@@ -13,22 +13,22 @@ public class WepleApplicationTests {
     @Qualifier("jasyptStringEncryptor")
     private StringEncryptor jasypt;
 
-//    @Test
-//    void 대칭키_암호화_테스트() {
-//
-//        String plainText = "my-secret-db-password";
-//
-//        String encryptedText = jasypt.encrypt(plainText);
-//
-//        System.out.println("Encrypted Result:");
-//        System.out.println(encryptedText);
-//    }
+ @Test
+void 대칭키_암호화_테스트() {
+
+    String plainText = "my-secret-db-password";
+
+String encryptedText = jasypt.encrypt(plainText);
+
+ System.out.println("Encrypted Result:");
+ System.out.println(encryptedText);
+  }
     
-//    @Test
-//    void checkBean() {
-//        System.out.println(jasypt);
-//    }
-//    
+@Test
+ void checkBean() {
+      System.out.println(jasypt);
+  }
+  
     @Test
     void db암호화값생성() {
 
