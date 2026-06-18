@@ -11,10 +11,17 @@
     list-style-type: none !important;
 }
 
-/* 2. [좌측 사이드바] 흰 배경 + 선택 항목만 하이라이트 */
-body.nav-md .container.body .left_col {
+/* 2. [좌측 사이드바] 흰 배경 + 선택 항목만 하이라이트 (창 크기와 상관없이 항상 고정) */
+body .container.body .left_col,
+body.nav-sm .container.body .left_col,
+body.nav-md .container.body .left_col,
+.left_col.scroll-view {
     background: #ffffff !important;
     border-right: 1px solid #E6EDF8 !important;
+    width: 230px !important; /* 🔥 창이 작아져도 무조건 너비 230px 고정 */
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .nav_title {
@@ -22,6 +29,8 @@ body.nav-md .container.body .left_col {
     border-bottom: 1px solid #E6EDF8 !important;
     text-align: left !important;
     padding-left: 24px !important;
+    width: 230px !important; /* 🔥 헤더 타이틀 영역도 너비 고정 */
+    display: block !important;
 }
 
 /* 타이틀 아이콘 숨김 */
@@ -34,10 +43,15 @@ body.nav-md .container.body .left_col {
     font-weight: bold !important;
     font-size: 22px !important;
     letter-spacing: -0.5px;
+    display: inline-block !important; /* 🔥 글자 숨김 방지 */
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .nav.side-menu > li {
     padding: 2px 10px !important;
+    width: 100% !important;
+    display: block !important;
 }
 
 .nav.side-menu > li > a {
@@ -50,6 +64,25 @@ body.nav-md .container.body .left_col {
     letter-spacing: -0.3px !important;
     border-right: none !important;
     transition: all 0.2s ease-in-out !important;
+    display: block !important;
+    text-align: left !important; /* 🔥 축소 시 가운데 정렬되는 것 차단 */
+}
+
+/* 메뉴 안의 아이콘과 글자가 숨겨지거나 깨지는 현상 차단 */
+.nav.side-menu > li > a i {
+    font-size: 14px !important;
+    width: 20px !important;
+    margin-right: 10px !important;
+    display: inline-block !important;
+    color: #64748B !important;
+    text-align: left !important;
+}
+
+.nav.side-menu > li > a span,
+.nav.side-menu > li > a {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .nav.side-menu > li > a:hover {
@@ -58,8 +91,13 @@ body.nav-md .container.body .left_col {
     border-radius: 8px !important;
     border-right: none !important;
 }
+.nav.side-menu > li > a:hover i {
+    color: #5271FF !important;
+}
 
-.nav.side-menu > li.active > a {
+.nav.side-menu > li.active > a,
+body.nav-sm .nav.side-menu > li.active-sm > a,
+body.nav-sm .nav.side-menu > li.active > a {
     background: #EBF0FF !important;
     color: #5271FF !important;
     font-weight: 600 !important;
@@ -67,18 +105,27 @@ body.nav-md .container.body .left_col {
     border-right: none !important;
     border-left: 3px solid #5271FF !important;
     padding-left: 13px !important;
+    display: block !important;
+}
+.nav.side-menu > li.active > a i,
+body.nav-sm .nav.side-menu > li.active-sm > a i {
+    color: #5271FF !important;
 }
 
 .nav.side-menu > li.active {
     border-right: none !important;
 }
 
-/* 3. [우측 컨테이너 배경] 칙칙한 회색 탈피, 메인 하늘색과 연결되는 초경량 블루 틴트 */
-body.nav-md .container.body .right_col {
+/* 3. [우측 컨테이너 배경] 창 크기와 상관없이 좌측 메뉴 너비(230px)만큼 항상 여백 확보 */
+body .container.body .right_col,
+body.nav-md .container.body .right_col,
+body.nav-sm .container.body .right_col {
     background: #F4F7FC !important;
     min-height: 100vh;
     margin-left: 230px !important;       
     width: calc(100% - 230px) !important; 
+    position: relative !important;
+    float: right !important;
 }
 
 /* 4. [상단 헤더바] */
@@ -122,22 +169,29 @@ body.nav-md .container.body .right_col {
     border: 2px solid #6C8DFF !important;
 }
 
-/* 5. [중단 서브 메뉴바] */
+/* 5. [중단 서브 메뉴바] - 창 축소 시 글자 찌그러짐 및 강제 줄바꿈 방지 수정 */
 .sub_menu_nav {
     background: #ffffff !important;
     border-bottom: 1px solid #EBF1FA !important;
     box-shadow: 0 2px 4px rgba(141, 174, 255, 0.02) !important;
     width: 100% !important;
+    overflow-x: auto !important; /* 창이 너무 작아지면 메뉴바 내부에 가로 스크롤 생성 */
 }
 
 .sub_menu_nav ul {
     display: flex !important;
     flex-direction: row !important;
+    flex-wrap: nowrap !important; /* 메뉴가 밑으로 떨어지지 않도록 설정 */
     padding: 0 24px !important;
     margin: 0 !important;
     gap: 20px !important;
     height: 45px !important;
     align-items: center !important;
+    width: max-content !important; /* 자식 요소들의 원본 너비 보존 */
+}
+
+.sub_menu_nav ul li {
+    flex-shrink: 0 !important; /* 창이 줄어들어도 메뉴 항목 너비가 좁아지지 않음 */
 }
 
 .sub_menu_nav ul li a {
@@ -150,6 +204,7 @@ body.nav-md .container.body .right_col {
     background: none !important;
     border: none !important;
     transition: color 0.15s ease !important;
+    white-space: nowrap !important; /* 글자 내부 줄바꿈 완전 차단 */
 }
 
 .sub_menu_nav ul li.active a,
@@ -212,7 +267,7 @@ body.nav-md .container.body .right_col {
 
 
 /* ==========================================================================
-   ★ [신규] 이미지 속 끈질긴 초록색 요소들 완전 제거 저격 코드
+   ★ 이미지 속 끈질긴 초록색 요소들 완전 제거 저격 코드
    ========================================================================== */
 
 #nprogress .bar {
@@ -238,4 +293,13 @@ body.nav-md .container.body .right_col {
 .nav-sm .container.body .left_col .sidebar-footer, 
 .sidebar-footer a {
     border-top: none !important;
+}
+
+/* Gentelella 테마가 사이드바 강제로 접을 때 발생하는 오버라이딩 속성 무력화 */
+body.nav-sm .main_container .left_col {
+    padding: 0 !important;
+}
+body.nav-sm #sidebar-menu span.blink, 
+body.nav-sm #sidebar-menu a span {
+    display: inline-block !important;
 }
