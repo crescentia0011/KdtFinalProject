@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+// =---------------일감유형-------------
 public class SystemServiceImpl implements SystemService {
 
 	private final SystemMapper systemMapper;
