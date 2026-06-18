@@ -129,10 +129,6 @@ body.nav-sm .container.body .right_col {
 }
 
 /* 4. [상단 헤더바] */
-.top_nav {
-    background: #ffffff !important;
-}
-
 .top_nav .nav_menu {
     background: #ffffff !important;
     border-bottom: 1px solid #E6EDF8 !important;
@@ -157,11 +153,6 @@ body.nav-sm .container.body .right_col {
     align-items: center !important;
     gap: 16px !important;
     height: 100% !important;
-}
-
-/* 회색 음영이 들어간 모든 상위 레이아웃 배경 초기화 */
-.right_col div:first-child {
-    background-color: #ffffff !important;
 }
 
 .header-profile-right .user-name {
