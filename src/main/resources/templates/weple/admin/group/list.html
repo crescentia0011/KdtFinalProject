@@ -1,14 +1,327 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
-<head>
-    <title>WEPLE - 공통 관리</title>
-</head>
-<body>
-
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  th:replace="~{common/layouts/default_layout_setting :: layout(~{::section})}"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" th:href="@{/css/groupList.css}" />
+    <title>그룹 관리</title>
+  </head>
+  <body>
     <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+      <div class="container">
+        <div class="header-bar"></div>
+        <div class="content">
+          <h1 class="main-title">그룹</h1>
+          <div style="text-align: right; margin: 15px 0">
+            <button
+              type="button"
+              class="add-btn"
+              th:onclick="|location.href ='@{/groupInsert}'|"
+            >
+              새 그룹 추가
+            </button>
+          </div>
 
-</body>
+          <form th:action="@{/groupList}" method="get" class="search-container">
+            <button type="submit" class="search-btn">
+              <i class="fa-solid fa-search search-icon"></i>
+            </button>
+
+            <input
+              type="text"
+              name="keyword"
+              class="search-input"
+              placeholder="그룹명을 입력하세요."
+              th:value="${keyword}"
+            />
+          </form>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>NO</th>
+                <th>그룹명</th>
+                <th>사용자 수</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <th:block th:each="info : ${systemGroupList}">
+                <tr>
+                  <td>[[ ${info.groupId} ]]</td>
+                  <td>[[ ${info.groupName} ]]</td>
+                  <td>[[${info.userCount}]]명</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-danger delete-btn"
+                      th:data-id="${info.groupId}"
+                      th:data-name="${info.groupName}"
+                      th:onclick="|location.href='@{/groupDelete(groupId=${info.groupId})}'|"
+                    >
+                      삭제
+                    </button>
+                  </td>
+                </tr>
+              </th:block>
+            </tbody>
+          </table>
+
+          <div class="pagination-wrap">
+            <a href="#" class="page-btn disabled">&lt; 이전</a>
+            <a href="#" class="page-btn active">1</a>
+            <a href="#" class="page-btn">2</a>
+            <a href="#" class="page-btn">3</a>
+            <a href="#" class="page-btn">4</a>
+            <a href="#" class="page-btn">다음 &gt;</a>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        document.querySelectorAll(".delete-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+
+            if (confirm(`${name} 그룹을 정말 삭제하시겠습니까?`)) {
+              location.href = `/groupDelete?groupId=${id}`;
+            }
+          });
+        });
+      </script>
+
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family:
+            -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            "Noto Sans KR", sans-serif;
+          background: #f5f6fa;
+          display: flex;
+          justify-content: flex-start;
+          align-items: stretch;
+          min-height: 100vh;
+          padding: 0;
+        }
+
+        .container {
+          width: 100%;
+          min-height: 100vh;
+          background: #fff;
+          border-radius: 0;
+          box-shadow: none;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .content {
+          padding: 30px;
+          flex: 1;
+        }
+
+        .main-title {
+          font-size: 24px;
+          font-weight: 700;
+          color: #0ea5e9;
+          margin-bottom: 24px;
+        }
+
+        /* 새 그룹 추가 버튼 */
+        .add-btn {
+          padding: 10px 18px;
+          border: none;
+          border-radius: 5px;
+          background: #1976d2;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: 0.2s;
+        }
+
+        .add-btn:hover {
+          background: #116699;
+        }
+
+        /* 검색창 */
+        .search-container {
+          position: relative;
+          width: 300px;
+          margin-bottom: 20px;
+        }
+
+        .search-btn {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          border: none;
+          background: none;
+          cursor: pointer;
+          color: #999;
+        }
+
+        .search-btn:hover {
+          color: #1976d2;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 10px 12px 10px 38px;
+          border: 1px solid #ddd;
+          outline: none;
+          transition: 0.2s;
+          border-radius: 10px;
+        }
+
+        .search-input:focus {
+          border-color: #1976d2;
+          box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+        }
+
+        /* 테이블 구조 리디자인 */
+        .data-table {
+          width: 100%;
+          border-collapse: collapse;
+          border: 1px solid #e5e5e5;
+        }
+
+        .data-table th {
+          background: #fafafa;
+          color: #666;
+          font-size: 14px;
+          font-weight: 600;
+          padding: 14px;
+          border-bottom: 1px solid #e5e5e5;
+          text-align: center;
+        }
+
+        .data-table td {
+          padding: 16px 14px;
+          border-bottom: 1px solid #eee;
+          color: #333;
+          text-align: center;
+        }
+
+        .data-table tbody tr:hover {
+          background: #fafafa;
+        }
+
+        .data-table tbody tr:last-child td {
+          border-bottom: none;
+        }
+
+        /* 균형 잡힌 가로 너비(%) 분배 구조 */
+        .data-table th:nth-child(1),
+        .data-table td:nth-child(1) {
+          width: 15%;
+        }
+
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2) {
+          width: 40%;
+        }
+
+        .data-table th:nth-child(3),
+        .data-table td:nth-child(3) {
+          width: 25%;
+        }
+
+        .data-table th:nth-child(4),
+        .data-table td:nth-child(4) {
+          width: 20%;
+        }
+
+        /* ================= 수정 및 정돈된 페이지네이션 CSS ================= */
+        .pagination-wrap {
+          display: flex !important;
+          flex-direction: row !important; /* 가로 정렬 강제 */
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+          margin-top: 30px;
+          margin-bottom: 10px;
+          width: 100%;
+        }
+
+        .page-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 34px;
+          height: 34px;
+          padding: 0 8px; /* 이전/다음 글자가 잘리지 않도록 여백 부여 */
+          text-decoration: none;
+          font-size: 13px;
+          font-weight: 500;
+          color: #5d6b87;
+          border: none;
+          background: transparent;
+          transition: all 0.2s ease;
+        }
+
+        .page-btn.active {
+          border-radius: 8px;
+          background: #4d84ff;
+          color: #fff;
+          font-weight: 700;
+        }
+
+        .page-btn.disabled {
+          opacity: 0.4;
+          pointer-events: none;
+        }
+
+        .page-btn:hover:not(.active):not(.disabled) {
+          color: #4d84ff;
+        }
+        /* ================================================================= */
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+          body {
+            padding: 0;
+          }
+          .search-container {
+            width: 100%;
+          }
+          .data-table {
+            font-size: 14px;
+          }
+          .add-btn {
+            width: 100%;
+          }
+        }
+
+        /* 커스텀 삭제 버튼 스타일 */
+        .delete-btn {
+          background-color: #ff0000 !important;
+          border-color: #ef3826 !important;
+          border-radius: 16px !important;
+          color: #ffffff !important;
+          padding: 6px 18px !important;
+          font-weight: 500;
+        }
+
+        .delete-btn:hover {
+          background-color: #d32f1f !important;
+          border-color: #d32f1f !important;
+        }
+      </style>
+    </section>
+  </body>
 </html>

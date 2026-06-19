@@ -14,9 +14,10 @@ import lombok.ToString;
 @Setter
 @ToString
 public class SystemGroupVO {
-	private Integer groupId;
-	private Integer companyId;
-	private String groupName;
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date createdAt;
+	private Integer groupId; //그룹아이디
+	private Integer companyId; //기업아이디 FK
+	private String groupName; //그룹명
+	@DateTimeFormat(pattern = "yyyy-MM-dd") 
+	private Date createdAt; //그룹 생성일자
+	private int userCount; //그룹 내 사용자수
 }

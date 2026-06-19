@@ -12,9 +12,15 @@ public class CommonController {
         return "weple/common";
     }
 
+    @GetMapping("/weple/admin")
+    public String adminPage() {
+        return "weple/admin/group/list"; 
+    }
+    
     @GetMapping("/{page}.html")
     public String page(@PathVariable String page) {
         return "dashboard/" + page;
     }
+
 }
 

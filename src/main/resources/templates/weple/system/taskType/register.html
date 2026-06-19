@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+<head>
+    <title>WEPLE - 일감 유형 등록</title>
+</head>
+<body>
+
+    <section>
+        <style>
+            .form-container { background-color: #ffffff; border: 1px solid #e3e6f0; border-radius: 8px; padding: 30px; max-width: 800px; margin: 0 auto; }
+            .form-group { margin-bottom: 24px; }
+            .form-label { font-weight: bold; color: #4e5d6c; margin-bottom: 8px; display: block; font-size: 14px; }
+            
+            /* [요구사항] 필수값 별표(*) 스타일 */
+            .required { color: #e74c3c; margin-left: 4px; font-weight: bold; }
+            
+            /* 입력창 스타일 커스텀 */
+            .custom-input { width: 100%; border: 1px solid #ced4da; border-radius: 8px; padding: 10px 14px; font-size: 14px; transition: border-color 0.15s ease-in-out; }
+            .custom-input:focus { border-color: #4a90e2; outline: none; box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.2); }
+            .custom-textarea { resize: none; min-height: 150px; }
+            
+            /* 하단 버튼 영역 스타일 */
+            .form-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; border-top: 1px solid #f1f3f5; padding-top: 20px; }
+            .btn-submit { background-color: #1e3a8a; color: #ffffff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
+            .btn-submit:hover { background-color: #111827; }
+            .btn-cancel { background-color: #ffffff; color: #4b5563; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 24px; font-size: 14px; font-weight: 500; cursor: pointer; }
+            .btn-cancel:hover { background-color: #f9fafb; }
+        </style>
+
+        <div class="mb-4" style="max-width: 800px; margin: 0 auto 20px auto;">
+            <h4 style="font-weight: bold; color: #2c3e50;">일감 유형 등록</h4>
+        </div>
+
+        <div class="form-container shadow-sm">
+            <form th:action="@{/system/taskTypeInsert}" method="post">
+                
+                <div class="form-group">
+                    <label for="typeName" class="form-label">
+                        이름<span class="required">*</span>
+                    </label>
+                    <input type="text" id="typeName" name="typeName" class="custom-input" placeholder="일감 유형 이름을 입력해 주세요." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskTypeDescribe" class="form-label">설명</label>
+                    <textarea id="taskTypeDescribe" name="taskTypeDescribe" class="custom-input custom-textarea" placeholder="일감 유형에 대한 설명을 입력해 주세요."></textarea>
+                </div>
+
+                <div class="form-footer">
+                    <button type="button" class="btn-cancel" onclick="history.back();">취소</button>
+                    <button type="submit" class="btn-submit">저장</button>
+                </div>
+                
+            </form>
+        </div>
+        
+    </section>
+
+</body>
+</html>

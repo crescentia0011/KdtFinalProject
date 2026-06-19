@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.history.worklog.mapper.WorkLogMapper">
+	<!-- 작업내역 목록 조회 -->
+	<select id="selectAll" resultType="com.weple.cloud.history.worklog.service.WorkLogVO">
+		SELECT
+			th.history_id,
+            p.project_title,
+            u.login_id AS user_name,
+            t.task_title,
+            tt.type_name,
+            cc.default_describe,
+            th.action_type,
+            th.action_at AS actionType
+		FROM task_history th
+		INNER JOIN task t ON th.task_id = t.task_id
+		INNER JOIN project p ON t.project_id = p.project_id
+		INNER JOIN users u ON th.changed_by = u.user_code
+		INNER JOIN task_types tt ON t.type_id = tt.type_id
+		LEFT OUTER JOIN work_time w ON t.task_id = w.task_id
+		LEFT OUTER JOIN common_code cc ON t.task_status = cc.common_code
+									   AND cc.common_id = '0E'
+		ORDER BY th.action_at DESC
+	</select>
+</mapper>

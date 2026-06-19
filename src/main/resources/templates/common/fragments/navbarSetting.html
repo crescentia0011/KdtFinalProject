@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<div th:fragment="navbarSettingFragment" class="sub_menu_nav">
+    <ul>
+        <li>
+            <a th:href="@{/projectSettingList}" 
+               th:class="${menu == 'project' || menu == null} ? 'active' : ''">프로젝트</a>
+        </li>
+        <li>
+            <a th:href="@{/userList}" 
+               th:class="${menu == 'user'} ? 'active' : ''">사용자</a>
+        </li>
+        <li>
+            <a th:href="@{/groupList}" 
+               th:class="${menu == 'group'} ? 'active' : ''">그룹</a>
+        </li>
+        <li>
+            <a th:href="@{/roleList}" 
+               th:class="${menu == 'role'} ? 'active' : ''">역할 및 권한</a>
+        </li>
+        <li>
+            <a th:href="@{/issueTypeList}" 
+               th:class="${menu == 'issueType'} ? 'active' : ''">일감 유형</a>
+        </li>
+        <li>
+            <a th:href="@{/issueStatusList}" 
+               th:class="${menu == 'issueStatus'} ? 'active' : ''">일감 상태</a>
+        </li>
+        <li>
+            <a th:href="@{/codeList}" 
+               th:class="${menu == 'code'} ? 'active' : ''">코드값</a>
+        </li>
+        <li>
+            <a th:href="@{/settingDetail}" 
+               th:class="${menu == 'setting'} ? 'active' : ''">설정</a>
+        </li>
+        <li>
+            <a th:href="@{/approvalList}" 
+               th:class="${menu == 'approval'} ? 'active' : ''">가입승인</a>
+        </li>
+    </ul>
+</div>
+<style>
+/* 1. 기본 탭 메뉴 스타일 구조 (기존 스타일 초기화 및 지정) */
+        .sub_menu_nav ul {
+            display: flex !important;
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        .sub_menu_nav ul li {
+            margin-right: 20px !important;
+            display: inline-block !important;
+        }
+
+        /* 2. 비활성화 상태 (기본 탭) - 글자색 회색, 밑줄 없음 */
+        .sub_menu_nav ul li a {
+            display: block !important;
+            padding: 10px 5px !important;
+            color: #4b5563 !important; /* 기본 회색 글자 */
+            text-decoration: none !important;
+            font-weight: 500 !important;
+            border-bottom: 2px solid transparent !important; 
+            transition: all 0.15s ease-in-out !important;
+        }
+
+        /* 3. 활성화 상태 (클릭된 탭) - 블루 계열 강제 적용 */
+        .sub_menu_nav ul li a.active {
+            color: #2563eb !important; /* 선명한 파란색 글자 */
+            font-weight: 700 !important;
+            border-bottom: 2px solid #2563eb !important; /* 파란색 밑줄 */
+        }
+</style>
+</body>
+</html>

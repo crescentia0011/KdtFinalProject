@@ -19,13 +19,13 @@ import lombok.ToString;
 @Builder
 @AllArgsConstructor
 public class ProjectVO {
-	private Long project_id;
-	private String project_title;
-	private String project_describe;
+	private Long projectId;
+	private String projectTitle;
+	private String projectDescribe;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date created_at;
+	private Date createdAt;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date finish_date;
-	private String project_status;
+	private Date finishDate;
+	private String status;
 	
 }

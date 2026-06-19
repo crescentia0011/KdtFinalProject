@@ -1,50 +1,324 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://thymeleaf.org"
       th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
 <head>
     <meta charset="UTF-8">
     <title>프로젝트 목록</title>
 </head>
 <body>
+	
+<section class="project-page">
+        <h3 class="project-title">프로젝트 목록</h3>
+    <div class="project-card">
+        
+        <div class="project-toolbar">
+            <form id="searchForm" method="get" th:action="@{/weple/project/list}">
+                <div class="project-search">
+                    <i class="fa fa-search"></i>
+                    <input type="text" name="keyword" th:value="${param.keyword}" placeholder="프로젝트명을 입력하세요.">
+                </div>
+            </form>
+            <button type="button" th:onclick="|location.href='@{/project/insert}'|" class="project-create-btn"> <i class="fa fa-folder"></i> 프로젝트 생성</button>
+        </div>
 
-    <section>
-        <div class="x_panel" style="margin: 20px; padding: 20px; background: #fff; border: 1px solid #E6E9ED;">
-            <h2>프로젝트 목록</h2>
-            
-            <table class="project-table" style="width:100%; border-collapse: collapse; margin-top:20px;">
+        <div class="project-table-wrap">
+            <table class="project-table">
                 <thead>
-                    <tr style="background-color: #fffde7; border-top: 2px solid #ffd600; border-bottom: 1px solid #e0e0e0;">
-                        <th style="padding: 12px; font-weight: bold;">NO</th>
-                        <th style="padding: 12px; font-weight: bold;">프로젝트명</th>
-                        <th style="padding: 12px; font-weight: bold;">설명</th>
-                        <th style="padding: 12px; font-weight: bold;">등록일</th>
-                        <th style="padding: 12px; font-weight: bold;">마감일</th>
-                        <th style="padding: 12px; font-weight: bold;">상태</th>
+                    <tr>
+                        <th>NO</th>
+                        <th>프로젝트명</th>
+                        <th>설명</th>
+                        <th>등록일</th>
+                        <th>마감일</th>
+                        <th>상태</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="project, stat : ${projects}" style="border-bottom:1px solid #f1f1f1; text-align: center;">
-                        <td style="padding: 12px;" th:text="${stat.count}">1</td>
-                        <td style="padding: 12px; text-align: left;" th:text="${project.project_title}">프로젝트 제목</td>
-                        <td style="padding: 12px; text-align: left;" th:text="${project.project_describe}">프로젝트 설명</td>
-                        <td style="padding: 12px;" th:text="${#dates.format(project.created_at, 'yyyy-MM-dd')}">2026-01-01</td>
-                        <td style="padding: 12px;" th:text="${#dates.format(project.finish_date, 'yyyy-MM-dd')}">2026-12-31</td>
-                        
-                        <td style="padding: 12px;">
-                            <span th:if="${project.project_status == '신규'}" class="status-badge badge-new" th:text="${project.project_status}">신규</span>
-                            <span th:if="${project.project_status == '진행중'}" class="status-badge badge-ing" th:text="${project.project_status}">진행중</span>
-                            <span th:if="${project.project_status == '완료'}" class="status-badge badge-done" th:text="${project.project_status}">완료</span>
-                            <span th:if="${#strings.isEmpty(project.project_status)}">-</span>
+                    <tr th:each="project, stat : ${projects}" th:classappend="${project?.status == '완료'} ? 'project-dim' : ''">
+                        <td th:text="${stat.count}"></td>
+                        <td class="text-left"><a class="project-link" th:href="@{/dashboard/project/detail/{id}(id=${project?.projectId})}" th:text="${project?.projectTitle}"></a></td>
+                        <td class="text-left" th:text="${project?.projectDescribe}"></td>
+                        <td th:text="${project?.createdAt != null ? #dates.format(project.createdAt,'yyyy-MM-dd') : '-'}"></td>
+                        <td th:text="${project?.finishDate != null ? #dates.format(project.finishDate,'yyyy-MM-dd') : '-'}"></td>
+                        <td>
+                            <span th:if="${project?.status == '신규'}" class="status-badge status-new">신규</span>
+                            <span th:if="${project?.status == '진행중' or project?.status == '진행 중'}" class="status-badge status-progress">진행중</span>
+                            <span th:if="${project?.status == '완료'}" class="status-badge status-done">완료</span>
+                            <span th:if="${project?.status == null || project?.status == ''}">-</span>
                         </td>
                     </tr>
-                    
                     <tr th:if="${#lists.isEmpty(projects)}">
-                        <td colspan="6" style="padding: 40px; color: #9e9e9e;">등록된 프로젝트가 존재하지 않습니다.</td>
+                        <td colspan="6" class="empty-message">검색 결과가 없습니다.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-    </section>
+
+        <div class="pagination-wrap">
+   			<a href="#" class="page-btn disabled">&lt; 이전</a>
+    		<a href="#" class="page-btn active">1</a>
+    		<a href="#" class="page-btn">2</a>
+    		<a href="#" class="page-btn">3</a>
+    		<a href="#" class="page-btn">4</a>
+    		<a href="#" class="page-btn">다음 &gt;</a>
+		</div>
+    </div>
+    
+        <style>
+		.right_col{
+		    background:#f5f6fa !important;
+		}
+		
+		.container-fluid{
+		    padding:0 !important;
+		}
+		
+		.project-page{
+		    padding:20px 25px;
+		    min-height:100vh;
+		}
+		
+		.project-card{
+		    width:100%;
+		    background:#ffffff;
+		    border-radius:24px;
+		    padding:30px;
+		    border:1px solid #edf1f7;
+		    box-shadow:0 2px 10px rgba(0,0,0,.03);
+		}
+	
+		.project-title{
+		    margin:0 0 24px;
+		    font-size:24px;
+		    font-weight:700;
+		    color:#222;
+		    letter-spacing:-0.5px;
+		}
+		
+		.project-toolbar{
+	    display:flex;
+	    justify-content:space-between;
+	    align-items:center;
+	    width:100%;
+	    margin-bottom:20px;
+		}
+		
+		.project-toolbar form{
+		    margin:0;
+		}
+		
+		.project-search{
+		    width:280px;
+		    height:42px;
+		    display:flex;
+		    align-items:center;
+		    padding:0 14px;
+		    border:1px solid #d9e1f2;
+		    border-radius:12px;
+		    background:#fff;
+		}
+		
+		.project-search i{
+		    color:#9aa8c4;
+		    margin-right:10px;
+		}
+		
+		.project-search input{
+		    width:100%;
+		    border:none;
+		    outline:none;
+		    background:transparent;
+		    font-size:13px;
+		    color:#495057;
+		}
+		
+		.project-search input::placeholder{
+		    color:#adb5bd;
+		}
+		
+		.project-create-btn{
+		    display:flex;
+		    align-items:center;
+		    justify-content:center;
+		    gap:6px;
+		    width:150px;
+		    height:40px;
+		    margin-top:0;
+		    border:none;
+		    border-radius:10px;
+		    background:#4d84ff;
+		    color:#fff;
+		    font-size:13px;
+		    font-weight:600;
+		    cursor:pointer;
+		    transition:.2s;
+		}
+		
+		.project-create-btn:hover{
+		    background:#3970eb;
+		}
+			
+		.project-table-wrap{
+		    margin-top:15px;
+		    border:1px solid #e6ecf5;
+		    border-radius:14px;
+		    overflow:hidden;
+		    background:#fff;
+		    margin-bottom:40px;
+		    overflow-x: auto; 
+		}
+		
+		.project-table{
+		    width:100%;
+		    border-collapse:collapse;
+		    table-layout: auto; 
+		    min-width: 900px; 
+		}
+		
+		.project-table thead{
+		    background:#f8faff;
+		}
+		
+		.project-table th{
+		    height:54px;
+		    font-size:13px;
+		    font-weight:700;
+		    color:#5d6b87;
+		    border-bottom:1px solid #e9edf5;
+		    text-align:center;
+		    white-space: nowrap; 
+		}
+		
+		.project-table th:nth-child(2),
+		.project-table th:nth-child(3){
+		    text-align:left;
+		    padding-left:20px;
+		}
+		
+		.project-table td{
+		    height:64px;
+		    padding:0 15px;
+		    border-top:1px solid #edf1f7;
+		    color:#374151;
+		    font-size:13px;
+		    text-align:center;
+		    white-space: nowrap; 
+		}
+		
+		.project-table td:nth-child(2),
+		.project-table td:nth-child(3){
+		    text-align:left;
+		    padding-left:20px;
+		    white-space: normal; 
+		}
+		
+		.project-table tbody tr:hover{
+		    background:#fafcff;
+		}
+
+		.project-link{
+		    color:#4d84ff;
+		    text-decoration:none;
+		    font-weight:600;
+		}
+		
+		.project-link:hover{
+		    color:#2f6eff;
+		    text-decoration:none;
+		}
+		
+		.status-badge{
+		    display:inline-flex;
+		    align-items:center;
+		    justify-content:center;
+		    min-width:78px;
+		    height:32px;
+		    border-radius:999px;
+		    font-size:12px;
+		    font-weight:700;
+		}
+		
+		.status-new{
+		    background:#eef4ff;
+		    color:#4d84ff;
+		}
+		
+		.status-progress{
+		    background:#eef4ff;
+		    color:#4d84ff;
+		}
+		
+		.status-done{
+		    background:#f1f3f7;
+		    color:#9ea7b8;
+		}
+
+		.project-dim{
+		    opacity:.55;
+		}
+		
+		.empty-message{
+		    padding:60px !important;
+		    text-align:center !important;
+		    color:#adb5bd;
+		    font-size:14px;
+		}
+		
+		.pagination-wrap{
+		    display:flex;
+		    justify-content:center;
+		    align-items:center;
+		    gap:8px;
+		    margin-top:10px;
+		    margin-bottom:10px;
+		}
+		
+		.page-btn{
+		    display:flex;
+		    align-items:center;
+		    justify-content:center;
+		    min-width:34px;
+		    height:34px;
+		    text-decoration:none;
+		    font-size:13px;
+		    font-weight:500;
+		    color:#5d6b87;
+		    border:none;
+		    background:transparent;
+		    transition:all .2s ease;
+		}
+		
+		.page-btn.active{
+		    width:34px;
+		    height:34px;
+		    border-radius:8px;
+		    background:#4d84ff;
+		    color:#fff;
+		    font-weight:700;
+		}
+		
+		.page-btn.disabled{
+		    opacity:.4;
+		    pointer-events:none;
+		}
+		
+		.page-btn:hover:not(.active):not(.disabled){
+		    color:#4d84ff;
+		}
+
+		@media(max-width:1200px){
+		    .project-card{
+		        padding:20px;
+		    }
+		    
+		    .project-search{
+		        width:240px;
+		    }
+		}
+		
+    </style>
+
+</section>
 
 </body>
 </html>

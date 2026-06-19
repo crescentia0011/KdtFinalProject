@@ -83,7 +83,11 @@
 			<artifactId>jasypt-spring-boot-starter</artifactId>
 			<version>4.0.4</version>
 		</dependency>
-
+				<!-- Spring Security 로그인/권한 처리를 위한 의존성 -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

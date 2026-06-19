@@ -1,11 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.weple.cloud.system.mapper.SystemGroupMapper">
-	<!-- 전체조회 -->
+<mapper namespace="com.weple.cloud.system.mapper.SystemMapper">
+	<!--/* 일감유형 */-->
+
+
+	<!--/* 그룹 종류 */-->
+	<!--/* 전체조회 */-->
+	<select id="selectGroupAll" resultType="SystemGroupVO">
+		SELECT g.group_id,
+       		   g.company_id,
+       		   g.group_name,
+       		   g.created_at,
+       		   COUNT(u.user_code) AS user_count
+		FROM groups g
+		LEFT JOIN users u ON g.group_id = u.group_id
+		
+		<where>
+        	<if test="_parameter != null and _parameter != ''">
+            	g.group_name LIKE '%' || #{_parameter} || '%'
+        	</if>
+   		 </where>
+		
+		GROUP BY g.group_id,
+         		 g.company_id,
+         		 g.group_name,
+         		 g.created_at
+		ORDER BY g.group_id ASC
+	</select>
 	
-	<!-- 상세조회 -->
-	
-	<!-- 등록 -->
+	<!--/* 등록 */-->
 	<insert id="insertGroup" parameterType="SystemGroupVO">
 		<selectKey keyProperty="groupId"
 				   resultType="Integer"
@@ -17,16 +40,30 @@
 						  	group_id
 						  	, company_id
 						  	, group_name
+						  	, created_at
 						  )
 		VALUES
 			  (
 			  	#{groupId}
 			  	, #{companyId}
 			  	, #{groupName}
+			  	, SYSDATE
 			  )
 	</insert>
 	
-	<!-- 수정 -->
-	
 	<!-- 삭제 -->
+	<delete id="deleteGroup" parameterType="int">
+		DELETE FROM groups
+		WHERE group_id = #{groupId}
+	</delete>
+	
+	<!--/* 그룹 내 사용자 */-->
+	<!--/* 전체조회 */-->
+	
+	<!--/* 등록 */-->
+	
+	<!--/* 수정 */-->
+	
+	<!--/* 삭제 */-->
+	
 </mapper>

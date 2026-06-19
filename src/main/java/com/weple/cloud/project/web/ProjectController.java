@@ -20,10 +20,13 @@ public class ProjectController {
 	}
 	
 	// 프로젝트 목록 조회 : projectList, project/list.html
-	@GetMapping("/project/list")
+	@GetMapping("/weple/project/list")
 	public String projectList(Model model) {
 		List<ProjectVO> list = projectService.findAll();
 		model.addAttribute("projects", list);
+		
+		model.addAttribute("sidebarMenu", "project");
+		model.addAttribute("currentMenu", "none");
 		return "weple/project/list";
 	}
 }

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+<head>
+    <th:block th:replace="~{common/configs/config :: configFragment}"></th:block>
+</head>
+
+<body class="nav-md">
+<div class="container body">
+    <div class="main_container">
+        
+        <div class="col-md-3 left_col">
+            <div th:replace="~{common/fragments/sidebar :: sidebarFragment}"></div>
+        </div>
+
+        <div class="right_col" role="main" style="padding: 0 !important; margin-left: 230px;">
+            
+            <div class="top_nav" th:replace="~{common/fragments/header :: headerFragment}"></div>
+            
+            <div class="sub_menu_nav" th:replace="~{common/fragments/navbarSetting :: navbarSettingFragment}"></div>
+
+            <div class="clearfix"></div>
+            
+            <div class="main_white_canvas_container">
+                <div th:replace="~{common/fragments/main :: mainFragment(${content})}"></div>
+            </div>
+            
+        </div>
+        
+    </div>
+</div>
+
+<th:block th:replace="~{common/configs/config :: scriptFragment}"></th:block>
+</body>
+</html>

@@ -1,223 +1,306 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+	th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
-    <style>
-        .filter-box { background-color: #ffffff; border: 1px solid #e3e6f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-        .filter-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; }
-        .filter-label { width: 100px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
-        .filter-label::before { content: '●'; font-size: 10px; }
-        .label-project::before { color: #e74c3c; }
-        .label-type::before { color: #f39c12; }
-        .label-status::before { color: #2ecc71; }
-        .label-priority::before { color: #3498db; }
-        .label-manager::before { color: #9b59b6; }
-        .label-progress::before { color: #1abc9c; }
-        .label-regdate::before { color: #e84393; }
-        .label-enddate::before { color: #ff7675; }
-        .filter-options { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; }
-        .filter-options label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        .text-more { color: #a0a0a0; font-size: 12px; margin-left: 5px; }
-        .table-container { background-color: #ffffff; border: 1px solid #e3e6f0; border-radius: 8px; padding: 15px; }
-        .progress { height: 8px; width: 100px; display: inline-block; background-color: #eaeded; border-radius: 4px; overflow: hidden; vertical-align: middle; }
-        .progress-bar { height: 100%; background-color: #3498db; }
-    </style>
+<title>WEPLE - 공통 관리</title>
+<style>
+.filter-box {
+	background-color: #ffffff;
+	border: 1px solid #e3e6f0;
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.filter-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 12px;
+	font-size: 14px;
+}
+
+.filter-label {
+	width: 100px;
+	font-weight: bold;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.filter-label::before {
+	content: '●';
+	font-size: 10px;
+}
+
+.label-project::before {
+	color: #e74c3c;
+}
+
+.label-type::before {
+	color: #f39c12;
+}
+
+.label-status::before {
+	color: #2ecc71;
+}
+
+.label-priority::before {
+	color: #3498db;
+}
+
+.label-manager::before {
+	color: #9b59b6;
+}
+
+.label-progress::before {
+	color: #1abc9c;
+}
+
+.label-regdate::before {
+	color: #e84393;
+}
+
+.label-enddate::before {
+	color: #ff7675;
+}
+
+.filter-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+	align-items: center;
+}
+
+.filter-options label {
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.text-more {
+	color: #a0a0a0;
+	font-size: 12px;
+	margin-left: 5px;
+}
+
+.table-container {
+	background-color: #ffffff;
+	border: 1px solid #e3e6f0;
+	border-radius: 8px;
+	padding: 15px;
+}
+
+.progress {
+	height: 8px;
+	width: 100px;
+	display: inline-block;
+	background-color: #eaeded;
+	border-radius: 4px;
+	overflow: hidden;
+	vertical-align: middle;
+}
+
+.progress-bar {
+	height: 100%;
+	background-color: #3498db;
+}
+</style>
 </head>
 <body>
 
-    <section class="container-fluid my-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold m-0" style="color: #2c3e50;">일감</h3>
-            <button type="button" th:onclick="|location.href='@{/task/insert}'|" class="btn btn-sm text-primary fw-bold" style="background: none; border: none;">+ 새 일감만들기</button>
-        </div>
+	<section class="container-fluid my-4">
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<h3 class="fw-bold m-0" style="color: #2c3e50;">일감</h3>
+			<button type="button" th:onclick="|location.href='@{/task/insert}'|"
+				class="btn btn-sm text-primary fw-bold"
+				style="background: none; border: none;">+ 새 일감만들기</button>
+		</div>
 
-        <div class="filter-box shadow-sm">
-            <div class="small text-muted mb-3">* 검색조건</div>
-            
-            <form id="searchForm" method="get">
-                <div class="row mb-3 justify-content-end">
-                    <div class="col-md-4">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i>🔍</span>
-                            <input type="text" class="form-control border-start-0" placeholder="검색">
-                        </div>
-                    </div>
-                </div>
+		<div class="filter-box shadow-sm">
+			<div class="small text-muted mb-3">* 검색조건</div>
 
-                <div class="filter-row">
-                    <div class="filter-label label-project">프로젝트</div>
-                    <div class="filter-options">
-                        <label><input type="checkbox"> 예담</label>
-                        <label><input type="checkbox"> 기획</label>
-                        <label><input type="checkbox"> 개발</label>
-                        <label><input type="checkbox"> 디자인</label>
-                    </div>
-                </div>
+			<form id="searchForm" method="get">
+				<div class="row mb-3 justify-content-end">
+					<div class="col-md-4">
+						<div class="input-group input-group-sm">
+							<span class="input-group-text bg-white border-end-0"><i
+								class="bi bi-search"></i>🔍</span> <input type="text"
+								class="form-control border-start-0" placeholder="검색">
+						</div>
+					</div>
+				</div>
 
-                <div class="filter-row">
-                    <div class="filter-label label-type">일감유형</div>
-                    <div class="filter-options">
-                        <label><input type="checkbox"> 기능개발</label>
-                        <label><input type="checkbox"> 결함/버그</label>
-                        <label><input type="checkbox"> 지원/문의</label>
-                        <label><input type="checkbox"> 개선</label>
-                        <label><input type="checkbox"> 초기설정</label>
-                    </div>
-                </div>
+				<div class="filter-row">
+					<div class="filter-label label-project">프로젝트</div>
+					<div class="filter-options">
+						<label><input type="checkbox"> 예담</label> <label><input
+							type="checkbox"> 기획</label> <label><input type="checkbox">
+							개발</label> <label><input type="checkbox"> 디자인</label>
+					</div>
+				</div>
 
-                <div class="filter-row">
-                    <div class="filter-label label-status">상태</div>
-                    <div class="filter-options">
-                        <label><input type="checkbox"> 신규</label>
-                        <label><input type="checkbox"> 결함</label>
-                        <label><input type="checkbox"> 완료</label>
-                        <label><input type="checkbox"> 예정</label>
-                    </div>
-                </div>
+				<div class="filter-row">
+					<div class="filter-label label-type">일감유형</div>
+					<div class="filter-options">
+						<label><input type="checkbox"> 기능개발</label> <label><input
+							type="checkbox"> 결함/버그</label> <label><input
+							type="checkbox"> 지원/문의</label> <label><input
+							type="checkbox"> 개선</label> <label><input type="checkbox">
+							초기설정</label>
+					</div>
+				</div>
 
-                <div class="filter-row">
-                    <div class="filter-label label-priority">우선순위</div>
-                    <div class="filter-options">
-                        <label><input type="checkbox"> 매우낮음</label>
-                        <label><input type="checkbox"> 낮음</label>
-                        <label><input type="checkbox"> 보통</label>
-                        <label><input type="checkbox"> 높음</label>
-                        <label><input type="checkbox"> 매우높음</label>
-                    </div>
-                </div>
+				<div class="filter-row">
+					<div class="filter-label label-status">상태</div>
+					<div class="filter-options">
+						<label><input type="checkbox"> 신규</label> <label><input
+							type="checkbox"> 결함</label> <label><input type="checkbox">
+							완료</label> <label><input type="checkbox"> 예정</label>
+					</div>
+				</div>
 
-                <div class="filter-row">
-                    <div class="filter-label label-manager">담당자</div>
-                    <div class="filter-options">
-                        <label><input type="checkbox"> admin</label>
-                        <label><input type="checkbox"> 홍길동</label>
-                        <label><input type="checkbox"> 김철수</label>
-                        <label><input type="checkbox"> 이영희</label>
-                    </div>
-                </div>
+				<div class="filter-row">
+					<div class="filter-label label-priority">우선순위</div>
+					<div class="filter-options">
+						<label><input type="checkbox"> 매우낮음</label> <label><input
+							type="checkbox"> 낮음</label> <label><input type="checkbox">
+							보통</label> <label><input type="checkbox"> 높음</label> <label><input
+							type="checkbox"> 매우높음</label>
+					</div>
+				</div>
 
-                <div class="filter-row">
-                    <div class="filter-label label-progress">진척도</div>
-                    <div class="filter-options">
-                        <label><input type="checkbox"> 0%</label>
-                        <label><input type="checkbox"> 1~25%</label>
-                        <label><input type="checkbox"> 26~50%</label>
-                        <label><input type="checkbox"> 51~75%</label>
-                        <label><input type="checkbox"> 76~100%</label>
-                    </div>
-                </div>
+				<div class="filter-row">
+					<div class="filter-label label-manager">담당자</div>
+					<div class="filter-options">
+						<label><input type="checkbox"> admin</label> <label><input
+							type="checkbox"> 홍길동</label> <label><input
+							type="checkbox"> 김철수</label> <label><input
+							type="checkbox"> 이영희</label>
+					</div>
+				</div>
 
-                <div class="filter-row">
-                    <div class="filter-label label-regdate">등록일자</div>
-                    <div class="filter-options">
-                        <label><input type="checkbox"> 오늘</label>
-                        <label><input type="checkbox"> 이번주</label>
-                        <label><input type="checkbox"> 이번달</label>
-                        <label><input type="checkbox"> 직접입력</label>
-                    </div>
-                </div>
+				<div class="filter-row">
+					<div class="filter-label label-progress">진척도</div>
+					<div class="filter-options">
+						<label><input type="checkbox"> 0%</label> <label><input
+							type="checkbox"> 1~25%</label> <label><input
+							type="checkbox"> 26~50%</label> <label><input
+							type="checkbox"> 51~75%</label> <label><input
+							type="checkbox"> 76~100%</label>
+					</div>
+				</div>
 
-                <div class="filter-row">
-                    <div class="filter-label label-enddate">마감일자</div>
-                    <div class="filter-options">
-                        <label><input type="checkbox"> 오늘</label>
-                        <label><input type="checkbox"> 이번주</label>
-                        <label><input type="checkbox"> 이번달</label>
-                        <label><input type="checkbox"> 직접입력</label>
-                    </div>
-                </div>
+				<div class="filter-row">
+					<div class="filter-label label-regdate">등록일자</div>
+					<div class="filter-options">
+						<label><input type="checkbox"> 오늘</label> <label><input
+							type="checkbox"> 이번주</label> <label><input
+							type="checkbox"> 이번달</label> <label><input
+							type="checkbox"> 직접입력</label>
+					</div>
+				</div>
 
-                <div class="text-center mt-3 position-relative">
-                    <button type="button" class="btn btn-sm text-secondary fw-bold" style="border:none; background:none;">옵션 전체보기 ∨</button>
-                    <div class="position-absolute end-0 bottom-0">
-                        <button type="reset" class="btn btn-sm btn-light border me-1 text-muted">🔄 지우기</button>
-                        <button type="submit" class="btn btn-sm btn-primary px-3">적용</button>
-                    </div>
-                </div>
-            </form>
-        </div>
+				<div class="filter-row">
+					<div class="filter-label label-enddate">마감일자</div>
+					<div class="filter-options">
+						<label><input type="checkbox"> 오늘</label> <label><input
+							type="checkbox"> 이번주</label> <label><input
+							type="checkbox"> 이번달</label> <label><input
+							type="checkbox"> 직접입력</label>
+					</div>
+				</div>
 
-        <div class="table-container shadow-sm">
-            <table class="table table-hover align-middle text-center custom-table" style="font-size: 14px;">
-                <thead class="table-light text-muted" style="font-size: 13px;">
-                    <tr>
-                        <th style="width: 40px;"><input type="checkbox"></th>
-                        <th style="width: 60px;">#</th>
-                        <th>프로젝트</th>
-                        <th>일감유형</th>
-                        <th>상태</th>
-                        <th>우선순위</th>
-                        <th>일감명</th>
-                        <th>진척도</th>
-                        <th>담당자</th>
-                        <th>등록일자</th>
-                        <th>마감일자</th>
-                        <th style="width: 50px;"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td>12</td>
-                        <td><a href="#" class="text-decoration-none text-primary">예담</a></td>
-                        <td>기획</td>
-                        <td>신규</td>
-                        <td>매우낮음</td>
-                        <td><a href="#" class="text-decoration-none text-primary">예담 기획</a></td>
-                        <td>
-                            <div class="progress"><div class="progress-bar" style="width: 80%;"></div></div>
-                            <span class="small text-muted ms-1">80%</span>
-                        </td>
-                        <td>-</td>
-                        <td>2023.09.12</td>
-                        <td>2024.01.27</td>
-                        <td class="text-muted" style="cursor:pointer;">•••</td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td>11</td>
-                        <td><a href="#" class="text-decoration-none text-primary">예담</a></td>
-                        <td>기획</td>
-                        <td>신규</td>
-                        <td>매우낮음</td>
-                        <td><a href="#" class="text-decoration-none text-primary">예담 일감</a></td>
-                        <td>
-                            <div class="progress"><div class="progress-bar" style="width: 80%;"></div></div>
-                            <span class="small text-muted ms-1">80%</span>
-                        </td>
-                        <td>-</td>
-                        <td>2023.09.12</td>
-                        <td>2024.01.27</td>
-                        <td class="text-muted" style="cursor:pointer;">•••</td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox"></td>
-                        <td>10</td>
-                        <td><a href="#" class="text-decoration-none text-primary">예담</a></td>
-                        <td>기획</td>
-                        <td>신규</td>
-                        <td>매우낮음</td>
-                        <td><a href="#" class="text-decoration-none text-primary">일감 하위</a></td>
-                        <td>
-                            <div class="progress"><div class="progress-bar" style="width: 80%;"></div></div>
-                            <span class="small text-muted ms-1">80%</span>
-                        </td>
-                        <td>admin</td>
-                        <td>2023.09.12</td>
-                        <td>2024.01.27</td>
-                        <td class="text-muted" style="cursor:pointer;">•••</td>
-                    </tr>
-                </tbody>
-            </table>
+				<div class="text-center mt-3 position-relative">
+					<button type="button" class="btn btn-sm text-secondary fw-bold"
+						style="border: none; background: none;">옵션 전체보기 ∨</button>
+					<div class="position-absolute end-0 bottom-0">
+						<button type="reset"
+							class="btn btn-sm btn-light border me-1 text-muted">🔄
+							지우기</button>
+						<button type="submit" class="btn btn-sm btn-primary px-3">적용</button>
+					</div>
+				</div>
+			</form>
+		</div>
 
-            <div class="d-flex justify-content-end align-items-center mt-3" style="font-size: 13px;">
-                <span class="text-muted me-2">내보내기 :</span>
-                <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2 me-1" style="font-size: 12px;">CSV</button>
-                <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 12px;">PDF</button>
-            </div>
-        </div>
-    </section>
+		<div class="table-container shadow-sm">
+			<table
+				class="table table-hover align-middle text-center custom-table"
+				style="font-size: 14px;">
+				<thead class="table-light text-muted" style="font-size: 13px;">
+					<tr>
+						<th style="width: 40px;"><input type="checkbox"></th>
+						<th style="width: 60px;">#</th>
+						<th>프로젝트</th>
+						<th>일감유형</th>
+						<th>상태</th>
+						<th>우선순위</th>
+						<th>일감명</th>
+						<th>진척도</th>
+						<th>담당자</th>
+						<th>등록일자</th>
+						<th>마감일자</th>
+						<th style="width: 50px;"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="task, status : ${taskListinfo}">
+						<td><input type="checkbox"></td>
+
+						<td th:text="${status.count}">1</td>
+
+						<td><a href="#" class="text-decoration-none text-primary"
+							th:text="${task.projectTitle}">프로젝트명</a></td>
+
+						<td th:text="${task.typeName}">기획</td>
+
+						<td th:text="${task.defaultDescribe}">신규</td>
+
+						<td th:text="${task.priority}">매우낮음</td>
+
+						<td><a href="#" class="text-decoration-none text-primary"
+							th:text="${task.taskTitle}">일감명</a></td>
+
+						<td>
+							<div class="d-flex align-items-center justify-content-center">
+								<div class="progress" style="width: 100px; height: 8px;">
+									<div class="progress-bar" role="progressbar"
+										th:style="|width: ${task.taskProgress != null ? task.taskProgress : 0}%|"></div>
+								</div>
+								<span class="small text-muted ms-2"
+									th:text="${task.taskProgress != null ? task.taskProgress + '%' : '0%'}">0%</span>
+							</div>
+						</td>
+
+						<td
+							th:text="${task.taskManager != null && task.taskManager != '' ? task.taskManager : '-'}">-</td>
+
+						<td th:text="${#temporals.format(task.createdAt, 'yyyy.MM.dd')}">2023.09.12</td>
+
+						<td th:text="${#temporals.format(task.finishDate, 'yyyy.MM.dd')}">2024.01.27</td>
+
+						<td class="text-muted" style="cursor: pointer;">•••</td>
+					</tr>
+
+					<tr th:if="${#lists.isEmpty(taskListinfo)}">
+						<td colspan="12" class="text-muted py-4">등록된 일감이 존재하지 않습니다.</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<div class="d-flex justify-content-end align-items-center mt-3"
+				style="font-size: 13px;">
+				<span class="text-muted me-2">내보내기 :</span>
+				<button type="button"
+					class="btn btn-xs btn-outline-secondary py-0 px-2 me-1"
+					style="font-size: 12px;">CSV</button>
+				<button type="button"
+					class="btn btn-xs btn-outline-secondary py-0 px-2"
+					style="font-size: 12px;">PDF</button>
+			</div>
+		</div>
+	</section>
 
 </body>
 </html>

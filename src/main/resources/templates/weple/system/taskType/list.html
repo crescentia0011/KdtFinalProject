@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+<head>
+    <title>WEPLE - 공통 관리</title>
+</head>
+<body>            
+
+    <section>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script> <!-- 마우스 드래그 & 드랍 기능 라이브러리 -->
+        
+        <style>
+            .filter-box { background-color: #ffffff; border: 1px solid #e3e6f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+            .filter-row { display: flex; align-items: center; margin-bottom: 12px; font-size: 14px; }
+            .filter-label { width: 100px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+            .filter-label::before { content: '●'; font-size: 10px; }
+            .label-project::before { color: #e74c3c; }
+            .label-type::before { color: #f39c12; }
+            .label-status::before { color: #2ecc71; }
+            .label-priority::before { color: #3498db; }
+            .label-manager::before { color: #9b59b6; }
+            .label-progress::before { color: #1abc9c; }
+            .label-regdate::before { color: #e84393; }
+            .label-enddate::before { color: #ff7675; }
+            .filter-options { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; }
+            .filter-options label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
+            .text-more { color: #a0a0a0; font-size: 12px; margin-left: 5px; }
+            
+            /* 테이블 및 버튼 추가 스타일 */
+            .table-container { background-color: #ffffff; border: 1px solid #e3e6f0; border-radius: 8px; padding: 15px; }
+            .btn-action-group { display: flex; gap: 6px; justify-content: center; align-items: center; }
+            .btn-action { background: #ffffff; border: 1px solid #dcdde1; border-radius: 6px; padding: 4px 8px; font-size: 14px; color: #535c68; cursor: pointer; transition: all 0.2s; }
+            .btn-action:hover { background: #f5f6fa; border-color: #b2bec3; }
+            .btn-delete:hover { background: #fff5f5; border-color: #ff8787; color: #fa5252; }
+            
+            /* 동그라미 유틸리티 (일감 유형별 색상 매칭용 예시) */
+            .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+            .dot-red { background-color: #e74c3c; }
+            .dot-orange { background-color: #f39c12; }
+            .dot-green { background-color: #2ecc71; }
+            .dot-blue { background-color: #3498db; }
+        </style>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0" style="font-weight: bold; color: #2c3e50;">일감 유형 관리</h4>
+            <button type="button" class="btn btn-sm btn-outline-secondary px-3 py-2" style="border-radius: 8px; font-weight: 500; background-color: #00ffff;" th:onclick="|location.href='@{/system/taskTypeInsert}'|">
+                + 새 코드값
+            </button>
+        </div>
+        
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        	const tableBody = document.getElementById("sortable-list");
+        	
+        	Sortable.create(tableBody, {
+        		animation: 150
+        		, handle : '.drag-handle' // 버튼을 잡았을 때만 드래그가 작동하도록 설정
+        		, onEnd: function() { //드래그가 끝나고 마우스를 놓았을 때 실행되는 이벤트
+        			const rows = tableBody.querySelectorAll('tr');
+        			const sortedIds = Array.from(rows).map(row => parseInt(row.getAttribute('data-id')));
+        			
+        			fetch('/system/taskTypeReorder', {
+        				method: 'PUT'
+        				, headers: {
+        					'Content-Type': 'application/json'
+        				}
+        				, body: JSON.stringify(sortedIds)
+        			})
+        			.then(response => {
+        				if (!response.ok) {
+        					alert("순서 저장 중 오류가 발생했습니다.");
+        				}
+        			})
+        			.catch(error => {
+        				console.error("Error:", error);
+        				alert("서버와 통신할 수 없습니다.");
+        			});
+        		}
+        	});
+        });
+        </script>
+
+        <div class="table-container shadow-sm">
+            <table class="table table-hover align-middle text-center custom-table" style="font-size: 14px;">
+                <thead class="table-light text-muted" style="font-size: 13px;">
+                    <tr>
+                        <th class="text-start" style="padding-left: 20px;">일감유형</th>
+                        <th class="text-start">설명</th>
+                        <th style="width: 160px;">관리</th> </tr>
+                </thead>
+                <tbody id="sortable-list">
+                    <th:block th:each="taskType : ${taskTypes}">
+	                    <tr th:data-id="${taskType.typeId}">
+	                        <td class="text-start" style="padding-left: 20px;">[[ ${taskType.typeName} ]]</td>
+	                        <td class="text-start text-muted">[[ ${taskType.taskTypeDescribe} ]]</td>
+	                        <td>
+	                            <div class="btn-action-group">
+	                                <button type="button" class="btn-action drag-handle" title="드래그 앤 드랍 순서변경">↕</button>
+	                                <button type="button" class="btn-action" title="편집">✏️</button>
+	                                <button type="button" class="btn-action btn-delete" title="삭제">❌</button>
+	                            </div>
+	                        </td>
+	                    </tr>
+                    
+                    </th:block>
+                    
+                </tbody>
+            </table>
+
+            <div class="d-flex justify-content-end align-items-center mt-3" style="font-size: 13px;">
+                <span class="text-muted me-2">내보내기 :</span>
+                <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2 me-1" style="font-size: 12px;">CSV</button>
+                <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-2" style="font-size: 12px;">PDF</button>
+            </div>
+        </div>
+        
+        
+        
+        
+    </section>
+
+</body>
+
+
+
+</html>

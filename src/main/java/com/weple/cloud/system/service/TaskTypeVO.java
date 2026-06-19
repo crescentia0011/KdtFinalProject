@@ -18,4 +18,5 @@ public class TaskTypeVO {
 	private Integer companyId;
 	private String  typeName;
 	private String  taskTypeDescribe;
+	private Integer position;
 }

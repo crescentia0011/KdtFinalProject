@@ -1,3 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="mapper.auth.signup-mapper"></mapper>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.weple.cloud.auth.mapper.SignupMapper">
+
+    <!-- 입력한 회사 코드가 실제 회사인지 확인하고 회사 ID를 가져옴. -->
+    <select id="selectCompanyIdByCompanyCode"
+            parameterType="string"
+            resultType="long">
+        SELECT company_id
+        FROM companies
+        WHERE company_code = #{companyCode}
+    </select>
+
+    <!-- 회원가입 전에 로그인 아이디 중복 여부를 확인함. -->
+    <select id="countUserByLoginId"
+            parameterType="string"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE login_id = #{loginId}
+    </select>
+
+    <!-- 검증이 끝난 사용자를 가입 승인 대기 상태로 저장함. -->
+    <insert id="insertSignupUser"
+            parameterType="com.weple.cloud.auth.service.SignupRequestVO">
+        <selectKey keyProperty="userCode"
+                   resultType="string"
+                   order="BEFORE">
+            SELECT
+                'usr-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
+                (
+                    NVL(
+                        MAX(
+                            TO_NUMBER(
+                                SUBSTR(
+                                    user_code,
+                                    LENGTH('usr-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-') + 1
+                                )
+                            )
+                        ),
+                        0
+                    ) + 1
+                )
+            FROM users
+            WHERE user_code LIKE 'usr-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
+              AND REGEXP_LIKE(
+                    SUBSTR(
+                        user_code,
+                        LENGTH('usr-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-') + 1
+                    ),
+                    '^[0-9]+$'
+                  )
+        </selectKey>
+
+        INSERT INTO users
+        (
+            user_code,
+            company_id,
+            login_id,
+            password,
+            user_name,
+            email,
+            phone_number,
+            status,
+            owner_yn,
+            admin_yn
+        )
+        VALUES
+        (
+            #{userCode},
+            #{companyId},
+            #{loginId},
+            #{encodedPassword},
+            #{userName},
+            #{email},
+            #{phoneNumber},
+            'a1',
+            0,
+            0
+        )
+    </insert>
+
+</mapper>

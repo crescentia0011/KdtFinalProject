@@ -4,7 +4,7 @@
 <body>
 <div th:fragment="navbarFragment" class="sub_menu_nav">
     <ul>
-        <li class="active"><a href="#">개요</a></li>
+        <li th:classappend="${currentMenu == 'overview'} ? 'active' : ''"><a href="#">개요</a></li>
         <li><a href="#">작업내역</a></li>
         <li><a href="#">마일스톤</a></li>
         <li th:classappend="${currentMenu == 'task'} ? 'active' : ''"><a th:href="@{/task}">일감</a></li>

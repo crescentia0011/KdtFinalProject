@@ -1,0 +1,154 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{common/layouts/default_layout_setting :: layout(~{::section})}">
+<head>
+<title>WEPLE</title>
+<link rel="stylesheet" th:href="@{/css/groupInsert.css}" />
+</head>
+<body>
+	<section>
+		<div class="row col-8-4">
+			<div class="group-title">그룹</div>
+
+			<div class="card custom-card">
+				<div class="card-body custom-body">
+					<form name="groupForm" th:action="@{/groupInsert}" method="post">
+
+						<div class="sub-title">새 그룹 추가</div>
+
+						<div class="form-horizontal-group">
+							<label class="form-label group-label" for="groupName">그룹명</label>
+							<span class="colon">:</span> <input type="text" id="groupName"
+								name="groupName" class="form-control custom-input"
+								placeholder="추가할 그룹명을 입력해주세요." />
+						</div>
+
+						<div class="form-actions">
+							<button type="reset" class="btn btn-light custom-btn-cancel">취소</button>
+							<button type="submit" class="btn btn-primary custom-btn-submit">등록</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<script>
+			document.querySelector('form[name="groupForm"]').addEventListener(
+					"submit",
+					function(event) {
+						event.preventDefault();
+
+						const formTag = event.currentTarget;
+						let nameTag = formTag
+								.querySelector('[name="groupName"]');
+						if (nameTag.value == "") {
+							alert("그룹명을 입력하세요.");
+							nameTag.focus();
+							return;
+						}
+
+						alert("정상적으로 등록되었습니다.");
+						formTag.submit();
+					});
+		</script>
+
+		<style>
+.custom-card {
+	border: 1px solid #E5E7EB;
+	border-radius: 16px;
+	background-color: #ffffff;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+	padding: 20px;
+}
+
+.custom-header {
+	background: none;
+	border-bottom: none;
+	padding-bottom: 10px;
+}
+
+/* 1번 영역: '그룹' 타이틀 요구사항 반영 */
+.group-title {
+	color: #000000 !important;
+	font-size: 25px !important;
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+.custom-body {
+	padding-top: 10px;
+}
+
+/* 새 그룹 추가 서브 타이틀 */
+.sub-title {
+	font-size: 16px;
+	font-weight: bold;
+	color: #333333;
+	margin-bottom: 25px; /* 아래 입력창과의 줄간격 확보 */
+}
+
+/* 2번 영역: 가로 배치형 레이아웃 및 줄간격 설정 */
+.form-horizontal-group {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin-bottom: 80px; /* 3번 버튼 영역과의 시각적 공간 확보 */
+}
+
+/* 녹색 빛 도는 라벨 스타일 */
+.group-label {
+	color: #0EA5E9; /* 이미지 2번의 초록색 폰트 컬러 반영 */
+	font-size: 16px;
+	font-weight: bold;
+	margin-bottom: 0; /* 세로 정렬 맞춤 */
+}
+
+.colon {
+	color: #10B981;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+/* 인풋 박스 스타일 세밀화 */
+.custom-input {
+	width: 250px;
+	height: 38px;
+	border: 1px solid #D1D5DB;
+	border-radius: 6px;
+	padding-left: 12px;
+	font-size: 14px;
+	width: 60%;
+}
+
+/* 3번 영역: 우측 하단 버튼 정렬 및 스타일 정의 */
+.form-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	margin-top: 20px;
+}
+
+/* 취소 버튼 스타일 */
+.custom-btn-cancel {
+	background-color: #ffffff !important;
+	color: #333333 !important;
+	border: 1px solid #CCCCCC !important;
+	border-radius: 6px !important;
+	padding: 8px 20px !important;
+	font-weight: 500;
+	font-size: 14px;
+}
+
+/* 등록 버튼 스타일 (밝은 파란색) */
+.custom-btn-submit {
+	background-color: #0EA5E9 !important; /* 이미지의 선명한 블루 컬러 */
+	border: none !important;
+	border-radius: 6px !important;
+	padding: 8px 20px !important;
+	color: #ffffff !important;
+	font-weight: bold;
+	font-size: 14px;
+}
+</style>
+	</section>
+</body>
+</html>

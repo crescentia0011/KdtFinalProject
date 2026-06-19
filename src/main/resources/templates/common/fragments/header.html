@@ -4,7 +4,7 @@
 <body>
 <div th:fragment="headerFragment" class="nav_menu" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 20px; box-sizing: border-box;">
     
-    <h1 class="header-title-left" style="margin: 0;">프로젝트 1</h1>
+    <h1 class="header-title-left" style="margin: 0;" th:styleappend="${currentMenu == 'none'} ? 'visibility: hidden;' : 'visibility: visible;'">프로젝트 1</h1>
     
     <div class="header-profile-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
         
@@ -17,7 +17,12 @@
         
         <span class="user-name" style="font-weight: bold; font-size: 14px;">김위플</span>
         
-        <a href="#" style="color: #64748b; font-size: 16px; display: flex; align-items: center;"><i class="fa fa-sign-out"></i></a>
+        <form th:action="@{/logout}" method="post" style="margin: 0; display: flex; align-items: center;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" title="로그아웃" aria-label="로그아웃" style="border: 0; background: transparent; color: #64748b; font-size: 16px; display: flex; align-items: center; padding: 0; cursor: pointer;">
+                <i class="fa fa-sign-out"></i>
+            </button>
+        </form>
         
     </div>
 

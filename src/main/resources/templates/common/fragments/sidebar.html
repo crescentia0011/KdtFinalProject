@@ -1,27 +1,46 @@
 <div th:fragment="sidebarFragment" class="left_col scroll-view">
-    
-    <div class="navbar nav_title" style="border: 0;">
-        <a th:href="@{/dashboard/index}" class="site_title">
-            <i class="fa fa-group"></i> <span>WEPLE</span>
-        </a>
-    </div>
-    <div class="clearfix"></div>
+  <div class="navbar nav_title" style="border: 0">
+    <a th:href="@{/dashboard/index}" class="site_title">
+      <i class="fa fa-group"></i> <span>WEPLE</span>
+    </a>
+  </div>
+  <div class="clearfix"></div>
 
-    <br />
+  <br />
 
     <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
         <div class="menu_section">
             <ul class="nav side-menu">
                 <li><a th:href="@{/dashboard/index}"><i class="fa fa-dashboard"></i> 대시보드</a></li>
-                <li class="active"><a th:href="@{/dashboard/project}"><i class="fa fa-folder-open"></i> 프로젝트</a></li>
+                <li th:classappend="${sidebarMenu == 'project'} ? 'active' : ''"><a th:href="@{/weple/project/list}"><i class="fa fa-folder-open"></i> 프로젝트</a></li>
                 <li><a th:href="@{/dashboard/task}"><i class="fa fa-tasks"></i> 일감</a></li>
-                <li><a th:href="@{/dashboard/work-history}"><i class="fa fa-history"></i> 작업내역</a></li>
+                <li th:classappend="${sidebarMenu == 'work-history'} ? 'active' : ''"><a th:href="@{/weple/worklog/list}"><i class="fa fa-history"></i> 작업내역</a></li>
                 <li><a th:href="@{/dashboard/gantt}"><i class="fa fa-bar-chart"></i> 간트차트</a></li>
                 <li><a th:href="@{/dashboard/calendar}"><i class="fa fa-calendar"></i> 캘린더</a></li>
                 <li><a th:href="@{/dashboard/time}"><i class="fa fa-clock-o"></i> 소요시간</a></li>
-                <li><a th:href="@{/dashboard/board}"><i class="fa fa-comments"></i> 게시판</a></li> <li><a th:href="@{/dashboard/admin}"><i class="fa fa-gears"></i> 관리</a></li>
+                <li><a th:href="@{/dashboard/board}"><i class="fa fa-comments"></i> 게시판</a></li>
+                <li><a th:href="@{/weple/admin}"><i class="fa fa-gears"></i> 관리</a></li>
             </ul>
         </div>
     </div>
-    
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const currentPath = window.location.pathname;
+      const sidebarItems = document.querySelectorAll("#sidebar-ul > li");
+
+      sidebarItems.forEach((li) => {
+        const link = li.querySelector("a");
+        if (!link) return;
+
+        const linkPath = link.getAttribute("href");
+
+        if (currentPath.includes(linkPath) && linkPath !== "/") {
+          li.classList.add("active");
+        } else {
+          li.classList.remove("active");
+        }
+      });
+    });
+  </script>
 </div>
