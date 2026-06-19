@@ -14,11 +14,20 @@ import com.weple.cloud.system.service.SystemService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.weple.cloud.system.service.TaskTypeVO;
+
+import lombok.RequiredArgsConstructor;
+
 @Controller
 @RequiredArgsConstructor
 public class SystemController {
 	
 	private final SystemService systemService;
+
 	
 	//관리 내 일감유형
 	
@@ -62,20 +71,8 @@ public class SystemController {
 	//수정
 	
 	//삭제
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.weple.cloud.system.service.SystemService;
-import com.weple.cloud.system.service.TaskTypeVO;
 
-import lombok.RequiredArgsConstructor;
-
-@Controller
-@RequiredArgsConstructor
-public class SystemController {
-
-	private final SystemService systemService;
 	
 	//-------------------------------일감유형------------------------------
 	// 전체조회
@@ -114,8 +111,8 @@ public class SystemController {
 	}
 	
 	// 수정하기
-	@PutMapping("/system/taskTypeUpdate")
-	public String
+//	@PutMapping("/system/taskTypeUpdate")
+//	public String
 	
 	
 	
