@@ -8,5 +8,7 @@ import com.weple.cloud.project.service.ProjectVO;
 
 @Mapper
 public interface ProjectMapper {
-	public List<ProjectVO> selectAll();
+	public List<ProjectVO> selectAll(String keyword);
+	
+	public ProjectVO selectById(String projectId);
 }

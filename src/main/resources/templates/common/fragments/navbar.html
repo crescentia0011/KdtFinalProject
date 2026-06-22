@@ -2,10 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head></head>
 <body>
-<div th:fragment="navbarFragment" class="sub_menu_nav">
+<div th:fragment="navbarFragment" class="sub_menu_nav" th:if="${currentMenu != 'none'}">
     <ul>
         <li th:classappend="${currentMenu == 'overview'} ? 'active' : ''"><a href="#">개요</a></li>
-        <li><a href="#">작업내역</a></li>
+        <li th:classappend="${currentMenu == 'worklog'} ? 'active' : ''"><a th:href="@{/project/worklog(projectId=${projectId})}">작업내역</a></li>
         <li><a href="#">마일스톤</a></li>
         <li th:classappend="${currentMenu == 'task'} ? 'active' : ''"><a th:href="@{/task}">일감</a></li>
         <li><a href="#">소요시간</a></li>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>프로젝트 작업내역</title>
+</head>
+
+<body>
+
+<section class="project-page">
+
+    <div class="project-toolbar-top">
+        <h3 class="project-title">
+            <span th:text="${project.projectTitle}">프로젝트</span> 작업내역
+        </h3>
+        <div class="total-time-card">
+            <div class="time-title">총 소요시간</div>
+            <div class="time-value">-</div>
+            <div class="time-period"></div>
+        </div>
+    </div>
+
+    <div class="project-card">
+
+        <form id="searchForm" method="get" th:action="@{/project/worklog}">
+            <input type="hidden" name="projectId" th:value="${projectId}">
+
+            <div class="filter-toolbar">
+                <div class="filter-group">
+                    <label class="filter-label">조회 기간</label>
+                    <div class="date-range-wrap">
+                        <button type="button" id="dateBackBtn" class="date-arrow-btn">&larr; 뒤로</button>
+                        <input type="text" id="startDateInput" name="startDate"
+                               th:value="${param.startDate}" class="filter-input-date"
+                               placeholder="2026.06.05" readonly>
+                        <span class="date-separator">~</span>
+                        <input type="text" id="endDateInput" name="endDate"
+                               th:value="${param.endDate}" class="filter-input-date"
+                               placeholder="2026.06.09" readonly>
+                        <button type="button" id="recentPeriodBtn" class="date-period-btn">최근 5일</button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">사용자</label>
+                    <select name="userCode" class="filter-select"
+                            onchange="document.getElementById('searchForm').submit()">
+                        <option value="">전체</option>
+                        <!--
+                            users 목록이 없으므로 현재는 전체만 표시
+                            컨트롤러에서 users를 넘겨주면 아래 주석 해제
+                        <option th:each="user : ${users}"
+                                th:value="${user.userCode}"
+                                th:text="${user.userName}"
+                                th:selected="${user.userCode == param.userCode}"></option>
+                        -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-checkbox-row">
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="typeNames" value="기획"
+                           onchange="document.getElementById('searchForm').submit()"
+                           th:checked="${typeNames != null and #lists.contains(typeNames,'기획')}">
+                    <span class="custom-check-box"></span> 기획
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="typeNames" value="새 기능"
+                           onchange="document.getElementById('searchForm').submit()"
+                           th:checked="${typeNames != null and #lists.contains(typeNames,'새 기능')}">
+                    <span class="custom-check-box"></span> 새 기능
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="typeNames" value="개선"
+                           onchange="document.getElementById('searchForm').submit()"
+                           th:checked="${typeNames != null and #lists.contains(typeNames,'개선')}">
+                    <span class="custom-check-box"></span> 개선
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="typeNames" value="피드백"
+                           onchange="document.getElementById('searchForm').submit()"
+                           th:checked="${typeNames != null and #lists.contains(typeNames,'피드백')}">
+                    <span class="custom-check-box"></span> 피드백
+                </label>
+            </div>
+        </form>
+
+        <h4 class="sub-list-title">작업내역 목록</h4>
+
+        <!-- ✅ null 제거한 유효한 목록만 추출 -->
+        <th:block th:with="validLogs=${workLogList != null ? workLogList.?[#this != null and #this.actionAt != null] : T(java.util.Collections).emptyList()}">
+
+            <div th:if="${validLogs.isEmpty()}" class="empty-message">
+                조회된 작업 내역이 없습니다.
+            </div>
+
+            <!--
+                ✅ 날짜별로 "날짜 제목 + 독립 테이블"을 하나의 완결된 단위로 반복 생성.
+                   - 날짜 키 리스트(dateKeys, 중복 제거)를 먼저 만든 뒤 그 리스트를 th:each로 순회한다.
+                   - 각 반복마다 div.date-section-title ~ /div.project-table-wrap 까지 통째로 한 번에 열고 닫으므로
+                     table/thead/tbody 태그가 반복 경계에 걸쳐 쪼개지지 않는다(파싱 깨짐 방지).
+                   - 테이블 내부 행은 validLogs를 다시 순회하되 날짜가 같은 것만 th:if로 표시한다.
+                     (목록이 매우 커지면 비효율적일 수 있으나, 페이지당 20건 제한이 있어 안전하다.)
+            -->
+            <th:block th:if="${!validLogs.isEmpty()}"
+                      th:with="dateKeyList=${validLogs.![#temporals.format(actionAt,'yyyy-MM-dd')]}">
+
+                <th:block th:each="curDate, dStat : ${dateKeyList}"
+                          th:if="${dStat.index == 0 or dateKeyList[dStat.index - 1] != curDate}">
+
+                    <div class="date-section-title" th:text="${curDate}">2026-06-21</div>
+
+                    <div class="project-table-wrap">
+                        <table class="project-table">
+                            <thead>
+                                <tr>
+                                    <th>등록일시</th>
+                                    <th>사용자</th>
+                                    <th>작업내용</th>
+                                    <th>일감유형</th>
+                                    <th>작업유형</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="worklog-item-row"
+                                    th:each="log, lStat : ${validLogs}"
+                                    th:if="${dateKeyList[lStat.index] == curDate}">
+                                    <td th:text="${#temporals.format(log.actionAt, 'HH:mm')}">14:20</td>
+                                    <td th:text="${log.userName}">사용자</td>
+                                    <td class="text-left" th:text="${log.taskTitle}">작업내용</td>
+                                    <td>
+                                        <span th:if="${log.typeName == '기획'}"    class="status-badge type-dev"     th:text="${log.typeName}"></span>
+                                        <span th:if="${log.typeName == '새 기능'}" class="status-badge type-bug"     th:text="${log.typeName}"></span>
+                                        <span th:if="${log.typeName == '개선'}"    class="status-badge type-support" th:text="${log.typeName}"></span>
+                                        <span th:if="${log.typeName == '피드백'}"  class="status-badge type-improve" th:text="${log.typeName}"></span>
+                                        <span th:if="${log.typeName != '기획' and log.typeName != '새 기능' and log.typeName != '개선' and log.typeName != '피드백'}"
+                                              class="status-badge type-default" th:text="${log.typeName}"></span>
+                                    </td>
+                                    <td class="action-cell" th:text="${log.actionType}">CREATE</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </th:block>
+
+            </th:block>
+
+        </th:block>
+
+        <div class="pagination-wrap">
+            <a href="#" class="page-btn disabled">&lt; 이전</a>
+            <a href="#" class="page-btn active">1</a>
+            <a href="#" class="page-btn">2</a>
+            <a href="#" class="page-btn">3</a>
+            <a href="#" class="page-btn">4</a>
+            <a href="#" class="page-btn">5</a>
+            <a href="#" class="page-btn">다음 &gt;</a>
+        </div>
+
+    </div>
+
+    <style>
+        .right_col { background: #f5f6fa !important; }
+        .container-fluid { padding: 0 !important; }
+        .project-page { padding: 15px; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .project-toolbar-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+        .project-title { margin: 0; font-size: 24px; font-weight: 700; color: #222; letter-spacing: -0.5px; white-space: nowrap; }
+        .total-time-card { width: 180px; min-width: 180px; height: 95px; background: #fff; border: 1px solid #e6ecf5; border-radius: 12px; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .time-title { font-size: 11px; font-weight: 600; color: #9aa8c4; }
+        .time-value { font-size: 18px; font-weight: 700; color: #4d84ff; margin: 4px 0; }
+        .time-period { font-size: 11px; color: #adb5bd; }
+        .project-card { width: 100%; background: #fff; border-radius: 14px; padding: 20px; border: 1px solid #e6ecf5; }
+        .filter-toolbar { display: flex; align-items: center; gap: 15px; width: 100%; padding-bottom: 15px; border-bottom: 1px solid #edf1f7; overflow-x: auto; white-space: nowrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+        .filter-label { font-size: 12px; font-weight: 700; color: #8a99b5; }
+        .filter-select { min-width: 120px; height: 38px; padding: 0 12px; border: 1px solid #d9e1f2; border-radius: 8px; font-size: 13px; background: #fff; color: #222 !important; font-weight: 600; }
+        .date-range-wrap { display: flex; align-items: center; gap: 6px; }
+        .date-arrow-btn, .date-period-btn { height: 38px; padding: 0 14px; border: 1px solid #d9e1f2; background: #fff; border-radius: 8px; font-size: 13px; cursor: pointer; color: #222 !important; font-weight: 600; }
+        .filter-input-date { width: 110px; height: 38px; border: 1px solid #d9e1f2; border-radius: 8px; text-align: center; font-size: 13px; cursor: pointer; background: #fff; color: #222 !important; font-weight: 600; }
+        .date-separator { color: #9aa8c4; }
+        .filter-checkbox-row { display: flex; align-items: center; gap: 24px; padding: 14px 0; }
+        .checkbox-inline { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; color: #495057; cursor: pointer; }
+        .checkbox-inline input[type="checkbox"] { display: none; }
+        .custom-check-box { display: inline-block; width: 16px; height: 16px; border: 2px solid #adb5bd; border-radius: 4px; background: #fff; position: relative; flex-shrink: 0; }
+        .checkbox-inline input[type="checkbox"]:checked + .custom-check-box { border-color: #4d84ff; }
+        .checkbox-inline input[type="checkbox"]:checked + .custom-check-box::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #4d84ff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+        .sub-list-title { font-size: 16px; font-weight: 700; color: #222; margin: 25px 0 15px; }
+        .date-section-title { font-size: 14px; font-weight: 700; color: #4d84ff; margin: 18px 0 8px; }
+        .date-section-title:first-of-type { margin-top: 0; }
+        .project-table-wrap { border: 1px solid #e6ecf5; border-radius: 10px; overflow: hidden; background: #fff; margin-bottom: 18px; }
+        .project-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .project-table th:nth-child(1), .project-table td:nth-child(1) { width: 14%; }
+        .project-table th:nth-child(2), .project-table td:nth-child(2) { width: 14%; }
+        .project-table th:nth-child(3), .project-table td:nth-child(3) { width: 40%; }
+        .project-table th:nth-child(4), .project-table td:nth-child(4) { width: 16%; }
+        .project-table th:nth-child(5), .project-table td:nth-child(5) { width: 16%; }
+        .project-table td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .project-table td:nth-child(3) { white-space: normal; word-break: break-all; }
+        .project-table th { height: 42px; font-size: 12px; font-weight: 700; color: #5d6b87; background: #f8faff; border-bottom: 1px solid #e9edf5; text-align: center; }
+        .project-table td { height: 50px; padding: 0 15px; border-top: 1px solid #edf1f7; font-size: 13px; color: #495057; text-align: center; }
+        .project-table th:nth-child(3), .project-table td:nth-child(3) { text-align: left; padding-left: 20px; }
+        .project-table tbody tr:first-child td { border-top: none; }
+        .project-table tbody tr:hover { background: #fafcff; }
+        .status-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 70px; height: 24px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .type-dev     { background: #eef4ff; color: #4d84ff; }
+        .type-bug     { background: #fff1f1; color: #f64e60; }
+        .type-support { background: #fbf2ff; color: #b55dff; }
+        .type-improve { background: #e8fff3; color: #50cd89; }
+        .type-default { background: #f1f3f7; color: #8a99b5; }
+        .action-cell { font-size: 12px; font-weight: 600; }
+        .empty-message { padding: 50px !important; text-align: center; color: #adb5bd; }
+        .pagination-wrap { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+        .page-btn { display: flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; text-decoration: none; color: #5d6b87; border-radius: 6px; font-size: 13px; }
+        .page-btn.active { background: #4d84ff; color: #fff; font-weight: 700; }
+        .page-btn.disabled { opacity: .3; pointer-events: none; }
+        .page-btn:hover:not(.active):not(.disabled) { background: #eef4ff; color: #4d84ff; }
+        .flatpickr-calendar { width: 340px !important; max-width: 340px !important; }
+        .flatpickr-calendar.arrowTop:before, .flatpickr-calendar.arrowTop:after { display: none; }
+        .flatpickr-months { align-items: center; margin-bottom: 8px; }
+        .flatpickr-months .flatpickr-month { height: 36px; color: #222; }
+        .flatpickr-current-month, .flatpickr-current-month .flatpickr-monthDropdown-months, .flatpickr-current-month input.cur-year { font-size: 14px; font-weight: 700; color: #222 !important; background: transparent; border-radius: 6px; padding: 0; }
+        .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; fill: #8a99b5; }
+        .flatpickr-months .flatpickr-prev-month:hover, .flatpickr-months .flatpickr-next-month:hover { background: #eef4ff; }
+        .flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg { fill: #4d84ff; }
+        .flatpickr-weekdays { margin-bottom: 4px; }
+        span.flatpickr-weekday { font-size: 11px; font-weight: 700; color: #9aa8c4; }
+        .dayContainer { width: 330px !important; min-width: 330px !important; }
+        .flatpickr-days { width: 330px !important; }
+        .flatpickr-day { width: 42px !important; max-width: 42px !important; height: 42px !important; line-height: 42px !important; }
+        .flatpickr-day.flatpickr-disabled, .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { color: #7a8aa8; }
+        .flatpickr-day:hover { background: #eef4ff; border-color: #eef4ff; color: #4d84ff; }
+        .flatpickr-day.today { background: #eef4ff !important; color: #4d84ff !important; border: none !important; border-radius: 8px !important; }
+        .flatpickr-day.today:hover { background: #eef4ff !important; border-color: #4d84ff !important; border-radius: 8px !important; color: #4d84ff !important; }
+        .flatpickr-day.selected, .flatpickr-day.selected:hover, .flatpickr-day.startRange, .flatpickr-day.startRange:hover, .flatpickr-day.endRange, .flatpickr-day.endRange:hover, .flatpickr-day.today.selected { background: #4d84ff !important; border-color: #4d84ff !important; color: #fff !important; font-weight: 700 !important; border-radius: 8px !important; }
+        .flatpickr-day.inRange { background: #eef4ff !important; border-color: #eef4ff !important; box-shadow: -5px 0 0 #eef4ff, 5px 0 0 #eef4ff !important; color: #4d84ff !important; }
+        .numInputWrapper:hover { background: transparent; }
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/ko.js"></script>
+
+    <script th:inline="javascript">
+        (function () {
+            var DATE_FORMAT = 'Y.m.d';
+            if (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.ko) {
+                flatpickr.localize(flatpickr.l10ns.ko);
+            }
+            function parseFormatted(str) {
+                if (!str) return null;
+                var parts = str.split('.');
+                if (parts.length !== 3) return null;
+                var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                return isNaN(d.getTime()) ? null : d;
+            }
+            function addDays(date, days) {
+                var d = new Date(date.getTime());
+                d.setDate(d.getDate() + days);
+                return d;
+            }
+            var startInput = document.getElementById('startDateInput');
+            var endInput   = document.getElementById('endDateInput');
+            var searchForm = document.getElementById('searchForm');
+            var autoSubmitEnabled = false;
+
+            function syncTimePeriod() {
+                var periodEl = document.querySelector('.time-period');
+                if (periodEl && startInput.value && endInput.value) {
+                    periodEl.textContent = startInput.value + ' ~ ' + endInput.value;
+                }
+            }
+            function submitSearchForm() {
+                syncTimePeriod();
+                if (autoSubmitEnabled && searchForm) searchForm.submit();
+            }
+            var startPicker = flatpickr(startInput, {
+                dateFormat: DATE_FORMAT, allowInput: false,
+                onChange: function (selectedDates) {
+                    if (selectedDates[0]) endPicker.set('minDate', selectedDates[0]);
+                    submitSearchForm();
+                }
+            });
+            var endPicker = flatpickr(endInput, {
+                dateFormat: DATE_FORMAT, allowInput: false,
+                onChange: function (selectedDates) {
+                    if (selectedDates[0]) startPicker.set('maxDate', selectedDates[0]);
+                    submitSearchForm();
+                }
+            });
+            function setRange(start, end) {
+                // ✅ minDate/maxDate 제약이 걸린 상태에서 setDate를 호출하면,
+                //    새로 넣으려는 날짜가 기존 제약 범위를 벗어날 경우 flatpickr가
+                //    그 값을 무시(보정)해버려 종료일이 안 바뀌는 문제가 생긴다.
+                //    그래서 먼저 제약을 풀고(null) 두 날짜를 모두 반영한 뒤,
+                //    마지막에 정확한 min/max 제약을 다시 건다.
+                startPicker.set('maxDate', null);
+                endPicker.set('minDate', null);
+
+                startPicker.setDate(start, false);
+                endPicker.setDate(end, false);
+
+                startPicker.set('maxDate', end);
+                endPicker.set('minDate', start);
+            }
+            function applyRecentDays(days) {
+                var today = new Date();
+                setRange(addDays(today, -(days - 1)), today);
+            }
+            if (!startInput.value || !endInput.value) applyRecentDays(5);
+            syncTimePeriod();
+            autoSubmitEnabled = true;
+
+            document.getElementById('recentPeriodBtn').addEventListener('click', function () {
+                applyRecentDays(5); submitSearchForm();
+            });
+            document.getElementById('dateBackBtn').addEventListener('click', function () {
+                var curStart = parseFormatted(startInput.value);
+                var curEnd   = parseFormatted(endInput.value);
+                if (!curStart || !curEnd) { applyRecentDays(5); submitSearchForm(); return; }
+                var rangeDays = Math.round((curEnd.getTime() - curStart.getTime()) / (24*60*60*1000)) + 1;
+                var newEnd    = addDays(curStart, -1);
+                var newStart  = addDays(newEnd, -(rangeDays - 1));
+                setRange(newStart, newEnd);
+                submitSearchForm();
+            });
+        })();
+    </script>
+
+</section>
+
+</body>
+</html>
