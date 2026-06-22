@@ -13,10 +13,10 @@
         <li><a href="#">테스트</a></li>
         <li><a href="#">위키</a></li>
         <li><a href="#">파일관리</a></li>
-        <li><a href="#">저장소</a></li>
+        <li th:if="${hasRepository}" th:classappend="${currentMenu == 'repository'} ? 'active' : ''"><a th:href="@{/repository/list(projectId=${projectId})}">저장소</a></li>
         <li><a href="#">칸반보드</a></li>
         <li><a href="#">캘린더</a></li>
-        <li><a href="#">설정</a></li>
+        <li><a th:href="@{/repository/management(projectId=${projectId})}">설정</a></li>
     </ul>
 </div>
 </body>

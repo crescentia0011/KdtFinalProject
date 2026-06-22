@@ -27,6 +27,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/login",
                     "/join",
+                    "/access-denide",
                     "/css/**",
                     "/js/**",
                     "/images/**",
@@ -35,6 +36,10 @@ public class SecurityConfig {
 
                 // 가입승인 화면과 승인 처리는 기업 최고관리자 또는 관리자만 접근할 수 있습니다.
                 .requestMatchers("/approvalList", "/approvalList/**")
+                .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
+
+                // 저장소 등록 설정은 기업 최고관리자 또는 관리자만 사용할 수 있습니다.
+                .requestMatchers("/repository/management", "/repository")
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
 
                 // 그 외 요청은 로그인 필요
@@ -71,6 +76,12 @@ public class SecurityConfig {
 
                 // 로그아웃 관련 URL 접근 허용
                 .permitAll()
+            )
+            .exceptionHandling(exception -> exception
+                // 권한이 없는 요청은 브라우저 기본 403 화면 대신 안내 페이지로 이동합니다.
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                    response.sendRedirect(request.getContextPath() + "/access-denide")
+                )
             );
 
         return http.build();

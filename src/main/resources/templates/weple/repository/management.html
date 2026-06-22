@@ -1,14 +1,44 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
-<head>
-    <title>WEPLE - 공통 관리</title>
-</head>
+<head><title>WEPLE - 저장소 설정</title></head>
 <body>
+<section>
+    <link rel="stylesheet" th:href="@{/css/repository/repository.css}">
+    <div class="repository-page">
+        <h1 class="repository-title">설정</h1>
+        <nav class="repository-setting-tabs" aria-label="프로젝트 설정 메뉴">
+            <a href="#">프로젝트</a><a href="#">구성원</a><a class="active" th:href="@{/repository/management(projectId=${projectId})}">저장소</a><a href="#">시간추적</a>
+        </nav>
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+        <p class="repository-message repository-message-error" th:if="${repositoryError}" th:text="${repositoryError}">입력값을 확인해주세요.</p>
 
+        <!-- GitHub 연동 정보는 현재 회사와 프로젝트에 연결해 저장합니다. -->
+        <form class="repository-form" th:action="@{/repository}" th:object="${repository}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" th:field="*{projectId}" th:value="${projectId}">
+            <div class="repository-form-row">
+                <label for="repositorySystem">형상관리시스템</label>
+                <input id="repositorySystem" value="GitHub" readonly>
+            </div>
+            <div class="repository-form-row">
+                <label for="repositoryName">저장소명</label>
+                <input id="repositoryName" th:field="*{repositoryName}" placeholder="저장소 이름을 입력하세요" required>
+            </div>
+            <div class="repository-form-row">
+                <label for="repositoryUrl">저장소 경로</label>
+                <input id="repositoryUrl" th:field="*{repositoryUrl}" placeholder="https://github.com/KDTFinalProject/KdtFinalProject.git" required>
+            </div>
+            <label class="repository-check" for="mainRepository">
+                <input id="mainRepository" th:field="*{mainYn}" type="checkbox" value="Y">
+                <span>주 저장소</span>
+            </label>
+            <div class="repository-form-actions">
+                <a class="repository-button repository-button-secondary" th:href="@{/repository/list(projectId=${projectId})}">취소</a>
+                <button class="repository-button repository-button-primary" type="submit">등록</button>
+            </div>
+        </form>
+    </div>
+</section>
 </body>
 </html>

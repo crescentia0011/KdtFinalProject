@@ -1,0 +1,42 @@
+.access-denide-page {
+    display: flex;
+    min-height: 360px;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+}
+
+.access-denide-content {
+    text-align: center;
+}
+
+.access-denide-content h1 {
+    margin: 0 0 10px;
+    color: #2b4c7e;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.access-denide-content p {
+    margin: 0 0 24px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.access-denide-home {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 112px;
+    height: 38px;
+    border-radius: 6px;
+    background: #5271ff;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.access-denide-home:hover {
+    background: #3d5be8;
+}

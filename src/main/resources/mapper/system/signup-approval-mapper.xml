@@ -15,7 +15,7 @@
             email AS email,
             phone_number AS phoneNumber,
             CASE
-                WHEN REGEXP_LIKE(user_code, '^usr-[0-9]{8}-[0-9]+$')
+                WHEN REGEXP_LIKE(user_code, '^USR-[0-9]{8}-[0-9]+$')
                 THEN TO_CHAR(TO_DATE(SUBSTR(user_code, 5, 8), 'YYYYMMDD'), 'YYYY/MM/DD')
             END AS requestedAt
         FROM users

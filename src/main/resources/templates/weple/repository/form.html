@@ -1,14 +1,36 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
-<head>
-    <title>WEPLE - 공통 관리</title>
-</head>
+<head><title>WEPLE - 파일 변경 비교</title></head>
 <body>
+<section>
+    <link rel="stylesheet" th:href="@{/css/repository/repository.css}">
+    <div class="repository-page">
+        <div class="repository-diff-heading"><div><h1 class="repository-title">파일 변경 비교</h1><p>KdtFinalProject / src/main/java/com/weple/Application.java</p></div><a th:href="@{/repository/detail(projectId=${projectId})}">저장소로 돌아가기</a></div>
+        <div class="repository-diff-meta"><span>이전 커밋 <strong>e86930e</strong></span><i class="fa fa-arrow-right"></i><span>현재 커밋 <strong>c7c824b8</strong></span></div>
+        <div class="repository-diff-grid">
+            <section><h2>이전 버전</h2><pre><code>package com.weple;
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+import org.springframework.boot.SpringApplication;
 
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}</code></pre></section>
+            <section><h2>현재 버전</h2><pre><code>package com.weple;
+
+import org.springframework.boot.SpringApplication;
+<span class="diff-add">import org.springframework.boot.autoconfigure.SpringBootApplication;</span>
+
+<span class="diff-add">@SpringBootApplication</span>
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}</code></pre></section>
+        </div>
+    </div>
+</section>
 </body>
 </html>

@@ -102,6 +102,9 @@ SELECT 'GROUPS', COUNT(*) FROM groups
 UNION ALL
 SELECT 'PROJECT', COUNT(*) FROM project;
 
+-- 저장소 등록 단계에서는 알림이 생성되지 않으므로 ALARM_ID는 비어 있을 수 있게 둠.
+ALTER TABLE repository_setting MODIFY (alarm_id NULL);
+
 
 
 -- 1. 기존 테이블 삭제 (오류 방지)

@@ -1,14 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
-<head>
-    <title>WEPLE - 공통 관리</title>
-</head>
+<head><title>WEPLE - 저장소 상세</title></head>
 <body>
-
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
-
+<section>
+    <link rel="stylesheet" th:href="@{/css/repository/repository.css}">
+    <div id="repositoryDetail" class="repository-page"
+         th:data-repository-url="${repository?.repositoryUrl}">
+        <div class="repository-detail-heading" th:if="${repository != null}">
+            <div><h1 class="repository-title">저장소</h1><a class="repository-url" th:href="${repository.repositoryUrl}" target="_blank" rel="noopener"><span th:text="${repository.repositoryName}">KdtFinalProject</span> <span>@ main</span></a></div>
+            <a class="repository-github" th:href="${repository.repositoryUrl}" target="_blank" rel="noopener"><i class="fa fa-github"></i> GitHub</a>
+        </div>
+        <div class="repository-empty-detail" th:if="${repository == null}"><h1 class="repository-title">저장소</h1><p>등록된 저장소가 없습니다.</p><a th:href="@{/repository/management(projectId=${projectId})}">저장소 등록으로 이동</a></div>
+        <th:block th:if="${repository != null}">
+        <p id="githubError" class="repository-message repository-message-error" th:if="${githubError}" th:text="${githubError}">GitHub 정보를 조회할 수 없습니다.</p>
+        <div class="repository-toolbar">
+            <label>브랜치<select id="githubBranch"><option th:each="branch : ${githubInfo?.branches}" th:value="${branch}" th:text="${branch}" th:selected="${branch == githubInfo?.selectedBranch}">main</option></select></label>
+            <label>폴더/파일<input id="githubDirectory" th:value="${githubInfo?.currentDirectory ?: '/'}" readonly><i class="fa fa-search"></i></label>
+        </div>
+        <div class="repository-browser">
+            <aside id="githubFileTree" class="repository-tree" aria-label="저장소 파일 목록">
+                <a th:if="${!#strings.isEmpty(githubInfo?.currentDirectory)}" th:href="@{/repository/detail(projectId=${projectId}, repositoryId=${repository.repositoryId}, branch=${githubInfo.selectedBranch}, directoryPath=${githubInfo.parentDirectory})}" class="repository-tree-folder"><i class="fa fa-level-up"></i><span>..</span></a>
+                <th:block th:each="file : ${githubInfo?.files}">
+                    <a th:if="${file.type == 'file'}" th:href="@{/repository/detail(projectId=${projectId}, repositoryId=${repository.repositoryId}, branch=${githubInfo.selectedBranch}, directoryPath=${githubInfo.currentDirectory}, filePath=${file.path})}" th:classappend="${file.path == githubInfo?.selectedFilePath} ? 'active' : ''"><i class="fa fa-file-code-o"></i><span th:text="${file.name}">pom.xml</span></a>
+                    <a th:unless="${file.type == 'file'}" th:href="@{/repository/detail(projectId=${projectId}, repositoryId=${repository.repositoryId}, branch=${githubInfo.selectedBranch}, directoryPath=${file.path})}" class="repository-tree-folder"><i class="fa fa-folder"></i><span th:text="${file.name}">src</span></a>
+                </th:block>
+            </aside>
+            <article class="repository-code">
+                <div id="githubFileTitle" class="repository-code-title" th:text="${githubInfo?.selectedFilePath}">파일을 선택하세요.</div>
+                <pre><code id="githubFileContent" th:text="${githubInfo?.selectedFileContent}">파일 내용을 불러오는 중입니다.</code></pre>
+            </article>
+        </div>
+        <div class="repository-commits-heading"><h2>커밋 내역</h2><a th:href="@{/repository/diff(projectId=${projectId})}">파일 변경 비교</a></div>
+        <div class="repository-table-wrap">
+            <table class="repository-table repository-commit-table">
+                <thead><tr><th>해시코드</th><th>브랜치 정보</th><th>최신 커밋 메시지</th><th>이메일</th><th>작성일시</th></tr></thead>
+                <tbody id="githubCommitList">
+                    <tr th:each="commit : ${githubInfo?.commits}"><td th:text="${commit.sha}">c7c824b8</td><td th:text="${githubInfo?.defaultBranch}">main</td><td th:text="${commit.message}">커밋 메시지</td><td th:text="${commit.authorEmail}">team@weple.com</td><td th:text="${commit.committedAt}">2026-06-19</td></tr>
+                    <tr th:if="${githubInfo == null or #lists.isEmpty(githubInfo.commits)}"><td class="repository-empty" colspan="5">GitHub 커밋 정보를 불러오지 못했습니다.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        </th:block>
+    </div>
+    <script th:src="@{/js/repository/repository-detail.js}"></script>
+</section>
 </body>
 </html>

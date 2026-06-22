@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.weple.cloud.repository.mapper.RepositoryMapper">
+
+    <!-- 프로젝트에 등록된 저장소가 있는지 확인해 상단 탭 노출에 사용합니다. -->
+    <select id="countRepositoriesByProjectId" resultType="int">
+        SELECT COUNT(*)
+        FROM repository_setting
+        WHERE project_id = #{projectId}
+    </select>
+
+    <!-- DB의 저장소명 중복 제약과 동일한 기준으로 등록 전 중복을 확인합니다. -->
+    <select id="countRepositoryByNameOrUrl" resultType="int">
+        SELECT COUNT(*)
+        FROM repository_setting
+        WHERE repository_identifier = #{repositoryName}
+           OR repository_url = #{repositoryUrl}
+    </select>
+
+    <!-- 저장소 목록 화면에서 현재 회사·프로젝트에 등록된 모든 저장소를 조회합니다. -->
+    <select id="selectRepositories" resultType="com.weple.cloud.repository.service.RepositoryVO">
+        SELECT repository_id AS repositoryId,
+               company_id AS companyId,
+               project_id AS projectId,
+               repository_identifier AS repositoryName,
+               repository_url AS repositoryUrl,
+               repository_main_yn AS mainYn,
+               created_at AS createdAt
+        FROM repository_setting
+        WHERE company_id = #{companyId}
+          AND project_id = #{projectId}
+        ORDER BY repository_main_yn DESC, created_at DESC
+    </select>
+
+    <!-- 목록에서 선택한 저장소 한 건을 상세 화면에 표시하기 위해 조회합니다. -->
+    <select id="selectRepository" resultType="com.weple.cloud.repository.service.RepositoryVO">
+        SELECT repository_id AS repositoryId,
+               company_id AS companyId,
+               project_id AS projectId,
+               repository_identifier AS repositoryName,
+               repository_url AS repositoryUrl,
+               repository_main_yn AS mainYn,
+               created_at AS createdAt
+        FROM repository_setting
+        WHERE company_id = #{companyId}
+          AND project_id = #{projectId}
+          AND repository_id = #{repositoryId}
+    </select>
+
+    <!-- 새 주 저장소 등록 전에는 같은 프로젝트의 기존 주 저장소 표시를 해제합니다. -->
+    <update id="clearMainRepository">
+        UPDATE repository_setting
+        SET repository_main_yn = 'N'
+        WHERE company_id = #{companyId}
+          AND project_id = #{projectId}
+          AND repository_main_yn = 'Y'
+    </update>
+
+    <!-- 저장소 등록 시 사용할 기본 관리 설정을 만들고 생성된 ID를 반환합니다. -->
+    <insert id="insertRepositoryManageSetting"
+            parameterType="com.weple.cloud.repository.service.RepositoryVO">
+        <!-- 저장소별 관리 설정 PK를 먼저 발급해 이후 INSERT에서 FK로 사용합니다. -->
+        <selectKey keyProperty="repositoryManageId" resultType="long" order="BEFORE">
+            SELECT NVL(MAX(repository_manage_id), 0) + 1
+            FROM repository_manage_setting
+        </selectKey>
+        INSERT INTO repository_manage_setting
+        (
+            repository_manage_id,
+            company_id
+        )
+        VALUES
+        (
+            #{repositoryManageId},
+            #{companyId}
+        )
+    </insert>
+
+    <!-- 기본 관리 설정이 연결된 프로젝트 저장소 정보를 저장합니다. -->
+    <insert id="insertRepository" parameterType="com.weple.cloud.repository.service.RepositoryVO">
+        <!-- 화면에 노출되지 않는 저장소 내부 식별자를 등록 전에 발급합니다. -->
+        <selectKey keyProperty="repositoryId" resultType="string" order="BEFORE">
+            SELECT 'REPO-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
+                   (NVL(MAX(TO_NUMBER(SUBSTR(repository_id, -4))), 0) + 1)
+            FROM repository_setting
+            WHERE repository_id LIKE 'REPO-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
+              AND REGEXP_LIKE(repository_id, '^REPO-[0-9]{8}-[0-9]+$')
+        </selectKey>
+        INSERT INTO repository_setting
+        (
+            repository_id,
+            company_id,
+            project_id,
+            repository_manage_id,
+            repository_identifier,
+            repository_url,
+            repository_main_yn,
+            created_at
+        )
+        VALUES
+        (
+            #{repositoryId},
+            #{companyId},
+            #{projectId},
+            #{repositoryManageId},
+            #{repositoryName},
+            #{repositoryUrl},
+            #{mainYn},
+            SYSDATE
+        )
+    </insert>
+
+</mapper>

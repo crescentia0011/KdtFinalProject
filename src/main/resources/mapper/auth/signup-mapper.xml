@@ -39,14 +39,14 @@
                    resultType="string"
                    order="BEFORE">
             SELECT
-                'usr-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
+                'USR-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
                 (
                     NVL(
                         MAX(
                             TO_NUMBER(
                                 SUBSTR(
                                     user_code,
-                                    LENGTH('usr-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-') + 1
+                                    LENGTH('USR-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-') + 1
                                 )
                             )
                         ),
@@ -54,11 +54,11 @@
                     ) + 1
                 )
             FROM users
-            WHERE user_code LIKE 'usr-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
+            WHERE user_code LIKE 'USR-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
               AND REGEXP_LIKE(
                     SUBSTR(
                         user_code,
-                        LENGTH('usr-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-') + 1
+                        LENGTH('USR-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-') + 1
                     ),
                     '^[0-9]+$'
                   )
