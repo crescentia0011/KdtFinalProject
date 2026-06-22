@@ -167,4 +167,4 @@ uploads/
 *.iml
 
 # application-secret
-application-secret.properties
+application-api.properties
