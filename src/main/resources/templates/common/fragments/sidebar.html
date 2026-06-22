@@ -12,14 +12,14 @@
         <div class="menu_section">
             <ul class="nav side-menu">
                 <li><a th:href="@{/dashboard/index}"><i class="fa fa-dashboard"></i> 대시보드</a></li>
-                <li th:classappend="${sidebarMenu == 'project'} ? 'active' : ''"><a th:href="@{/weple/project/list}"><i class="fa fa-folder-open"></i> 프로젝트</a></li>
-                <li><a th:href="@{/dashboard/task}"><i class="fa fa-tasks"></i> 일감</a></li>
-                <li th:classappend="${sidebarMenu == 'work-history'} ? 'active' : ''"><a th:href="@{/weple/worklog/list}"><i class="fa fa-history"></i> 작업내역</a></li>
+                <li><a th:href="@{/task/all-list}"><i class="fa fa-tasks"></i> 일감</a></li>
+                <li th:classappend="${sidebarMenu == 'project'} ? 'active' : ''"><a th:href="@{/project}"><i class="fa fa-folder-open"></i> 프로젝트</a></li>
+                <li th:classappend="${sidebarMenu == 'work-history'} ? 'active' : ''"><a th:href="@{/worklog}"><i class="fa fa-history"></i> 작업내역</a></li>
                 <li><a th:href="@{/dashboard/gantt}"><i class="fa fa-bar-chart"></i> 간트차트</a></li>
                 <li><a th:href="@{/dashboard/calendar}"><i class="fa fa-calendar"></i> 캘린더</a></li>
                 <li><a th:href="@{/dashboard/time}"><i class="fa fa-clock-o"></i> 소요시간</a></li>
                 <li><a th:href="@{/dashboard/board}"><i class="fa fa-comments"></i> 게시판</a></li>
-                <li><a th:href="@{/weple/admin}"><i class="fa fa-gears"></i> 관리</a></li>
+                <li th:classappend="${sidebarMenu == 'system'} ? 'active' : ''"><a th:href="@{/system}"><i class="fa fa-gears"></i> 관리</a></li>
             </ul>
         </div>
     </div>

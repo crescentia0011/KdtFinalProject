@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://thymeleaf.org"
       th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+
 <head>
     <meta charset="UTF-8">
     <title>작업 내역 목록</title>
@@ -16,87 +17,143 @@
             <div class="time-period" th:text="${searchPeriod != null ? searchPeriod : '2026.06.05 ~ 2026.06.09'}">2026.06.05 ~ 2026.06.09</div>
         </div>
     </div>
-
+ 
     <div class="project-card">
-        <form id="searchForm" method="get" th:action="@{/weple/worklog/list}">
+        <form id="searchForm" method="get" th:action="@{/worklog}">
             <div class="filter-toolbar">
                 <div class="filter-group">
                     <label class="filter-label">프로젝트</label>
-                    <select name="projectId" class="filter-select">
+                    <select name="projectId" class="filter-select" onchange="document.getElementById('searchForm').submit()">
                         <option value="">전체 프로젝트</option>
+                        <option th:each="project : ${projects}" 
+                            th:value="${project.projectId}" 
+                            th:text="${project.projectTitle}"
+                            th:selected="${project.projectId.toString() == projectId}">
+                        </option>
                     </select>
                 </div>
+                
                 <div class="filter-group">
                     <label class="filter-label">조회 기간</label>
                     <div class="date-range-wrap">
-                        <button type="button" class="date-arrow-btn">&larr; 뒤로</button>
-                        <input type="text" name="startDate" th:value="${param.startDate}" class="filter-input-date" placeholder="2026.06.05">
+                        <button type="button" id="dateBackBtn" class="date-arrow-btn">&larr; 뒤로</button>
+                        <input type="text" id="startDateInput" name="startDate" th:value="${param.startDate}" class="filter-input-date" placeholder="2026.06.05" readonly>
                         <span class="date-separator">~</span>
-                        <input type="text" name="endDate" th:value="${param.endDate}" class="filter-input-date" placeholder="2026.06.09">
-                        <button type="button" class="date-period-btn">최근 5일</button>
+                        <input type="text" id="endDateInput" name="endDate" th:value="${param.endDate}" class="filter-input-date" placeholder="2026.06.09" readonly>
+                        <button type="button" id="recentPeriodBtn" class="date-period-btn">최근 5일</button>
                     </div>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">사용자</label>
                     <select name="userCode" class="filter-select">
                         <option value="">전체</option>
+                        <option th:each="user : ${users}" 
+                            th:value="${user.userCode}" 
+                            th:text="${user.userName}"
+                            th:selected="${user.userCode == param.userCode}"></option>
                     </select>
                 </div>
             </div>
+            
             <div class="filter-checkbox-row">
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="typeNames" value="기획" checked>
-                    <span class="custom-check-box dev-box"></span> 기획
-                </label>
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="typeNames" value="새 기능" checked>
-                    <span class="custom-check-box bug-box"></span> 새 기능
-                </label>
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="typeNames" value="개선" checked>
-                    <span class="custom-check-box support-box"></span> 개선
-                </label>
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="typeNames" value="피드백">
-                    <span class="custom-check-box improve-box"></span> 피드백
-                </label>
-            </div>
+			    <label class="checkbox-inline">
+			        <input type="checkbox"
+			               name="typeNames"
+			               value="기획"
+			               onchange="document.getElementById('searchForm').submit()"
+			               th:checked="${typeNames != null and #lists.contains(typeNames, '기획')}">
+			        <span class="custom-check-box"></span> 기획
+			    </label>
+			
+			    <label class="checkbox-inline">
+			        <input type="checkbox"
+			               name="typeNames"
+			               value="새 기능"
+			               onchange="document.getElementById('searchForm').submit()"
+			               th:checked="${typeNames != null and #lists.contains(typeNames, '새 기능')}">
+			        <span class="custom-check-box"></span> 새 기능
+			    </label>
+			
+			    <label class="checkbox-inline">
+			        <input type="checkbox"
+			               name="typeNames"
+			               value="개선"
+			               onchange="document.getElementById('searchForm').submit()"
+			               th:checked="${typeNames != null and #lists.contains(typeNames, '개선')}">
+			        <span class="custom-check-box"></span> 개선
+			    </label>
+			
+			    <label class="checkbox-inline">
+			        <input type="checkbox"
+			               name="typeNames"
+			               value="피드백"
+			               onchange="document.getElementById('searchForm').submit()"
+			               th:checked="${typeNames != null and #lists.contains(typeNames, '피드백')}">
+			        <span class="custom-check-box"></span> 피드백
+			    </label>
+			</div>
         </form>
+ 
         <h4 class="sub-list-title">전체 작업 내역 목록</h4>
-        <div class="project-table-wrap">
-            <table class="project-table">
-                <thead>
-                    <tr>
-                        <th>등록일시</th>
-                        <th>프로젝트</th>
-                        <th>사용자</th>
-                        <th>일감</th>
-                        <th>일감유형</th>
-                        <th>작업유형</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="log : ${workLogList}">
-					    <td th:text="${log.actionAt != null ? #temporals.format(log.actionAt, 'HH:mm') : '00:00'}">14:20</td>
-					    <td class="text-left" th:text="${log.projectTitle}">WEPLE</td>
-					    <td th:text="${log.userName}">신짱구</td>
-					    <td class="text-left" th:text="${log.taskTitle}">로그인 기능 구현</td>
-					    <td>
-					        <span th:if="${log.typeName == '기획'}" class="status-badge type-dev" th:text="${log.typeName}">기획</span>
-					        <span th:if="${log.typeName == '새 기능'}" class="status-badge type-bug" th:text="${log.typeName}">새 기능</span>
-					        <span th:if="${log.typeName == '개선'}" class="status-badge type-support" th:text="${log.typeName}">개선</span>
-					        <span th:if="${log.typeName == '피드백'}" class="status-badge type-improve" th:text="${log.typeName}">피드백</span>
-					        <span th:if="${log.typeName != '기획' and log.typeName != '새 기능' and log.typeName != '개선' and log.typeName != '피드백'}" class="status-badge type-default" th:text="${log.typeName}">-</span>
-					    </td>
-					    <td class="action-cell" th:text="${log.actionType}">CREATE</td>
-					</tr>
-                    <tr th:if="${#lists.isEmpty(workLogList)}">
-                        <td colspan="6" class="empty-message">조회된 작업 내역이 없습니다.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
+ 
+        <th:block th:with="validLogs=${workLogList != null ? workLogList.?[#this != null] : {}}">
+ 
+            <div th:if="${#lists.isEmpty(validLogs)}" class="empty-message">조회된 작업 내역이 없습니다.</div>
+ 
+            <th:block th:each="log, stat : ${validLogs}"
+                      th:with="prevLog=${stat.first ? null : validLogs[stat.index - 1]},
+                               prevKey=${(prevLog == null or prevLog.actionAt == null) ? null : #temporals.format(prevLog.actionAt, 'yyyy-MM-dd')},
+                               curKey=${log.actionAt != null ? #temporals.format(log.actionAt, 'yyyy-MM-dd') : '미정'}">
+ 
+                <th:block th:if="${stat.first or prevKey != curKey}">
+ 
+                    <th:block th:unless="${stat.first}">
+                        </tbody>
+                        </table>
+                    </th:block>
+ 
+                    <div class="date-section-title" th:text="${curKey}">2026-06-19</div>
+ 
+                    <div class="project-table-wrap">
+                        <table class="project-table">
+                            <thead>
+                                <tr>
+                                    <th>등록일시</th>
+                                    <th>프로젝트</th>
+                                    <th>사용자</th>
+                                    <th>일감</th>
+                                    <th>일감유형</th>
+                                    <th>작업유형</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                </th:block>
+ 
+                <tr class="worklog-item-row">
+                    <td th:text="${log.actionAt != null ? #temporals.format(log.actionAt, 'HH:mm') : '00:00'}">14:20</td>
+                    <td class="text-left" th:text="${log.projectTitle}">WEPLE</td>
+                    <td th:text="${log.userName}">신짱구</td>
+                    <td class="text-left" th:text="${log.taskTitle}">로그인 기능 구현</td>
+                    <td>
+                        <span th:if="${log.typeName == '기획'}" class="status-badge type-dev" th:text="${log.typeName}">기획</span>
+                        <span th:if="${log.typeName == '새 기능'}" class="status-badge type-bug" th:text="${log.typeName}">새 기능</span>
+                        <span th:if="${log.typeName == '개선'}" class="status-badge type-support" th:text="${log.typeName}">개선</span>
+                        <span th:if="${log.typeName == '피드백'}" class="status-badge type-improve" th:text="${log.typeName}">피드백</span>
+                        <span th:if="${log.typeName != '기획' and log.typeName != '새 기능' and log.typeName != '개선' and log.typeName != '피드백'}" class="status-badge type-default" th:text="${log.typeName}">-</span>
+                    </td>
+                    <td class="action-cell" th:text="${log.actionType}">CREATE</td>
+                </tr>
+ 
+                <th:block th:if="${stat.last}">
+                            </tbody>
+                        </table>
+                    </div>
+                </th:block>
+ 
+            </th:block>
+ 
+        </th:block>
+ 
         <div class="pagination-wrap">
             <a href="#" class="page-btn disabled">&lt; 이전</a>
             <a href="#" class="page-btn active">1</a>
@@ -118,18 +175,17 @@
 		}
 		
 		.project-page {
-		    padding: 20px 25px;
+		    padding: 15px;
 		    min-height: 100vh;
-		    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+		    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+		        Roboto, Helvetica, Arial, sans-serif;
 		}
-	
+		
 		.project-toolbar-top {
 		    display: flex;
+		    align-items: flex-start;
 		    justify-content: space-between;
-		    align-items: flex-end;
-		    width: 100%;
 		    margin-bottom: 20px;
-		    gap: 15px;
 		}
 		
 		.project-title {
@@ -142,52 +198,54 @@
 		}
 		
 		.total-time-card {
-		    background: #ffffff;
-		    border: 1px solid #edf1f7;
-		    border-radius: 14px;
-		    padding: 15px 20px;
-		    text-align: right;
-		    box-shadow: 0 2px 8px rgba(0, 0, 0, .02);
-		    min-width: 220px;
-		    flex-shrink: 0;
+		    width: 180px;
+		    min-width: 180px;
+		    height: 95px;
+		    background: #fff;
+		    border: 1px solid #e6ecf5;
+		    border-radius: 12px;
+		    padding: 15px;
+		    text-align: center;
+		    box-shadow: none;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: center;
 		}
 		
 		.time-title {
 		    font-size: 11px;
 		    font-weight: 600;
 		    color: #9aa8c4;
-		    margin-bottom: 4px;
 		}
 		
 		.time-value {
-		    font-size: 24px;
-		    font-weight: 800;
+		    font-size: 18px;
+		    font-weight: 700;
 		    color: #4d84ff;
+		    margin: 4px 0;
 		}
 		
 		.time-period {
 		    font-size: 11px;
 		    color: #adb5bd;
-		    margin-top: 2px;
 		}
 		
 		.project-card {
 		    width: 100%;
-		    background: #ffffff;
-		    border-radius: 24px;
-		    padding: 30px;
-		    border: 1px solid #edf1f7;
-		    box-shadow: 0 2px 10px rgba(0, 0, 0, .03);
-		    min-width: 0;
+		    background: #fff;
+		    border-radius: 14px;
+		    padding: 20px;
+		    border: 1px solid #e6ecf5;
+		    box-shadow: none;
 		}
 		
 		.filter-toolbar {
 		    display: flex;
 		    align-items: center;
-		    gap: 24px;
+		    gap: 15px;
 		    width: 100%;
-		    padding-bottom: 20px;
-		    border-bottom: 1px solid #f1f3f7;
+		    padding-bottom: 15px;
+		    border-bottom: 1px solid #edf1f7;
 		    overflow-x: auto;
 		    white-space: nowrap;
 		}
@@ -195,7 +253,7 @@
 		.filter-group {
 		    display: flex;
 		    flex-direction: column;
-		    gap: 8px;
+		    gap: 6px;
 		    flex-shrink: 0;
 		}
 		
@@ -203,19 +261,18 @@
 		    font-size: 12px;
 		    font-weight: 700;
 		    color: #8a99b5;
-		    margin: 0;
 		}
 		
 		.filter-select {
-		    min-width: 180px;
-		    height: 40px;
+		    min-width: 170px;
+		    height: 38px;
 		    padding: 0 12px;
 		    border: 1px solid #d9e1f2;
-		    border-radius: 10px;
+		    border-radius: 8px;
 		    font-size: 13px;
-		    color: #495057;
-		    outline: none;
 		    background: #fff;
+		    color: #222 !important;
+		    font-weight: 600;
 		}
 		
 		.date-range-wrap {
@@ -224,122 +281,150 @@
 		    gap: 6px;
 		}
 		
-		.date-arrow-btn, .date-period-btn {
-		    height: 40px;
+		.date-arrow-btn,
+		.date-period-btn {
+		    height: 38px;
 		    padding: 0 14px;
 		    border: 1px solid #d9e1f2;
 		    background: #fff;
-		    border-radius: 10px;
+		    border-radius: 8px;
 		    font-size: 13px;
-		    color: #495057;
 		    cursor: pointer;
-		    font-weight: 500;
+		    color: #222 !important;
+		    font-weight: 600;
 		}
 		
 		.filter-input-date {
 		    width: 110px;
-		    height: 40px;
+		    height: 38px;
 		    border: 1px solid #d9e1f2;
-		    border-radius: 10px;
+		    border-radius: 8px;
 		    text-align: center;
 		    font-size: 13px;
-		    color: #495057;
-		    outline: none;
+		    cursor: pointer;
+		    background: #fff;
+		    color: #222 !important;
+		    font-weight: 600;
 		}
 		
 		.date-separator {
 		    color: #9aa8c4;
-		    font-weight: 500;
 		}
 		
 		.filter-checkbox-row {
 		    display: flex;
 		    align-items: center;
-		    gap: 20px;
-		    padding: 20px 0 10px 0;
-		    overflow-x: auto;
-		    white-space: nowrap;
+		    gap: 24px;
+		    padding: 14px 0;
 		}
 		
 		.checkbox-inline {
 		    display: flex;
 		    align-items: center;
-		    gap: 8px;
+		    gap: 7px;
 		    font-size: 13px;
-		    font-weight: 600;
+		    font-weight: 500;
 		    color: #495057;
 		    cursor: pointer;
-		    flex-shrink: 0;
 		}
 		
 		.checkbox-inline input[type="checkbox"] {
-		    position: absolute;
-		    width: 1px;
-		    height: 1px;
-		    padding: 0;
-		    margin: -1px;
-		    overflow: hidden;
-		    clip: rect(0,0,0,0);
-		    border: 0;
+		    display: none;
 		}
 		
 		.custom-check-box {
+		    display: inline-block;
 		    width: 16px;
 		    height: 16px;
-		    border: 2px solid #cbd5e1;
+		    border: 2px solid #adb5bd;
 		    border-radius: 4px;
-		    display: inline-block;
+		    background: #fff;
 		    position: relative;
+		    flex-shrink: 0;
+		}
+		
+		.checkbox-inline input[type="checkbox"]:checked + .custom-check-box {
+		    border-color: #4d84ff;
 		    background: #fff;
 		}
 		
-		.checkbox-inline input[type="checkbox"]:checked + .custom-check-box.dev-box { background: #eef4ff; border-color: #4d84ff; }
-		.checkbox-inline input[type="checkbox"]:checked + .custom-check-box.bug-box { background: #fff1f1; border-color: #f64e60; }
-		.checkbox-inline input[type="checkbox"]:checked + .custom-check-box.support-box { background: #fbf2ff; border-color: #b55dff; }
-		.checkbox-inline input[type="checkbox"]:checked + .custom-check-box.improve-box { background: #e8fff3; border-color: #50cd89; }
+		.checkbox-inline input[type="checkbox"]:checked + .custom-check-box::after {
+		    content: "";
+		    position: absolute;
+		    left: 4px;
+		    top: 1px;
+		    width: 4px;
+		    height: 8px;
+		    border: solid #4d84ff;
+		    border-width: 0 2px 2px 0;
+		    transform: rotate(45deg);
+		}
 		
 		.sub-list-title {
-		    font-size: 15px;
+		    font-size: 16px;
 		    font-weight: 700;
 		    color: #222;
-		    margin: 30px 0 15px 0;
+		    margin: 25px 0 15px;
+		}
+		
+		.date-section-title {
+		    font-size: 14px;
+		    font-weight: 700;
+		    color: #4d84ff;
+		    margin: 18px 0 8px;
+		}
+		
+		.date-section-title:first-of-type {
+		    margin-top: 0;
 		}
 		
 		.project-table-wrap {
 		    border: 1px solid #e6ecf5;
-		    border-radius: 14px;
+		    border-radius: 10px;
 		    overflow: hidden;
 		    background: #fff;
-		    margin-bottom: 30px;
-		    overflow-x: auto; 
+		    margin-bottom: 18px;
 		}
 		
 		.project-table {
 		    width: 100%;
 		    border-collapse: collapse;
-		    table-layout: auto; 
-		    min-width: 900px;
+		    table-layout: fixed;
 		}
+
+		.project-table th:nth-child(1), .project-table td:nth-child(1) { width: 11%; }
+		.project-table th:nth-child(2), .project-table td:nth-child(2) { width: 16%; }
+		.project-table th:nth-child(3), .project-table td:nth-child(3) { width: 11%; }
+		.project-table th:nth-child(4), .project-table td:nth-child(4) { width: 32%; }
+		.project-table th:nth-child(5), .project-table td:nth-child(5) { width: 15%; }
+		.project-table th:nth-child(6), .project-table td:nth-child(6) { width: 15%; }
 		
 		.project-table th {
-		    height: 50px;
-		    font-size: 13px;
+		    height: 42px;
+		    font-size: 12px;
 		    font-weight: 700;
 		    color: #5d6b87;
 		    background: #f8faff;
 		    border-bottom: 1px solid #e9edf5;
 		    text-align: center;
-		    white-space: nowrap;
 		}
 		
 		.project-table td {
-		    height: 56px;
+		    height: 50px;
 		    padding: 0 15px;
 		    border-top: 1px solid #edf1f7;
-		    color: #495057;
 		    font-size: 13px;
+		    color: #495057;
 		    text-align: center;
+		    overflow: hidden;
+		    text-overflow: ellipsis;
 		    white-space: nowrap;
+		}
+
+		/* 일감(작업내용) 컬럼만 줄바꿈 허용 — 내용이 길어도 잘리지 않게 */
+		.project-table td:nth-child(4) {
+		    white-space: normal;
+		    word-break: break-all;
 		}
 		
 		.project-table th:nth-child(2),
@@ -348,8 +433,10 @@
 		.project-table td:nth-child(4) {
 		    text-align: left;
 		    padding-left: 20px;
-		    white-space: normal;
-		    min-width: 180px; 
+		}
+		
+		.project-table tbody tr:first-child td {
+		    border-top: none;
 		}
 		
 		.project-table tbody tr:hover {
@@ -360,39 +447,54 @@
 		    display: inline-flex;
 		    align-items: center;
 		    justify-content: center;
-		    min-width: 78px;
-		    height: 28px;
+		    min-width: 70px;
+		    height: 24px;
 		    border-radius: 6px;
-		    font-size: 12px;
+		    font-size: 11px;
 		    font-weight: 700;
-		    white-space: nowrap;
 		}
 		
-		.type-dev { background: #eef4ff; color: #4d84ff; }
-		.type-bug { background: #fff1f1; color: #f64e60; }
-		.type-support { background: #fbf2ff; color: #b55dff; }
-		.type-improve { background: #e8fff3; color: #50cd89; }
-		.type-default { background: #f1f3f7; color: #8a99b5; }
+		.type-dev {
+		    background: #eef4ff;
+		    color: #4d84ff;
+		}
+		
+		.type-bug {
+		    background: #fff1f1;
+		    color: #f64e60;
+		}
+		
+		.type-support {
+		    background: #fbf2ff;
+		    color: #b55dff;
+		}
+		
+		.type-improve {
+		    background: #e8fff3;
+		    color: #50cd89;
+		}
+		
+		.type-default {
+		    background: #f1f3f7;
+		    color: #8a99b5;
+		}
 		
 		.action-cell {
-		    font-weight: 600;
 		    font-size: 12px;
-		    color: #5e6278;
-		    white-space: nowrap;
+		    font-weight: 600;
 		}
 		
 		.empty-message {
 		    padding: 50px !important;
-		    text-align: center !important;
+		    text-align: center;
 		    color: #adb5bd;
-		    font-size: 14px;
 		}
 		
 		.pagination-wrap {
 		    display: flex;
 		    justify-content: center;
-		    align-items: center;
 		    gap: 6px;
+		    margin-top: 8px;
 		}
 		
 		.page-btn {
@@ -402,11 +504,9 @@
 		    min-width: 32px;
 		    height: 32px;
 		    text-decoration: none;
-		    font-size: 13px;
-		    font-weight: 500;
 		    color: #5d6b87;
 		    border-radius: 6px;
-		    transition: all .2s ease;
+		    font-size: 13px;
 		}
 		
 		.page-btn.active {
@@ -424,19 +524,269 @@
 		    background: #eef4ff;
 		    color: #4d84ff;
 		}
-		
-		@media(max-width: 992px) {
-		    .project-toolbar-top {
-		        flex-direction: column;
-		        align-items: flex-start;
-		    }
-		    .total-time-card {
-		        width: 100%;
-		        text-align: left;
-		    }
+
+		/* ===== Flatpickr 커스텀 테마 ===== */
+		.flatpickr-calendar {
+		    width: 340px !important;
+		    max-width: 340px !important;
 		}
 
+		.flatpickr-calendar.arrowTop:before,
+		.flatpickr-calendar.arrowTop:after {
+		    display: none;
+		}
+
+		.flatpickr-months {
+		    align-items: center;
+		    margin-bottom: 8px;
+		}
+
+		.flatpickr-months .flatpickr-month {
+		    height: 36px;
+		    color: #222;
+		}
+
+		/* [수정1] 상단 월/연도 글자 검정 명시 */
+		.flatpickr-current-month,
+		.flatpickr-current-month .flatpickr-monthDropdown-months,
+		.flatpickr-current-month input.cur-year {
+		    font-size: 14px;
+		    font-weight: 700;
+		    color: #222 !important;
+		    background: transparent;
+		    border-radius: 6px;
+		    padding: 0;
+		}
+
+		.flatpickr-months .flatpickr-prev-month,
+		.flatpickr-months .flatpickr-next-month {
+		    width: 30px;
+		    height: 30px;
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    border-radius: 8px;
+		    fill: #8a99b5;
+		}
+
+		.flatpickr-months .flatpickr-prev-month:hover,
+		.flatpickr-months .flatpickr-next-month:hover {
+		    background: #eef4ff;
+		}
+
+		.flatpickr-months .flatpickr-prev-month:hover svg,
+		.flatpickr-months .flatpickr-next-month:hover svg {
+		    fill: #4d84ff;
+		}
+
+		.flatpickr-weekdays {
+		    margin-bottom: 4px;
+		}
+
+		span.flatpickr-weekday {
+		    font-size: 11px;
+		    font-weight: 700;
+		    color: #9aa8c4;
+		}
+
+		.dayContainer {
+		    width: 330px !important;
+		    min-width: 330px !important;
+		}
+		
+		.flatpickr-days {
+		    width: 330px !important;
+		}
+
+		.flatpickr-day {
+		    width: 42px !important;
+		    max-width: 42px !important;
+		    height: 42px !important;
+		    line-height: 42px !important;
+		}
+
+		.flatpickr-day.flatpickr-disabled,
+		.flatpickr-day.prevMonthDay,
+		.flatpickr-day.nextMonthDay {
+		    color: #7a8aa8;
+		}
+
+		.flatpickr-day:hover {
+		    background: #eef4ff;
+		    border-color: #eef4ff;
+		    color: #4d84ff;
+		}
+
+		/* [수정2] 오늘 날짜 스타일 */
+		.flatpickr-day.today {
+		    background: #eef4ff !important;
+		    color: #4d84ff !important;
+		    border: none !important;
+		    border-radius: 8px !important;
+		}
+		
+
+		.flatpickr-day.today:hover {
+		    background: #eef4ff !important;
+		    border-color: #4d84ff !important;
+		    border-radius: 8px !important;
+		    color: #4d84ff !important;
+		}
+
+		/* [수정3] 선택된 날짜 스타일 — 파란 배경 + 흰 글자, 항상 사각형(시작일/종료일/오늘 모두 동일) */
+		.flatpickr-day.selected,
+		.flatpickr-day.selected:hover,
+		.flatpickr-day.startRange,
+		.flatpickr-day.startRange:hover,
+		.flatpickr-day.endRange,
+		.flatpickr-day.endRange:hover,
+		.flatpickr-day.today.selected {
+		    background: #4d84ff !important;
+		    border-color: #4d84ff !important;
+		    color: #fff !important;
+		    font-weight: 700 !important;
+		    border-radius: 8px !important;
+		}
+
+		.flatpickr-day.inRange {
+		    background: #eef4ff !important;
+		    border-color: #eef4ff !important;
+		    box-shadow: -5px 0 0 #eef4ff, 5px 0 0 #eef4ff !important;
+		    color: #4d84ff !important;
+		}
+
+		.numInputWrapper:hover {
+		    background: transparent;
+		}
     </style>
+
+    <!-- Flatpickr 캘린더 라이브러리 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/ko.js"></script>
+
+    <script th:inline="javascript">
+        (function () {
+            var DATE_FORMAT = 'Y.m.d';
+
+            if (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.ko) {
+                flatpickr.localize(flatpickr.l10ns.ko);
+            }
+
+            function parseFormatted(str) {
+                if (!str) return null;
+                var parts = str.split('.');
+                if (parts.length !== 3) return null;
+                var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                return isNaN(d.getTime()) ? null : d;
+            }
+
+            function addDays(date, days) {
+                var d = new Date(date.getTime());
+                d.setDate(d.getDate() + days);
+                return d;
+            }
+
+            var startInput = document.getElementById('startDateInput');
+            var endInput   = document.getElementById('endDateInput');
+            var searchForm = document.getElementById('searchForm');
+
+            var autoSubmitEnabled = false;
+
+            /* [수정4] 소요시간 카드 기간 텍스트 동기화 */
+            function syncTimePeriod() {
+                var periodEl = document.querySelector('.time-period');
+                if (periodEl && startInput.value && endInput.value) {
+                    periodEl.textContent = startInput.value + ' ~ ' + endInput.value;
+                }
+            }
+
+            function submitSearchForm() {
+                syncTimePeriod();
+                if (autoSubmitEnabled && searchForm) {
+                    searchForm.submit();
+                }
+            }
+
+            var startPicker = flatpickr(startInput, {
+                dateFormat: DATE_FORMAT,
+                allowInput: false,
+                onChange: function (selectedDates) {
+                    if (selectedDates[0]) {
+                        endPicker.set('minDate', selectedDates[0]);
+                    }
+                    submitSearchForm();
+                }
+            });
+
+            var endPicker = flatpickr(endInput, {
+                dateFormat: DATE_FORMAT,
+                allowInput: false,
+                onChange: function (selectedDates) {
+                    if (selectedDates[0]) {
+                        startPicker.set('maxDate', selectedDates[0]);
+                    }
+                    submitSearchForm();
+                }
+            });
+
+            function setRange(start, end) {
+                // ✅ minDate/maxDate 제약이 걸린 상태에서 setDate를 호출하면,
+                //    새로 넣으려는 날짜가 기존 제약 범위를 벗어날 경우 flatpickr가
+                //    그 값을 무시(보정)해버려 종료일이 안 바뀌는 문제가 생긴다.
+                //    그래서 먼저 제약을 풀고(null) 두 날짜를 모두 반영한 뒤,
+                //    마지막에 정확한 min/max 제약을 다시 건다.
+                startPicker.set('maxDate', null);
+                endPicker.set('minDate', null);
+
+                startPicker.setDate(start, false);
+                endPicker.setDate(end, false);
+
+                startPicker.set('maxDate', end);
+                endPicker.set('minDate', start);
+            }
+
+            function applyRecentDays(days) {
+                var today = new Date();
+                var from  = addDays(today, -(days - 1));
+                setRange(from, today);
+            }
+
+            if (!startInput.value || !endInput.value) {
+                applyRecentDays(5);
+            }
+
+            /* 초기 세팅 후 카드 기간 즉시 반영 */
+            syncTimePeriod();
+
+            autoSubmitEnabled = true;
+
+            document.getElementById('recentPeriodBtn').addEventListener('click', function () {
+                applyRecentDays(5);
+                submitSearchForm();
+            });
+
+            document.getElementById('dateBackBtn').addEventListener('click', function () {
+                var curStart = parseFormatted(startInput.value);
+                var curEnd   = parseFormatted(endInput.value);
+
+                if (!curStart || !curEnd) {
+                    applyRecentDays(5);
+                    submitSearchForm();
+                    return;
+                }
+
+                var dayMs    = 24 * 60 * 60 * 1000;
+                var rangeDays = Math.round((curEnd.getTime() - curStart.getTime()) / dayMs) + 1;
+
+                var newEnd   = addDays(curStart, -1);
+                var newStart = addDays(newEnd, -(rangeDays - 1));
+
+                setRange(newStart, newEnd);
+                submitSearchForm();
+            });
+        })();
+    </script>
 </section>
 
 </body>

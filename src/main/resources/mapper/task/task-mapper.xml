@@ -1,81 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.weple.cloud.task.mapper.TaskMapper">
-	<select id="selectAll" resultType="TaskVO"> <!-- 프로젝트 내부 일감 전체 조회 -->
+	<select id="selectAll" resultType="TaskVO"> 
 		SELECT
-		p.project_title AS
-		projectTitle,
-		tt.type_name AS typeName,
-		cc.default_describe AS
-		defaultDescribe,
-		t.priority AS priority,
-		t.task_title AS taskTitle,
-		t.task_progress AS taskProgress,
-		t.task_manager AS taskManager,
-		t.created_at AS createdAt,
-		t.finish_date AS finishDate
+			p.project_title AS projectTitle,
+			tt.type_name AS typeName,
+			cc.default_describe AS defaultDescribe,
+			t.priority AS priority,
+			t.task_title AS taskTitle,
+			t.task_progress AS taskProgress,
+			u.user_name AS taskManager, 
+			t.created_at AS createdAt,
+			t.finish_date AS finishDate
 		FROM
-		task t
-		INNER
-		JOIN
-		project p ON t.project_id = p.project_id
+			task t
 		INNER JOIN
-		task_types tt ON
-		t.type_id = tt.type_id
+			project p ON t.project_id = p.project_id
 		INNER JOIN
-		common_code cc ON t.task_status =
-		cc.common_id
+			task_types tt ON t.type_id = tt.type_id
+		INNER JOIN
+			common_code cc ON t.task_status = cc.common_id
+		LEFT JOIN
+			users u ON t.task_manager = u.user_code
+		WHERE t.project_id = #{pId}
 	</select>
 	<select id="taskTypes" resultType="TaskTypeListVO"> <!-- 일감등록 일감유형 목록 조회 -->
 		SELECT
-		type_id AS typeId,
-		type_name AS typeName
+			type_id AS typeId,
+			type_name AS typeName
 		FROM task_types
+		WHERE company_id = #{cId}
 	</select>
 	<select id="taskStatuses" resultType="TaskStatusVO"><!-- 일감등록 일감상태 목록 조회 -->
-		SELECT common_id AS
-		commonId,
-		default_describe AS defaultDescribe
-		FROM common_code
-		WHERE
-		common_code = '0E'
+		SELECT 
+			common_id AS commonId,
+			default_describe AS defaultDescribe
+		FROM
+			common_code
+		WHERE common_code = '0E'
 	</select>
 	<select id="taskMembers" resultType="TaskMemberVO"> <!-- 일감등록 현재 선택된 프로젝트 참여자 목록 조회 -->
-		SELECT u.user_code AS userCode,
-		u.user_name AS userName
+		SELECT 
+			u.user_code AS userCode,
+			u.user_name AS userName
 		FROM members m
-		INNER JOIN users u ON m.user_code = u.user_code
-		WHERE m.project_id =
-		#{pId} <!-- 추후에 선택된 프로젝트 id로 값 바뀌어야 함 -->
+			INNER JOIN users u ON m.user_code = u.user_code
+		WHERE m.project_id = #{pId} <!-- 추후에 선택된 프로젝트 id로 값 바뀌어야 함 -->
 	</select>
-	<select id="taskParents" resultType="TaskParentVO"><!-- 일감등록 현재 선택된 프로젝트에 상위일감들의 목록 조회 -->
-		SELECT task_id AS taskId,
-		task_title AS taskTitle
+	<select id="taskParents" resultType="TaskParentVO" ><!-- 일감등록 현재 선택된 프로젝트에 상위일감들의 목록 조회 -->
+		SELECT 
+			task_id AS taskId,
+			task_title AS taskTitle
 		FROM task
-		WHERE parent_task_id IS NULL
+		WHERE parent_task_id IS NULL AND project_id = #{pId}
 	</select>
-	<insert id="insertTask" parameterType="TaskVO"> <!-- 일감등록 정적값 포함하여 일감등록 -->
-		INSERT INTO task 
-		(
-			task_id, task_title, task_describe, task_status, priority,
-			task_manager, start_date, finish_date, estimated_time, task_progress,
-			parent_task_id, spent_hours_sum, created_at, project_id, user_code,type_id
-		)
+	<select id="taskPriorities" resultType="TaskPriorityVO"><!-- 일감등록 등록된 우선순위 목록 -->
+		SELECT 
+			task_priority_id AS priorityId,
+    		priority_name AS priorityName
+		FROM task_priority
+		WHERE company_id  = #{cId}  AND using_yn = 'Y'
+	</select>
+	<select id="taskMilestones" resultType="TaskMilestoneVO"><!-- 일감등록 마일스톤 목록 -->
+		SELECT milestone_id, milestone_title
+		FROM milestone
+		WHERE project_id = #{pId} AND milestone_status = 'g1'
+	</select>
+	
+<insert id="insertTask" parameterType="TaskVO">
+    INSERT INTO task
+    (
+        task_id, task_title, task_describe, task_status, priority,
+        task_manager, start_date, finish_date, estimated_time, task_progress,
+        parent_task_id, spent_hours_sum, created_at, project_id,
+        user_code, type_id
+    )
+    SELECT
+        'TSK-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' || 
+        (SELECT NVL(MAX(TO_NUMBER(SUBSTR(task_id, 12))), 0) + 1  <!-- 날짜넘어 갈때마다 시퀀스 초기화 -->
+         FROM task 
+         WHERE task_id LIKE 'TSK-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_%'),
+        #{taskTitle},
+        #{taskDescribe, jdbcType=VARCHAR}, <!--null 허용인 값들 타입 jdbctype varchar로 알려주기 -->
+        #{taskStatus},
+        #{priority},
+        #{taskManager, jdbcType=VARCHAR},
+        #{startDate, jdbcType=DATE},
+        #{finishDate, jdbcType=DATE},
+        #{estimatedTime},
+        #{taskProgress},
+        (SELECT MAX(task_id) FROM task WHERE task_title = #{parentTaskTitle,jdbcType=VARCHAR}), <!-- 어쩌피 목록들 중복 안되지만 그래도 오류 방지로 MAX씀 -->
+        0,
+        SYSDATE,
+        #{projectId},
+        #{userCode},
+        (SELECT MAX(type_id) FROM task_types WHERE type_name = #{typeIdName,jdbcType=VARCHAR}) <!-- 어쩌피 목록들 중복 안되지만 그래도 오류 방지로 MAX씀 -->
+    FROM DUAL
+</insert>
+		<select id="selectAllList" resultType="TaskVO"> 
 		SELECT
-			'TSK-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' || TASK_DAY_SEQ.NEXTVAL,
-			#{taskTitle},
-			#{taskDescribe, jdbcType=VARCHAR},
-			#{taskStatus},
-			#{priority},
-			#{taskManager, jdbcType=VARCHAR},
-			#{startDate, jdbcType=DATE},
-			#{finishDate, jdbcType=DATE},
-			#{estimatedTime},
-			#{taskProgress},
-
-		(SELECT MAX(task_id) FROM task WHERE task_title = #{parentTaskTitle,jdbcType=VARCHAR}),0,SYSDATE,#{projectId},#{userCode},
-		(SELECT MAX(type_id) FROM task_types WHERE type_name = #{typeIdName,jdbcType=VARCHAR})
-		FROM DUAL
-	</insert>
+			p.project_title AS projectTitle,
+			tt.type_name AS typeName,
+			cc.default_describe AS defaultDescribe,
+			t.priority AS priority,
+			t.task_title AS taskTitle,
+			t.task_progress AS taskProgress,
+			u.user_name AS taskManager, 
+			t.created_at AS createdAt,
+			t.finish_date AS finishDate
+		FROM
+			task t
+		INNER JOIN
+			project p ON t.project_id = p.project_id
+		INNER JOIN
+			task_types tt ON t.type_id = tt.type_id
+		INNER JOIN
+			common_code cc ON t.task_status = cc.common_id
+		LEFT JOIN
+			users u ON t.task_manager = u.user_code
+		WHERE t.task_manager = #{tManager}
+	</select>
+	<select id="myAllTasks" resultType="TaskProjectSelectVO">
+		SELECT 
+			m.project_id , p.project_title
+		FROM 
+			members m JOIN project p ON m.project_id = p.project_id
+		WHERE m.user_code = #{uCode}
+	</select>
 
 </mapper>

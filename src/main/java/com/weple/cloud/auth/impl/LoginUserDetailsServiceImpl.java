@@ -14,6 +14,7 @@ import com.weple.cloud.auth.mapper.LoginMapper;
 import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.auth.service.LoginUserVO;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Service

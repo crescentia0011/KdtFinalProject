@@ -2,8 +2,6 @@ package com.weple.cloud.history.worklog.service;
 
 import java.time.LocalDateTime;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,8 +20,8 @@ public class WorkLogVO {
 	private String taskId;
 	private String actionType;
 	private String changedBy;
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
 	private LocalDateTime actionAt;
+	private String defaultDescribe;
 	
 	private String projectTitle; // 프로젝트명(project 테이블)
 	private String userName; // 사용자명(user 테이블)

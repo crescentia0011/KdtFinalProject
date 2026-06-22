@@ -1,14 +1,115 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+	th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+<title>WEPLE</title>
+<link rel="stylesheet" th:href="@{/css/task/task-list.css}">
 </head>
 <body>
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+	<section class="container-fluid my-4" style="padding: 20px;">
+		<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+			<h3 style="color: #1e293b; font-weight: 700; margin: 0;">일감</h3>
+			<button type="button" data-toggle="modal" data-target="#projectSelectModal" class="btn btn-sm text-primary fw-bold" style="background: none; border: none; color: #3b82f6; font-weight: bold;">
+			    + 새 일감만들기
+			</button>
+		</div>
 
+		<div class="filter-box">
+			<form id="searchForm" method="get">
+				<div class="row" style="margin-bottom: 20px;">
+					<div class="col-md-4 col-md-offset-8">
+						<div class="input-group input-group-sm search-group">
+							<span class="input-group-addon">🔍</span>
+							<input type="text" class="form-control" placeholder="검색">
+						</div>
+					</div>
+				</div>
+
+				<div class="filter-row"><div class="filter-label label-project">프로젝트</div><div class="filter-options"><label><input type="checkbox"> 예담</label><label><input type="checkbox"> 기획</label><label><input type="checkbox"> 개발</label><label><input type="checkbox"> 디자인</label></div></div>
+				<div class="filter-row"><div class="filter-label label-type">일감유형</div><div class="filter-options"><label><input type="checkbox"> 기능개발</label><label><input type="checkbox"> 결함/버그</label><label><input type="checkbox"> 지원/문의</label><label><input type="checkbox"> 개선</label></div></div>
+				<div class="filter-row"><div class="filter-label label-status">상태</div><div class="filter-options"><label><input type="checkbox"> 신규</label><label><input type="checkbox"> 결함</label><label><input type="checkbox"> 완료</label><label><input type="checkbox"> 예정</label></div></div>
+				<div class="filter-row"><div class="filter-label label-priority">우선순위</div><div class="filter-options"><label><input type="checkbox"> 매우낮음</label><label><input type="checkbox"> 낮음</label><label><input type="checkbox"> 보통</label><label><input type="checkbox"> 높음</label></div></div>
+
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+					<div style="margin: 0 auto; margin-left: 47%;"><button type="button" class="btn btn-sm text-secondary" style="border: none; background: none; color: #3b82f6;">옵션 전체보기 ∨</button></div>
+					<div style="display: flex; gap: 8px;"><button type="reset" class="btn-pill-light">🔄 지우기</button><button type="submit" class="btn-pill-primary">적용</button></div>
+				</div>
+			</form>
+		</div>
+
+		<div class="table-container">
+			<table class="table table-hover custom-table" style="font-size: 14px; text-align: center;">
+				<thead>
+					<tr>
+						<th style="width: 40px; text-align: center;"><input type="checkbox"></th>
+						<th style="width: 60px; text-align: center;">#</th>
+						<th style="text-align: center;">프로젝트</th>
+						<th style="text-align: center;">일감유형</th>
+						<th style="text-align: center;">상태</th>
+						<th style="text-align: center;">우선순위</th>
+						<th style="text-align: center;">일감명</th>
+						<th style="width: 120px; text-align: center;">진척도</th>
+						<th style="text-align: center;">담당자</th>
+						<th style="text-align: center;">등록일자</th>
+						<th style="text-align: center;">마감일자</th>
+						<th style="width: 50px; text-align: center;"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="task, status : ${allList}">
+						<td><input type="checkbox"></td>
+						<td th:text="${status.count}">1</td>
+						<td><a href="#" style="text-decoration: none; color: #3b82f6; font-weight: 500;" th:text="${task.projectTitle}">프로젝트명</a></td>
+						<td th:text="${task.typeName}">기획</td>
+						<td th:text="${task.defaultDescribe}">신규</td>
+						<td th:text="${task.priority}">매우낮음</td>
+						<td><a href="#" style="text-decoration: none; color: #1e293b; font-weight: 500;" th:text="${task.taskTitle}">일감명</a></td>
+						<td>
+							<div class="progress-container">
+								<div class="progress"><div class="progress-bar" role="progressbar" th:style="|width: ${task.taskProgress != null ? task.taskProgress : 0}%|"></div></div>
+								<span class="progress-text" th:text="${task.taskProgress != null ? task.taskProgress + '%' : '0%'}">0%</span>
+							</div>
+						</td>
+						<td th:text="${task.taskManager != null && task.taskManager != '' ? task.taskManager : '-'}">-</td>
+						<td th:text="${#temporals.format(task.createdAt, 'yyyy.MM.dd')}">2023.09.12</td>
+						<td th:text="${#temporals.format(task.finishDate, 'yyyy.MM.dd')}">2024.01.27</td>
+						<td style="cursor: pointer; color: #94a3b8;">•••</td>
+					</tr>
+					<tr th:if="${#lists.isEmpty(allList)}"><td colspan="12" style="color: #94a3b8; padding: 40px 0;">등록된 일감이 존재하지 않습니다.</td></tr>
+				</tbody>
+			</table>
+		</div>
+		
+		<div class="modal fade" id="projectSelectModal" tabindex="-1" role="dialog" aria-labelledby="projectSelectModalLabel">
+		    <div class="modal-dialog modal-sm" role="document" style="margin-top: 15%;">
+		        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+		            <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 15px 20px;">
+		                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		                <h4 class="modal-title" id="projectSelectModalLabel" style="color: #1e293b; font-weight: 700;">프로젝트 선택</h4>
+		            </div>
+		            <div class="modal-body" style="padding: 20px;">
+		                <div class="form-group" style="margin: 0;">
+		                    <select class="form-control" id="modalProjectId" style="border-radius: 6px;">
+		                        <option value="">-- 프로젝트 선택 --</option>
+		                        <th:block th:each="proj : ${projectList}">
+		                            <option th:value="${proj.projectId}" th:text="${proj.projectTitle}"></option>
+		                        </th:block>
+		                    </select>
+		                </div>
+		            </div>
+		            <div class="modal-footer" style="border-top: 1px solid #f1f5f9; padding: 12px 20px; display: flex; justify-content: flex-end; gap: 6px;">
+		                <button type="button" class="btn btn-sm btn-default" data-dismiss="modal" style="border-radius: 6px; margin:0;">취소</button>
+		                <button type="button" class="btn btn-sm btn-primary" onclick="redirectToInsertTask()" style="background-color: #3b82f6; border: none; border-radius: 6px; margin:0; padding: 5px 15px;">이동</button>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+
+		<script th:inline="javascript">
+			window.insertTaskBaseUrl = /*[[@{/project/task/insert}]]*/ '/project/task/insert';
+		</script>
+		<script th:src="@{/js/task/task-list.js}"></script>
+	</section>
 </body>
 </html>

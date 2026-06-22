@@ -83,18 +83,17 @@ body.nav-md .container.body .left_col,
 }
 
 .nav.side-menu > li > a {
-    color: #64748B !important;
-    font-weight: 500 !important;
-    background: transparent !important;
-    border-radius: 8px !important;
+	color: #111827 !important;
+    display: flex !important;
+    align-items: center !important;
+
+    width: 100% !important;
+    box-sizing: border-box !important;
+
     padding: 11px 16px !important;
-    font-size: 13px !important;
-    letter-spacing: -0.3px !important;
-    border-right: none !important;
-    transition: all 0.2s ease-in-out !important;
-    display: block !important;
-    text-align: left !important; /* 🔥 축소 시 가운데 정렬되는 것 차단 */
+    border-radius: 8px !important;
 }
+
 
 /* 메뉴 안의 아이콘과 글자가 숨겨지거나 깨지는 현상 차단 */
 .nav.side-menu > li > a i {
@@ -114,13 +113,9 @@ body.nav-md .container.body .left_col,
 }
 
 .nav.side-menu > li > a:hover {
-    background: #F0F4FF !important;
-    color: #5271FF !important;
+    background: #E6EEFF !important; 
+    color: #1F4ED8 !important;    
     border-radius: 8px !important;
-    border-right: none !important;
-}
-.nav.side-menu > li > a:hover i {
-    color: #5271FF !important;
 }
 
 /* 📌 원래 이쁘게 들어가 있던 파란색 활성화 스타일 완벽 복원 */
@@ -129,7 +124,7 @@ body.nav-sm .nav.side-menu > li.active-sm > a,
 body.nav-sm .nav.side-menu > li.active > a {
     background: #EBF0FF !important;
     color: #5271FF !important;
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     border-radius: 8px !important;
     border-right: none !important;
     border-left: 3px solid #5271FF !important;

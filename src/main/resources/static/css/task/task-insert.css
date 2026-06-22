@@ -1,0 +1,71 @@
+.form-container {
+	background: #ffffff;
+	border: 1px solid #eef2f5;
+	border-radius: 12px;
+	padding: 30px;
+	box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+}
+
+.form-label {
+	font-weight: 600;
+	color: #334155;
+	font-size: 14px;
+	margin-bottom: 8px;
+}
+
+.form-control, .form-select {
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 6px !important;
+	padding: 8px 12px !important;
+	height: auto !important;
+	box-shadow: none !important;
+	transition: border-color 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+	border-color: #3b82f6 !important;
+}
+
+/* 파일 드롭존 점선 카드 스타일 */
+.upload-zone {
+	border: 1px dashed #cbd5e1;
+	background-color: #f8fafc;
+	border-radius: 8px;
+	padding: 30px;
+	text-align: center;
+	cursor: pointer;
+	transition: background-color 0.2s, border-color 0.2s;
+}
+
+.upload-zone:hover {
+	background-color: #f1f5f9;
+	border-color: #3b82f6;
+}
+
+.upload-icon {
+	font-size: 24px;
+	margin-bottom: 8px;
+	color: #64748b;
+}
+
+.upload-text {
+	font-size: 13px;
+	color: #64748b;
+}
+
+.btn-insert-submit {
+	background-color: #0000ff !important;
+	border-color: #0000ff !important;
+	color: white !important;
+	font-weight: bold;
+	border-radius: 6px;
+	padding: 8px 24px;
+}
+
+.btn-insert-cancel {
+	background-color: #ffffff;
+	border: 1px solid #cbd5e1;
+	color: #475569;
+	border-radius: 6px;
+	padding: 8px 24px;
+}

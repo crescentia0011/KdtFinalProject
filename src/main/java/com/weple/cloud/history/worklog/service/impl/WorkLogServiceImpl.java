@@ -16,7 +16,17 @@ public class WorkLogServiceImpl implements WorkLogService {
 	private final WorkLogMapper workLogMapper;
 	
 	@Override
-	public List<WorkLogVO> findAll(){
-		return workLogMapper.selectAll();
+	public List<WorkLogVO> findAll(
+			String projectId,
+	        String startDate,
+	        String endDate,
+	        String userCode,
+	        List<String> typeNames){
+		return workLogMapper.selectAll(
+				  projectId,
+		          startDate,
+		          endDate,
+		          userCode,
+		          typeNames);
 	}
 }

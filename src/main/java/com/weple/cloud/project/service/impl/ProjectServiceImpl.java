@@ -16,7 +16,12 @@ public class ProjectServiceImpl implements ProjectService {
 	private final ProjectMapper projectMapper;
 	
 	@Override
-	public List<ProjectVO> findAll(){
-		return projectMapper.selectAll();
+	public List<ProjectVO> findAll(String keyword){
+		return projectMapper.selectAll(keyword);
+	}
+
+	@Override
+	public ProjectVO findById(String projectId) {
+		return projectMapper.selectById(projectId);
 	}
 }

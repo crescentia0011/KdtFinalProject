@@ -12,10 +12,10 @@
     <div class="project-card">
         
         <div class="project-toolbar">
-            <form id="searchForm" method="get" th:action="@{/weple/project/list}">
+            <form id="searchForm" method="get" th:action="@{/project}">
                 <div class="project-search">
                     <i class="fa fa-search"></i>
-                    <input type="text" name="keyword" th:value="${param.keyword}" placeholder="프로젝트명을 입력하세요.">
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="프로젝트명을 입력하세요.">
                 </div>
             </form>
             <button type="button" th:onclick="|location.href='@{/project/insert}'|" class="project-create-btn"> <i class="fa fa-folder"></i> 프로젝트 생성</button>
@@ -36,7 +36,12 @@
                 <tbody>
                     <tr th:each="project, stat : ${projects}" th:classappend="${project?.status == '완료'} ? 'project-dim' : ''">
                         <td th:text="${stat.count}"></td>
-                        <td class="text-left"><a class="project-link" th:href="@{/dashboard/project/detail/{id}(id=${project?.projectId})}" th:text="${project?.projectTitle}"></a></td>
+                        <td class="text-left">
+							<a class="project-link" 
+							   th:href="@{/project/worklog(projectId=${project.projectId})}" 
+							   th:text="${project.projectTitle}">
+							</a>
+						</td>
                         <td class="text-left" th:text="${project?.projectDescribe}"></td>
                         <td th:text="${project?.createdAt != null ? #dates.format(project.createdAt,'yyyy-MM-dd') : '-'}"></td>
                         <td th:text="${project?.finishDate != null ? #dates.format(project.finishDate,'yyyy-MM-dd') : '-'}"></td>
@@ -63,6 +68,8 @@
     		<a href="#" class="page-btn">다음 &gt;</a>
 		</div>
     </div>
+    
+    
     
         <style>
 		.right_col{
@@ -317,7 +324,19 @@
 		}
 		
     </style>
-
+    
+    <!-- list.html 맨 아래 </section> 직전에 추가 -->
+	<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        const navigationEntries = performance.getEntriesByType('navigation');
+        if (navigationEntries.length > 0 && navigationEntries[0].type === 'reload') {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('keyword')) {
+                window.location.href = '/project';
+            }
+        }
+   	 });
+	</script>
 </section>
 
 </body>

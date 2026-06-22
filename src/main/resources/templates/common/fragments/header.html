@@ -4,7 +4,11 @@
 <body>
 <div th:fragment="headerFragment" class="nav_menu" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 20px; box-sizing: border-box;">
     
-    <h1 class="header-title-left" style="margin: 0;" th:styleappend="${currentMenu == 'none'} ? 'visibility: hidden;' : 'visibility: visible;'">프로젝트 1</h1>
+    <div class="header-title-area">
+	    <h1 class="header-title-left"
+	        th:text="${project != null ? project.projectTitle : '　'}">
+	    </h1>
+	</div>
     
     <div class="header-profile-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
         
@@ -28,4 +32,22 @@
 
 </div>
 </body>
+<<<<<<< HEAD
 </html>
+=======
+
+<style>
+.header-title-area{
+    flex:1;
+    min-width:300px;
+}
+
+.header-title-left{
+    margin:0;
+    font-size:24px;
+    font-weight:700;
+    color:#222;
+}
+</style>
+</html>
+>>>>>>> f1ca4a2591dd1d11eb3a1b4253f632ebf0968367

@@ -14,6 +14,31 @@
 		LEFT OUTER JOIN common_code c
 			ON p.status = c.common_id
 			AND c.common_code = '0J'
+		<where>
+       	 	<if test="keyword != null and keyword != ''">
+            p.project_title LIKE '%' || #{keyword} || '%'
+        	</if>
+   		 </where>	
 		ORDER BY p.project_id
+	</select>
+	
+	<!-- 프로젝트 단건 조회 -->
+	<select id="selectById"
+	        parameterType="string"
+	        resultType="com.weple.cloud.project.service.ProjectVO">
+	
+	    SELECT
+	        p.project_id,
+	        p.project_title,
+	        p.project_describe,
+	        p.created_at,
+	        p.finish_date,
+	        c.default_describe AS status
+	    FROM project p
+	    LEFT OUTER JOIN common_code c
+	        ON p.status = c.common_id
+	        AND c.common_code = '0J'
+	    WHERE p.project_id = #{projectId}
+	
 	</select>
 </mapper>

@@ -43,7 +43,7 @@ public class TaskVO {
     @JsonFormat(pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt; 
     private Integer milestoneId; 
-    private Integer projectId;   
+    private Long projectId;   
     private String userCode; 
     private Integer typeId;
     
