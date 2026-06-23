@@ -32,7 +32,7 @@
             <a th:href="@{/codeList}" 
                th:class="${menu == 'code'} ? 'active' : ''">코드값</a>
         </li>
-        <li th:if="${canApproveSignup}">
+        <li th:if="${canApproveSignup}" th:classappend="${menu == 'approval'} ? 'active' : ''">
             <a th:href="@{/approvalList}" 
                th:class="${menu == 'approval'} ? 'active' : ''">가입승인</a>
         </li>

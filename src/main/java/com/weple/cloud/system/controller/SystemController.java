@@ -240,6 +240,10 @@ public class SystemController {
 		List<com.weple.cloud.system.service.SignupApprovalUserVO> pendingUsers = signupApprovalService
 				.findPendingUsers(loginUser.getLoginUser().getCompanyId());
 		model.addAttribute("pendingUsers", pendingUsers);
+		// /system/project와 같은 관리 전용 헤더·사이드바 상태를 사용합니다.
+		model.addAttribute("sidebarMenu", "system");
+		// 프로젝트 탭이 활성화되지 않도록 현재 관리 메뉴를 가입승인으로 지정합니다.
+		model.addAttribute("currentMenu", "approval");
 		model.addAttribute("menu", "approval");
 		return "weple/admin/config/join-request";
 	}

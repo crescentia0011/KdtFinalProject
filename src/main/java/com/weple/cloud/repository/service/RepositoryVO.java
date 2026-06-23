@@ -30,6 +30,9 @@ public class RepositoryVO {
     // 프로젝트의 대표 저장소 여부. Y: 주 저장소, N: 일반 저장소
     private String mainYn;
 
+    // 기존 주 저장소를 다른 저장소로 교체한다는 사용자 확인값입니다. DB에는 저장하지 않습니다.
+    private boolean mainChangeConfirmed;
+
     // 저장소 등록 일시
     private Date createdAt;
 }

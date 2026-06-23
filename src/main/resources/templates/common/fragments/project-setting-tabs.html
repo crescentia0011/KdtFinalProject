@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- 프로젝트 설정 화면에서 공통으로 사용하는 제목과 탭 메뉴입니다. -->
+<div th:fragment="projectSettingTabs" class="project-setting-heading">
+    <h1 class="repository-title">설정</h1>
+    <nav class="repository-setting-tabs" aria-label="프로젝트 설정 메뉴">
+        <a th:classappend="${settingMenu == 'project'} ? 'active' : ''" href="#">프로젝트</a>
+        <a th:classappend="${settingMenu == 'member'} ? 'active' : ''" href="#">구성원</a>
+        <a th:classappend="${settingMenu == 'repository'} ? 'active' : ''" th:href="@{/repository/management(projectId=${projectId})}">저장소</a>
+        <a th:classappend="${settingMenu == 'timeTracking'} ? 'active' : ''" href="#">시간추적</a>
+    </nav>
+</div>
+</body>
+</html>

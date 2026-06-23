@@ -12,12 +12,14 @@
         WHERE project_id = #{projectId}
     </select>
 
-    <!-- DB의 저장소명 중복 제약과 동일한 기준으로 등록 전 중복을 확인합니다. -->
+    <!-- 다른 프로젝트의 동일 저장소 등록은 허용하고, 현재 프로젝트 범위에서만 중복을 확인합니다. -->
     <select id="countRepositoryByNameOrUrl" resultType="int">
         SELECT COUNT(*)
         FROM repository_setting
-        WHERE repository_identifier = #{repositoryName}
-           OR repository_url = #{repositoryUrl}
+        WHERE company_id = #{companyId}
+          AND project_id = #{projectId}
+          AND (repository_identifier = #{repositoryName}
+               OR repository_url = #{repositoryUrl})
     </select>
 
     <!-- 저장소 목록 화면에서 현재 회사·프로젝트에 등록된 모든 저장소를 조회합니다. -->
@@ -25,6 +27,7 @@
         SELECT repository_id AS repositoryId,
                company_id AS companyId,
                project_id AS projectId,
+               repository_manage_id AS repositoryManageId,
                repository_identifier AS repositoryName,
                repository_url AS repositoryUrl,
                repository_main_yn AS mainYn,
@@ -40,6 +43,7 @@
         SELECT repository_id AS repositoryId,
                company_id AS companyId,
                project_id AS projectId,
+               repository_manage_id AS repositoryManageId,
                repository_identifier AS repositoryName,
                repository_url AS repositoryUrl,
                repository_main_yn AS mainYn,
@@ -48,6 +52,32 @@
         WHERE company_id = #{companyId}
           AND project_id = #{projectId}
           AND repository_id = #{repositoryId}
+    </select>
+
+    <!-- 현재 회사·프로젝트에서 수정 중인 저장소 자신을 제외한 이름 중복 여부를 확인합니다. -->
+    <select id="countRepositoryNameExcept" resultType="int">
+        SELECT COUNT(*)
+        FROM repository_setting
+        WHERE company_id = #{companyId}
+          AND project_id = #{projectId}
+          AND repository_identifier = #{repositoryName}
+          AND repository_id != #{repositoryId}
+    </select>
+
+    <!-- 주 저장소 변경 전 현재 지정된 저장소를 확인합니다. -->
+    <select id="selectMainRepository" resultType="com.weple.cloud.repository.service.RepositoryVO">
+        SELECT repository_id AS repositoryId,
+               company_id AS companyId,
+               project_id AS projectId,
+               repository_manage_id AS repositoryManageId,
+               repository_identifier AS repositoryName,
+               repository_url AS repositoryUrl,
+               repository_main_yn AS mainYn,
+               created_at AS createdAt
+        FROM repository_setting
+        WHERE company_id = #{companyId}
+          AND project_id = #{projectId}
+          AND repository_main_yn = 'Y'
     </select>
 
     <!-- 새 주 저장소 등록 전에는 같은 프로젝트의 기존 주 저장소 표시를 해제합니다. -->
@@ -62,10 +92,10 @@
     <!-- 저장소 등록 시 사용할 기본 관리 설정을 만들고 생성된 ID를 반환합니다. -->
     <insert id="insertRepositoryManageSetting"
             parameterType="com.weple.cloud.repository.service.RepositoryVO">
-        <!-- 저장소별 관리 설정 PK를 먼저 발급해 이후 INSERT에서 FK로 사용합니다. -->
+        <!-- DB 시퀀스로 PK를 발급해 동시 등록에도 중복되지 않게 합니다. -->
         <selectKey keyProperty="repositoryManageId" resultType="long" order="BEFORE">
-            SELECT NVL(MAX(repository_manage_id), 0) + 1
-            FROM repository_manage_setting
+            SELECT repository_manage_setting_seq.NEXTVAL
+            FROM dual
         </selectKey>
         INSERT INTO repository_manage_setting
         (
@@ -81,13 +111,11 @@
 
     <!-- 기본 관리 설정이 연결된 프로젝트 저장소 정보를 저장합니다. -->
     <insert id="insertRepository" parameterType="com.weple.cloud.repository.service.RepositoryVO">
-        <!-- 화면에 노출되지 않는 저장소 내부 식별자를 등록 전에 발급합니다. -->
+        <!-- DB 시퀀스 기반의 내부 식별자를 발급해 동시에 등록해도 ID가 겹치지 않게 합니다. -->
         <selectKey keyProperty="repositoryId" resultType="string" order="BEFORE">
             SELECT 'REPO-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
-                   (NVL(MAX(TO_NUMBER(SUBSTR(repository_id, -4))), 0) + 1)
-            FROM repository_setting
-            WHERE repository_id LIKE 'REPO-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
-              AND REGEXP_LIKE(repository_id, '^REPO-[0-9]{8}-[0-9]+$')
+                   LPAD(TO_CHAR(repository_setting_seq.NEXTVAL), 6, '0')
+            FROM dual
         </selectKey>
         INSERT INTO repository_setting
         (
@@ -112,5 +140,29 @@
             SYSDATE
         )
     </insert>
+
+    <!-- 저장소 경로는 변경하지 않고 화면에 표시되는 이름과 주 저장소 여부만 갱신합니다. -->
+    <update id="updateRepository" parameterType="com.weple.cloud.repository.service.RepositoryVO">
+        UPDATE repository_setting
+        SET repository_identifier = #{repositoryName},
+            repository_main_yn = #{mainYn}
+        WHERE company_id = #{companyId}
+          AND project_id = #{projectId}
+          AND repository_id = #{repositoryId}
+    </update>
+
+    <!-- 회사와 프로젝트 조건을 함께 사용해 다른 프로젝트 저장소를 삭제하지 못하게 합니다. -->
+    <delete id="deleteRepository">
+        DELETE FROM repository_setting
+        WHERE company_id = #{companyId}
+          AND project_id = #{projectId}
+          AND repository_id = #{repositoryId}
+    </delete>
+
+    <!-- 저장소 삭제 후 더 이상 연결되지 않는 기본 관리 설정을 정리합니다. -->
+    <delete id="deleteRepositoryManageSetting">
+        DELETE FROM repository_manage_setting
+        WHERE repository_manage_id = #{repositoryManageId}
+    </delete>
 
 </mapper>

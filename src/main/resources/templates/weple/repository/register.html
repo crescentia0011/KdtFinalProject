@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head><title>WEPLE - 저장소 등록</title></head>
+<body>
+<section>
+    <link rel="stylesheet" th:href="@{/css/repository/repository.css}">
+    <div class="repository-page">
+        <div th:replace="~{common/fragments/project-setting-tabs :: projectSettingTabs}"></div>
+        <h2 class="repository-form-title" th:text="${repository.repositoryId == null ? '저장소 등록' : '저장소 수정'}">저장소 등록</h2>
+
+        <p class="repository-message repository-message-error" th:if="${repositoryError}" th:text="${repositoryError}">입력값을 확인해 주세요.</p>
+
+        <!-- 수정일 때는 등록 폼을 재사용하되 URL은 읽기 전용으로 유지합니다. -->
+        <form id="repositoryForm" class="repository-form" th:action="${repository.repositoryId == null} ? @{/repository} : @{/repository/update}" th:object="${repository}" method="post" th:attr="data-main-change-required=${mainChangeRequired}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" th:field="*{projectId}" th:value="${projectId}">
+            <input type="hidden" th:if="${repository.repositoryId != null}" th:field="*{repositoryId}">
+            <input id="mainChangeConfirmed" type="hidden" th:field="*{mainChangeConfirmed}">
+            <div class="repository-form-row">
+                <label for="repositorySystem">형상관리시스템</label>
+                <input id="repositorySystem" value="GitHub" readonly>
+            </div>
+            <div class="repository-form-row">
+                <label for="repositoryName">저장소명</label>
+                <input id="repositoryName" th:field="*{repositoryName}" placeholder="저장소 이름을 입력하세요" required>
+            </div>
+            <div class="repository-form-row">
+                <label for="repositoryUrl">저장소 경로</label>
+                <input id="repositoryUrl" th:field="*{repositoryUrl}" placeholder="https://github.com/KDTFinalProject/KdtFinalProject.git" th:readonly="${repository.repositoryId != null}" required>
+            </div>
+            <label class="repository-check" for="mainRepository">
+                <input id="mainRepository" th:field="*{mainYn}" type="checkbox" value="Y">
+                <span>주 저장소</span>
+            </label>
+            <div class="repository-form-actions">
+                <a class="repository-button repository-button-secondary" th:href="@{/repository/management(projectId=${projectId})}">취소</a>
+                <button class="repository-button repository-button-primary" type="submit" th:text="${repository.repositoryId == null ? '등록' : '저장'}">등록</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 이미 있는 주 저장소를 교체할 때만 표시되는 확인 창입니다. -->
+    <dialog class="repository-delete-dialog" id="mainRepositoryChangeDialog" aria-labelledby="mainRepositoryChangeDialogTitle">
+        <div class="repository-delete-dialog-header">
+            <h2 id="mainRepositoryChangeDialogTitle">주 저장소 변경</h2>
+            <button class="repository-dialog-close" type="button" aria-label="닫기" data-main-change-close>&times;</button>
+        </div>
+        <p><strong th:text="${currentMainRepository != null ? currentMainRepository.repositoryName : '기존 저장소'}">기존 저장소</strong>가 현재 주 저장소입니다. 이 저장소를 일반 저장소로 변경하고 새 주 저장소로 저장할까요?</p>
+        <div class="repository-dialog-actions repository-dialog-content-actions">
+            <button class="repository-button repository-button-secondary" type="button" data-main-change-close>취소</button>
+            <button class="repository-button repository-button-primary" type="button" id="confirmMainRepositoryChange">변경 후 저장</button>
+        </div>
+    </dialog>
+
+    <script>
+        // 기존 주 저장소가 있을 때만 저장 직전에 변경 의사를 확인합니다.
+        (function () {
+            var form = document.getElementById('repositoryForm');
+            var mainCheckbox = document.getElementById('mainRepository');
+            var confirmationInput = document.getElementById('mainChangeConfirmed');
+            var dialog = document.getElementById('mainRepositoryChangeDialog');
+
+            form.addEventListener('submit', function (event) {
+                var mainChangeRequired = form.dataset.mainChangeRequired === 'true';
+                if (mainCheckbox.checked && mainChangeRequired && confirmationInput.value !== 'true') {
+                    event.preventDefault();
+                    dialog.showModal();
+                }
+            });
+            document.getElementById('confirmMainRepositoryChange').addEventListener('click', function () {
+                confirmationInput.value = 'true';
+                dialog.close();
+                form.requestSubmit();
+            });
+            document.querySelectorAll('[data-main-change-close]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    dialog.close();
+                });
+            });
+        }());
+    </script>
+</section>
+</body>
+</html>

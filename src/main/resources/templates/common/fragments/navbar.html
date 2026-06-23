@@ -3,8 +3,7 @@
 <head></head>
 <body>
 <div th:fragment="navbarFragment" class="sub_menu_nav" th:if="${currentMenu != 'none' and sidebarMenu != 'system'}">
-        
-    <ul>        
+    <ul>   
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b2')}"
         	th:classappend="${currentMenu == 'worklog'} ? 'active' : ''">
         	<a th:href="@{/project/worklog(projectId=${projectId})}">작업내역</a>
@@ -54,7 +53,7 @@
         </li>
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b11')}">
-        	<a th:href="@{/repository/management(projectId=${projectId})}">설정</a>
+          <a th:href="@{/repository/management(projectId=${projectId})}" th:class="${currentMenu == 'setting'} ? 'active' : ''">설정</a>
         </li>
     </ul>
 </div>

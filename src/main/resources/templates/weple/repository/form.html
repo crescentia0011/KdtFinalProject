@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org/"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head><title>WEPLE - 파일 변경 비교</title></head>
 <body>
 <section>
     <link rel="stylesheet" th:href="@{/css/repository/repository.css}">
     <div class="repository-page">
-        <div class="repository-diff-heading"><div><h1 class="repository-title">파일 변경 비교</h1><p>KdtFinalProject / src/main/java/com/weple/Application.java</p></div><a th:href="@{/repository/detail(projectId=${projectId})}">저장소로 돌아가기</a></div>
-        <div class="repository-diff-meta"><span>이전 커밋 <strong>e86930e</strong></span><i class="fa fa-arrow-right"></i><span>현재 커밋 <strong>c7c824b8</strong></span></div>
-        <div class="repository-diff-grid">
-            <section><h2>이전 버전</h2><pre><code>package com.weple;
-
-import org.springframework.boot.SpringApplication;
-
-public class Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
-}</code></pre></section>
-            <section><h2>현재 버전</h2><pre><code>package com.weple;
-
-import org.springframework.boot.SpringApplication;
-<span class="diff-add">import org.springframework.boot.autoconfigure.SpringBootApplication;</span>
-
-<span class="diff-add">@SpringBootApplication</span>
-public class Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
-}</code></pre></section>
+        <div class="repository-diff-heading">
+            <div>
+                <h1 class="repository-title">파일 변경 비교</h1>
+                <p th:text="${fileDiff != null ? repository.repositoryName + ' / ' + fileDiff.filePath : '선택한 파일의 변경 내용을 조회합니다.'}">저장소 / 파일 경로</p>
+            </div>
+            <a th:if="${repository != null}" th:href="@{/repository/detail(projectId=${projectId}, repositoryId=${repository.repositoryId})}">저장소로 돌아가기</a>
         </div>
+
+        <p class="repository-message repository-message-error" th:if="${githubError}" th:text="${githubError}">GitHub 비교 정보를 조회할 수 없습니다.</p>
+        <p class="repository-message repository-message-error" th:if="${fileDiff != null and !#strings.isEmpty(fileDiff.message)}" th:text="${fileDiff.message}">비교할 이전 커밋이 없습니다.</p>
+
+        <th:block th:if="${fileDiff != null}">
+            <div class="repository-diff-meta">
+                <div><span>이전 커밋</span><strong th:text="${fileDiff.previousCommitMessage ?: '이전 버전'}">이전 커밋 메시지</strong><small th:text="${fileDiff.previousCommitSha ?: '-'}">이전 SHA</small></div>
+                <i class="fa fa-arrow-right"></i>
+                <div><span>최신 커밋</span><strong th:text="${fileDiff.currentCommitMessage ?: '최신 버전'}">최신 커밋 메시지</strong><small th:text="${fileDiff.currentCommitSha ?: '-'}">최신 SHA</small></div>
+            </div>
+            <div class="repository-diff-grid">
+                <section>
+                    <h2 th:text="${fileDiff.previousCommitMessage ?: '이전 버전'}">이전 버전</h2>
+                    <pre class="repository-diff-code"><code th:if="${fileDiff.previousLines != null}" th:each="line : ${fileDiff.previousLines}"><span class="repository-diff-line" th:classappend="${line.type == 'removed'} ? ' diff-remove' : (${line.type == 'placeholder'} ? ' diff-placeholder' : '')"><em th:text="${line.lineNumber ?: ''}">1</em><b th:text="${line.type == 'removed' ? '-' : ' '}"> </b><span th:text="${line.content}">이전 파일 내용</span></span></code><code th:unless="${fileDiff.previousLines != null}" th:text="${fileDiff.previousContent ?: ''}">이전 파일 내용</code></pre>
+                </section>
+                <section>
+                    <h2 th:text="${fileDiff.currentCommitMessage ?: '최신 버전'}">최신 버전</h2>
+                    <pre class="repository-diff-code"><code th:if="${fileDiff.currentLines != null}" th:each="line : ${fileDiff.currentLines}"><span class="repository-diff-line" th:classappend="${line.type == 'added'} ? ' diff-add' : (${line.type == 'placeholder'} ? ' diff-placeholder' : '')"><em th:text="${line.lineNumber ?: ''}">1</em><b th:text="${line.type == 'added' ? '+' : ' '}"> </b><span th:text="${line.content}">최신 파일 내용</span></span></code><code th:unless="${fileDiff.currentLines != null}" th:text="${fileDiff.currentContent ?: ''}">최신 파일 내용</code></pre>
+                </section>
+            </div>
+        </th:block>
+
+        <p class="repository-diff-empty" th:if="${fileDiff == null and githubError == null}">비교할 파일을 선택해 주세요.</p>
     </div>
 </section>
 </body>

@@ -1,45 +1,87 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org/"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head><title>WEPLE - 저장소 설정</title></head>
 <body>
 <section>
     <link rel="stylesheet" th:href="@{/css/repository/repository.css}">
     <div class="repository-page">
-        <h1 class="repository-title">설정</h1>
-        <nav class="repository-setting-tabs" aria-label="프로젝트 설정 메뉴">
-            <a href="#">프로젝트</a><a href="#">구성원</a><a class="active" th:href="@{/repository/management(projectId=${projectId})}">저장소</a><a href="#">시간추적</a>
-        </nav>
+        <div th:replace="~{common/fragments/project-setting-tabs :: projectSettingTabs}"></div>
 
-        <p class="repository-message repository-message-error" th:if="${repositoryError}" th:text="${repositoryError}">입력값을 확인해주세요.</p>
+        <p class="repository-message repository-message-success" th:if="${repositorySuccess}" th:text="${repositorySuccess}">저장소가 등록되었습니다.</p>
+        <p class="repository-message repository-message-error" th:if="${repositoryError}" th:text="${repositoryError}">요청을 처리할 수 없습니다.</p>
 
-        <!-- GitHub 연동 정보는 현재 회사와 프로젝트에 연결해 저장합니다. -->
-        <form class="repository-form" th:action="@{/repository}" th:object="${repository}" method="post">
+        <div class="repository-management-actions">
+            <a class="repository-button repository-button-primary repository-add-button" th:href="@{/repository/management/new(projectId=${projectId})}">+ 저장소 추가</a>
+        </div>
+
+        <div class="repository-table-wrap">
+            <table class="repository-table repository-management-table">
+                <thead>
+                    <tr><th>식별자</th><th>주 저장소</th><th>형상관리시스템</th><th>저장소 경로</th><th>관리</th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="repository : ${repositoryList}">
+                        <td th:text="${repository.repositoryName}">KdtFinalProject</td>
+                        <td><span class="repository-badge" th:if="${repository.mainYn == &quot;Y&quot;}">주 저장소</span></td>
+                        <td>GitHub</td>
+                        <td><a class="repository-url" th:href="${repository.repositoryUrl}" target="_blank" rel="noopener" th:text="${repository.repositoryUrl}">https://github.com/KDTFinalProject/KdtFinalProject.git</a></td>
+                        <td>
+                            <div class="repository-management-buttons">
+                                <a class="repository-button repository-button-secondary" th:href="@{/repository/management/edit(projectId=${projectId}, repositoryId=${repository.repositoryId})}">수정</a>
+                                <!-- 공용 삭제 모달에 전달할 대상 정보만 data 속성으로 보관합니다. -->
+                                <button class="repository-button repository-button-danger repository-delete-trigger" type="button"
+                                        th:attr="data-repository-id=${repository.repositoryId},data-repository-name=${repository.repositoryName}">삭제</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(repositoryList)}"><td class="repository-empty" colspan="5">등록된 저장소가 없습니다. 저장소 추가 버튼으로 GitHub 저장소를 등록해 주세요.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 목록 밖의 모달 하나를 모든 삭제 버튼이 함께 사용합니다. -->
+    <dialog class="repository-delete-dialog" id="repositoryDeleteDialog" aria-labelledby="repositoryDeleteDialogTitle">
+        <div class="repository-delete-dialog-header">
+            <h2 id="repositoryDeleteDialogTitle">저장소 삭제</h2>
+            <button class="repository-dialog-close" type="button" aria-label="닫기" data-delete-dialog-close>&times;</button>
+        </div>
+        <p><strong id="repositoryDeleteName">저장소</strong>를 삭제합니다. 이 작업은 되돌릴 수 없습니다.</p>
+        <form th:action="@{/repository/delete}" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <input type="hidden" th:field="*{projectId}" th:value="${projectId}">
-            <div class="repository-form-row">
-                <label for="repositorySystem">형상관리시스템</label>
-                <input id="repositorySystem" value="GitHub" readonly>
-            </div>
-            <div class="repository-form-row">
-                <label for="repositoryName">저장소명</label>
-                <input id="repositoryName" th:field="*{repositoryName}" placeholder="저장소 이름을 입력하세요" required>
-            </div>
-            <div class="repository-form-row">
-                <label for="repositoryUrl">저장소 경로</label>
-                <input id="repositoryUrl" th:field="*{repositoryUrl}" placeholder="https://github.com/KDTFinalProject/KdtFinalProject.git" required>
-            </div>
-            <label class="repository-check" for="mainRepository">
-                <input id="mainRepository" th:field="*{mainYn}" type="checkbox" value="Y">
-                <span>주 저장소</span>
+            <input type="hidden" name="projectId" th:value="${projectId}">
+            <input id="repositoryDeleteId" type="hidden" name="repositoryId">
+            <label for="repositoryDeleteConfirmationName">
+                <span id="repositoryDeletePrompt">삭제하려면 저장소명을 입력하세요.</span>
+                <input id="repositoryDeleteConfirmationName" name="confirmationName" type="text" required autocomplete="off">
             </label>
-            <div class="repository-form-actions">
-                <a class="repository-button repository-button-secondary" th:href="@{/repository/list(projectId=${projectId})}">취소</a>
-                <button class="repository-button repository-button-primary" type="submit">등록</button>
+            <div class="repository-dialog-actions">
+                <button class="repository-button repository-button-secondary" type="button" data-delete-dialog-close>취소</button>
+                <button class="repository-button repository-button-danger" type="submit">삭제 확인</button>
             </div>
         </form>
-    </div>
+    </dialog>
+
+    <script>
+        // 선택한 행의 저장소 정보를 하나의 삭제 확인 모달에 주입합니다.
+        document.querySelectorAll('.repository-delete-trigger').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var dialog = document.getElementById('repositoryDeleteDialog');
+                var repositoryName = button.dataset.repositoryName;
+                document.getElementById('repositoryDeleteId').value = button.dataset.repositoryId;
+                document.getElementById('repositoryDeleteName').textContent = repositoryName;
+                document.getElementById('repositoryDeletePrompt').textContent = '삭제하려면 ' + repositoryName + '을(를) 입력하세요.';
+                document.getElementById('repositoryDeleteConfirmationName').value = '';
+                dialog.showModal();
+            });
+        });
+        document.querySelectorAll('[data-delete-dialog-close]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                document.getElementById('repositoryDeleteDialog').close();
+            });
+        });
+    </script>
 </section>
 </body>
 </html>

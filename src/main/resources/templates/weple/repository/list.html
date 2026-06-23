@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org/"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head><title>WEPLE - 저장소</title></head>
 <body>
@@ -10,22 +9,24 @@
         <p class="repository-message repository-message-success" th:if="${repositorySuccess}" th:text="${repositorySuccess}">저장소가 등록되었습니다.</p>
         <div class="repository-list-heading">
             <div><h1 class="repository-title">저장소</h1><p>프로젝트 전체 저장소 목록</p></div>
-            <label class="repository-search"><i class="fa fa-search" aria-hidden="true"></i><input type="search" placeholder="저장소명을 입력하세요."></label>
+            <label class="repository-search"><i class="fa fa-search" aria-hidden="true"></i><input id="repositorySearch" type="search" placeholder="저장소명 또는 경로를 입력하세요" autocomplete="off"></label>
         </div>
         <div class="repository-table-wrap">
-            <table class="repository-table">
+            <table id="repositoryListTable" class="repository-table">
                 <thead><tr><th>저장소명</th><th>설명</th><th>경로</th></tr></thead>
                 <tbody>
-                    <tr th:each="repository : ${repositoryList}">
-                        <td><a class="repository-name" th:href="@{/repository/detail(projectId=${projectId}, repositoryId=${repository.repositoryId})}"><i class="fa fa-github" aria-hidden="true"></i><span th:text="${repository.repositoryName}">KdtFinalProject</span> <span class="repository-badge" th:if="${repository.mainYn == 'Y'}">주 저장소</span></a></td>
+                    <tr th:each="repository : ${repositoryList}" data-repository-row th:attr="data-repository-name=${repository.repositoryName},data-repository-url=${repository.repositoryUrl}">
+                        <td><a class="repository-name" th:href="@{/repository/detail(projectId=${projectId}, repositoryId=${repository.repositoryId})}"><i class="fa fa-github" aria-hidden="true"></i><span th:text="${repository.repositoryName}">KdtFinalProject</span> <span class="repository-badge" th:if="${repository.mainYn == &quot;Y&quot;}">주 저장소</span></a></td>
                         <td th:text="${repository.repositoryName + ' GitHub 저장소입니다.'}">KDT Final Project GitHub 저장소입니다.</td>
                         <td><a class="repository-url" th:href="${repository.repositoryUrl}" target="_blank" rel="noopener" th:text="${repository.repositoryUrl}">github.com/KDTFinalProject/KdtFinalProject</a></td>
                     </tr>
-                    <tr th:if="${#lists.isEmpty(repositoryList)}"><td class="repository-empty" colspan="3">등록된 저장소가 없습니다. 설정에서 GitHub 저장소를 등록해주세요.</td></tr>
+                    <tr th:if="${#lists.isEmpty(repositoryList)}"><td class="repository-empty" colspan="3">등록된 저장소가 없습니다. 설정에서 GitHub 저장소를 등록해 주세요.</td></tr>
+                    <tr id="repositorySearchEmpty" hidden><td class="repository-empty" colspan="3">검색 결과가 없습니다.</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
+    <script th:src="@{/js/repository/repository-list.js}"></script>
 </section>
 </body>
 </html>

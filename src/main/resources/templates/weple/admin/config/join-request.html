@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout_setting :: layout(~{::section})}">
+<html xmlns:th="http://www.thymeleaf.org/"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
     <title>WEPLE - 가입승인</title>
     <link rel="stylesheet" th:href="@{/css/admin/join-request.css}">
 </head>
 <body>
     <section>
-        <link rel="stylesheet" th:href="@{/css/admin/join-request.css}">
         <div class="approval-page">
             <h1 class="approval-title">가입승인</h1>
 

@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
 
                 // 저장소 등록 설정은 기업 최고관리자 또는 관리자만 사용할 수 있습니다.
-                .requestMatchers("/repository/management", "/repository")
+                .requestMatchers("/repository/management", "/repository/management/**", "/repository", "/repository/update", "/repository/delete")
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
 
                 // 그 외 요청은 로그인 필요
