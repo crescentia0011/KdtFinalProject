@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head>
+    <meta charset="UTF-8">
+    <title>프로젝트 수정</title>
+    <link rel="stylesheet" href="/css/system/project-update.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+</head>
+<body>
+
+<section class="project-page">
+
+    <!-- 토스트 (수정 실패 시) -->
+    <div id="toastWrap" class="toast-wrap" th:if="${toastError}">
+        <div class="toast-msg toast-error" th:text="${toastError}"></div>
+    </div>
+
+    <div class="project-toolbar-top">
+        <h3 class="project-title">프로젝트 수정</h3>
+    </div>
+
+    <div class="project-card">
+        <form id="projectForm" method="post" th:action="@{/system/project/update}">
+
+            <!-- 수정 시 projectId 전달 (hidden) -->
+            <input type="hidden" name="projectId" th:value="${project.projectId}">
+
+            <div class="form-group-row">
+                <label for="projectTitle" class="form-label required">프로젝트명</label>
+                <input type="text" id="projectTitle" name="projectTitle"
+                       class="form-input-text"
+                       placeholder="프로젝트명을 입력하세요."
+                       th:value="${project.projectTitle}"
+                       required>
+            </div>
+
+            <div class="form-group-row">
+                <label for="projectDescribe" class="form-label">설명</label>
+                <textarea id="projectDescribe" name="projectDescribe"
+                          class="form-textarea"
+                          placeholder="프로젝트의 설명을 입력하세요."
+                          th:text="${project.projectDescribe}"></textarea>
+            </div>
+
+            <div class="form-group-row">
+                <label for="projectIdentifier" class="form-label required">식별자</label>
+                <div class="identifier-input-wrap">
+                    <input type="text" id="projectIdentifier" name="projectIdentifier"
+                           class="form-input-text"
+                           placeholder="식별자를 입력하세요 (예: my-project)"
+                           th:value="${project.projectIdentifier}"
+                           required>
+                </div>
+            </div>
+
+            <div class="form-group-row">
+                <label class="form-label">날짜</label>
+                <div class="date-row">
+                    <div class="date-field">
+                        <label for="startDate" class="date-label">시작일자</label>
+                        <input type="text" id="startDate" name="startDate"
+                               class="form-input-text date-input"
+                               th:value="${project.startDate != null ? #dates.format(project.startDate, 'yyyy-MM-dd') : ''}"
+                               readonly>
+                    </div>
+                    <div class="date-field">
+                        <label for="finishDate" class="date-label required">마감일자</label>
+                        <input type="text" id="finishDate" name="finishDate"
+                               class="form-input-text date-input"
+                               th:value="${project.finishDate != null ? #dates.format(project.finishDate, 'yyyy-MM-dd') : ''}"
+                               placeholder="마감일자를 선택하세요"
+                               required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group-row">
+                <div class="module-label-row">
+                    <label class="form-label required">모듈</label>
+                    <div class="module-select-controls">
+                        <button type="button" class="module-ctrl-btn" id="selectAll">전체선택</button>
+                        <button type="button" class="module-ctrl-btn" id="deselectAll">전체해제</button>
+                    </div>
+                </div>
+
+                <!--
+                    기존에 등록된 모듈 목록(project.moduleNames)과 비교해서
+                    체크 여부를 결정합니다.
+                    project.moduleNames = List<String> (예: ["b1","b2","b4"])
+                -->
+                <div class="module-box-container">
+                    <div class="module-flex-layout">
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b1"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b1')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">개요</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b2"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b2')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">작업내역</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b3"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b3')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">로드맵</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b4"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b4')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">일감</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b5"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b5')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">소요시간</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b6"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b6')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">간트차트</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b12"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b12')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">테스트</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b7"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b7')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">위키</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b8"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b8')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">저장소</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b9"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b9')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">칸반보드</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b10"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b10')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">캘린더</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b11"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b11')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">설정</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pagination-wrap button-group-right">
+                <button type="button" class="page-btn btn-cancel" onclick="history.back()">취소</button>
+                <button type="submit" class="page-btn active btn-submit">수정</button>
+            </div>
+
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/ko.js"></script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        flatpickr.localize(flatpickr.l10ns.ko);
+
+        flatpickr("#finishDate", {
+            dateFormat: "Y-m-d",
+            allowInput: false
+            // 수정 시엔 minDate 제한 없음 (기존 마감일이 과거일 수 있으므로)
+        });
+
+        // 전체선택
+        document.getElementById("selectAll").addEventListener("click", function () {
+            document.querySelectorAll('input[name="moduleNames"]')
+                .forEach(cb => cb.checked = true);
+        });
+
+        // 전체해제
+        document.getElementById("deselectAll").addEventListener("click", function () {
+            document.querySelectorAll('input[name="moduleNames"]')
+                .forEach(cb => cb.checked = false);
+        });
+
+        // 폼 제출 시 최소 1개 체크 검증
+        document.getElementById("projectForm").addEventListener("submit", function (e) {
+            const checked = document.querySelectorAll('input[name="moduleNames"]:checked');
+            if (checked.length === 0) {
+                e.preventDefault();
+                const wrap = document.createElement("div");
+                wrap.className = "toast-wrap";
+                wrap.innerHTML = '<div class="toast-msg toast-error">최소 1개 이상의 모듈을 선택해야 합니다.</div>';
+                document.querySelector(".project-page").prepend(wrap);
+                setTimeout(() => wrap.remove(), 3500);
+            }
+        });
+
+        // 토스트 자동 제거
+        const toastWrap = document.getElementById("toastWrap");
+        if (toastWrap) {
+            setTimeout(() => toastWrap.remove(), 3500);
+        }
+
+    });
+    </script>
+
+</section>
+</body>
+</html>

@@ -50,7 +50,7 @@
                         p.project_title LIKE '%' || #{keyword} || '%'
                     </if>
                 </where>
-                ORDER BY p.project_id
+                ORDER BY p.created_at DESC, p.project_id DESC
             ) inner_q
             WHERE ROWNUM &lt;= #{offset} + #{pageSize}
         )

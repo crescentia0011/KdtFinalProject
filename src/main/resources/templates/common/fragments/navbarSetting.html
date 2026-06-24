@@ -6,7 +6,7 @@
     <ul>
         <li th:classappend="${currentMenu == 'systemproject'} ? 'active' : ''">
             <a th:href="@{/system/project/list}" 
-               th:class="${menu == 'project' || menu == null} ? 'active' : ''">프로젝트</a>
+               th:class="${menu == 'project'} ? 'active' : ''">프로젝트</a>
         </li>
         <li>
             <a th:href="@{/userList}" 
@@ -16,7 +16,7 @@
             <a th:href="@{/groupList}" 
                th:class="${menu == 'group'} ? 'active' : ''">그룹</a>
         </li>
-        <li>
+        <li th:classappend="${currentMenu == 'systemrole'} ? 'active' : ''">
             <a th:href="@{/system/role}" 
                th:class="${menu == 'role'} ? 'active' : ''">역할 및 권한</a>
         </li>

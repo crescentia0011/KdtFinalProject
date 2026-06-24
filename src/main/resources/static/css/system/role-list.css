@@ -4,54 +4,31 @@
 }
 
 .role-card {
+    width: 100%;
     background: #fff;
     border-radius: 24px;
     padding: 30px;
     border: 1px solid #edf1f7;
-    box-shadow: 0 2px 10px rgba(0,0,0,.03);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .03);
 }
 
-.role-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
+/* title (project 완전 동일 기준) */
 .role-title {
-    margin: 0;
+    margin: 0 0 20px 0;
     font-size: 24px;
     font-weight: 700;
     color: #222;
 }
 
-.role-create-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 16px;
-    height: 36px;
-    border-radius: 8px;
-    background: #4d84ff;
-    color: #fff;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    transition: .2s;
-}
-
-.role-create-btn:hover {
-    background: #3970eb;
-    color: #fff;
-    text-decoration: none;
-}
-
+/* table wrap */
 .role-table-wrap {
     border: 1px solid #e6ecf5;
     border-radius: 14px;
     overflow: hidden;
+    background: #fff;
 }
 
+/* table */
 .role-table {
     width: 100%;
     border-collapse: collapse;
@@ -79,15 +56,18 @@
     text-align: center;
 }
 
+.role-table tbody tr:hover {
+    background: #fafcff;
+}
+
+/* left align */
+.role-table th.text-left,
 .role-table td.text-left {
     text-align: left;
     padding-left: 20px;
 }
 
-.role-table tbody tr:hover {
-    background: #fafcff;
-}
-
+/* link */
 .role-link {
     color: #4d84ff;
     text-decoration: none;
@@ -98,24 +78,33 @@
     color: #3970eb;
 }
 
+/* delete button (project 100% 동일) */
 .delete-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
+
+    min-width: 70px;
     height: 32px;
+
     border: none;
-    border-radius: 8px;
+    border-radius: 999px;
+
     background: #ffe9ec;
     color: #ef4444;
-    font-size: 13px;
+
+    font-size: 12px;
+    font-weight: 700;
+
     cursor: pointer;
+    transition: all .2s ease;
 }
 
 .delete-btn:hover {
     background: #ffd8de;
 }
 
+/* empty */
 .empty-message {
     padding: 60px !important;
     text-align: center !important;
@@ -123,6 +112,7 @@
     font-size: 14px;
 }
 
+/* toast (project 동일) */
 .toast-message {
     position: fixed;
     top: 50%;

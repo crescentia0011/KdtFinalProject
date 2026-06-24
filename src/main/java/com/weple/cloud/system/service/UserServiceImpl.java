@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService{
 	// 그룹 내 사용자 등록
 	@Override
 	public int addGroupUser(SystemGroupUserVO systemGroupUserVO) {
-	    int result = userMapper.updateGroupUser(systemGroupUserVO);
+		int result = userMapper.updateGroupUser(systemGroupUserVO);
 	    return result;
 	}
 

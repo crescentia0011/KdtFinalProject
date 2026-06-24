@@ -14,27 +14,34 @@
 <body>
 <section class="project-page">
 
+    <h3 class="project-title">프로젝트</h3>
     <div class="project-card">
-
         <!-- 상단 -->
         <div class="project-toolbar">
-            <h3 class="project-title">프로젝트</h3>
-            <a th:href="@{/system/project}" class="project-create-btn">
-                <i class="fas fa-folder"></i>
-                <span>프로젝트 생성</span>
-            </a>
+
+    <!-- 검색 -->
+    <form method="get"
+          th:action="@{/system/project/list}"
+          class="filter-toolbar">
+
+        <div class="project-search">
+            <i class="fas fa-search"></i>
+            <input type="text"
+                   name="keyword"
+                   th:value="${keyword}"
+                   placeholder="프로젝트명을 입력하세요."
+                   onchange="this.form.submit()">
         </div>
 
-        <!-- 검색 -->
-        <form method="get" th:action="@{/system/project/list}" class="filter-toolbar">
-		    <div class="project-search">
-		        <i class="fas fa-search"></i>
-		        <input type="text" name="keyword"
-		               th:value="${keyword}"
-		               placeholder="프로젝트명을 입력하세요."
-		               onchange="this.form.submit()">
-		    </div>
-		</form>
+    </form>
+
+    <!-- 버튼 -->
+    <a th:href="@{/system/project}" class="project-create-btn">
+        <i class="fas fa-folder"></i>
+        <span>프로젝트 생성</span>
+    </a>
+
+</div>
 
         <!-- 테이블 -->
         <div class="project-table-wrap">
@@ -70,11 +77,15 @@
 						    </span>
 						</td>
                         <td>
-                            <form th:action="@{/system/project/delete}" method="post" class="delete-form">
-                                <input type="hidden" name="projectId" th:value="${project.projectId}">
-                                <button type="button" class="delete-btn delete-project-btn">삭제</button>
-                            </form>
-                        </td>
+						    <div class="action-btn-group">
+						        <a th:href="@{/system/project/update/{id}(id=${project.projectId})}"
+						           class="edit-btn">수정</a>
+						        <form th:action="@{/system/project/delete}" method="post" class="delete-form">
+						            <input type="hidden" name="projectId" th:value="${project.projectId}">
+						            <button type="button" class="delete-btn delete-project-btn">삭제</button>
+						        </form>
+						    </div>
+						</td>
                     </tr>
                 </tbody>
             </table>

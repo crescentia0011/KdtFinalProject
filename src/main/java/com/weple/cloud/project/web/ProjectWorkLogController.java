@@ -32,11 +32,14 @@ public class ProjectWorkLogController {
             @RequestParam(value = "page", defaultValue = "1") int page,
             Model model) {
     	
-        if (startDate == null || startDate.isEmpty()) {
-            LocalDate today = LocalDate.now();
-            endDate = today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
-            startDate = today.minusDays(4).format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
-        }
+    	if (startDate == null || startDate.isBlank()) {
+    	    LocalDate today = LocalDate.now();
+
+    	    return "redirect:/project/worklog"
+    	            + "?projectId=" + projectId
+    	            + "&startDate=" + today.minusDays(4).format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
+    	            + "&endDate=" + today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+    	}
         
         int pageSize = 10;
         int offset = (page - 1) * pageSize;
@@ -61,6 +64,9 @@ public class ProjectWorkLogController {
         model.addAttribute("endDate", endDate);
         model.addAttribute("userCode", userCode);
         model.addAttribute("typeNames", typeNames);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        
         
         model.addAttribute("sidebarMenu", "project");
         model.addAttribute("currentMenu", "worklog");

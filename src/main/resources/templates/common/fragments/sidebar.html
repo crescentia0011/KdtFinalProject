@@ -17,7 +17,7 @@
                 <li th:classappend="${sidebarMenu == 'work-history'} ? 'active' : ''"><a th:href="@{/worklog}"><i class="fa fa-history"></i> 작업내역</a></li>
                 <li><a th:href="@{/dashboard/gantt}"><i class="fa fa-bar-chart"></i> 간트차트</a></li>
                 <li><a th:href="@{/dashboard/calendar}"><i class="fa fa-calendar"></i> 캘린더</a></li>
-                <li><a th:href="@{/dashboard/time}"><i class="fa fa-clock-o"></i> 소요시간</a></li>
+                <li th:classappend="${sidebarMenu == 'time'} ? 'active' : ''"><a th:href="@{/totalTimeList}"><i class="fa fa-clock-o"></i> 소요시간</a></li>
                 <li><a th:href="@{/dashboard/board}"><i class="fa fa-comments"></i> 게시판</a></li>
                 <li th:classappend="${sidebarMenu == 'system'} ? 'active' : ''"><a th:href="@{/system/project/list}"><i class="fa fa-gears"></i> 관리</a></li>
             </ul>

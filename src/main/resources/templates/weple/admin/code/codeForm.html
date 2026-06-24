@@ -4,19 +4,22 @@
 	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
 <title>WEPLE - 코드값 등록/수정</title>
+<link rel="stylesheet" href="https://uicdn.toast.com/tui-notification/latest/tui-notification.min.css" />
 </head>
-<body>
 
+<body>
+<script src="https://uicdn.toast.com/tui-notification/latest/tui-notification.min.js"></script>
 	<section>
 		<h2 class="page-title"
 			th:text="${CodeValue == null ? '새 코드값 등록' : '코드값 수정'}">새 코드값 등록</h2>
 
 		<div class="breadcrumb">
-			<span th:text="${pageTitle}">작업분류</span> &gt; <span class="current"
-				th:text="${CodeValue == null ? '새 코드값' : '코드값 수정'}">새 코드값</span>
+			<span th:text="${pageTitle}"></span> &lt;
+			<span class="current"
+				th:text="${CodeValue == null ? '새 코드값' : '코드값 수정'}"></span>
 		</div>
 
-		<form th:action="${CodeValue == null ? '/codeInsert' : '/codeUpdate'}"
+		<form id="codeForm" th:action="${CodeValue == null ? '/codeInsert' : '/codeUpdate'}"
 			method="post">
 
 			<input type="hidden" name="type" th:value="${type}"> <input
@@ -72,7 +75,39 @@
 			</div>
 		</form>
 
+		<script>
+		document.addEventListener('DOMContentLoaded', function() {
+	        const form = document.getElementById('codeForm');
 
+	        form.addEventListener('submit', function(e) {
+	            const defaultCheckbox = document.querySelector('input[name="defaultYn"]');
+	            const usingCheckbox = document.querySelector('input[name="usingYn"]');
+	            
+	            const isDefaultChecked = defaultCheckbox ? defaultCheckbox.checked : false;
+	            const isUsingChecked = usingCheckbox ? usingCheckbox.checked : false;
+
+	            if (isDefaultChecked && !isUsingChecked) {
+	                e.preventDefault();
+	                alert("사용중이 아닌 항목은 기본값으로 설정할 수 없습니다.");
+	                return false;
+	            }
+
+	            if (isDefaultChecked) {
+	                e.preventDefault(); 
+	                
+	                if (confirm("이미 기본값이 설정되어 있습니다. 현재 항목을 기본값으로 변경하시겠습니까?")) {
+	                    form.submit();
+	                } else {
+	                    if (typeof tui !== 'undefined') {
+	                        const toast = new tui.Notification({ position: 'top-right' });
+	                        toast.error("기본값 변경이 취소되었습니다.");
+	                    }
+	                }
+	            }
+	        });
+	    });
+		</script>
+		
 		<style>
 /* ===========================공통 컨테이너=========================== */
 .code-edit-container {

@@ -75,4 +75,10 @@ public class CodeValueServiceImpl implements CodeValueService {
 	    codeValueMapper.resetAllDefaultYn(type);
 	}
 
+	// 수정 (드래그 앤 드랍으로 순서 변경한 데이터 저장)
+	//@Override
+	//public void updateOrder(String type, String cno, long orderNum) {
+	//	codeValueMapper.updateOrderNum(type, cno, orderNum);		
+	//}
+
 }

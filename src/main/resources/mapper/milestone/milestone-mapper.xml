@@ -14,10 +14,11 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
-    <resultMap id="MilestoneListResultMap" type="MilestoneListVO" extends="MilestoneResultMap">
+    <resultMap id="MilestoneInfoResultMap" type="MilestoneInfoVO" extends="MilestoneResultMap">
         <result property="totalTaskCount" column="total_task_count"/>
         <result property="closedTaskCount" column="closed_task_count"/>
         <result property="progressPercentage" column="progress_percentage"/>
+        <result property="delayDays" column="delay_days"/>
         
         <collection property="recentTasks" ofType="TaskVO">
             <id property="taskId" column="task_id"/>
@@ -29,8 +30,23 @@
             <result property="defaultDescribe" column="default_describe"/>
         </collection>
     </resultMap>
+    
+    <resultMap id="milestoneDetailMap" type="MilestoneDetailVO">
+	    <id property="milestoneId" column="milestone_id"/>
+	    <result property="projectId" column="project_id"/>
+	    <result property="userCode" column="user_code"/>
+	    <result property="milestoneTitle" column="milestone_title"/>
+	    <result property="milestoneDescribe" column="milestone_describe"/>
+	    <result property="milestoneStatus" column="milestone_status"/>
+	    <result property="finishDate" column="finish_date"/>
+	    <result property="delayDays" column="delay_days"/>
+	    
+	    <result property="totalEstimatedHours" column="total_estimated_hours"/>
+	    <result property="totalSpentHours" column="total_spent_hours"/>
+	</resultMap>
 
-    <select id="selectMilestoneAll" parameterType="long" resultMap="MilestoneListResultMap">
+    <select id="selectMilestoneAll" parameterType="long" resultMap="MilestoneInfoResultMap">
+    
     SELECT 
         m.milestone_id, 
         m.project_id, 
@@ -47,6 +63,13 @@
         NVL(stats.total_count, 0) AS total_task_count,
         NVL(stats.closed_count, 0) AS closed_task_count,
         NVL(stats.avg_progress, 0) AS progress_percentage,
+        
+        CASE 
+            WHEN NVL(stats.avg_progress, 0) &lt; 100 AND TRUNC(SYSDATE) > TRUNC(m.finish_date)
+            THEN TRUNC(SYSDATE) - TRUNC(m.finish_date)
+            ELSE 0 
+        END AS delay_days,
+        
         t.task_id, 
         t.task_title, 
         t.task_progress, 
@@ -77,19 +100,76 @@
 </select>
 
 
-    <select id="selectMilestoneById" parameterType="long" resultMap="MilestoneResultMap">
-        SELECT 
-            milestone_id, 
-            project_id, 
-            user_code, 
-            milestone_title, 
-            milestone_describe, 
-            finish_date, 
-            milestone_status, 
-            created_at,
-            updated_at
-        FROM milestone
-        WHERE milestone_id = #{milestoneId}
+    <select id="selectMilestoneDetailBase" resultMap="milestoneDetailMap">
+        SELECT m.milestone_id, m.project_id,
+	           m.user_code,
+	           m.milestone_title,
+	           m.milestone_describe,
+	           NVL(SUM(t.estimated_time), 0) AS total_estimated_hours, NVL(SUM(t.spent_hours_sum), 0) AS total_spent_hours
+	    FROM milestone m
+        LEFT JOIN task t ON m.milestone_id = t.milestone_id
+        WHERE m.milestone_id = #{milestoneId} AND m.project_id = #{projectId}
+        GROUP BY m.milestone_id, m.project_id, m.user_code, m.milestone_title, m.milestone_describe
+    </select>
+
+    <select id="selectMilestoneTasksWithPaging" resultType="TaskVO">
+        SELECT * FROM (
+            SELECT ROWNUM AS rnum, a.* FROM (
+                SELECT task_id AS taskId,
+                       task_title AS taskTitle,
+                       task_describe AS taskDescribe,
+                       task_status AS taskStatus,
+                       priority AS priority,
+                       task_manager AS taskManager
+                FROM task
+                WHERE milestone_id = #{milestoneId} AND project_id = #{projectId}
+                ORDER BY created_at DESC, task_id DESC
+            ) a WHERE ROWNUM &lt;= #{endRow}
+        ) WHERE rnum &gt;= #{startRow}
+    </select>
+
+    <select id="selectTaskStatusStats" resultType="TaskGroupStatVO">
+        SELECT CASE task_status 
+                    WHEN 'e1' THEN '신규'
+                    WHEN 'e2' THEN '진행 중'
+                    WHEN 'e3' THEN '완료'
+                    WHEN 'e4' THEN '결함'
+                    ELSE '미지정'
+               END AS groupName,
+               COUNT(*) AS totalCount,
+               SUM(CASE WHEN task_status = 'e3' THEN 1 ELSE 0 END) AS closedCount
+        FROM task
+        WHERE milestone_id = #{milestoneId} AND project_id = #{projectId}
+        GROUP BY task_status
+    </select>
+
+    <select id="selectTaskPriorityStats" resultType="TaskGroupStatVO">
+        SELECT priority AS groupName,
+               COUNT(*) AS totalCount,
+               SUM(CASE WHEN task_status = 'e3' THEN 1 ELSE 0 END) AS closedCount
+        FROM task
+        WHERE milestone_id = #{milestoneId} AND project_id = #{projectId} AND priority IS NOT NULL
+        GROUP BY priority
+    </select>
+
+    <select id="selectTaskTypeStats" resultType="TaskGroupStatVO">
+        SELECT tp.type_name AS groupName,
+               COUNT(*) AS totalCount,
+               SUM(CASE WHEN t.task_status = 'e3' THEN 1 ELSE 0 END) AS closedCount
+        FROM task t
+        JOIN task_types tp ON t.type_id = tp.type_id
+        WHERE t.milestone_id = #{milestoneId} AND project_id = #{projectId}
+        GROUP BY tp.type_name, t.type_id
+    </select>
+
+    <select id="selectTaskManagerStats" resultType="TaskGroupStatVO">
+        SELECT NVL(u.user_name, '미지정') AS groupName,
+               COUNT(*) AS totalCount,
+               SUM(CASE WHEN t.task_status = 'e3' THEN 1 ELSE 0 END) AS closedCount
+        FROM task t
+        LEFT JOIN users u ON t.task_manager = u.user_code
+        WHERE t.milestone_id = #{milestoneId} AND t.project_id = #{projectId}
+        GROUP BY u.user_name
     </select>
 
     <insert id="insertMilestone" parameterType="MilestoneVO">

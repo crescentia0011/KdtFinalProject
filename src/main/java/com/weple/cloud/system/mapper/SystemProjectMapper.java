@@ -20,6 +20,11 @@ public interface SystemProjectMapper {
 	List<SystemProjectVO> selectProjectList(SystemProjectVO vo);
     int selectProjectCount(SystemProjectVO vo);
 	
+    // 프로젝트 수정
+    SystemProjectVO selectProjectById(Long projectId);
+    int updateProject(SystemProjectVO projectVO);
+    int deleteModuleMapping(Long projectId);
+    
 	// 프로젝트 삭제
 	int deleteProject(String projectId);
 }

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head>
+    <title>WEPLE - 마일스톤 상세조회</title>
+    <link rel="stylesheet" th:href="@{/css/milestone/milestone-detail.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
+</head>
+<body>
+<section>
+    <div class="milestone-page">
+        <div class="milestone-page-header">
+            <h1 class="milestone-page-title">마일스톤 상세조회</h1>
+            <a th:href="@{/project/milestone/list(projectId=${detail.projectId})}" class="milestone-add-link">← 목록으로 돌아가기</a>
+        </div>
+
+        <div class="milestone-container">
+            
+            <div class="milestone-header" th:data-milestone-id="${detail.milestoneId}">
+                <div class="view-mode-container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                    <div class="milestone-title-group">
+                        <span class="milestone-icon">📋</span>
+                        <h2 class="milestone-title" th:text="${detail.milestoneTitle}">설계</h2>
+                        
+                        <span class="milestone-badge" 
+                              th:classappend="${detail.milestoneStatus == 'g2' ? 'badge-success' : 'badge-process'}"
+                              th:text="${detail.milestoneStatus == 'g2' ? '완료' : '진행 중'}">진행 중</span>
+                        
+                        <span class="milestone-due-date" 
+                              th:if="${detail.finishDate != null}"
+                              th:text="${#temporals.format(detail.finishDate, 'yyyy.MM.dd')} + ' 까지'">2026.03.01 까지</span>
+                        
+                        <span class="milestone-badge badge-delay-text" 
+                              th:if="${detail.delayDays > 0}" 
+                              th:text="'지연됨 (D+' + ${detail.delayDays} + ')'">지연됨 (D+2)</span>
+                        
+                        <span class="milestone-describe" th:text="${detail.milestoneDescribe}">마일스톤 설명</span>
+                    </div>
+                    <button type="button" class="milestone-edit-btn" onclick="enableEditMode(this)">마일스톤 편집</button>
+                </div>
+            </div>
+
+            <div class="milestone-progress-row">
+                <div class="milestone-progress-bar-wrap">
+                    <div class="milestone-progress-bar" th:style="'width: ' + ${detail.progressPercentage} + '%'"></div>
+                </div>
+                <span class="milestone-progress-percent" th:text="${detail.progressPercentage} + '%'">100%</span>
+            </div>
+            
+            <div class="milestone-task-summary">
+                <span th:text="${totalTasks} + '일감 (' + ${detail.closedTaskCount} + ' 건 완료 — ' + (${detail.progressPercentage == 100} ? '모두 완료' : '진행중') + ')'">
+                    10일감 (10 건 완료 — 모두 완료)
+                </span>
+            </div>
+
+            <div class="milestone-time-tracking">
+                <div class="time-card card-estimated">
+                    <span class="time-label">⏳ 총 추정 시간</span>
+                    <span class="time-value" th:text="${detail.totalEstimatedHours} + ' 시간'">45.5 시간</span>
+                </div>
+                <div class="time-card card-spent">
+                    <span class="time-label">⏱️ 총 소요 시간</span>
+                    <span class="time-value" th:text="${detail.totalSpentHours} + ' 시간'">32.0 시간</span>
+                </div>
+            </div>
+
+            <div class="milestone-stat-grid">
+                <div class="stat-column">
+                    <h4 class="stat-column-title">📌 상태별 일감 완료</h4>
+                    <div class="stat-list-box">
+                        <div class="stat-item-row" th:each="stat : ${detail.statusStats}">
+                            <span class="stat-name" th:text="${stat.groupName}">진행 중</span>
+                            <div class="stat-mini-progress">
+                                <div class="stat-mini-bar-wrap">
+                                    <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+                                </div>
+                                <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">2/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-column">
+                    <h4 class="stat-column-title">🔥 우선순위별 일감 완료</h4>
+                    <div class="stat-list-box">
+                        <div class="stat-item-row" th:each="stat : ${detail.priorityStats}">
+                            <span class="stat-name" th:text="${stat.groupName}">높음</span>
+                            <div class="stat-mini-progress">
+                                <div class="stat-mini-bar-wrap">
+                                    <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+                                </div>
+                                <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">22/30</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-column">
+                    <h4 class="stat-column-title">🛠️ 유형별 일감 완료</h4>
+                    <div class="stat-list-box">
+                        <div class="stat-item-row" th:each="stat : ${detail.typeStats}">
+                            <span class="stat-name" th:text="${stat.groupName}">Bug</span>
+                            <div class="stat-mini-progress">
+                                <div class="stat-mini-bar-wrap">
+                                    <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+                                </div>
+                                <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">5/8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-column">
+                    <h4 class="stat-column-title">👤 담당자별 일감 완료</h4>
+                    <div class="stat-list-box">
+                        <div class="stat-item-row" th:each="stat : ${detail.managerStats}">
+                            <span class="stat-name" th:text="${stat.groupName}">홍길동</span>
+                            <div class="stat-mini-progress">
+                                <div class="stat-mini-bar-wrap">
+                                    <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+                                </div>
+                                <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">3/4</span>
+                            </div>
+                        </div>
+                        <div class="stat-empty-text" th:if="${#lists.isEmpty(detail.managerStats)}">배정된 담당자가 없습니다.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="connected-tasks-section">
+                <h3 class="connected-tasks-title">연결된 일감 목록 (최신순)</h3>
+                
+                <div class="task-list-card">
+                    <div class="task-item-row" th:each="task : ${taskList}">
+                        <div class="task-col col-id" th:text="'#' + ${task.taskId}">#1</div>
+                        
+                        <div class="task-col col-type">
+                            <span class="task-type-tag" th:text="${task.typeName != null ? task.typeName : '일감'}">일감유형</span>
+                        </div>
+                        
+                        <div class="task-col col-name">
+                            <a th:href="@{/project/task/detail(taskId=${task.taskId})}" th:text="${task.taskTitle}">일감명</a>
+                        </div>
+                        
+                        <div class="task-col col-progress">
+                            <div class="task-mini-bar-wrap">
+                                <div class="task-mini-bar" th:style="'width: ' + ${task.taskProgress} + '%'"></div>
+                            </div>
+                            <span class="task-mini-percent" th:text="${task.taskProgress} + '%'">80%</span>
+                        </div>
+                        
+                        <div class="task-col col-assignee" th:text="${task.taskManager != null ? task.taskManager : '미지정'}">담당자명</div>
+                        
+                        <div class="task-col col-status">
+                            <span class="status-dot-group" th:classappend="'status-' + ${task.taskStatus}">
+                                <span class="status-dot"></span>
+                                <span class="status-text" th:text="${task.taskStatus == 'e1' ? '신규' : (task.taskStatus == 'e2' ? '진행 중' : (task.taskStatus == 'e3' ? '완료' : '결함'))}">진행중</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="task-empty-row" th:if="${#lists.isEmpty(taskList)}">
+                        연결된 일감이 존재하지 않습니다.
+                    </div>
+                </div>
+
+                <div class="pagination-wrap" th:if="${totalPages > 1}">
+                    <a th:href="@{/project/milestone/detail(milestoneId=${detail.milestoneId}, page=${currentPage - 1})}"
+                       th:classappend="${currentPage == 1} ? 'disabled-link' : ''" class="page-link-btn">이전</a>
+                    
+                    <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages)}">
+                        <a th:href="@{/project/milestone/detail(milestoneId=${detail.milestoneId}, page=${pageNum})}"
+                           th:text="${pageNum}"
+                           th:classappend="${pageNum == currentPage} ? 'page-active' : ''" class="page-num-link">1</a>
+                    </th:block>
+
+                    <a th:href="@{/project/milestone/detail(milestoneId=${detail.milestoneId}, page=${currentPage + 1})}"
+                       th:classappend="${currentPage == totalPages} ? 'disabled-link' : ''" class="page-link-btn">다음</a>
+                </div>
+
+            </div>
+            
+        </div>
+    </div>
+</section>
+</body>
+</html>

@@ -3,6 +3,8 @@ package com.weple.cloud.system.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.weple.cloud.system.service.CodeValueVO;
 
 public interface CodeValueMapper {
@@ -24,4 +26,7 @@ public interface CodeValueMapper {
 	
 	// 수정 (데이터 1개씩 수정 가능)
 	public long updateCodeValue(CodeValueVO codeValueVO);
+	
+	// 수정 (드래그 앤 드랍으로 순서 변경한 데이터 저장)
+//	public void updateOrderNum(@Param("type") String type, @Param("id") String id, @Param("orderNum") long orderNum);
 }

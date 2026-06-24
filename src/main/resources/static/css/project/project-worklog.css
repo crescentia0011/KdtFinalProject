@@ -46,12 +46,57 @@
         .type-improve { background: #e8fff3; color: #50cd89; }
         .type-default { background: #f1f3f7; color: #8a99b5; }
         .action-cell { font-size: 12px; font-weight: 600; }
+        .action-badge {
+		    display: inline-flex;
+		    align-items: center;
+		    justify-content: center;
+		    min-width: 64px;
+		    height: 22px;
+		    border-radius: 5px;
+		    font-size: 11px;
+		    font-weight: 700;
+		    letter-spacing: 0.3px;
+		}
+		
+		.action-create  { background: #e8fff3; color: #50cd89; }
+		.action-update  { background: #fff8e6; color: #f6a609; }
+		.action-delete  { background: #fff1f1; color: #f64e60; }
+		.action-default { background: #f1f3f7; color: #8a99b5; }
         .empty-message { padding: 50px !important; text-align: center; color: #adb5bd; }
-        .pagination-wrap { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
-        .page-btn { display: flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; text-decoration: none; color: #5d6b87; border-radius: 6px; font-size: 13px; }
-        .page-btn.active { background: #4d84ff; color: #fff; font-weight: 700; }
-        .page-btn.disabled { opacity: .3; pointer-events: none; }
-        .page-btn:hover:not(.active):not(.disabled) { background: #eef4ff; color: #4d84ff; }
+        .pagination-wrap {
+		    display: flex;
+		    justify-content: center;
+		    gap: 6px;
+		    margin-top: 8px;
+		}
+		
+		.page-btn {
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    min-width: 32px;
+		    height: 32px;
+		    text-decoration: none;
+		    color: #5d6b87;
+		    border-radius: 6px;
+		    font-size: 13px;
+		}
+		
+		.page-btn.active {
+		    background: #4d84ff;
+		    color: #fff;
+		    font-weight: 700;
+		}
+		
+		.page-btn.disabled {
+		    opacity: .3;
+		    pointer-events: none;
+		}
+		
+		.page-btn:hover:not(.active):not(.disabled) {
+		    background: #eef4ff;
+		    color: #4d84ff;
+		}
         .flatpickr-calendar { width: 240px !important; max-width: 240px !important; padding: 8px !important; }
         .flatpickr-calendar.arrowTop:before, .flatpickr-calendar.arrowTop:after { display: none; }
         .flatpickr-months { align-items: center; margin-bottom: 8px; }

@@ -111,15 +111,33 @@
     </choose>
 	</update>
 	
+	<!-- 추가 등록 시 모든 기본값을 N으로 변경  -->
 	<update id="resetAllDefaultYn" parameterType="string">
 	    UPDATE ${type == 'work' ? 'work_classification' : 'task_priority'}
 	    SET default_yn = 'N'
 	</update>
 	
+	<!-- 수정 시 나 제외하고 모든 기본값을 N으로 변경 -->
 	<update id="resetDefaultYn" parameterType="map">
     	UPDATE ${type == 'work' ? 'work_classification' : 'task_priority'}
     	SET default_yn = 'N'
     	WHERE ${type == 'work' ? 'task_classification_id' : 'task_priority_id'} != #{id}
 	</update>
+	
+	<!-- 드래그 앤 드랍으로 순서 변경한 데이터 저장  
+	<update id="updateOrderNum">
+	    <choose>
+	        <when test="type == 'work'">
+	            UPDATE work_classification
+	            SET order_num = #{orderNum}
+	            WHERE task_classification_id = #{id}
+	        </when>
+	        <otherwise>
+	            UPDATE task_priority
+	            SET order_num = #{orderNum}
+	            WHERE task_priority_id = #{id}
+	        </otherwise>
+	    </choose>
+</update>-->
 
 </mapper>

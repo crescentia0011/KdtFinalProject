@@ -331,6 +331,187 @@
 		    font-size: 12px;
 		    color: #888;
 		}
+		
+		/* ==========================================
+		   마일스톤 상세조회 전용 추가 디자인 스펙
+		========================================== */
+		
+		/* 1. 시간 추적 영역 스펙 (추정시간 vs 소요시간) */
+		.milestone-time-tracking {
+		    display: flex;
+		    gap: 16px;
+		    margin: 20px 0;
+		}
+		
+		.time-card {
+		    flex: 1;
+		    background-color: #fcfcfd;
+		    border: 1px solid #e4e7ec;
+		    border-radius: 8px;
+		    padding: 14px 20px;
+		    display: flex;
+		    flex-direction: column;
+		    gap: 6px;
+		    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+		}
+		
+		.time-label {
+		    font-size: 0.85rem;
+		    color: #667085;
+		    font-weight: 500;
+		}
+		
+		.time-value {
+		    font-size: 1.25rem;
+		    color: #1d2939;
+		    font-weight: 700;
+		}
+		
+		.card-estimated {
+		    border-left: 4px solid #36b37e; /* 계획 위주의 초록 계열 포인트 */
+		}
+		
+		.card-spent {
+		    border-left: 4px solid #0052cc; /* 수행 위주의 블루 계열 포인트 */
+		}
+		
+		
+		/* 2. 4대 기준별 일감 완료 여부 스코어보드 (그리드 배치) */
+		.milestone-stat-grid {
+		    display: grid;
+		    grid-template-columns: repeat(4, 1fr); /* 4분할 가로 배열 */
+		    gap: 16px;
+		    margin-bottom: 28px;
+		}
+		
+		@media (max-width: 1024px) {
+		    .milestone-stat-grid {
+		        grid-template-columns: repeat(2, 1fr); /* 유동적 브레이크 포인트 (2x2) */
+		    }
+		}
+		
+		.stat-column {
+		    background: #ffffff;
+		    border: 1px solid #eaecf0;
+		    border-radius: 8px;
+		    padding: 16px;
+		    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+		}
+		
+		.stat-column-title {
+		    font-size: 0.9rem;
+		    color: #344054;
+		    margin-bottom: 12px;
+		    padding-bottom: 8px;
+		    border-bottom: 1px solid #f2f4f7;
+		    font-weight: 600;
+		}
+		
+		.stat-list-box {
+		    display: flex;
+		    flex-direction: column;
+		    gap: 10px;
+		    max-height: 180px;
+		    overflow-y: auto; /* 데이터가 많을 경우 내부 스크롤 보장 */
+		}
+		
+		.stat-item-row {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    font-size: 0.82rem;
+		}
+		
+		.stat-name {
+		    color: #475467;
+		    font-weight: 500;
+		    max-width: 90px;
+		    white-space: nowrap;
+		    overflow: hidden;
+		    text-overflow: ellipsis;
+		}
+		
+		.stat-mini-progress {
+		    display: flex;
+		    align-items: center;
+		    gap: 8px;
+		    flex: 1;
+		    justify-content: flex-end;
+		}
+		
+		.stat-mini-bar-wrap {
+		    width: 60px;
+		    height: 6px;
+		    background-color: #f2f4f7;
+		    border-radius: 4px;
+		    overflow: hidden;
+		}
+		
+		.stat-mini-bar {
+		    height: 100%;
+		    background-color: #12b76a; /* 진척도 내부 바 색상 */
+		    border-radius: 4px;
+		}
+		
+		.stat-count-text {
+		    font-family: monospace;
+		    color: #667085;
+		    font-weight: 600;
+		    min-width: 35px;
+		    text-align: right;
+		}
+		
+		.stat-empty-text {
+		    font-size: 0.8rem;
+		    color: #98a2b3;
+		    text-align: center;
+		    padding: 20px 0;
+		}
+		
+		
+		/* 3. 하단 페이징 네비게이션 UI 컴포넌트 */
+		.pagination-wrap {
+		    display: flex;
+		    justify-content: center;
+		    align-items: center;
+		    gap: 6px;
+		    margin-top: 24px;
+		    padding-top: 16px;
+		}
+		
+		.page-num-link, .page-link-btn {
+		    display: inline-flex;
+		    align-items: center;
+		    justify-content: center;
+		    padding: 6px 12px;
+		    font-size: 0.85rem;
+		    color: #475467;
+		    border: 1px solid #d0d5dd;
+		    background-color: #ffffff;
+		    border-radius: 6px;
+		    text-decoration: none;
+		    transition: all 0.15s ease;
+		    font-weight: 500;
+		}
+		
+		.page-num-link:hover, .page-link-btn:hover {
+		    background-color: #f9fafb;
+		    color: #1d2939;
+		    border-color: #b2ddff;
+		}
+		
+		.page-active {
+		    background-color: #7f56d9 !important; /* 메인 테마색상 부여 (퍼플/블루에 맞춰 변경 가능) */
+		    color: #ffffff !important;
+		    border-color: #7f56d9 !important;
+		}
+		
+		.disabled-link {
+		    opacity: 0.5;
+		    pointer-events: none; /* 클릭 비활성화 */
+		    background-color: #f2f4f7;
+		    color: #98a2b3;
+		}
 
         /* 상태 코드별 동적 컬러 클래스 */
         .status-progress { color: #4d7df4; }

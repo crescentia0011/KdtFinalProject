@@ -13,22 +13,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 ROWNUM AS rn
             FROM (
                 SELECT
-                    th.history_id       AS historyId,
-                    u.user_name         AS userName,
-                    t.task_title        AS taskTitle,
-                    tt.type_name        AS typeName,
-                    cc.default_describe AS defaultDescribe,
-                    th.action_type      AS actionType,
+                    th.history_id,
+                    u.user_name,
+                    NVL(d_title.new_value, t.task_title) AS taskTitle,
+                    NVL(d_type.new_value, tt.type_name)  AS typeName,
+                    cc.default_describe AS taskStatus,
+                    th.action_type,
                     th.action_at + INTERVAL '9' HOUR AS actionAt
                 FROM task_history th
-                INNER JOIN task t        ON th.task_id    = t.task_id
-                INNER JOIN users u       ON th.changed_by = u.user_code
-                INNER JOIN task_types tt ON t.type_id     = tt.type_id
-                LEFT JOIN common_code cc
-                       ON t.task_status  = cc.common_id
-                      AND cc.common_code = '0E'
+                INNER JOIN task t
+                		ON th.task_id = t.task_id
+                INNER JOIN users u
+                		ON th.changed_by = u.user_code
+                INNER JOIN task_types tt
+                		ON t.type_id = tt.type_id
+                LEFT JOIN task_history_detail d_title
+				       ON th.history_id = d_title.history_id
+				      AND d_title.field_name = 'task_title'
+				LEFT JOIN task_history_detail d_type
+				       ON th.history_id = d_type.history_id
+				      AND d_type.field_name = 'type_name'
+				LEFT JOIN common_code cc
+				       ON t.task_status = cc.common_id
+				      AND cc.common_code = '0E'
                 <where>
-                    AND t.project_id = #{projectId}
+                    t.project_id = #{projectId}
                     <if test="userCode != null and userCode != ''">
                         AND u.user_code = #{userCode}
                     </if>
@@ -55,11 +64,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="countProjectWorkLog" resultType="int">
         SELECT COUNT(*)
         FROM task_history th
-        INNER JOIN task t        ON th.task_id    = t.task_id
-        INNER JOIN users u       ON th.changed_by = u.user_code
-        INNER JOIN task_types tt ON t.type_id     = tt.type_id
+        INNER JOIN task t
+        		ON th.task_id = t.task_id
+        INNER JOIN users u
+        		ON th.changed_by = u.user_code
+        INNER JOIN task_types tt
+        		ON t.type_id     = tt.type_id
         <where>
-            AND t.project_id = #{projectId}
+            t.project_id = #{projectId}
             <if test="userCode != null and userCode != ''">
                 AND u.user_code = #{userCode}
             </if>

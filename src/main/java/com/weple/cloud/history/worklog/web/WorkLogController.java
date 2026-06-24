@@ -40,7 +40,7 @@ public class WorkLogController {
 			Model model) {
 		
 		 // 날짜 기본값: 최근 5일
-        if (startDate == null || startDate.isEmpty()) {
+		if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty()) {
             LocalDate today = LocalDate.now();
             endDate = today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
             startDate = today.minusDays(4).format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
@@ -71,6 +71,7 @@ public class WorkLogController {
 		
 		model.addAttribute("sidebarMenu", "work-history");
 		model.addAttribute("currentMenu", "none");
+		
 		return "weple/history/worklog";
 	}
 }

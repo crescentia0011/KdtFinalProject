@@ -8,35 +8,35 @@
             resultType="com.weple.cloud.system.service.SystemProjectVO">
         SELECT * FROM (
             SELECT
-                inner_q.PROJECT_ID,
-                inner_q.PROJECT_TITLE,
-                inner_q.PROJECT_DESCRIBE,
-                inner_q.PROJECT_IDENTIFIER,
-                inner_q.STATUS,
-                inner_q.START_DATE,
-                inner_q.FINISH_DATE,
-                inner_q.CREATED_AT,
+                inner_q.project_id,
+                inner_q.project_title,
+                inner_q.project_describe,
+                inner_q.project_identifier,
+                inner_q.status,
+                inner_q.start_date,
+                inner_q.finish_date,
+                inner_q.created_at,
                 ROWNUM AS RN
             FROM (
                 SELECT
-                    p.PROJECT_ID,
-                    p.PROJECT_TITLE,
-                    p.PROJECT_DESCRIBE,
-                    p.PROJECT_IDENTIFIER,
-                    c.DEFAULT_DESCRIBE AS STATUS,
-                    p.START_DATE,
-                    p.FINISH_DATE,
-                    p.CREATED_AT
-                FROM PROJECT p
-                LEFT JOIN COMMON_CODE c
-                    ON p.STATUS = c.COMMON_ID
-                   AND c.COMMON_CODE = '0J'
+                    p.project_id,
+                    p.project_title,
+                    p.project_describe,
+                    p.project_identifier,
+                    c.default_describe AS status,
+                    p.start_date,
+                    p.finish_date,
+                    p.created_at
+                FROM project p
+                LEFT JOIN common_code c
+                    ON p.status = c.common_id
+                   AND c.common_code = '0J'
                 <where>
                     <if test="keyword != null and keyword != ''">
-                        p.PROJECT_TITLE LIKE '%' || #{keyword} || '%'
+                        p.project_title LIKE '%' || #{keyword} || '%'
                     </if>
                 </where>
-                ORDER BY p.PROJECT_ID DESC
+                ORDER BY p.project_id DESC
             ) inner_q
             WHERE ROWNUM &lt;= #{offset} + #{pageSize}
         )
@@ -51,7 +51,7 @@
         FROM PROJECT p
         <where>
             <if test="keyword != null and keyword != ''">
-                p.PROJECT_TITLE LIKE '%' || #{keyword} || '%'
+                p.project_title LIKE '%' || #{keyword} || '%'
             </if>
         </where>
     </select>
@@ -117,12 +117,24 @@
         </foreach>
         ) t
     </insert>
+    
+    <!-- 프로젝트 수정 -->
+    <update id="updateProject" parameterType="com.weple.cloud.system.service.SystemProjectVO">
+    	UPDATE project
+	    SET project_title = #{projectTitle},
+	        project_describe = #{projectDescribe},
+	        project_identifier = #{projectIdentifier},
+	        status = #{status},
+	        start_date = #{startDate},
+	        finish_date = #{finishDate}
+	    WHERE project_id = #{projectId}
+    </update>
 
     <!-- 프로젝트 삭제 -->
     <delete id="deleteProject">
         DELETE
-        FROM PROJECT
-        WHERE PROJECT_ID = #{projectId}
+        FROM project
+        WHERE project_id = #{projectId}
     </delete>
 
 </mapper>

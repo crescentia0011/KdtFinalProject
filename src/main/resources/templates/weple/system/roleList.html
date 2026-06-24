@@ -11,24 +11,17 @@
 </head>
 <body>
 <section class="role-page">
+    <h3 class="role-title">역할 및 권한</h3>
     <div class="role-card">
-
-        <div class="role-toolbar">
-            <h3 class="role-title">역할 및 권한</h3>
-            <a th:href="@{/system/role/create}" class="role-create-btn">
-                <i class="fas fa-plus"></i>
-                <span>역할 등록</span>
-            </a>
-        </div>
 
         <div class="role-table-wrap">
             <table class="role-table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>역할명</th>
+                        <th class="text-left">역할명</th>
                         <th>생성일자</th>
-                        <th></th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,8 +40,8 @@
                             <form th:action="@{/system/role/delete}" method="post">
                                 <input type="hidden" name="roleId" th:value="${role.roleId}">
                                 <button type="button" class="delete-btn delete-role-btn">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+								    삭제
+								</button>
                             </form>
                         </td>
                     </tr>

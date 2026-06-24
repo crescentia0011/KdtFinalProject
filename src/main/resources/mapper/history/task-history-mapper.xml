@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.history.task.mapper.TaskHistoryMapper">
+
+    <insert id="insertTaskHistory">
+        INSERT INTO task_history (
+            history_id,
+            task_id,
+            changed_by,
+            action_type,
+            action_at
+        ) VALUES (
+            task_history_seq.NEXTVAL,
+            #{taskId},
+            #{changedBy},
+            #{actionType},
+            SYSDATE
+        )
+    </insert>
+
+    <select id="selectLastHistoryId" resultType="Long">
+        SELECT task_history_seq.CURRVAL
+        FROM dual
+    </select>
+
+
+    <insert id="insertTaskHistoryDetail">
+        INSERT INTO task_history_detail (
+        	detail_id,
+        	history_id,
+        	field_name,
+        	old_value,
+        	new_value
+        	)
+        VALUES (
+        	task_history_detail_seq.NEXTVAL,
+        	#{historyId},
+        	#{fieldName},
+        	#{oldValue},
+        	#{newValue}
+        	)
+    </insert>
+
+</mapper>

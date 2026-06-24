@@ -218,16 +218,16 @@
     transition: border-color 0.2s;
 }
 
-/* 등록일자 - readonly 회색 */
-.date-input[readonly] {
-    background-color: #f8faff;
-    color: #adb5bd;
-    cursor: not-allowed;
-    border-color: #e6ecf5;
-}
 
 /* 마감일자 - 흰색 활성 */
 .date-input:not([readonly]) {
+    background-color: #fff;
+    color: #222;
+    cursor: pointer;
+    border-color: #d9e1f2;
+}
+
+.date-input {
     background-color: #fff;
     color: #222;
     cursor: pointer;
@@ -327,4 +327,30 @@ span.flatpickr-weekday { font-size: 11px; font-weight: 700; color: #9aa8c4; }
     display: flex;
     align-items: center;
     justify-content: space-between;  
+}
+
+.module-readonly .custom-check-box {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.module-readonly .module-text {
+    color: #adb5bd;
+    cursor: not-allowed;
+}
+
+/* 설정 모듈 고정 체크 - 회색 처리 */
+#labelSettings .custom-check-box {
+    background: #adb5bd !important;
+    border-color: #adb5bd !important;
+    cursor: not-allowed;
+}
+
+#labelSettings .module-text {
+    color: #adb5bd;
+    cursor: not-allowed;
+}
+
+#labelSettings {
+    cursor: not-allowed;
 }

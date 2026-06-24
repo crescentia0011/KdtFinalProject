@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.system.mapper.SelectTotalTimeMapper">
+	<!-- 전체 소요시간 -->
+	<!-- 전체 조회 -->
+	<resultMap id="TotalTimeResultMap" type="com.weple.cloud.system.service.SelectTotalTimeVO">
+	    <result property="workId" column="work_id" />
+	    <result property="projectId" column="project_id" />
+	    <result property="taskId" column="task_id" />
+	    <result property="userCode" column="user_code" />
+	    <result property="workNameLabel" column="work_name_label" /> <result property="workDate" column="work_date" />
+	    <result property="spentContent" column="spent_content" />
+	    <result property="spentHour" column="spent_hour" />
+	</resultMap>
+	
+	<select id="SelectTotalTimeAll" resultType="SelectTotalTimeVO">
+		SELECT w_tme.work_id
+       		   , p.project_id
+       		   , t.task_id
+       		   , u.user_code
+       	       , w_cls.work_name   AS workNameLabel
+       		   , w_tme.work_date
+       		   , w_tme.spent_content
+       		   , w_tme.spent_hour
+       		   , w_tme.created_at
+       		   , w_tme.updated_at
+		FROM work_time w_tme
+		LEFT JOIN project P ON w_tme.project_id = p.project_id
+		LEFT JOIN users u ON u.user_code = w_tme.user_code
+		LEFT JOIN work_classification w_cls ON w_tme.work_name = w_cls.task_classification_id
+		LEFT JOIN task t ON t.task_id = w_tme.task_id
+		ORDER BY w_tme.work_id
+	</select>
+	
+	<!-- 등록 -->
+	<insert id="insertSelectTotalTime" parameterType="SelectTotalTimeVO">
+		INSERT INTO work_time (
+		                        work_id
+		                        , project_id
+		                        , task_id
+		                        , user_code
+		                        , work_name
+		                        , work_date
+		                        , spent_content
+		                        , spent_hour
+		                        , created_at
+		                        , updated_at
+		                       )
+		VALUES (
+		        ATE_DAY_SEQ.NEXTVAL
+		        , #{projectId}
+		        , #{taskId}
+		        , #{userCode}
+		        , #{workName}
+		        , #{workDate}
+		        , #{spentContent}
+		        , #{spentHour}
+		        , SYSDATE
+		        , SYSDATE
+		)
+	</insert>	
+	
+	<!-- 수정 -->
+	<update id="updateSelectTotalTime" parameterType="SelectTotalTimeVO">
+		UPDATE work_time
+		SET    project_id = #{projectId}
+       		   , task_id = #{taskId}
+       		   , user_code = #{userCode}
+       	       , work_name = #{workName}
+       		   , work_date = #{workDate}
+       		   , spent_content = #{spentContent}
+       		   , spent_hour = #{spentHour}
+       		   , updated_at = SYSDATE  WHERE work_id = #{workId}
+		WHERE work_id = #{workId}
+	</update>
+	
+	<!-- 삭제 -->
+	<delete id="deleteSelectTotalTime" parameterType="long">
+		DELETE FROM work_time
+		WHERE work_id = #{workId}
+	</delete>
+	
+	
+</mapper>

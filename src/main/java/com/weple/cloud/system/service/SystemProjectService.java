@@ -8,5 +8,9 @@ public interface SystemProjectService {
 	
 	List<SystemProjectVO> selectProjectList(SystemProjectVO vo);
 	int selectProjectCount(SystemProjectVO vo);
+	
+	SystemProjectVO selectProjectById(Long projectId);
+	int updateProject(SystemProjectVO projectVO);
+	
 	int deleteProject(String projectId);
 }

@@ -100,71 +100,144 @@
         <h4 class="sub-list-title">전체 작업 내역 목록</h4>
  
         <th:block th:with="validLogs=${workLogList != null ? workLogList.?[#this != null] : {}}">
- 
-            <div th:if="${#lists.isEmpty(validLogs)}" class="empty-message">조회된 작업 내역이 없습니다.</div>
- 
-            <th:block th:each="log, stat : ${validLogs}"
-                      th:with="prevLog=${stat.first ? null : validLogs[stat.index - 1]},
-                               prevKey=${(prevLog == null or prevLog.actionAt == null) ? null : #temporals.format(prevLog.actionAt, 'yyyy-MM-dd')},
-                               curKey=${log.actionAt != null ? #temporals.format(log.actionAt, 'yyyy-MM-dd') : '미정'}">
- 
-                <th:block th:if="${stat.first or prevKey != curKey}">
- 
-                    <th:block th:unless="${stat.first}">
-                        </tbody>
-                    </th:block>
- 
-                    <div class="date-section-title" th:text="${curKey}">2026-06-19</div>
- 
-                    <div class="project-table-wrap">
-                        <table class="project-table">
-                            <thead>
-                                <tr>
-                                    <th>등록일시</th>
-                                    <th>프로젝트</th>
-                                    <th>사용자</th>
-                                    <th>일감</th>
-                                    <th>일감유형</th>
-                                    <th>작업유형</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                </th:block>
- 
-                <tr class="worklog-item-row">
-                    <td th:text="${log.actionAt != null ? #temporals.format(log.actionAt, 'HH:mm') : '00:00'}">14:20</td>
-                    <td class="text-left" th:text="${log.projectTitle}">WEPLE</td>
-                    <td th:text="${log.userName}">신짱구</td>
-                    <td class="text-left" th:text="${log.taskTitle}">로그인 기능 구현</td>
-                    <td>
-                        <span th:if="${log.typeName == '기획'}" class="status-badge type-dev" th:text="${log.typeName}">기획</span>
-                        <span th:if="${log.typeName == '새 기능'}" class="status-badge type-bug" th:text="${log.typeName}">새 기능</span>
-                        <span th:if="${log.typeName == '개선'}" class="status-badge type-support" th:text="${log.typeName}">개선</span>
-                        <span th:if="${log.typeName == '피드백'}" class="status-badge type-improve" th:text="${log.typeName}">피드백</span>
-                        <span th:if="${log.typeName != '기획' and log.typeName != '새 기능' and log.typeName != '개선' and log.typeName != '피드백'}" class="status-badge type-default" th:text="${log.typeName}">-</span>
-                    </td>
-                    <td class="action-cell" th:text="${log.actionType}">CREATE</td>
-                </tr>
- 
-                <th:block th:if="${stat.last}">
-                            </tbody>
-                        </table>
-                    </div>
-                </th:block>
- 
-            </th:block>
- 
-        </th:block>
+
+    <div th:if="${#lists.isEmpty(validLogs)}" class="empty-message">
+        조회된 작업 내역이 없습니다.
+    </div>
+
+    <th:block th:unless="${#lists.isEmpty(validLogs)}"
+              th:each="log, stat : ${validLogs}"
+              th:with="
+                prevLog=${stat.first ? null : validLogs[stat.index - 1]},
+                prevKey=${(prevLog == null or prevLog.actionAt == null) ? null : #temporals.format(prevLog.actionAt, 'yyyy-MM-dd')},
+                curKey=${log.actionAt != null ? #temporals.format(log.actionAt, 'yyyy-MM-dd') : '미정'}">
+
+        <th:block th:if="${stat.first or prevKey != curKey}">
+
+	            <div class="date-section-title"
+	                 th:text="${curKey}">
+	                2026-06-19
+	            </div>
+	
+	            <div class="project-table-wrap">
+	                <table class="project-table">
+	                    <thead>
+	                        <tr>
+	                            <th>등록일시</th>
+	                            <th>프로젝트</th>
+	                            <th>사용자</th>
+	                            <th>일감</th>
+	                            <th>일감유형</th>
+	                            <th>작업유형</th>
+	                        </tr>
+	                    </thead>
+	
+	                    <tbody>
+	
+	                        <tr class="worklog-item-row"
+	                            th:each="innerLog : ${validLogs}"
+	                            th:if="${innerLog.actionAt != null ? #temporals.format(innerLog.actionAt,'yyyy-MM-dd') : '미정'} == ${curKey}">
+	
+	                            <td th:text="${innerLog.actionAt != null ? #temporals.format(innerLog.actionAt,'HH:mm') : '00:00'}">
+	                                14:20
+	                            </td>
+	
+	                            <td class="text-left"
+	                                th:text="${innerLog.projectTitle}">
+	                                WEPLE
+	                            </td>
+	
+	                            <td th:text="${innerLog.userName}">
+	                                신짱구
+	                            </td>
+	
+	                            <td class="text-left"
+	                                th:text="${innerLog.taskTitle}">
+	                                로그인 기능 구현
+	                            </td>
+	
+	                            <td>
+	                                <span th:if="${innerLog.typeName == '기획'}"
+	                                      class="status-badge type-dev"
+	                                      th:text="${innerLog.typeName}"></span>
+	
+	                                <span th:if="${innerLog.typeName == '새 기능'}"
+	                                      class="status-badge type-bug"
+	                                      th:text="${innerLog.typeName}"></span>
+	
+	                                <span th:if="${innerLog.typeName == '개선'}"
+	                                      class="status-badge type-support"
+	                                      th:text="${innerLog.typeName}"></span>
+	
+	                                <span th:if="${innerLog.typeName == '피드백'}"
+	                                      class="status-badge type-improve"
+	                                      th:text="${innerLog.typeName}"></span>
+	
+	                                <span th:if="${innerLog.typeName != '기획'
+	                                           and innerLog.typeName != '새 기능'
+	                                           and innerLog.typeName != '개선'
+	                                           and innerLog.typeName != '피드백'}"
+	                                      class="status-badge type-default"
+	                                      th:text="${innerLog.typeName}">
+	                                </span>
+	                            </td>
+	
+	                            <td>
+	                                <span th:if="${innerLog.actionType == 'CREATE'}"
+	                                      class="action-badge action-create">
+	                                      CREATE
+	                                </span>
+	
+	                                <span th:if="${innerLog.actionType == 'UPDATE'}"
+	                                      class="action-badge action-update">
+	                                      UPDATE
+	                                </span>
+	
+	                                <span th:if="${innerLog.actionType == 'DELETE'}"
+	                                      class="action-badge action-delete">
+	                                      DELETE
+	                                </span>
+	
+	                                <span th:if="${innerLog.actionType != 'CREATE'
+	                                           and innerLog.actionType != 'UPDATE'
+	                                           and innerLog.actionType != 'DELETE'}"
+	                                      class="action-badge action-default"
+	                                      th:text="${innerLog.actionType}">
+	                                </span>
+	                            </td>
+	
+	                        </tr>
+	
+	                    </tbody>
+	                </table>
+	            </div>
+	
+	        </th:block>
+	
+	    </th:block>
+	
+	</th:block>
  
         <div class="pagination-wrap">
-            <a href="#" class="page-btn disabled">&lt; 이전</a>
-            <a href="#" class="page-btn active">1</a>
-            <a href="#" class="page-btn">2</a>
-            <a href="#" class="page-btn">3</a>
-            <a href="#" class="page-btn">4</a>
-            <a href="#" class="page-btn">5</a>
-            <a href="#" class="page-btn">다음 &gt;</a>
-        </div>
+	    <a th:href="${currentPage > 1}
+	            ? @{/worklog(page=${currentPage - 1}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}
+	            : '#'"
+	       th:classappend="${currentPage <= 1} ? 'disabled'"
+	       class="page-btn">&lt; 이전</a>
+	
+	    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+	        <a th:href="@{/worklog(page=${i}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}"
+	           th:text="${i}"
+	           th:classappend="${i == currentPage} ? 'active'"
+	           class="page-btn">1</a>
+	    </th:block>
+	
+	    <a th:href="${currentPage < totalPages}
+	            ? @{/worklog(page=${currentPage + 1}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}
+	            : '#'"
+	       th:classappend="${currentPage >= totalPages} ? 'disabled'"
+	       class="page-btn">다음 &gt;</a>
+	</div>
     </div>
     
    

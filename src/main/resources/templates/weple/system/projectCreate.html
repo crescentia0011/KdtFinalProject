@@ -11,62 +11,66 @@
 <body>
 
     <section class="project-page">
-    	<!-- 토스트 -->
-	    <div id="toastWrap" class="toast-wrap" th:if="${toastError}">
-	        <div class="toast-msg toast-error" th:text="${toastError}"></div>
-	    </div>
+        <!-- 토스트 -->
+        <div id="toastWrap" class="toast-wrap" th:if="${toastError}">
+            <div class="toast-msg toast-error" th:text="${toastError}"></div>
+        </div>
+
         <div class="project-toolbar-top">
             <h3 class="project-title">프로젝트 생성</h3>
         </div>
-        
+
         <div class="project-card">
             <form id="projectForm" method="post" th:action="@{/system/project}">
-                
+
                 <div class="form-group-row">
                     <label for="projectTitle" class="form-label required">프로젝트명</label>
-                    <input type="text" id="projectTitle" name="projectTitle" 
+                    <input type="text" id="projectTitle" name="projectTitle"
                            class="form-input-text" placeholder="프로젝트명을 입력하세요." required>
                 </div>
 
                 <div class="form-group-row">
                     <label for="projectDescribe" class="form-label">설명</label>
-                    <textarea id="projectDescribe" name="projectDescribe" 
+                    <textarea id="projectDescribe" name="projectDescribe"
                               class="form-textarea" placeholder="프로젝트의 설명을 입력하세요."></textarea>
                 </div>
 
                 <div class="form-group-row">
                     <label for="projectIdentifier" class="form-label required">식별자</label>
                     <div class="identifier-input-wrap">
-                        <input type="text" id="projectIdentifier" name="projectIdentifier" 
-                               class="form-input-text" placeholder="식별자를 입력하세요 (예: my-project)" required>
+                        <input type="text" id="projectIdentifier" name="projectIdentifier"
+                               class="form-input-text"
+                               placeholder="식별자를 입력하세요 (예: my-project)" required>
                     </div>
                 </div>
-                
+
                 <div class="form-group-row">
-				    <label class="form-label">날짜</label>
-				    <div class="date-row">
-				        <div class="date-field">
-				            <label for="startDate" class="date-label">등록일자</label>
-				            <input type="text" id="startDate" name="startDate"
-				                   class="form-input-text date-input" readonly>
-				        </div>
-				        <div class="date-field">
-				            <label for="finishDate" class="date-label required">마감일자</label>
-				            <input type="text" id="finishDate" name="finishDate"
-				                   class="form-input-text date-input" placeholder="마감일자를 선택하세요" required>
-				        </div>
-				    </div>
-				</div>
-                
+                    <label class="form-label">날짜</label>
+                    <div class="date-row">
+                        <div class="date-field">
+                            <label for="startDate" class="date-label required">시작일자</label>
+                            <input type="text" id="startDate" name="startDate"
+                                   class="form-input-text date-input"
+                                   placeholder="시작일자를 선택하세요" required>
+                        </div>
+                        <div class="date-field">
+                            <label for="finishDate" class="date-label required">마감일자</label>
+                            <input type="text" id="finishDate" name="finishDate"
+                                   class="form-input-text date-input"
+                                   placeholder="마감일자를 선택하세요" required>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group-row">
                     <div class="module-label-row">
-					    <label class="form-label required">모듈</label>
-					    <div class="module-select-controls">
-					        <button type="button" class="module-ctrl-btn" id="selectAll">전체선택</button>
-					        <button type="button" class="module-ctrl-btn" id="deselectAll">전체해제</button>
-					    </div>
-					</div>
-        
+                        <label class="form-label required">모듈</label>
+                        <div class="module-select-controls">
+                            <button type="button" class="module-ctrl-btn" id="selectAll">전체선택</button>
+                            <button type="button" class="module-ctrl-btn" id="deselectAll">전체해제</button>
+                        </div>
+                    </div>
+
                     <div class="module-box-container">
                         <div class="module-flex-layout">
                             <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b1" checked><span class="custom-check-box"></span><span class="module-text">개요</span></label></div>
@@ -80,7 +84,15 @@
                             <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b8" checked><span class="custom-check-box"></span><span class="module-text">저장소</span></label></div>
                             <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b9" checked><span class="custom-check-box"></span><span class="module-text">칸반보드</span></label></div>
                             <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b10" checked><span class="custom-check-box"></span><span class="module-text">캘린더</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b11" checked><span class="custom-check-box"></span><span class="module-text">설정</span></label></div>
+                            <!-- 설정: checked 고정, JS로 클릭 차단 -->
+                            <div class="module-item-wrapper">
+                                <label class="checkbox-inline" id="labelSettings">
+                                    <input type="checkbox" name="moduleNames" value="b11"
+                                           checked id="moduleSettings">
+                                    <span class="custom-check-box"></span>
+                                    <span class="module-text">설정</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -89,77 +101,76 @@
                     <button type="button" class="page-btn btn-cancel" onclick="history.back()">취소</button>
                     <button type="submit" class="page-btn active btn-submit">등록</button>
                 </div>
-                
+
             </form>
         </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/ko.js"></script>
-		
-		<script>
-		document.addEventListener("DOMContentLoaded", function () {
-		
-		    const startEl = document.getElementById("startDate");
-		    const finishEl = document.getElementById("finishDate");
-		
-		    const today = new Date();
-		
-		    const yyyy = today.getFullYear();
-		    const mm = String(today.getMonth() + 1).padStart(2, "0");
-		    const dd = String(today.getDate()).padStart(2, "0");
-		
-		    startEl.value = `${yyyy}-${mm}-${dd}`;
-		
-		    flatpickr.localize(flatpickr.l10ns.ko);
-		
-		    flatpickr("#finishDate", {
-		        dateFormat: "Y-m-d",
-		        minDate: "today",
-		        allowInput: false
-		    });
-		
-		});
-		
-		document.getElementById("projectForm").addEventListener("submit", function(e) {
-		    const checked = document.querySelectorAll('input[name="moduleNames"]:checked');
-		    if (checked.length === 0) {
-		        e.preventDefault();
-		        showToast("최소 1개 이상의 모듈을 선택해야 합니다.", "error");
-		    }
-		});
-		
-		// 토스트 자동 제거
-		const toastWrap = document.getElementById("toastWrap");
-		if (toastWrap) {
-		    setTimeout(() => toastWrap.remove(), 3500);
-		}
-		
-		// 전체선택
-		document.getElementById("selectAll").addEventListener("click", function () {
-		    document.querySelectorAll('input[name="moduleNames"]')
-		        .forEach(cb => cb.checked = true);
-		});
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/ko.js"></script>
 
-		// 전체해제
-		document.getElementById("deselectAll").addEventListener("click", function () {
-		    document.querySelectorAll('input[name="moduleNames"]')
-		        .forEach(cb => cb.checked = false);
-		});
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
 
-		// 폼 제출 시 최소 1개 체크 검증
-		document.getElementById("projectForm").addEventListener("submit", function (e) {
-		    const checked = document.querySelectorAll('input[name="moduleNames"]:checked');
-		    if (checked.length === 0) {
-		        e.preventDefault();
-		        // 토스트 재활용
-		        const wrap = document.createElement("div");
-		        wrap.className = "toast-wrap";
-		        wrap.innerHTML = '<div class="toast-msg toast-error">최소 1개 이상의 모듈을 선택해야 합니다.</div>';
-		        document.querySelector(".project-page").prepend(wrap);
-		        setTimeout(() => wrap.remove(), 3500);
-		    }
-		});
-		</script>
-        
+            flatpickr.localize(flatpickr.l10ns.ko);
+
+            const startPicker = flatpickr("#startDate", {
+                dateFormat: "Y-m-d",
+                allowInput: false,
+                onChange: function(selectedDates) {
+                    if (selectedDates.length > 0) {
+                        finishPicker.set("minDate", selectedDates[0]);
+                    }
+                }
+            });
+
+            const finishPicker = flatpickr("#finishDate", {
+                dateFormat: "Y-m-d",
+                allowInput: false
+            });
+
+            // 설정 모듈: 클릭해도 해제 안 되도록
+            const settingsCheckbox = document.getElementById("moduleSettings");
+            settingsCheckbox.addEventListener("click", function (e) {
+                e.preventDefault();
+                this.checked = true;
+            });
+
+            // 전체선택
+            document.getElementById("selectAll").addEventListener("click", function () {
+                document.querySelectorAll('input[name="moduleNames"]')
+                    .forEach(cb => cb.checked = true);
+            });
+
+            // 전체해제 (설정 제외)
+            document.getElementById("deselectAll").addEventListener("click", function () {
+                document.querySelectorAll('input[name="moduleNames"]')
+                    .forEach(cb => {
+                        if (cb.value !== "b11") cb.checked = false;
+                    });
+            });
+
+            // 폼 제출 시 최소 1개 체크 검증
+            document.getElementById("projectForm").addEventListener("submit", function (e) {
+                const checked = document.querySelectorAll('input[name="moduleNames"]:checked');
+                if (checked.length === 0) {
+                    e.preventDefault();
+                    const wrap = document.createElement("div");
+                    wrap.className = "toast-wrap";
+                    wrap.innerHTML = '<div class="toast-msg toast-error">최소 1개 이상의 모듈을 선택해야 합니다.</div>';
+                    document.querySelector(".project-page").prepend(wrap);
+                    setTimeout(() => wrap.remove(), 3500);
+                }
+            });
+
+            // 토스트 자동 제거
+            const toastWrap = document.getElementById("toastWrap");
+            if (toastWrap) {
+                setTimeout(() => toastWrap.remove(), 3500);
+            }
+
+        });
+        </script>
+
     </section>
 
 </body>

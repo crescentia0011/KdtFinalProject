@@ -1,14 +1,553 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+<html xmlns:th="http://www.thymeleaf.org/"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+<title>WEPLE</title>
 </head>
 <body>
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+	<section>
+		<div class="worktime-container">
+			<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+			    <h3 style="margin: 0; font-size: 22px; font-weight: 700;">소요시간</h3>
+			    <button class="btn btn-primary" th:onclick="|location.href='@{/insertTotalTime}'|">+ 소요시간 등록</button>
+			</div>
+
+			<!-- 검색 영역 -->
+			<div class="search-box">
+				<div class="search-title" style="margin-bottom: 10px; font-weight: bold; color: #1976d2; display: flex; align-items: center;">
+                    <span style="margin-right: 5px;">▼</span> 검색조건
+                </div>
+				<div class="search-top">
+					<div class="search-left">
+						<div class="search-item">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; color: #1976d2;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+						    <label>작업시간</label>
+						    <input type="text" name="workTime" placeholder="작업시간을 입력하세요." style="width: 180px; height: 36px; border: 1px solid #d6d6d6; border-radius: 4px; padding: 0 10px;">
+						</div>
+					</div>
+					<div class="search-right">
+					    <button class="btn btn-primary">검색조건 추가 ▼</button>
+					</div>
+				</div>
+
+				<div class="search-bottom">
+					<div class="search-action">
+						<button class="btn btn-primary">적용</button>
+						<button class="btn btn-light">지우기</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- 총 시간 -->
+			<div class="summary-area">
+				<span>시간 : <strong>4:00</strong></span>
+			</div>
+
+			<!-- 테이블 -->
+			<div class="table-wrapper">
+				<table class="data-table">
+					<thead>
+						<tr>
+							<th width="50"><input type="checkbox"></th>
+							<th width="120">프로젝트</th>
+							<th width="120">작업일자 ▼</th>
+							<th width="150">사용자</th>
+							<th width="120">작업분류</th>
+							<th>일감</th>
+							<th>내용</th>
+							<th width="90">시간</th>
+							<th width="70">관리</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:if="${#lists.isEmpty(totalTimeList)}">
+               				<td colspan="9">조회된 데이터가 없습니다.</td>
+            			</tr>
+            			
+            			<th:block th:each="time : ${totalTimeList}">
+						<tr>
+							<td><input type="checkbox"></td>
+			                <td th:text="${time.projectId}">프로젝트</td>
+			                <td th:text="${time.workDate != null} ? ${#dates.format(time.workDate, 'yyyy/MM/dd')} : '-'">작업일자</td>
+			                <td th:text="${time.userCode}">사용자</td>
+			                <td th:text="${time.workNameLabel}">작업분류</td>
+			                <td th:text="${time.taskId}">일감</td>
+			                <td th:text="${time.spentContent}">내용</td>
+			                <td class="time" th:text="${time.spentHour} + ':00'">시간</td>
+			                <td>
+							    <button class="btn-edit" th:onclick="|location.href='@{/edit(id=${time.workId})}'|">수정</button>
+							    <button class="btn-del" th:onclick="|deleteWork(${time.workId})|">삭제</button>
+							</td>
+						</tr>
+						</th:block>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- 하단 -->
+			<div class="bottom-area">
+			    <div class="paging">
+			        </div>
+			    <div class="export-area">
+			        <button class="csv-btn" onclick="exportToCSV()">내보내기 : CSV</button>
+			    </div>
+			</div>
+		</div>
+	<script>	
+	//시간 합계
+	document.addEventListener("DOMContentLoaded", function() {
+	    let totalMinutes = 0;
+	    document.querySelectorAll(".time").forEach(el => {
+	        const parts = el.innerText.split(':');
+	        const h = parseInt(parts[0]) || 0;
+	        const m = parseInt(parts[1]) || 0;
+	        
+	        totalMinutes += (h * 60) + m;
+	    });
+	    const totalHours = Math.floor(totalMinutes / 60);
+	    const remainingMinutes = totalMinutes % 60;
+	    const formattedMinutes = remainingMinutes.toString().padStart(2, '0');
+	    document.querySelector(".summary-area strong").innerText = `${totalHours}:${formattedMinutes}`;
+	});
+	    
+	    //삭제버튼 컨펌
+	    function deleteWork(workId) {
+	        if(confirm("정말 삭제하시겠습니까?")) {
+	            location.href = '/deleteTotalTime?workId=' + workId;
+	        }
+	    }
+	    
+	    //페이징
+	    let currentPage = 1;
+	    const itemsPerPage = 20;
+	    const rows = document.querySelectorAll(".data-table tbody tr:not([th\\:if])");
+	    function showPage(page) {
+	        currentPage = page;
+	        rows.forEach((row, index) => {
+	            row.style.display = (index >= (page - 1) * itemsPerPage && index < page * itemsPerPage) 
+	                                ? "" : "none";
+	        });
+	        updatePagination();
+	    }
+
+	    function updatePagination() {
+	        const pageCount = Math.ceil(rows.length / itemsPerPage);
+	        const pagingDiv = document.querySelector(".paging");
+	        
+	        pagingDiv.innerHTML = `
+	            <button class="page-btn" onclick="showPage(Math.max(1, currentPage - 1))">&lt; 이전</button>
+	            <span id="page-numbers"></span>
+	            <button class="page-btn" onclick="showPage(Math.min(${pageCount}, currentPage + 1))">다음 &gt;</button>
+	        `;
+
+	        const numberSpan = document.getElementById("page-numbers");
+	        for (let i = 1; i <= pageCount; i++) {
+	            const a = document.createElement("a");
+	            a.href = "#";
+	            a.innerText = i;
+	            if (i === currentPage) a.className = "active";
+	            a.onclick = (e) => { e.preventDefault(); showPage(i); };
+	            numberSpan.appendChild(a);
+	        }
+	    }
+
+	    document.addEventListener("DOMContentLoaded", () => {
+	        showPage(1);
+	        
+	     // 엔터키 검색
+	        searchInput.addEventListener("keypress", function(event) {
+	            if (event.key === "Enter") {
+	                event.preventDefault();
+	                searchBtn.click();
+	            }
+	        });
+	    });
+	    
+	 	// 검색
+	    const searchBtn = document.querySelector(".btn-primary");
+	    const clearBtn = document.querySelector(".btn-light");
+	    const searchInput = document.querySelector("input[name='workTime']");
+
+	    function applySearch() {
+	        const keyword = searchInput.value.toLowerCase();
+	        const rows = document.querySelectorAll(".data-table tbody tr:not([th\\:if])");
+	        
+	        rows.forEach(row => {
+	            const timeText = row.cells[7].innerText.toLowerCase();
+	            if (timeText.includes(keyword)) {
+	                row.style.display = "";
+	            } else {
+	                row.style.display = "none";
+	            }
+	        });
+	    }
+
+	    searchBtn.addEventListener("click", () => {
+	        const keyword = searchInput.value.toLowerCase();
+	        const rows = document.querySelectorAll(".data-table tbody tr:not([th\\:if])");
+	        
+	        const filteredRows = Array.from(rows).filter(row => {
+	            const timeText = row.querySelector('.time').innerText.toLowerCase();
+	            return timeText.includes(keyword);
+	        });
+
+	        rows.forEach(row => {
+	            const timeText = row.cells[7].innerText.toLowerCase();
+	            row.style.display = timeText.includes(keyword) ? "" : "none";
+	            row.classList.toggle("filtered", timeText.includes(keyword));
+	        });
+	    });
+
+	    // 지우기 버튼 클릭 이벤트
+	    clearBtn.addEventListener("click", () => {
+	        searchInput.value = "";
+	        const rows = document.querySelectorAll(".data-table tbody tr:not([th\\:if])");
+	        rows.forEach(row => {
+	            row.style.display = "";
+	            row.classList.remove("filtered");
+	        });
+	        showPage(1);
+	    });
+	    
+	    //CSV 내보내기
+	    function exportToCSV() {
+		    const today = new Date();
+		    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
+		    const fileName = `worktime_${dateStr}.csv`;
+		
+		    let csv = [];
+		    const rows = document.querySelectorAll(".data-table tr:not([style*='display: none'])");
+		
+		    for (let i = 0; i < rows.length; i++) {
+		        let row = [], cols = rows[i].querySelectorAll("td, th");
+		        for (let j = 0; j < cols.length; j++) {
+		            let text = cols[j].innerText.replace(/"/g, '""');
+		            row.push('"' + text + '"');
+		        }
+		        csv.push(row.join(","));
+		    }
+		
+		    const csvFile = new Blob(["\ufeff" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+		    const downloadLink = document.createElement("a");
+		    downloadLink.href = URL.createObjectURL(csvFile);
+		    downloadLink.download = fileName;
+		    downloadLink.click();
+		}
+	    
+	</script>
+		<style>
+/* 관리 버튼 스타일 */
+.btn-edit, .btn-del {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.btn-edit:hover { background: #e9f3ff; color: #1976d2; border-color: #1976d2; }
+.btn-del:hover { background: #fff1f1; color: #d32f2f; border-color: #d32f2f; }
+/* =========================공통========================= */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: "Malgun Gothic", sans-serif;
+	font-size: 14px;
+	color: #333;
+	background: #fff;
+}
+
+.worktime-container {
+	width: 95%;
+	margin: 25px auto;
+}
+
+/* =========================제목========================= */
+.page-header {
+	margin-bottom: 15px;
+}
+
+.page-header h3 {
+	font-size: 22px;
+	font-weight: 700;
+	color: #222;
+}
+
+/* =========================검색영역========================= */
+.search-box {
+	border: 1px solid #dcdfe6;
+	border-radius: 6px;
+	background: #fff;
+	padding: 20px 25px;
+	margin-bottom: 20px;
+}
+
+.search-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.search-left {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
+
+.search-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.search-item label {
+	font-weight: 600;
+}
+
+.search-item select {
+	width: 160px;
+	height: 36px;
+	border: 1px solid #d6d6d6;
+	border-radius: 4px;
+	padding: 0 10px;
+	outline: none;
+	background: #fff;
+}
+
+.search-bottom {
+	display: flex;
+	justify-content: flex-start;
+}
+
+.search-action {
+	display: flex;
+	gap: 10px;
+}
+
+/* =========================버튼========================= */
+.btn {
+	min-width: 90px;
+	height: 36px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: .2s;
+	font-size: 14px;
+}
+
+.btn-primary {
+	background: #1976d2;
+	color: #fff;
+	border: 1px solid #1976d2;
+}
+
+.btn-primary:hover {
+	background: #1565c0;
+}
+
+.btn-outline {
+	background: #fff;
+	color: #1976d2;
+	border: 1px solid #1976d2;
+}
+
+.btn-outline:hover {
+	background: #1976d2;
+	color: #fff;
+}
+
+.btn-light {
+	background: #fff;
+	border: 1px solid #ccc;
+}
+
+.btn-light:hover {
+	background: #f5f5f5;
+}
+
+/* =========================총 시간========================= */
+.summary-area {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 8px;
+	font-size: 15px;
+}
+
+.summary-area strong {
+	color: #1976d2;
+}
+
+/* =========================테이블========================= */
+.table-wrapper {
+	border: 1px solid #e2e2e2;
+	border-radius: 6px;
+	overflow: hidden;
+	background: #fff;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.data-table thead {
+	background: #f7f8fa;
+}
+
+.data-table th, .data-table td {
+    padding: 10px 8px; /* 위아래 패딩 추가 */
+    border-bottom: 1px solid #e5e5e5;
+    text-align: center;
+    vertical-align: middle; /* 세로 중앙 정렬 */
+}
+
+.data-table td{
+	padding: 10px 8px;
+    white-space: nowrap;      /* 줄바꿈 금지 */
+    overflow: hidden;         /* 넘치는 글자 숨김 */
+    text-overflow: ellipsis;
+}
+
+/* 추가: 내용(내용 컬럼)은 왼쪽 정렬이 보기 좋을 수 있음 */
+.data-table td:nth-child(7), .data-table th:nth-child(7) {
+    white-space: normal;
+    text-align: left;
+}
+
+.data-table tbody tr:hover {
+	background: #f8fbff;
+}
+
+.data-table input[type=checkbox] {
+	cursor: pointer;
+}
+
+.time {
+	color: #1976d2;
+	font-weight: bold;
+}
+
+/* =========================하단========================= */
+.bottom-area {
+	margin-top: 30px;
+	position: relative;
+	min-height: 40px;
+	display: flex;
+	justify-content: center; /* 중앙 정렬 */
+	align-items: center;
+}
+
+/* 페이징 컨테이너 */
+.paging {
+	display: flex;
+	align-items: center;
+	gap: 10px; /* 버튼과 숫자 사이 간격 */
+	font-size: 14px;
+	color: #666;
+}
+
+/* 이전/다음 버튼 스타일 */
+.page-btn {
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: #999;
+	font-weight: 500;
+	padding: 5px 10px;
+}
+
+.page-btn:hover {
+	color: #1976d2;
+}
+
+/* 숫자 링크 스타일 */
+.paging a {
+	width: 28px;
+	height: 28px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-decoration: none;
+	color: #666;
+	border-radius: 4px;
+	transition: all 0.2s;
+}
+
+/* 활성화된 페이지 (파란색 박스) */
+.paging a.active {
+	background: #1976d2;
+	color: #fff;
+	font-weight: bold;
+}
+
+.paging a:hover:not(.active) {
+	background: #f0f0f0;
+}
+
+/* CSV 버튼 영역을 우측 하단으로 고정 */
+.export-area {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.csv-btn {
+	border: none;
+	background: none;
+	color: #1976d2;
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.csv-btn:hover {
+	text-decoration: underline;
+}
+
+/* =========================반응형========================= */
+@media ( max-width :900px) {
+	.search-top {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 15px;
+	}
+	.bottom-area {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+	.paging {
+		position: static;
+		transform: none;
+		justify-content: center;
+	}
+	.export-area {
+		justify-content: center;
+	}
+}
+
+/* 이제 각 열의 너비를 비율에 맞게 설정하세요 */
+.data-table th:nth-child(1) { width: 5%; }  /* 체크박스 */
+.data-table th:nth-child(2) { width: 10%; } /* 프로젝트 */
+.data-table th:nth-child(3) { width: 10%; } /* 작업일자 */
+.data-table th:nth-child(4) { width: 12%; } /* 사용자 */
+.data-table th:nth-child(5) { width: 10%; } /* 작업분류 */
+.data-table th:nth-child(6) { width: 10%; } /* 일감 */
+.data-table th:nth-child(7) { width: auto; } /* 내용 (남은 공간 다 차지) */
+.data-table th:nth-child(8) { width: 8%; }  /* 시간 */
+.data-table th:nth-child(9) { width: 10%; } /* 관리 */
+</style>
+	</section>
 
 </body>
 </html>

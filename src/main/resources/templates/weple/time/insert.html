@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head>
+<title>WEPLE</title>
+</head>
+<body>
+
+	<section>
+		<div class="worktime-container">
+			<div class="page-header">
+				<h3>소요시간 등록</h3>
+			</div>
+
+			<form th:action="@{/insertTotalTime}" method="post"
+				class="insert-form">
+				<div class="form-group">
+				    <label>프로젝트 <span>*</span></label> 
+				    <select name="projectId" required>
+				        <option value="">선택하세요.</option>
+				        <option th:each="p : ${projectList}" 
+				                th:value="${p.projectId}" 
+				                th:text="${p.projectName}">프로젝트명</option>
+				    </select>
+				</div>
+
+				<div class="form-group">
+					<label>일감</label>
+					<div class="input-inline">
+						<select name="taskId">
+							<option value="">선택하세요.</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label>사용자 <span>*</span></label> <input type="text"
+						name="userCode" placeholder="사용자를 입력하세요." required>
+				</div>
+
+				<div class="form-group">
+					<label>작업일자 <span>*</span></label> <input type="date"
+						name="workDate" required>
+				</div>
+
+				<div class="form-group">
+					<label>소요시간 <span>*</span></label> <input type="number"
+						name="spentHour" step="0.1" placeholder="시간 입력" required>
+				</div>
+
+				<div class="form-group">
+					<label>설명</label>
+					<textarea name="spentContent" rows="3"></textarea>
+				</div>
+
+				<div class="form-group">
+					<label>작업분류 <span>*</span></label> <select name="workNameLabel"
+						required>
+						<option value="">--- 선택하세요 ---</option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<label>진척도</label>
+					<div class="progress-area">
+						<input type="range" name="progress" min="0" max="100"> <span>0%</span>
+					</div>
+				</div>
+
+				<div class="btn-area">
+					<button type="button" class="btn btn-light"
+						onclick="history.back()">취소</button>
+					<button type="submit" class="btn btn-primary">등록</button>
+				</div>
+			</form>
+		</div>
+
+		<style>
+worktime-container {
+	width: 800px;
+	margin: 40px auto;
+}
+
+.page-header h3 {
+	font-size: 20px;
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+.insert-form {
+	background: #fff;
+	padding: 30px;
+	border: 1px solid #e2e2e2;
+	border-radius: 6px;
+}
+
+.form-group {
+	display: flex;
+	align-items: center;
+	margin-bottom: 15px;
+}
+
+.form-group label {
+	width: 120px;
+	font-weight: 600;
+}
+
+.form-group label span {
+	color: #d32f2f;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+	flex: 1;
+	height: 38px;
+	padding: 0 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.form-group textarea {
+	height: auto;
+	padding: 10px;
+}
+
+.input-inline {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.text-info {
+	color: #1976d2;
+	font-size: 13px;
+}
+
+.progress-area {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
+
+.btn-area {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 30px;
+}
+</style>
+	</section>
+
+</body>
+</html>

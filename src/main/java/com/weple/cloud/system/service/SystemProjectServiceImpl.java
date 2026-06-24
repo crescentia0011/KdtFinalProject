@@ -22,7 +22,6 @@ public class SystemProjectServiceImpl implements SystemProjectService {
 		// 프로젝트 등록 성공 시 선택된 모듈 리스트 매핑 등록
 		if(result > 0) {
 			List<String> moduleNames = projectVO.getModuleNames();
-			
 			if(moduleNames!= null && !moduleNames.isEmpty()) {
 				systemProjectMapper.insertModuleMapping(projectVO);
 			}
@@ -51,5 +50,26 @@ public class SystemProjectServiceImpl implements SystemProjectService {
 	public int selectProjectCount(SystemProjectVO vo) {
 		return systemProjectMapper.selectProjectCount(vo);
 	}
-	
+
+	@Override
+	public SystemProjectVO selectProjectById(Long projectId) {
+		return systemProjectMapper.selectProjectById(projectId);
+	}
+
+	@Override
+	@Transactional
+	public int updateProject(SystemProjectVO projectVO) {
+		int result = systemProjectMapper.updateProject(projectVO);
+		
+		if(result > 0) {
+			// 기존 모듈 매핑 삭제 후 재등록
+			systemProjectMapper.deleteModuleMapping(projectVO.getProjectId());
+			
+			List<String> moduleNames = projectVO.getModuleNames();
+			if(moduleNames!= null && !moduleNames.isEmpty()) {
+				systemProjectMapper.insertModuleMapping(projectVO);
+			}
+		}
+		return result;
+	}
 }
