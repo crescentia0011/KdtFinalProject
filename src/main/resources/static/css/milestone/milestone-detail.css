@@ -1,0 +1,533 @@
+@charset "UTF-8";
+
+        /* 기본 스타일 초기화 및 폰트 설정 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .milestone-page {
+            padding: 28px 30px 34px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 페이지 최상단 헤더 */
+        .milestone-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .milestone-page-title {
+            margin: 0;
+            color: #1f2937;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .milestone-add-link {
+            color: #4d7df4;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .milestone-add-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 개별 마일스톤 대단위 섹션 */
+        .milestone-container {
+            margin-bottom: 48px;
+        }
+
+        /* 마일스톤 타이틀 라인 */
+        .milestone-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .milestone-title-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .milestone-icon {
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .milestone-title {
+            margin: 0;
+            color: #111827;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* 마일스톤 상단 상태 배지 컴포넌트 */
+        .milestone-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .badge-success {
+            background-color: #e6f4ea;
+            color: #137333;
+        }
+
+        .badge-process {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+        }
+
+        .badge-delay {
+            background-color: #fce8e6;
+            color: #c5221f;
+        }
+
+        .badge-delay-text {
+            background-color: #ffeef0;
+            color: #ff4f6b;
+        }
+
+
+		.milestone-due-date {
+		    font-size: 14px;
+		    color: #666666; /* 차분한 회색 톤 */
+		    margin-left: 8px;
+		    margin-right: 4px;
+		    align-self: center; /* 다른 배지들과 세로 중앙 정렬 */
+		    font-weight: 500;
+		}
+		
+		.milestone-describe {
+		    font-size: 14px;
+		    color: #000; /* 차분한 회색 톤 */
+		    margin-left: 8px;
+		    margin-right: 4px;
+		    align-self: center; /* 다른 배지들과 세로 중앙 정렬 */
+		}
+
+        .milestone-edit-btn {
+            color: #4d7df4;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .milestone-edit-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* 메인 진행률 바 */
+        .milestone-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .milestone-progress-bar-wrap {
+            flex: 1;
+            max-width: 260px;
+            height: 6px;
+            background-color: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .milestone-progress-bar {
+            height: 100%;
+            background-color: #4d7df4;
+            border-radius: 3px;
+        }
+
+        .milestone-progress-percent {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* 일감 건수 요약 텍스트 */
+        .milestone-task-summary {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 18px;
+        }
+
+        /* 연결된 일감 목록 바디 */
+        .connected-tasks-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .connected-tasks-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 10px 0;
+        }
+
+        /* 라운드 코너 화이트 카드 컨테이너 */
+        .task-list-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        /* 일감 테이블 목록 행 스타일 구현 */
+        .task-item-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .task-item-row:last-child {
+            border-bottom: none;
+        }
+
+        /* 공통 컬럼 설정 */
+        .task-col {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        /* 가로 비중 분할 */
+        .col-id { width: 6%; color: #9ca3af; font-weight: 500; }
+        .col-type { width: 12%; }
+        .col-name { width: 44%; }
+        .col-progress { width: 18%; gap: 8px; }
+        .col-assignee { width: 10%; color: #4b5563; }
+        .col-status { width: 10%; justify-content: flex-end; }
+
+        /* 일감 카테고리/유형 회색 태그 */
+        .task-type-tag {
+            background-color: #f3f4f6;
+            color: #6b7280;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        /* 일감명 링크 스타일 */
+        .col-name a {
+            color: #4d7df4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .col-name a:hover {
+            text-decoration: underline;
+        }
+
+        /* 내부 미니 게이지 바 */
+        .task-mini-bar-wrap {
+            width: 70px;
+            height: 4px;
+            background-color: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .task-mini-bar {
+            height: 100%;
+            background-color: #4d7df4;
+            border-radius: 2px;
+        }
+
+        .task-mini-percent {
+            font-size: 12px;
+            color: #6b7280;
+            min-width: 32px;
+        }
+
+        /* 우측 상태 표시등 구조 도트 컴포넌트 */
+        .status-dot-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        
+        /* 편집 모드 레이아웃 정렬 */
+		.edit-mode-container {
+		    display: flex;
+		    justify-content: space-between;
+		    width: 100%;
+		    align-items: center;
+		}
+		.milestone-edit-inputs {
+		    display: flex;
+		    gap: 15px;
+		    align-items: center;
+		}
+		
+		/* 스위치 토글 디자인 */
+		.switch-label {
+		    position: relative;
+		    display: inline-block;
+		    width: 44px;
+		    height: 22px;
+		}
+		.switch-label input { 
+		    opacity: 0;
+		    width: 0;
+		    height: 0;
+		}
+		.slider {
+		    position: absolute;
+		    cursor: pointer;
+		    top: 0; left: 0; right: 0; bottom: 0;
+		    background-color: #ccc;
+		    transition: .4s;
+		}
+		.slider:before {
+		    position: absolute;
+		    content: "";
+		    height: 16px; width: 16px;
+		    left: 3px; bottom: 3px;
+		    background-color: white;
+		    transition: .4s;
+		}
+		input:checked + .slider {
+		    background-color: #2ecc71; /* 활성화 시 초록색 */
+		}
+		input:checked + .slider:before {
+		    transform: translateX(22px);
+		}
+		input:disabled + .slider {
+		    background-color: #e0e0e0;
+		    cursor: not-allowed;
+		}
+		.slider.round {
+		    border-radius: 22px;
+		}
+		.slider.round:before {
+		    border-radius: 50%;
+		}
+		.switch-text {
+		    font-size: 12px;
+		    color: #888;
+		}
+		
+		/* ==========================================
+		   마일스톤 상세조회 전용 추가 디자인 스펙
+		========================================== */
+		
+		/* 1. 시간 추적 영역 스펙 (추정시간 vs 소요시간) */
+		.milestone-time-tracking {
+		    display: flex;
+		    gap: 16px;
+		    margin: 20px 0;
+		}
+		
+		.time-card {
+		    flex: 1;
+		    background-color: #fcfcfd;
+		    border: 1px solid #e4e7ec;
+		    border-radius: 8px;
+		    padding: 14px 20px;
+		    display: flex;
+		    flex-direction: column;
+		    gap: 6px;
+		    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+		}
+		
+		.time-label {
+		    font-size: 0.85rem;
+		    color: #667085;
+		    font-weight: 500;
+		}
+		
+		.time-value {
+		    font-size: 1.25rem;
+		    color: #1d2939;
+		    font-weight: 700;
+		}
+		
+		.card-estimated {
+		    border-left: 4px solid #36b37e; /* 계획 위주의 초록 계열 포인트 */
+		}
+		
+		.card-spent {
+		    border-left: 4px solid #0052cc; /* 수행 위주의 블루 계열 포인트 */
+		}
+		
+		
+		/* 2. 4대 기준별 일감 완료 여부 스코어보드 (그리드 배치) */
+		.milestone-stat-grid {
+		    display: grid;
+		    grid-template-columns: repeat(4, 1fr); /* 4분할 가로 배열 */
+		    gap: 16px;
+		    margin-bottom: 28px;
+		}
+		
+		@media (max-width: 1024px) {
+		    .milestone-stat-grid {
+		        grid-template-columns: repeat(2, 1fr); /* 유동적 브레이크 포인트 (2x2) */
+		    }
+		}
+		
+		.stat-column {
+		    background: #ffffff;
+		    border: 1px solid #eaecf0;
+		    border-radius: 8px;
+		    padding: 16px;
+		    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+		}
+		
+		.stat-column-title {
+		    font-size: 0.9rem;
+		    color: #344054;
+		    margin-bottom: 12px;
+		    padding-bottom: 8px;
+		    border-bottom: 1px solid #f2f4f7;
+		    font-weight: 600;
+		}
+		
+		.stat-list-box {
+		    display: flex;
+		    flex-direction: column;
+		    gap: 10px;
+		    max-height: 180px;
+		    overflow-y: auto; /* 데이터가 많을 경우 내부 스크롤 보장 */
+		}
+		
+		.stat-item-row {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    font-size: 0.82rem;
+		}
+		
+		.stat-name {
+		    color: #475467;
+		    font-weight: 500;
+		    max-width: 90px;
+		    white-space: nowrap;
+		    overflow: hidden;
+		    text-overflow: ellipsis;
+		}
+		
+		.stat-mini-progress {
+		    display: flex;
+		    align-items: center;
+		    gap: 8px;
+		    flex: 1;
+		    justify-content: flex-end;
+		}
+		
+		.stat-mini-bar-wrap {
+		    width: 60px;
+		    height: 6px;
+		    background-color: #f2f4f7;
+		    border-radius: 4px;
+		    overflow: hidden;
+		}
+		
+		.stat-mini-bar {
+		    height: 100%;
+		    background-color: #12b76a; /* 진척도 내부 바 색상 */
+		    border-radius: 4px;
+		}
+		
+		.stat-count-text {
+		    font-family: monospace;
+		    color: #667085;
+		    font-weight: 600;
+		    min-width: 35px;
+		    text-align: right;
+		}
+		
+		.stat-empty-text {
+		    font-size: 0.8rem;
+		    color: #98a2b3;
+		    text-align: center;
+		    padding: 20px 0;
+		}
+		
+		
+		/* 3. 하단 페이징 네비게이션 UI 컴포넌트 */
+		.pagination-wrap {
+		    display: flex;
+		    justify-content: center;
+		    align-items: center;
+		    gap: 6px;
+		    margin-top: 24px;
+		    padding-top: 16px;
+		}
+		
+		.page-num-link, .page-link-btn {
+		    display: inline-flex;
+		    align-items: center;
+		    justify-content: center;
+		    padding: 6px 12px;
+		    font-size: 0.85rem;
+		    color: #475467;
+		    border: 1px solid #d0d5dd;
+		    background-color: #ffffff;
+		    border-radius: 6px;
+		    text-decoration: none;
+		    transition: all 0.15s ease;
+		    font-weight: 500;
+		}
+		
+		.page-num-link:hover, .page-link-btn:hover {
+		    background-color: #f9fafb;
+		    color: #1d2939;
+		    border-color: #b2ddff;
+		}
+		
+		.page-active {
+		    background-color: #7f56d9 !important; /* 메인 테마색상 부여 (퍼플/블루에 맞춰 변경 가능) */
+		    color: #ffffff !important;
+		    border-color: #7f56d9 !important;
+		}
+		
+		.disabled-link {
+		    opacity: 0.5;
+		    pointer-events: none; /* 클릭 비활성화 */
+		    background-color: #f2f4f7;
+		    color: #98a2b3;
+		}
+
+        /* 상태 코드별 동적 컬러 클래스 */
+        .status-progress { color: #4d7df4; }
+        .status-progress .status-dot { background-color: #4d7df4; }
+
+        .status-done { color: #10b981; }
+        .status-done .status-dot { background-color: #10b981; }
+
+        .status-new { color: #f43f5e; }
+        .status-new .status-dot { background-color: #f43f5e; }
+
+        @media (max-width: 992px) {
+            .task-list-card {
+                overflow-x: auto;
+            }
+            .task-item-row {
+                min-width: 800px;
+            }
+        }

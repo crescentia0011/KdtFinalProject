@@ -5,6 +5,9 @@
 <head>
     <title>WEPLE - 마일스톤 관리</title>
     <link rel="stylesheet" th:href="@{/css/milestone/milestone-list.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
 </head>
 <body>
 <section>
@@ -21,7 +24,10 @@
                 <div class="view-mode-container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
                     <div class="milestone-title-group">
                         <span class="milestone-icon">📋</span>
-                        <h2 class="milestone-title" th:text="${milestone.milestoneTitle}">설계</h2>
+                        <h2 class="milestone-title">
+					        <a th:href="@{/project/milestone/detail(projectId=${projectId}, milestoneId=${milestone.milestoneId})}" 
+							   th:text="${milestone.milestoneTitle}">설계</a>
+					    </h2>
                         
                         <span class="milestone-badge" 
                               th:classappend="${milestone.milestoneStatus == 'g2' ? 'badge-success' : 'badge-process'}"
@@ -34,6 +40,9 @@
                         <span class="milestone-badge badge-delay-text" 
                               th:if="${milestone.delayDays > 0}" 
                               th:text="'지연됨 (D+' + ${milestone.delayDays} + ')'">지연됨 (D+2)</span>
+                        
+                        <span class="milestone-describe"
+                        	  th:text="${milestone.milestoneDescribe}">마일스톤 설명</span>
                     </div>
                     <button type="button" class="milestone-edit-btn" onclick="enableEditMode(this)">마일스톤 편집</button>
                 </div>
@@ -53,6 +62,8 @@
                         <span class="switch-text" 
                               th:text="${milestone.progressPercentage == 100 ? '상태 토글 가능' : '진척도 100% 필수'}"
                               style="font-size: 12px; color: #888;">진척도 100% 필수</span>
+                              
+                        <input type="text" class="edit-describe-input" th:value="${milestone.milestoneDescribe}" placeholder="마일스톤 설명 입력"/>
                     </div>
                     
                     <div class="milestone-action-btns">
@@ -141,6 +152,10 @@
 		    const updatedDate = header.querySelector('.edit-date-input').value;
 		    const isChecked = header.querySelector('.edit-status-toggle').checked;
 		    const updatedStatus = isChecked ? 'g2' : 'g1';
+		    const milestoneDescribe = header.querySelector('.edit-describe-input').value;
+		    
+		    const csrfParameter = document.querySelector('meta[name="_csrf_parameter"]').getAttribute('content');
+		    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
 		
 		    // 기본 validation
 		    if (!updatedTitle.trim()) {
@@ -155,6 +170,9 @@
 		    formData.append('milestoneTitle', updatedTitle);
 		    formData.append('finishDate', updatedDate);
 		    formData.append('milestoneStatus', updatedStatus);
+		    formData.append('milestoneDescribe', milestoneDescribe);
+		    
+		    formData.append(csrfParameter, csrfToken);
 		
 		    // 비동기 통신 요청 전송
 		    fetch('/project/milestone/update', {
