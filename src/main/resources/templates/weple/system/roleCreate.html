@@ -4,49 +4,74 @@
       th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
     <meta charset="UTF-8">
-    <title>역할 등록</title>
+    <title th:text="${mode == 'edit'} ? '역할 수정' : '역할 등록'"></title>
     <link rel="stylesheet" href="/css/system/role-create.css">
 </head>
 <body>
 <section class="role-create-page">
     <div class="role-create-card">
 
-        <div class="role-create-toolbar">
-            <h3 class="role-create-title">역할 등록</h3>
-        </div>
+        <h3 class="role-create-title"
+            th:text="${mode == 'edit'} ? '역할 수정' : '역할 등록'"></h3>
 
-        <form id="roleForm" method="post" th:action="@{/system/role/create}">
+        <form method="post"
+              th:action="${mode == 'edit'} ? @{/system/role/edit} : @{/system/role/create}">
 
-            <!-- 역할 이름 -->
-            <div class="form-group-row">
-                <label class="form-label required">역할 이름</label>
-                <input type="text" name="roleName" class="form-input-text"
-                       placeholder="역할 이름을 입력하세요." required>
-            </div>
+            <!-- 수정 모드: roleId hidden -->
+            <input th:if="${mode == 'edit'}" type="hidden"
+                   name="roleId" th:value="${role.roleId}">
 
-            <!-- 권한 설정 -->
-            <div th:each="tag : ${permissionList.![permissionTag].toSet()}"
-                 class="permission-section">
-
-                <div class="permission-tag-title" th:text="${tag}"></div>
-
-                <div class="permission-items">
-                    <label th:each="perm : ${permissionList}"
-                           th:if="${perm.permissionTag == tag}"
-                           class="permission-item">
-                        <input type="checkbox"
-                               name="permissionCodes"
-                               th:value="${perm.permissionCode}">
-                        <span th:text="${perm.permissionName}"></span>
-                    </label>
+            <!-- ① 역할 이름 -->
+            <div class="perm-row">
+                <div class="perm-badge">1</div>
+                <div class="perm-box name-box">
+                    <span class="perm-box-label">역할 이름</span>
+                    <input type="text" name="roleName" class="role-name-input"
+                           th:value="${mode == 'edit'} ? ${role.roleName} : ''"
+                           placeholder="역할 이름을 입력하세요." required>
                 </div>
-
             </div>
 
-            <div class="button-group-right">
+            <!--
+                ②~ 권한 섹션
+                tagLabel(한글) 기준으로 섹션을 나눔.
+                iterStat 을 활용해 섹션 번호는 2부터 시작.
+                같은 tagLabel 권한들은 한 .perm-box 안에 나열.
+
+                [Thymeleaf 처리 전략]
+                - 권한 목록을 tagLabel별로 묶는 작업은 Java(Controller 또는 Service)에서
+                  LinkedHashMap<String, List<PermissionVO>> 으로 전달하는 게 가장 깔끔합니다.
+                - 아래는 Controller에서 groupedPermissions(Map)을 전달한다고 가정한 버전입니다.
+            -->
+            <th:block th:each="entry, entryStat : ${groupedPermissions}">
+                <div class="perm-row">
+                    <div class="perm-badge"
+                         th:text="${entryStat.index + 2}"></div>
+                    <div class="perm-box">
+                        <span class="perm-box-label"
+                              th:text="${entry.key}"></span>
+                        <div class="perm-checks">
+                            <label class="perm-check-item"
+                                   th:each="perm : ${entry.value}">
+                                <input type="checkbox"
+                                       name="permissionCodes"
+                                       th:value="${perm.permissionCode}"
+                                       th:checked="${mode == 'edit'
+                                                     and checkedCodes != null
+                                                     and #lists.contains(checkedCodes,
+                                                                         perm.permissionCode)}">
+                                <span th:text="${perm.permissionName}"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+
+            <div class="btn-area">
                 <button type="button" class="page-btn btn-cancel"
                         onclick="history.back()">취소</button>
-                <button type="submit" class="page-btn btn-submit active">등록</button>
+                <button type="submit" class="page-btn btn-submit"
+                        th:text="${mode == 'edit'} ? '수정' : '등록'"></button>
             </div>
 
         </form>

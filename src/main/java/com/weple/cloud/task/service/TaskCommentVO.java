@@ -1,6 +1,6 @@
 package com.weple.cloud.task.service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,8 @@ public class TaskCommentVO {
 	private Long parentCommentId;
 	private String userCode;
 	private String userName;
+	private String email;
 	private String profileImage;
 	private String taskComment;
-	private LocalDate createdAt;
+	private LocalDateTime createdAt;
 }

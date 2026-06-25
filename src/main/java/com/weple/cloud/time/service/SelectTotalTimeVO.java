@@ -1,4 +1,4 @@
-package com.weple.cloud.system.service;
+package com.weple.cloud.time.service;
 
 import java.util.Date;
 
@@ -25,9 +25,15 @@ public class SelectTotalTimeVO {
 	@DateTimeFormat(pattern = "yyyy-MM-dd") 
 	private Date workDate;
 	private String spentContent;
-	private long spentHour;
+	private Long spentHour;
 	@DateTimeFormat(pattern = "yyyy-MM-dd") 
 	private Date createdAt;
 	@DateTimeFormat(pattern = "yyyy-MM-dd") 
 	private Date updatedAt;
+	
+	private String projectTitle;
+	private String taskTitle;
+	private String userName; 
+	private Long countSpentHour;
+	private Long totalSpentHour;
 }

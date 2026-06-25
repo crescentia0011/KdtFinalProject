@@ -24,5 +24,5 @@ public class RoleVO {
 	private Date createdAt;
 	
 	// 권한 목록(역할에 매핑된 권한)
-	private List<PermissionVO> permissions;
+	private List<String> permissionCodes;
 }

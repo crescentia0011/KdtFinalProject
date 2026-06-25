@@ -3,7 +3,7 @@ package com.weple.cloud.system.service;
 import java.util.List;
 import java.util.Map;
 
-public interface UserService {
+public interface GroupUserService {
 	// ---------------------------- 그룹 내 사용자 --------------------------
 	// 전체조회
 	public List<SystemGroupUserVO> findGroupUserAll();

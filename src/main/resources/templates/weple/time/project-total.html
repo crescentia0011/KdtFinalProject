@@ -1,14 +1,347 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+<html xmlns:th="http://www.thymeleaf.org/"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+<title>WEPLE</title>
 </head>
 <body>
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+	<section>
+		<div class="worktime-container">
+			<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+			    <h3 style="margin: 0; font-size: 22px; font-weight: 700;">소요시간</h3>
+			    <button class="btn btn-primary" th:onclick="|location.href='@{/insertProjectTime}'|">+ 소요시간 등록</button>
+			</div>
+
+			<!-- 검색 영역 -->
+			<div class="search-box">
+				<div class="search-title" style="margin-bottom: 10px; font-weight: bold; color: #1976d2; display: flex; align-items: center;">
+                    <span style="margin-right: 5px;">▼</span> 검색조건
+                </div>
+				<div class="search-top">
+					<div class="search-left">
+						<div class="search-item">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; color: #1976d2;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+						    <label>작업시간</label>
+						    <input type="text" name="workTime" placeholder="작업시간을 입력하세요." style="width: 180px; height: 36px; border: 1px solid #d6d6d6; border-radius: 4px; padding: 0 10px;">
+						</div>
+					</div>
+					<div class="search-right">
+					    <button class="btn btn-primary">검색조건 추가 ▼</button>
+					</div>
+				</div>
+
+				<div class="search-bottom">
+					<div class="search-action">
+						<button class="btn btn-primary">적용</button>
+						<button class="btn btn-light">지우기</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- 총 시간 -->
+			<div class="summary-area">
+			    <span>
+			        시간 :
+			        <strong th:text="${totalSpentHour + ':00'}">0:00</strong>
+			    </span>
+			</div>
+
+			<!-- 테이블 -->
+			<div class="table-wrapper">
+				<table class="data-table">
+					<thead>
+						<tr>
+							<th width="120">프로젝트</th>
+							<th width="120">작업일자 ▼</th>
+							<th width="150">사용자</th>
+							<th width="120">작업분류</th>
+							<th>일감</th>
+							<th>내용</th>
+							<th width="90">시간</th>
+							<th width="70">관리</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:if="${#lists.isEmpty(projectTimeList)}">
+               				<td colspan="9">조회된 데이터가 없습니다.</td>
+            			</tr>
+            			
+            			<th:block th:each="time : ${projectTimeList}">
+						<tr>
+			                <td th:text="${time.projectTitle}">프로젝트</td>
+			                <td th:text="${time.workDate != null} ? ${#dates.format(time.workDate, 'yyyy/MM/dd')} : '-'">작업일자</td>
+			                <td th:text="${time.userName}">사용자</td>
+			                <td th:text="${time.workNameLabel}">작업분류</td>
+			                <td th:text="${time.taskTitle}">일감</td>
+			                <td th:text="${time.spentContent}">내용</td>
+			                <td class="time" th:text="${time.spentHour} + ':00'">시간</td>
+			                <td style="position: relative; text-align: center;" onclick="event.stopPropagation();">
+								<div class="dropdown-wrapper">
+									<span class="more-options-btn" onclick="toggleDropdown(this)">•••</span>
+									<div class="dropdown-menu-box">
+									    <button type="button" class="dropdown-item edit-btn"
+									        	th:onclick="|location.href='@{/updateProjectTime(id=${time.workId})}'|">
+									        	✏️ 수정
+									    </button>
+									    <button type="button"
+										        class="dropdown-item delete-btn task-delete-trigger"
+										        th:onclick="|deleteWork(${time.workId}, ${time.projectId})|">
+										        🗑️ 삭제
+									    </button>
+									</div>
+								</div>
+							</td>
+						</tr>
+						</th:block>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- 하단 -->
+			<div class="bottom-area">
+			    <div class="paging">
+			        </div>
+			    <div class="export-area">
+			        <button class="csv-btn" onclick="exportToCSV()">내보내기 : CSV</button>
+			    </div>
+			</div>
+		</div>
+	<script>
+	// 1. 공통 변수
+    const searchInput = document.querySelector("input[name='workTime']");
+    const searchBtn = document.querySelector(".search-action .btn-primary");
+    const clearBtn = document.querySelector(".btn-light");
+    const allRows = document.querySelectorAll(".data-table tbody tr:not([th\\:if])");
+    
+    let currentPage = 1;
+    const itemsPerPage = 20;
+	
+	// 검색
+	function applySearch() {
+        const keyword = searchInput.value.toLowerCase();        
+        // 검색 필터링
+        allRows.forEach(row => {
+            const timeText = row.cells[7] ? row.cells[7].innerText.toLowerCase() : "";
+            const isMatch = timeText.includes(keyword);
+            row.style.display = isMatch ? "" : "none";
+        });
+        showPage(1);
+    }
+    
+	function showPage(page) {
+        currentPage = page;
+        const visibleRows = Array.from(allRows).filter(row => row.style.display !== "none");
+        allRows.forEach((row, index) => {
+            if (row.style.display === "none") return;
+            const visibleIndex = visibleRows.indexOf(row);
+            row.style.display = (visibleIndex >= (page - 1) * itemsPerPage && visibleIndex < page * itemsPerPage) 
+                                ? "" : "none";
+        });
+        updatePagination(Math.ceil(visibleRows.length / itemsPerPage));
+    }
+	
+	function updatePagination(pageCount) {
+        const pagingDiv = document.querySelector(".paging");
+        if (pageCount === 0) pageCount = 1;
+        
+        pagingDiv.innerHTML = `
+            <button class="page-btn" onclick="showPage(Math.max(1, currentPage - 1))">&lt; 이전</button>
+            <span id="page-numbers"></span>
+            <button class="page-btn" onclick="showPage(Math.min(${pageCount}, currentPage + 1))">다음 &gt;</button>
+        `;
+
+        const numberSpan = document.getElementById("page-numbers");
+        for (let i = 1; i <= pageCount; i++) {
+            const a = document.createElement("a");
+            a.href = "#";
+            a.innerText = i;
+            if (i === currentPage) a.className = "active";
+            a.onclick = (e) => { e.preventDefault(); showPage(i); };
+            numberSpan.appendChild(a);
+        }
+    }
+	
+	function toggleDropdown(element) {
+	    // 클릭한 버튼의 부모(dropdown-wrapper) 내부에 있는 메뉴 박스를 찾음
+	    const dropdownWrapper = element.parentElement;
+	    const menuBox = dropdownWrapper.querySelector('.dropdown-menu-box');
+	    
+	    // 다른 곳을 클릭하면 닫히게 하려면 아래 '전체 닫기' 로직 추가 권장
+	    document.querySelectorAll('.dropdown-menu-box').forEach(menu => {
+	        if (menu !== menuBox) menu.classList.remove('show');
+	    });
+
+	    // 현재 메뉴 토글
+	    menuBox.classList.toggle('show');
+	}
+
+	// 화면 아무 곳이나 클릭하면 열려있는 메뉴 닫기
+	window.onclick = function(event) {
+	    if (!event.target.matches('.more-options-btn')) {
+	        document.querySelectorAll('.dropdown-menu-box').forEach(menu => {
+	            menu.classList.remove('show');
+	        });
+	    }
+	}
+        
+     // 검색 버튼 및 엔터키 이벤트 연결
+        searchBtn.addEventListener("click", applySearch);
+        searchInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                applySearch();
+            }
+        });
+    
+    // 지우기 버튼 클릭 이벤트
+        clearBtn.addEventListener("click", () => {
+            searchInput.value = "";
+            allRows.forEach(row => row.style.display = "");
+            showPage(1);
+        });
+
+        showPage(1);
+	    
+	    //삭제버튼 컨펌
+	    function deleteWork(workId, projectId) {
+		    if(confirm("정말 삭제하시겠습니까?")) {
+		        location.href = `/deleteProjectTime?workId=${workId}&projectId=${projectId}`;
+		    }
+		}
+	    
+	    //CSV 내보내기
+	    function exportToCSV() {
+		    const today = new Date();
+		    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
+		    const fileName = `worktime_${dateStr}.csv`;
+		
+		    let csv = [];
+		    const rows = document.querySelectorAll(".data-table tr:not([style*='display: none'])");
+		
+		    for (let i = 0; i < rows.length; i++) {
+		        let row = [], cols = rows[i].querySelectorAll("td, th");
+		        for (let j = 0; j < cols.length; j++) {
+		            let text = cols[j].innerText.replace(/"/g, '""');
+		            row.push('"' + text + '"');
+		        }
+		        csv.push(row.join(","));
+		    }
+		
+		    const csvFile = new Blob(["\ufeff" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+		    const downloadLink = document.createElement("a");
+		    downloadLink.href = URL.createObjectURL(csvFile);
+		    downloadLink.download = fileName;
+		    downloadLink.click();
+	    }
+	</script>
+		<style>
+/* =========================공통========================= */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Malgun Gothic", sans-serif; font-size: 14px; color: #333; background: #fff; }
+
+.worktime-container { width: 95%; margin: 25px auto; min-height: auto; }
+
+/* =========================제목 및 검색 ========================= */
+.page-header { margin-bottom: 15px; }
+.page-header h3 { font-size: 22px; font-weight: 700; color: #222; }
+
+.search-box { border: 1px solid #dcdfe6; border-radius: 6px; background: #fff; padding: 20px 25px; margin-bottom: 20px; }
+.search-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.search-left { display: flex; align-items: center; gap: 15px; }
+.search-item { display: flex; align-items: center; gap: 10px; }
+.search-item label { font-weight: 600; }
+.search-item select { width: 160px; height: 36px; border: 1px solid #d6d6d6; border-radius: 4px; padding: 0 10px; outline: none; background: #fff; }
+.search-action { display: flex; gap: 10px; }
+
+/* =========================버튼 ========================= */
+.btn { min-width: 90px; height: 36px; border-radius: 4px; cursor: pointer; transition: .2s; font-size: 14px; }
+.btn-primary { background: #1976d2; color: #fff; border: 1px solid #1976d2; }
+.btn-primary:hover { background: #1565c0; }
+.btn-light { background: #fff; border: 1px solid #ccc; }
+.btn-light:hover { background: #f5f5f5; }
+
+/* =========================테이블 영역 ========================= */
+.table-wrapper { border: 1px solid #e2e2e2; border-radius: 6px; background: #fff; overflow: visible; }
+
+.data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.data-table thead { background: #f7f8fa; }
+
+.data-table th, .data-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* 텍스트 줄임 처리 (관리 셀 제외) */
+.data-table td:not(:last-child) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 관리 버튼(마지막 셀) 및 드롭다운 */
+.data-table td:last-child { overflow: visible !important; }
+.dropdown-wrapper { position: relative; display: inline-block; }
+
+.more-options-btn { cursor: pointer; color: #94a3b8; padding: 6px 12px; font-size: 16px; font-weight: bold; border-radius: 4px; transition: background 0.2s; }
+.more-options-btn:hover { color: #475569; background-color: #f1f5f9; }
+
+.dropdown-menu-box {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: #ffffff;
+    min-width: 90px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    z-index: 999; /* z-index 높여서 가려짐 방지 */
+    padding: 4px 0;
+}
+.dropdown-menu-box.show { display: block; }
+
+.dropdown-item { display: block; width: 100%; padding: 8px 14px; text-align: left; background: none; border: none; font-size: 13px; color: #334155; cursor: pointer; }
+.dropdown-item:hover { background-color: #f8fafc; }
+.dropdown-item.delete-btn { color: #ef4444; }
+
+/* 열별 정렬 및 너비 설정 (체크박스 열 삭제 반영) */
+.data-table th:nth-child(1) { width: 10%; } /* 프로젝트 */
+.data-table th:nth-child(2) { width: 10%; } /* 작업일자 */
+.data-table th:nth-child(3) { width: 12%; } /* 사용자 */
+.data-table th:nth-child(4) { width: 10%; } /* 작업분류 */
+.data-table th:nth-child(5) { width: 22%; text-align: left; padding-left: 15px; } /* 일감 */
+.data-table th:nth-child(6) { width: auto; text-align: left; padding-left: 15px; } /* 내용 */
+.data-table th:nth-child(7) { width: 8%; color: #1976d2; font-weight: bold; } /* 시간 */
+.data-table th:nth-child(8) { width: 7%; } /* 관리 */
+
+/* 내용 열(6번째) 줄바꿈 허용 */
+.data-table td:nth-child(6) { white-space: normal; text-align: left; padding-left: 15px; }
+
+.data-table tbody tr:hover { background: #f8fbff; }
+
+/* =========================하단 페이징 및 내보내기 ========================= */
+.bottom-area { margin-top: 30px; position: relative; min-height: 40px; display: flex; justify-content: center; align-items: center; }
+.paging { display: flex; align-items: center; gap: 10px; }
+.page-btn { border: none; background: none; cursor: pointer; color: #999; font-weight: 500; padding: 5px 10px; }
+.paging a { width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; text-decoration: none; color: #666; border-radius: 4px; }
+.paging a.active { background: #1976d2; color: #fff; font-weight: bold; }
+
+.export-area { position: absolute; right: 0; top: 0; }
+.csv-btn { border: none; background: none; color: #1976d2; cursor: pointer; font-weight: 600; }
+
+/* =========================반응형 ========================= */
+@media (max-width: 900px) {
+    .search-top { flex-direction: column; align-items: flex-start; gap: 15px; }
+}
+</style>
+	</section>
 
 </body>
 </html>

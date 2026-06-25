@@ -53,7 +53,13 @@ public class SystemProjectServiceImpl implements SystemProjectService {
 
 	@Override
 	public SystemProjectVO selectProjectById(Long projectId) {
-		return systemProjectMapper.selectProjectById(projectId);
+		SystemProjectVO project = systemProjectMapper.selectProjectById(projectId);
+		
+		if(project != null) {
+			project.setModuleNames(systemProjectMapper.selectModuleNames(projectId));
+		}
+		
+		return project;
 	}
 
 	@Override

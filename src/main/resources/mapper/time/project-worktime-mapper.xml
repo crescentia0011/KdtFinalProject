@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.weple.cloud.system.mapper.SelectTotalTimeMapper">
+<mapper namespace="com.weple.cloud.time.mapper.TimeMapper">
 	<!-- 전체 소요시간 -->
 	<!-- 전체 조회 -->
-	<resultMap id="TotalTimeResultMap" type="com.weple.cloud.system.service.SelectTotalTimeVO">
+	<resultMap id="TotalTimeResultMap" type="com.weple.cloud.time.service.WorkTimeVO">
 	    <result property="workId" column="work_id" />
 	    <result property="projectId" column="project_id" />
 	    <result property="taskId" column="task_id" />
 	    <result property="userCode" column="user_code" />
-	    <result property="workNameLabel" column="work_name_label" /> <result property="workDate" column="work_date" />
+	    <result property="workNameLabel" column="workNameLabel" />
+	    <result property="workDate" column="work_date" />
 	    <result property="spentContent" column="spent_content" />
 	    <result property="spentHour" column="spent_hour" />
+	    <result property="countSpentHour" column="countSpentHour"/>
+		<result property="totalSpentHour" column="totalSpentHour"/>
 	</resultMap>
 	
-	<select id="SelectTotalTimeAll" resultType="SelectTotalTimeVO">
+	<select id="projectTimeAll" resultMap="TotalTimeResultMap">
 		SELECT w_tme.work_id
        		   , p.project_id
        		   , t.task_id
@@ -22,18 +25,24 @@
        		   , w_tme.work_date
        		   , w_tme.spent_content
        		   , w_tme.spent_hour
+       		   , SUM(w_tme.spent_hour) OVER (ORDER BY w_tme.work_id) AS countSpentHour
+               , SUM(w_tme.spent_hour) OVER () AS totalSpentHour
        		   , w_tme.created_at
        		   , w_tme.updated_at
+       		   , p.project_title
+               , u.user_name
+               , t.task_title
 		FROM work_time w_tme
 		LEFT JOIN project P ON w_tme.project_id = p.project_id
 		LEFT JOIN users u ON u.user_code = w_tme.user_code
 		LEFT JOIN work_classification w_cls ON w_tme.work_name = w_cls.task_classification_id
 		LEFT JOIN task t ON t.task_id = w_tme.task_id
+		WHERE w_tme.project_id = #{projectId}
 		ORDER BY w_tme.work_id
 	</select>
 	
 	<!-- 등록 -->
-	<insert id="insertSelectTotalTime" parameterType="SelectTotalTimeVO">
+	<insert id="insertProjectTime" parameterType="WorkTimeVO">
 		INSERT INTO work_time (
 		                        work_id
 		                        , project_id
@@ -61,7 +70,7 @@
 	</insert>	
 	
 	<!-- 수정 -->
-	<update id="updateSelectTotalTime" parameterType="SelectTotalTimeVO">
+	<update id="updateProjectTime" parameterType="WorkTimeVO">
 		UPDATE work_time
 		SET    project_id = #{projectId}
        		   , task_id = #{taskId}
@@ -75,10 +84,15 @@
 	</update>
 	
 	<!-- 삭제 -->
-	<delete id="deleteSelectTotalTime" parameterType="long">
+	<delete id="deleteProjectTime" parameterType="long">
 		DELETE FROM work_time
 		WHERE work_id = #{workId}
 	</delete>
 	
-	
+	<!-- 작업시간 합계 갱신 -->
+	<update id="updateTaskSpentHours">
+	    BEGIN
+	        PROC_UPDATE_TASK_TIME;
+	    END;
+	</update>
 </mapper>

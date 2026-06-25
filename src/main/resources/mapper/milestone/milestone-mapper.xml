@@ -31,20 +31,23 @@
         </collection>
     </resultMap>
     
-    <resultMap id="milestoneDetailMap" type="MilestoneDetailVO">
-	    <id property="milestoneId" column="milestone_id"/>
-	    <result property="projectId" column="project_id"/>
-	    <result property="userCode" column="user_code"/>
-	    <result property="milestoneTitle" column="milestone_title"/>
-	    <result property="milestoneDescribe" column="milestone_describe"/>
-	    <result property="milestoneStatus" column="milestone_status"/>
-	    <result property="finishDate" column="finish_date"/>
-	    <result property="delayDays" column="delay_days"/>
-	    
-	    <result property="totalEstimatedHours" column="total_estimated_hours"/>
-	    <result property="totalSpentHours" column="total_spent_hours"/>
-	</resultMap>
+    <resultMap id="milestoneDetailMap" type="MilestoneDetailVO" extends="MilestoneResultMap">
+        <result property="totalTaskCount" column="total_task_count"/>
+        <result property="closedTaskCount" column="closed_task_count"/>
+        <result property="progressPercentage" column="progress_percentage"/>
+        <result property="delayDays" column="delay_days"/>
+        
+        <result property="totalEstimatedHours" column="total_estimated_hours"/>
+        <result property="totalSpentHours" column="total_spent_hours"/>
+    </resultMap>
 
+
+	<!-- 상세조회
+		마일스톤 아이디 | 프로젝트 아이디 | 회원 코드 | 마일스톤 제목 | 마일스톤 설명 | 목표 완료일 | 마일스톤 상태 | 생성일자 | 수정일자 | 연결된 일감 전체 개수 | 
+		
+		연결된 일감 완료 개수 | 진척도(일감 평균) | 지연일자 | 일감 아이디 | 일감명 | 일감 진척도 | 일감 완료 예정일 | 담당자명 | 일감유형명 | 공통코드 설명 |     
+	
+	 -->
     <select id="selectMilestoneAll" parameterType="long" resultMap="MilestoneInfoResultMap">
     
     SELECT 
@@ -54,10 +57,7 @@
         m.milestone_title, 
         m.milestone_describe, 
         m.finish_date, 
-        CASE 
-            WHEN NVL(stats.avg_progress, 0) = 100 THEN 'g2'
-            ELSE m.milestone_status 
-        END AS milestone_status,
+        m.milestone_status AS milestone_status,
         m.created_at,
         m.updated_at,
         NVL(stats.total_count, 0) AS total_task_count,
@@ -78,6 +78,8 @@
         tt.type_name AS type_name,
         cc.default_describe AS default_describe
     FROM milestone m
+    
+    /* [튜닝 1] 해당 프로젝트의 일감만 그룹바이 하도록 서브쿼리 내부 필터링 추가 */
     LEFT JOIN (
         SELECT 
             milestone_id,
@@ -85,47 +87,108 @@
             COUNT(CASE WHEN task_progress = 100 THEN 1 END) AS closed_count,
             ROUND(AVG(NVL(task_progress, 0))) AS avg_progress
         FROM task
-        GROUP BY milestone_id
+        WHERE project_id = #{projectId}  GROUP BY milestone_id
     ) stats ON m.milestone_id = stats.milestone_id
+    
+    /* [튜닝 2] 해당 프로젝트의 일감 범위 내에서만 정렬 및 ROW_NUMBER()를 매기도록 수정 */
     LEFT JOIN (
-        SELECT tk.*,
+        SELECT tk.task_id,
+        	   tk.milestone_id,
+	           tk.task_title,
+	           tk.task_progress,
+	           tk.finish_date,
+	           tk.task_manager,
+	           tk.type_id,
+	           tk.task_status,
+	           tk.created_at,
                ROW_NUMBER() OVER (PARTITION BY milestone_id ORDER BY created_at DESC) AS rn
         FROM task tk
-    ) t ON m.milestone_id = t.milestone_id AND t.rn &lt;= 5
+        WHERE project_id = #{projectId}  ) t ON m.milestone_id = t.milestone_id AND t.rn &lt;= 5
+    
+    /* [튜닝 3] 일감이 가진 담당자 회원코드와 일치하는 회원 정보     */
     LEFT JOIN users u ON t.task_manager = u.user_code
+    
+    /* [튜닝 4] 일감이 가진 일감유형 아이디와 일치하는 일감유형 정보 */
     LEFT JOIN task_types tt ON t.type_id = tt.type_id
+    
+    /* [튜닝 5] 일감이 가진 일감상태가 공통코드 테이블의 아이디와 일치하는 공통코드 정보 */
     LEFT JOIN common_code cc ON t.task_status = cc.common_id
     WHERE m.project_id = #{projectId}
     ORDER BY m.created_at DESC, t.created_at DESC
 </select>
 
-
+	<!-- 상세조회
+		마일스톤 아이디 | 프로젝트 아이디 | 회원 코드 | 마일스톤 제목 | 마일스톤 설명 | 목표 완료일 | 마일스톤 상태 | 생성일자 | 수정일자 | 연결된 일감 전체 개수 | 연결된 일감 완료 개수 | 진척도(일감 평균) | 지연일자 | 추정시간 | 소요시간 |   
+	
+	 -->
     <select id="selectMilestoneDetailBase" resultMap="milestoneDetailMap">
-        SELECT m.milestone_id, m.project_id,
-	           m.user_code,
-	           m.milestone_title,
-	           m.milestone_describe,
-	           NVL(SUM(t.estimated_time), 0) AS total_estimated_hours, NVL(SUM(t.spent_hours_sum), 0) AS total_spent_hours
-	    FROM milestone m
-        LEFT JOIN task t ON m.milestone_id = t.milestone_id
+        SELECT 
+            m.milestone_id, 
+            m.project_id,
+            m.user_code,
+            m.milestone_title,
+            m.milestone_describe,
+            m.finish_date,
+            m.milestone_status AS milestone_status,
+            m.created_at,
+            m.updated_at,
+            
+            NVL(stats.total_count, 0) AS total_task_count,
+            NVL(stats.closed_count, 0) AS closed_task_count,
+            NVL(stats.avg_progress, 0) AS progress_percentage,
+            CASE 
+                WHEN NVL(stats.avg_progress, 0) &lt; 100 AND TRUNC(SYSDATE) > TRUNC(m.finish_date)
+                THEN TRUNC(SYSDATE) - TRUNC(m.finish_date)
+                ELSE 0 
+            END AS delay_days,
+            
+            NVL(stats.total_estimated, 0) AS total_estimated_hours, 
+            NVL(stats.total_spent, 0) AS total_spent_hours
+        FROM milestone m
+        LEFT JOIN (
+            SELECT 
+                milestone_id,
+                COUNT(*) AS total_count,
+                SUM(CASE WHEN task_status = 'e3' THEN 1 ELSE 0 END) AS closed_count,
+                ROUND(AVG(NVL(task_progress, 0))) AS avg_progress,
+                SUM(NVL(estimated_time, 0)) AS total_estimated,
+                SUM(NVL(spent_hours_sum, 0)) AS total_spent
+            FROM task
+            WHERE milestone_id = #{milestoneId} AND project_id = #{projectId}
+            GROUP BY milestone_id
+        ) stats ON m.milestone_id = stats.milestone_id
         WHERE m.milestone_id = #{milestoneId} AND m.project_id = #{projectId}
-        GROUP BY m.milestone_id, m.project_id, m.user_code, m.milestone_title, m.milestone_describe
     </select>
 
     <select id="selectMilestoneTasksWithPaging" resultType="TaskVO">
-        SELECT * FROM (
-            SELECT ROWNUM AS rnum, a.* FROM (
-                SELECT task_id AS taskId,
-                       task_title AS taskTitle,
-                       task_describe AS taskDescribe,
-                       task_status AS taskStatus,
-                       priority AS priority,
-                       task_manager AS taskManager
-                FROM task
-                WHERE milestone_id = #{milestoneId} AND project_id = #{projectId}
-                ORDER BY created_at DESC, task_id DESC
-            ) a WHERE ROWNUM &lt;= #{endRow}
-        ) WHERE rnum &gt;= #{startRow}
+        SELECT 
+            t.task_id AS taskId,
+            t.task_title AS taskTitle,
+            t.task_status AS taskStatus,
+            t.task_progress AS taskProgress,
+            u.user_name AS taskManager,       
+            tt.type_name AS typeName           
+            FROM (
+	            /* 1. 필요한 최소 컬럼만 뽑아서 20건 페이징 */
+	            SELECT ROWNUM AS rnum,
+	            				 a.task_id, 
+					            a.task_title, 
+					            a.task_status, 
+					            a.task_progress, 
+					            a.task_manager, 
+					            a.type_id
+	            FROM (
+	                SELECT task_id, task_title, task_status, task_progress, task_manager, type_id
+	                FROM task
+	                WHERE milestone_id = #{milestoneId} AND project_id = #{projectId}
+	                ORDER BY created_at DESC, task_id DESC
+	            ) a WHERE ROWNUM &lt;= #{endRow}
+	        ) t
+        /* 2. 최종 추출된 20건에 대해서만 이름 정보 조인 */
+        LEFT JOIN users u ON t.task_manager = u.user_code
+        LEFT JOIN task_types tt ON t.type_id = tt.type_id
+        WHERE t.rnum &gt;= #{startRow}
+        ORDER BY t.rnum ASC
     </select>
 
     <select id="selectTaskStatusStats" resultType="TaskGroupStatVO">
@@ -216,5 +279,17 @@
         DELETE FROM milestone
         WHERE milestone_id = #{milestoneId}
     </delete>
+    
+    <update id="updateMilestoneStatusByTaskProgress" parameterType="long">
+	    UPDATE milestone m
+	    SET m.milestone_status = (
+	        SELECT CASE WHEN NVL(AVG(t.task_progress), 0) = 100 THEN 'g2' ELSE 'g1' END
+	        FROM task t
+	        WHERE t.milestone_id = m.milestone_id
+	    )
+	    WHERE m.milestone_id = #{milestoneId}
+	</update>
+    
+    
     
 </mapper>

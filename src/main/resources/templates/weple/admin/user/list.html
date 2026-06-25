@@ -19,10 +19,10 @@
                     <i class="fa fa-search" aria-hidden="true"></i>
                     <input id="userSearch" name="keyword" type="search" th:value="${keyword}" placeholder="아이디 또는 이름을 검색하세요." autocomplete="off">
                 </form>
-                <button class="user-register-button" type="button">
+                <a class="user-register-button" th:href="@{/userList/insert}">
                     <i class="fa fa-user-plus" aria-hidden="true"></i>
                     <span>사용자 등록</span>
-                </button>
+                </a>
             </div>
 
             <!-- 가입승인 완료 후 활성 또는 비활성 상태인 같은 회사 사용자만 출력합니다. -->
@@ -30,18 +30,16 @@
                 <table class="user-table">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" aria-label="전체 사용자 선택" disabled></th>
                             <th>아이디</th>
                             <th>이름</th>
                             <th>이메일</th>
                             <th>역할</th>
                             <th>상태 활성화</th>
-                            <th><span class="sr-only">더보기</span></th>
+                            <th>관리</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="user : ${userList}">
-                            <td><input type="checkbox" th:attr="aria-label=${user.loginId + ' 선택'}" disabled></td>
                             <td th:text="${user.loginId}">admin</td>
                             <td th:text="${user.userName}">관리자</td>
                             <td th:text="${user.email}">admin@weple.com</td>
@@ -62,15 +60,20 @@
                                     <input type="hidden" name="page" th:value="${currentPage}">
                                     <input type="hidden" name="keyword" th:value="${keyword}">
                                     <label class="user-status-switch">
-                                        <input type="checkbox" th:checked="${user.status == 'a2'}" th:attr="aria-label=${user.loginId + ' 활성 상태 변경'}" onchange="this.form.submit()">
+                                        <input class="user-status-toggle" type="checkbox" th:checked="${user.status == 'a2'}" th:attr="aria-label=${user.loginId + ' 활성 상태 변경'}">
                                         <span></span>
                                     </label>
+                                    <span class="user-status-notice" aria-live="polite"></span>
                                 </form>
                             </td>
-                            <td><button class="user-more-button" type="button" th:attr="aria-label=${user.loginId + ' 더보기'}"><i class="fa fa-ellipsis-h"></i></button></td>
+                            <td>
+                                <a class="user-edit-button"
+                                   th:href="@{/userList/{userCode}/edit(userCode=${user.userCode})}"
+                                   th:attr="aria-label=${user.loginId + ' 정보 수정'}">수정</a>
+                            </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(userList)}">
-                            <td class="user-empty" colspan="7">표시할 사용자가 없습니다.</td>
+                            <td class="user-empty" colspan="6">표시할 사용자가 없습니다.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -135,6 +138,69 @@
                             }
                         });
                 }, 300);
+            });
+
+            // 상태 변경은 현재 행만 갱신해서 방금 변경한 사용자가 목록 뒤로 이동하지 않도록 처리합니다.
+            document.addEventListener('submit', function (event) {
+                if (event.target.classList.contains('user-status-form')) {
+                    event.preventDefault();
+                }
+            });
+
+            document.addEventListener('change', function (event) {
+                if (!event.target.classList.contains('user-status-toggle')) {
+                    return;
+                }
+
+                var statusToggle = event.target;
+                var statusForm = statusToggle.closest('.user-status-form');
+                var statusInput = statusForm.querySelector('input[name="status"]');
+                var statusNotice = statusForm.querySelector('.user-status-notice');
+                var userRow = statusForm.closest('tr');
+                var previousChecked = !statusToggle.checked;
+                var formData = new FormData(statusForm);
+
+                statusToggle.disabled = true;
+                statusNotice.textContent = '변경 중...';
+
+                fetch(statusForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(function (response) {
+                        return response.json().then(function (body) {
+                            if (!response.ok) {
+                                throw new Error(body.message || '사용자 상태를 변경할 수 없습니다.');
+                            }
+                            return body;
+                        });
+                    })
+                    .then(function (body) {
+                        var changedStatus = body.status || statusInput.value;
+                        statusInput.value = changedStatus === 'a2' ? 'a3' : 'a2';
+                        statusToggle.checked = changedStatus === 'a2';
+                        statusNotice.textContent = body.message || '상태가 변경되었습니다.';
+
+                        userRow.classList.remove('user-row-updated');
+                        window.setTimeout(function () {
+                            userRow.classList.add('user-row-updated');
+                        }, 0);
+                        window.setTimeout(function () {
+                            userRow.classList.remove('user-row-updated');
+                            statusNotice.textContent = '';
+                        }, 2200);
+                    })
+                    .catch(function (error) {
+                        statusToggle.checked = previousChecked;
+                        statusNotice.textContent = error.message;
+                    })
+                    .finally(function () {
+                        statusToggle.disabled = false;
+                    });
             });
         }());
     </script>

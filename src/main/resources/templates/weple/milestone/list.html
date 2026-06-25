@@ -21,65 +21,88 @@
             
             <div class="milestone-header" th:data-milestone-id="${milestone.milestoneId}">
                 
-                <div class="view-mode-container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
-                    <div class="milestone-title-group">
-                        <span class="milestone-icon">📋</span>
-                        <h2 class="milestone-title">
-					        <a th:href="@{/project/milestone/detail(projectId=${projectId}, milestoneId=${milestone.milestoneId})}" 
-							   th:text="${milestone.milestoneTitle}">설계</a>
-					    </h2>
-                        
-                        <span class="milestone-badge" 
-                              th:classappend="${milestone.milestoneStatus == 'g2' ? 'badge-success' : 'badge-process'}"
-                              th:text="${milestone.milestoneStatus == 'g2' ? '완료' : '진행 중'}">진행 중</span>
-                        
-                        <span class="milestone-due-date" 
-                              th:if="${milestone.finishDate != null}"
-                              th:text="${#temporals.format(milestone.finishDate, 'yyyy.MM.dd')} + ' 까지'">2026.03.01 까지</span>
-                        
-                        <span class="milestone-badge badge-delay-text" 
-                              th:if="${milestone.delayDays > 0}" 
-                              th:text="'지연됨 (D+' + ${milestone.delayDays} + ')'">지연됨 (D+2)</span>
-                        
-                        <span class="milestone-describe"
-                        	  th:text="${milestone.milestoneDescribe}">마일스톤 설명</span>
-                    </div>
-                    <button type="button" class="milestone-edit-btn" onclick="enableEditMode(this)">마일스톤 편집</button>
-                </div>
+                <div class="view-mode-container" style="display: flex; width: 100%; justify-content: space-between; align-items: flex-start; gap: 20px;">
+				    <div class="milestone-title-group" style="display: flex; flex-direction: column; gap: 8px;">
+				        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+				            <span class="milestone-icon">📋</span>
+				            <h2 class="milestone-title" style="margin: 0;">
+				                <a th:href="@{/project/milestone/detail(projectId=${projectId}, milestoneId=${milestone.milestoneId})}" 
+				                   th:text="${milestone.milestoneTitle}">설계</a>
+				            </h2>
+				            
+				            <span class="milestone-badge" 
+				                  th:classappend="${milestone.milestoneStatus == 'g2' ? 'badge-success' : 'badge-process'}"
+				                  th:text="${milestone.milestoneStatus == 'g2' ? '완료' : '진행 중'}">진행 중</span>
+				            
+				            <span class="milestone-due-date" 
+				                  th:if="${milestone.finishDate != null}"
+				                  th:text="${#temporals.format(milestone.finishDate, 'yyyy.MM.dd')} + ' 까지'">2026.03.01 까지</span>
+				            
+				            <span class="milestone-badge badge-delay-text" 
+				                  th:if="${milestone.delayDays > 0}" 
+				                  th:text="'지연됨 (D+' + ${milestone.delayDays} + ')'">지연됨 (D+2)</span>
+				        </div>
+				        
+				        
+				    </div>
+				    <div class="milestone-action-group" style="display: flex; gap: 8px; flex-shrink: 0;">
+					    <button type="button" class="milestone-edit-btn" onclick="enableEditMode(this)">마일스톤 편집</button>
+					    <button type="button" class="milestone-delete-btn" 
+					            style="background-color: #e55039; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;" 
+					            onclick="deleteMilestone(this)">마일스톤 삭제</button>
+					</div>
+				</div>
 
-                <div class="edit-mode-container" style="display: none; width: 100%; justify-content: space-between; align-items: center;">
-                    <div class="milestone-edit-inputs" style="display: flex; gap: 15px; align-items: center;">
-                        <input type="text" class="edit-title-input" th:value="${milestone.milestoneTitle}" placeholder="마일스톤명 입력" />
-                        
-                        <input type="date" class="edit-date-input" th:value="${milestone.finishDate}" />
-                        
-                        <label class="switch-label" style="position: relative; display: inline-block; width: 44px; height: 22px;">
-                            <input type="checkbox" class="edit-status-toggle" 
-                                   th:checked="${milestone.milestoneStatus == 'g2'}"
-                                   th:disabled="${milestone.progressPercentage < 100}" />
-                            <span class="slider round"></span>
-                        </label>
-                        <span class="switch-text" 
-                              th:text="${milestone.progressPercentage == 100 ? '상태 토글 가능' : '진척도 100% 필수'}"
-                              style="font-size: 12px; color: #888;">진척도 100% 필수</span>
-                              
-                        <input type="text" class="edit-describe-input" th:value="${milestone.milestoneDescribe}" placeholder="마일스톤 설명 입력"/>
-                    </div>
-                    
-                    <div class="milestone-action-btns">
-                        <button type="button" class="milestone-cancel-btn" onclick="cancelEditMode(this)">취소</button>
-                        <button type="button" class="milestone-save-btn" onclick="saveMilestone(this)">변경</button>
-                    </div>
-                </div>
+                <div class="edit-mode-container" style="display: none; width: 100%; flex-direction: column; gap: 12px;">
+				    <div style="display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 20px;">
+				        <div class="milestone-edit-inputs" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+				            <input type="text" class="edit-title-input" th:value="${milestone.milestoneTitle}" placeholder="마일스톤명 입력" />
+				            
+				            <input type="date" class="edit-date-input" th:value="${milestone.finishDate}" />
+				            
+				            <div style="display: flex; align-items: center; gap: 8px;">
+				                <label class="switch-label" style="position: relative; display: inline-block; width: 44px; height: 22px; margin: 0;">
+				                    <input type="checkbox" class="edit-status-toggle" 
+				                           th:checked="${milestone.milestoneStatus == 'g2'}"
+				                           th:disabled="${milestone.progressPercentage < 100}"
+				                           onchange="toggleStatusText(this)" />
+				                    <span class="slider round"></span>
+				                </label>
+				                <span class="switch-text" 
+				                      th:data-progress="${milestone.progressPercentage}"
+				                      th:text="${milestone.progressPercentage < 100 ? '진척도 100% 필수' : (milestone.milestoneStatus == 'g2' ? '완료 처리' : '진행 중')}"
+				                      style="font-size: 12px; color: #888; user-select: none;">진척도 100% 필수</span>
+				            </div>
+				        </div>
+				        
+				        <div class="milestone-action-btns" style="flex-shrink: 0;">
+				            <button type="button" class="milestone-cancel-btn" onclick="cancelEditMode(this)">취소</button>
+				            <button type="button" class="milestone-save-btn" onclick="saveMilestone(this)">변경</button>
+				        </div>
+				    </div>
+				    
+				    <div style="width: 100%;">
+				        <input type="text" class="edit-describe-input" th:value="${milestone.milestoneDescribe}" placeholder="마일스톤 설명 입력" style="width: 100%; box-sizing: border-box; padding: 6px 10px;" />
+				    </div>
+				</div>
                 
             </div>
 
-            <div class="milestone-progress-row">
-                <div class="milestone-progress-bar-wrap">
-                    <div class="milestone-progress-bar" th:style="'width: ' + ${milestone.progressPercentage} + '%'"></div>
-                </div>
-                <span class="milestone-progress-percent" th:text="${milestone.progressPercentage} + '%'">100%</span>
-            </div>
+            <div class="milestone-progress-row" style="display: flex; align-items: center; gap: 15px; width: 100%;">
+			    <div class="milestone-progress-bar-wrap" style="flex-shrink: 0; width: 200px; background-color: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+			        <div class="milestone-progress-bar" th:style="'width: ' + ${milestone.progressPercentage} + '%; background-color: #4A90E2; height: 100%;'"></div>
+			    </div>
+			    
+			    <span class="milestone-progress-percent" th:text="${milestone.progressPercentage} + '%'" style="flex-shrink: 0; font-weight: bold; min-width: 40px; color: #333;">100%</span>
+			    
+			    <span class="milestone-describe" 
+			          th:if="${milestone.milestoneDescribe != null}"
+			          th:text="${milestone.milestoneDescribe}" 
+			          th:title="${milestone.milestoneDescribe}"
+			          style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000; font-size: 16px;">
+			        마일스톤 설명
+			    </span>
+			</div>
             
             <div class="milestone-task-summary">
                 <span th:text="${milestone.totalTaskCount} + '일감 (' + ${milestone.closedTaskCount} + ' 건 완료 — ' + (${milestone.progressPercentage == 100} ? '모두 완료' : '진행중') + ')'">
@@ -91,7 +114,11 @@
                 <h3 class="connected-tasks-title">연결된 일감 (최근 5개)</h3>
                 
                 <div class="task-list-card">
-                    <div class="task-item-row" th:each="task : ${milestone.recentTasks}">
+                    <div class="task-item-row" 
+                    	th:each="task : ${milestone.recentTasks}"
+                    	th:onclick="|location.href='@{/project/task/detail/{id}(id=${task.taskId}, projectId=${projectId})}'|"
+                    	style="cursor: pointer;">
+                    	
                         <div class="task-col col-id" th:text="'#' + ${task.taskId}">#1</div>
                         
                         <div class="task-col col-type">
@@ -99,7 +126,7 @@
                         </div>
                         
                         <div class="task-col col-name">
-                            <a th:href="@{/project/task/detail(taskId=${task.taskId})}" th:text="${task.taskTitle}">일감명</a>
+                            <span  th:text="${task.taskTitle}">일감명</span>
                         </div>
                         
                         <div class="task-col col-progress">
@@ -129,72 +156,147 @@
     </div>
     
     <script th:inline="javascript">
-		// 1. 편집 모드로 전환 (일반 UI 가이드 숨기고 인풋 폼 노출)
-		function enableEditMode(button) {
-		    const header = button.closest('.milestone-header');
-		    header.querySelector('.view-mode-container').style.display = 'none';
-		    header.querySelector('.edit-mode-container').style.display = 'flex';
-		}
-		
-		// 2. 편집 취소 (인풋 폼 숨기고 일반 UI 가이드 원복)
-		function cancelEditMode(button) {
-		    const header = button.closest('.milestone-header');
-		    header.querySelector('.edit-mode-container').style.display = 'none';
-		    header.querySelector('.view-mode-container').style.display = 'flex';
-		}
-		
-		// 3. 비동기(AJAX) 데이터 변경 및 저장 처리
-		function saveMilestone(button) {
-		    const header = button.closest('.milestone-header');
-		    const milestoneId = header.getAttribute('data-milestone-id');
-		    
-		    const updatedTitle = header.querySelector('.edit-title-input').value;
-		    const updatedDate = header.querySelector('.edit-date-input').value;
-		    const isChecked = header.querySelector('.edit-status-toggle').checked;
-		    const updatedStatus = isChecked ? 'g2' : 'g1';
-		    const milestoneDescribe = header.querySelector('.edit-describe-input').value;
-		    
-		    const csrfParameter = document.querySelector('meta[name="_csrf_parameter"]').getAttribute('content');
-		    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-		
-		    // 기본 validation
-		    if (!updatedTitle.trim()) {
-		        alert("마일스톤 명칭은 공백일 수 없습니다.");
-		        return;
-		    }
-		
-		    // 기존 백엔드 Controller 규격(@RequestParam 수신 양식)과 매핑 연동을 위한 인코딩 변환
-		    const formData = new URLSearchParams();
-		    formData.append('milestoneId', milestoneId);
-		    formData.append('projectId', new URLSearchParams(window.location.search).get('projectId')); // 쿼리스트링 파라미터 자동 연동
-		    formData.append('milestoneTitle', updatedTitle);
-		    formData.append('finishDate', updatedDate);
-		    formData.append('milestoneStatus', updatedStatus);
-		    formData.append('milestoneDescribe', milestoneDescribe);
-		    
-		    formData.append(csrfParameter, csrfToken);
-		
-		    // 비동기 통신 요청 전송
-		    fetch('/project/milestone/update', {
-		        method: 'POST',
-		        headers: {
-		            'Content-Type': 'application/x-www-form-urlencoded'
-		        },
-		        body: formData
-		    })
-		    .then(response => {
-		        if (response.ok) {
-		            alert('마일스톤 수정이 완료되었습니다.');
-		            location.reload(); // 화면 즉시 새로고침하여 바뀐 데이터 재조회 반영
-		        } else {
-		            alert('수정 작업 처리에 실패하였습니다. 데이터 무결성을 체크해 주세요.');
-		        }
-		    })
-		    .catch(error => {
-		        console.error('AJAX 전송 처리 에러:', error);
-		        alert('네트워크 상태가 불안정하여 변경할 수 없습니다.');
-		    });
-		}
+	    // 1. 토글 스위치 상태에 따른 안내 텍스트 동적 변경
+	    function toggleStatusText(checkbox) {
+	        const container = checkbox.closest('.edit-mode-container');
+	        const textSpan = container.querySelector('.switch-text');
+	        const progress = parseInt(textSpan.getAttribute('data-progress') || '0', 10);
+	        
+	        if (progress < 100) {
+	            textSpan.textContent = '진척도 100% 필수';
+	            return;
+	        }
+	        
+	        textSpan.textContent = checkbox.checked ? '완료 처리' : '진행 중';
+	    }
+	
+	    // 2. 편집 모드 진입 (기존 데이터 백업)
+	    function enableEditMode(button) {
+	        const header = button.closest('.milestone-header');
+	        
+	        // 데이터 오염 방지를 위해 현재 입력값들을 원본 데이터로 저장
+	        header.dataset.oriTitle = header.querySelector('.edit-title-input').value;
+	        header.dataset.oriDate = header.querySelector('.edit-date-input').value;
+	        header.dataset.oriDescribe = header.querySelector('.edit-describe-input').value;
+	        header.dataset.oriChecked = header.querySelector('.edit-status-toggle').checked;
+	
+	        header.querySelector('.view-mode-container').style.display = 'none';
+	        header.querySelector('.edit-mode-container').style.display = 'flex';
+	    }
+	    
+	    // 3. 편집 취소 (수정 중이던 값 초기화 및 복구)
+	    function cancelEditMode(button) {
+	        const header = button.closest('.milestone-header');
+	        
+	        // 백업해둔 기존 데이터로 복원
+	        header.querySelector('.edit-title-input').value = header.dataset.oriTitle || '';
+	        header.querySelector('.edit-date-input').value = header.dataset.oriDate || '';
+	        header.querySelector('.edit-describe-input').value = header.dataset.oriDescribe || '';
+	        
+	        const toggle = header.querySelector('.edit-status-toggle');
+	        toggle.checked = header.dataset.oriChecked === 'true';
+	        toggleStatusText(toggle); 
+	
+	        header.querySelector('.edit-mode-container').style.display = 'none';
+	        header.querySelector('.view-mode-container').style.display = 'flex';
+	    }
+	    
+	    // 4. 비동기 저장 처리 (공백 및 날짜 검증 포함)
+	    function saveMilestone(button) {
+	        const header = button.closest('.milestone-header');
+	        const milestoneId = header.getAttribute('data-milestone-id');
+	        
+	        const updatedTitle = header.querySelector('.edit-title-input').value;
+	        const updatedDate = header.querySelector('.edit-date-input').value;
+	        const isChecked = header.querySelector('.edit-status-toggle').checked;
+	        const updatedStatus = isChecked ? 'g2' : 'g1';
+	        const milestoneDescribe = header.querySelector('.edit-describe-input').value;
+	        
+	        const csrfParameter = document.querySelector('meta[name="_csrf_parameter"]').getAttribute('content');
+	        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	    
+	        // 필수 값 검증 (Validation)
+	        if (!updatedTitle.trim()) {
+	            alert("마일스톤 명칭은 공백일 수 없습니다.");
+	            return;
+	        }
+	        
+	        if (!updatedDate) {
+	            alert("목표 완료일을 입력해 주세요.");
+	            return;
+	        }
+	    
+	        const formData = new URLSearchParams();
+	        formData.append('milestoneId', milestoneId);
+	        formData.append('projectId', new URLSearchParams(window.location.search).get('projectId'));
+	        formData.append('milestoneTitle', updatedTitle);
+	        formData.append('finishDate', updatedDate);
+	        formData.append('milestoneStatus', updatedStatus);
+	        formData.append('milestoneDescribe', milestoneDescribe);
+	        formData.append(csrfParameter, csrfToken);
+	    
+	        fetch('/project/milestone/update', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/x-www-form-urlencoded'
+	            },
+	            body: formData
+	        })
+	        .then(response => {
+	            if (response.ok) {
+	                alert('마일스톤 수정이 완료되었습니다.');
+	                location.reload();
+	            } else {
+	                alert('수정 작업 처리에 실패하였습니다. 데이터 구조를 확인해 주세요.');
+	            }
+	        })
+	        .catch(error => {
+	            console.error('AJAX 전송 처리 에러:', error);
+	            alert('네트워크 연결이 원활하지 않습니다.');
+	        });
+	    }
+	    
+	 	// 5. 비동기(AJAX) 마일스톤 삭제 처리
+	    function deleteMilestone(button) {
+	        const header = button.closest('.milestone-header');
+	        const milestoneId = header.getAttribute('data-milestone-id');
+	        
+	        // 안전장치 업그레이드 전 임시 1차 confirm alert
+	        const milestoneTitle = header.querySelector('.milestone-title a').textContent.trim();
+	        if (!confirm(`[${milestoneTitle}] 마일스톤을 정말 삭제하시겠습니까?\n연결된 일감은 삭제되지 않고 안전하게 유지됩니다.`)) {
+	            return;
+	        }
+	        
+	        const csrfParameter = document.querySelector('meta[name="_csrf_parameter"]').getAttribute('content');
+	        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	        const projectId = new URLSearchParams(window.location.search).get('projectId');
+
+	        const formData = new URLSearchParams();
+	        formData.append('milestoneId', milestoneId);
+	        formData.append('projectId', projectId);
+	        formData.append(csrfParameter, csrfToken);
+
+	        // 준비해두신 백엔드 삭제 컨트롤러 URL 규격 매핑 (@RequestParam 수신 양식)
+	        fetch('/project/milestone/delete', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/x-www-form-urlencoded'
+	            },
+	            body: formData
+	        })
+	        .then(response => {
+	            if (response.ok) {
+	                alert('마일스톤이 성공적으로 삭제되었습니다.');
+	                location.reload(); // 삭제 완료 후 화면 새로고침으로 데이터 갱신
+	            } else {
+	                alert('삭제 작업 처리에 실패하였습니다. 권한이나 데이터 무결성을 확인해 주세요.');
+	            }
+	        })
+	        .catch(error => {
+	            console.error('AJAX 삭제 처리 에러:', error);
+	            alert('네트워크 연결이 불안정하여 삭제 요청을 완료할 수 없습니다.');
+	        });
+	    }
 	</script>
 </section>
 

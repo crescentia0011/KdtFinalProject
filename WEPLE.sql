@@ -518,7 +518,7 @@ VALUES (
         , 10
         , SYSDATE
         , '전체 소요시간 데이터 조회 테스트'
-        , 2
+        , 6
         , SYSDATE
         , SYSDATE
 );
@@ -535,3 +535,6 @@ CREATE SEQUENCE ATE_DAY_SEQ
     MINVALUE 1
     NOCACHE
     NOCYCLE;
+    
+    
+SELECT * FROM task;

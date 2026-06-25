@@ -40,56 +40,49 @@
                     <label class="filter-label">조회 기간</label>
                     <div class="date-range-wrap">
                         <button type="button" id="dateBackBtn" class="date-arrow-btn">&larr; 뒤로</button>
-                        <input type="text" id="startDateInput" name="startDate" th:value="${param.startDate}" class="filter-input-date" placeholder="2026.06.05" readonly>
+                        <input type="text" id="startDateInput" name="startDate"
+                               th:value="${startDate}" class="filter-input-date"
+                               placeholder="2026.06.05" readonly>
                         <span class="date-separator">~</span>
-                        <input type="text" id="endDateInput" name="endDate" th:value="${param.endDate}" class="filter-input-date" placeholder="2026.06.09" readonly>
+                        <input type="text" id="endDateInput" name="endDate"
+                               th:value="${endDate}" class="filter-input-date"
+                               placeholder="2026.06.09" readonly>
                         <button type="button" id="recentPeriodBtn" class="date-period-btn">최근 5일</button>
                     </div>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">사용자</label>
-                    <select name="userCode" class="filter-select">
+                    <select name="userCode" class="filter-select" onchange="document.getElementById('searchForm').submit()">
                         <option value="">전체</option>
                         <option th:each="user : ${users}" 
                             th:value="${user.userCode}" 
                             th:text="${user.userName}"
-                            th:selected="${user.userCode == param.userCode}"></option>
+                            th:selected="${user.userCode == userCode}"></option>
                     </select>
                 </div>
             </div>
             
             <div class="filter-checkbox-row">
 			    <label class="checkbox-inline">
-			        <input type="checkbox"
-			               name="typeNames"
-			               value="기획"
+			        <input type="checkbox" name="typeNames" value="기획"
 			               onchange="document.getElementById('searchForm').submit()"
 			               th:checked="${typeNames != null and #lists.contains(typeNames, '기획')}">
 			        <span class="custom-check-box"></span> 기획
 			    </label>
-			
 			    <label class="checkbox-inline">
-			        <input type="checkbox"
-			               name="typeNames"
-			               value="새 기능"
+			        <input type="checkbox" name="typeNames" value="새 기능"
 			               onchange="document.getElementById('searchForm').submit()"
 			               th:checked="${typeNames != null and #lists.contains(typeNames, '새 기능')}">
 			        <span class="custom-check-box"></span> 새 기능
 			    </label>
-			
 			    <label class="checkbox-inline">
-			        <input type="checkbox"
-			               name="typeNames"
-			               value="개선"
+			        <input type="checkbox" name="typeNames" value="개선"
 			               onchange="document.getElementById('searchForm').submit()"
 			               th:checked="${typeNames != null and #lists.contains(typeNames, '개선')}">
 			        <span class="custom-check-box"></span> 개선
 			    </label>
-			
 			    <label class="checkbox-inline">
-			        <input type="checkbox"
-			               name="typeNames"
-			               value="피드백"
+			        <input type="checkbox" name="typeNames" value="피드백"
 			               onchange="document.getElementById('searchForm').submit()"
 			               th:checked="${typeNames != null and #lists.contains(typeNames, '피드백')}">
 			        <span class="custom-check-box"></span> 피드백
@@ -101,158 +94,91 @@
  
         <th:block th:with="validLogs=${workLogList != null ? workLogList.?[#this != null] : {}}">
 
-    <div th:if="${#lists.isEmpty(validLogs)}" class="empty-message">
-        조회된 작업 내역이 없습니다.
-    </div>
+            <div th:if="${#lists.isEmpty(validLogs)}" class="empty-message">
+                조회된 작업 내역이 없습니다.
+            </div>
 
-    <th:block th:unless="${#lists.isEmpty(validLogs)}"
-              th:each="log, stat : ${validLogs}"
-              th:with="
-                prevLog=${stat.first ? null : validLogs[stat.index - 1]},
-                prevKey=${(prevLog == null or prevLog.actionAt == null) ? null : #temporals.format(prevLog.actionAt, 'yyyy-MM-dd')},
-                curKey=${log.actionAt != null ? #temporals.format(log.actionAt, 'yyyy-MM-dd') : '미정'}">
+            <th:block th:unless="${#lists.isEmpty(validLogs)}"
+                      th:each="log, stat : ${validLogs}"
+                      th:with="
+                        prevLog=${stat.first ? null : validLogs[stat.index - 1]},
+                        prevKey=${(prevLog == null or prevLog.actionAt == null) ? null : #temporals.format(prevLog.actionAt, 'yyyy-MM-dd')},
+                        curKey=${log.actionAt != null ? #temporals.format(log.actionAt, 'yyyy-MM-dd') : '미정'}">
 
-        <th:block th:if="${stat.first or prevKey != curKey}">
+                <th:block th:if="${stat.first or prevKey != curKey}">
+                    <div class="date-section-title" th:text="${curKey}">2026-06-19</div>
+                    <div class="project-table-wrap">
+                        <table class="project-table">
+                            <thead>
+                                <tr>
+                                    <th>등록일시</th>
+                                    <th>프로젝트</th>
+                                    <th>사용자</th>
+                                    <th>일감</th>
+                                    <th>일감유형</th>
+                                    <th>작업유형</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="worklog-item-row"
+                                    th:each="innerLog : ${validLogs}"
+                                    th:if="${innerLog.actionAt != null ? #temporals.format(innerLog.actionAt,'yyyy-MM-dd') : '미정'} == ${curKey}">
+                                    <td th:text="${innerLog.actionAt != null ? #temporals.format(innerLog.actionAt,'HH:mm') : '00:00'}">14:20</td>
+                                    <td class="text-left" th:text="${innerLog.projectTitle}">WEPLE</td>
+                                    <td th:text="${innerLog.userName}">신짱구</td>
+                                    <td class="text-left" th:text="${innerLog.taskTitle}">로그인 기능 구현</td>
+                                    <td>
+                                        <span th:if="${innerLog.typeName == '기획'}" class="status-badge type-dev" th:text="${innerLog.typeName}"></span>
+                                        <span th:if="${innerLog.typeName == '새 기능'}" class="status-badge type-bug" th:text="${innerLog.typeName}"></span>
+                                        <span th:if="${innerLog.typeName == '개선'}" class="status-badge type-support" th:text="${innerLog.typeName}"></span>
+                                        <span th:if="${innerLog.typeName == '피드백'}" class="status-badge type-improve" th:text="${innerLog.typeName}"></span>
+                                        <span th:if="${innerLog.typeName != '기획' and innerLog.typeName != '새 기능' and innerLog.typeName != '개선' and innerLog.typeName != '피드백'}"
+                                              class="status-badge type-default" th:text="${innerLog.typeName}"></span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${innerLog.actionType == 'CREATE'}" class="action-badge action-create">CREATE</span>
+                                        <span th:if="${innerLog.actionType == 'UPDATE'}" class="action-badge action-update">UPDATE</span>
+                                        <span th:if="${innerLog.actionType == 'DELETE'}" class="action-badge action-delete">DELETE</span>
+                                        <span th:if="${innerLog.actionType != 'CREATE' and innerLog.actionType != 'UPDATE' and innerLog.actionType != 'DELETE'}"
+                                              class="action-badge action-default" th:text="${innerLog.actionType}"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </th:block>
 
-	            <div class="date-section-title"
-	                 th:text="${curKey}">
-	                2026-06-19
-	            </div>
-	
-	            <div class="project-table-wrap">
-	                <table class="project-table">
-	                    <thead>
-	                        <tr>
-	                            <th>등록일시</th>
-	                            <th>프로젝트</th>
-	                            <th>사용자</th>
-	                            <th>일감</th>
-	                            <th>일감유형</th>
-	                            <th>작업유형</th>
-	                        </tr>
-	                    </thead>
-	
-	                    <tbody>
-	
-	                        <tr class="worklog-item-row"
-	                            th:each="innerLog : ${validLogs}"
-	                            th:if="${innerLog.actionAt != null ? #temporals.format(innerLog.actionAt,'yyyy-MM-dd') : '미정'} == ${curKey}">
-	
-	                            <td th:text="${innerLog.actionAt != null ? #temporals.format(innerLog.actionAt,'HH:mm') : '00:00'}">
-	                                14:20
-	                            </td>
-	
-	                            <td class="text-left"
-	                                th:text="${innerLog.projectTitle}">
-	                                WEPLE
-	                            </td>
-	
-	                            <td th:text="${innerLog.userName}">
-	                                신짱구
-	                            </td>
-	
-	                            <td class="text-left"
-	                                th:text="${innerLog.taskTitle}">
-	                                로그인 기능 구현
-	                            </td>
-	
-	                            <td>
-	                                <span th:if="${innerLog.typeName == '기획'}"
-	                                      class="status-badge type-dev"
-	                                      th:text="${innerLog.typeName}"></span>
-	
-	                                <span th:if="${innerLog.typeName == '새 기능'}"
-	                                      class="status-badge type-bug"
-	                                      th:text="${innerLog.typeName}"></span>
-	
-	                                <span th:if="${innerLog.typeName == '개선'}"
-	                                      class="status-badge type-support"
-	                                      th:text="${innerLog.typeName}"></span>
-	
-	                                <span th:if="${innerLog.typeName == '피드백'}"
-	                                      class="status-badge type-improve"
-	                                      th:text="${innerLog.typeName}"></span>
-	
-	                                <span th:if="${innerLog.typeName != '기획'
-	                                           and innerLog.typeName != '새 기능'
-	                                           and innerLog.typeName != '개선'
-	                                           and innerLog.typeName != '피드백'}"
-	                                      class="status-badge type-default"
-	                                      th:text="${innerLog.typeName}">
-	                                </span>
-	                            </td>
-	
-	                            <td>
-	                                <span th:if="${innerLog.actionType == 'CREATE'}"
-	                                      class="action-badge action-create">
-	                                      CREATE
-	                                </span>
-	
-	                                <span th:if="${innerLog.actionType == 'UPDATE'}"
-	                                      class="action-badge action-update">
-	                                      UPDATE
-	                                </span>
-	
-	                                <span th:if="${innerLog.actionType == 'DELETE'}"
-	                                      class="action-badge action-delete">
-	                                      DELETE
-	                                </span>
-	
-	                                <span th:if="${innerLog.actionType != 'CREATE'
-	                                           and innerLog.actionType != 'UPDATE'
-	                                           and innerLog.actionType != 'DELETE'}"
-	                                      class="action-badge action-default"
-	                                      th:text="${innerLog.actionType}">
-	                                </span>
-	                            </td>
-	
-	                        </tr>
-	
-	                    </tbody>
-	                </table>
-	            </div>
-	
-	        </th:block>
-	
-	    </th:block>
-	
-	</th:block>
+            </th:block>
+
+        </th:block>
  
         <div class="pagination-wrap">
-	    <a th:href="${currentPage > 1}
-	            ? @{/worklog(page=${currentPage - 1}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}
-	            : '#'"
-	       th:classappend="${currentPage <= 1} ? 'disabled'"
-	       class="page-btn">&lt; 이전</a>
-	
-	    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
-	        <a th:href="@{/worklog(page=${i}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}"
-	           th:text="${i}"
-	           th:classappend="${i == currentPage} ? 'active'"
-	           class="page-btn">1</a>
-	    </th:block>
-	
-	    <a th:href="${currentPage < totalPages}
-	            ? @{/worklog(page=${currentPage + 1}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}
-	            : '#'"
-	       th:classappend="${currentPage >= totalPages} ? 'disabled'"
-	       class="page-btn">다음 &gt;</a>
-	</div>
+            <a th:href="${currentPage > 1}
+                    ? @{/worklog(page=${currentPage - 1}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}
+                    : '#'"
+               th:classappend="${currentPage <= 1} ? 'disabled'"
+               class="page-btn">&lt; 이전</a>
+            <th:block th:if="${totalPages > 0}" th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a th:href="@{/worklog(page=${i}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}"
+                   th:text="${i}" th:classappend="${i == currentPage} ? 'active'" class="page-btn">1</a>
+            </th:block>
+            <a th:href="${currentPage < totalPages}
+                    ? @{/worklog(page=${currentPage + 1}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}
+                    : '#'"
+               th:classappend="${currentPage >= totalPages} ? 'disabled'"
+               class="page-btn">다음 &gt;</a>
+        </div>
     </div>
     
-   
-    <!-- Flatpickr 캘린더 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/ko.js"></script>
 
     <script th:inline="javascript">
         (function () {
             var DATE_FORMAT = 'Y.m.d';
-
             if (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.ko) {
                 flatpickr.localize(flatpickr.l10ns.ko);
             }
-
             function parseFormatted(str) {
                 if (!str) return null;
                 var parts = str.split('.');
@@ -260,110 +186,94 @@
                 var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
                 return isNaN(d.getTime()) ? null : d;
             }
-
             function addDays(date, days) {
                 var d = new Date(date.getTime());
                 d.setDate(d.getDate() + days);
                 return d;
             }
-
             var startInput = document.getElementById('startDateInput');
             var endInput   = document.getElementById('endDateInput');
             var searchForm = document.getElementById('searchForm');
-
             var autoSubmitEnabled = false;
 
-            /* [수정4] 소요시간 카드 기간 텍스트 동기화 */
             function syncTimePeriod() {
                 var periodEl = document.querySelector('.time-period');
                 if (periodEl && startInput.value && endInput.value) {
                     periodEl.textContent = startInput.value + ' ~ ' + endInput.value;
                 }
             }
-
             function submitSearchForm() {
                 syncTimePeriod();
-                if (autoSubmitEnabled && searchForm) {
-                    searchForm.submit();
-                }
+                if (autoSubmitEnabled && searchForm) searchForm.submit();
             }
-
             var startPicker = flatpickr(startInput, {
-                dateFormat: DATE_FORMAT,
-                allowInput: false,
+                dateFormat: DATE_FORMAT, allowInput: false,
                 onChange: function (selectedDates) {
-                    if (selectedDates[0]) {
-                        endPicker.set('minDate', selectedDates[0]);
-                    }
+                    if (selectedDates[0]) endPicker.set('minDate', selectedDates[0]);
                     submitSearchForm();
                 }
             });
-
             var endPicker = flatpickr(endInput, {
-                dateFormat: DATE_FORMAT,
-                allowInput: false,
+                dateFormat: DATE_FORMAT, allowInput: false,
                 onChange: function (selectedDates) {
-                    if (selectedDates[0]) {
-                        startPicker.set('maxDate', selectedDates[0]);
-                    }
+                    if (selectedDates[0]) startPicker.set('maxDate', selectedDates[0]);
                     submitSearchForm();
                 }
             });
-
             function setRange(start, end) {
-                // ✅ minDate/maxDate 제약이 걸린 상태에서 setDate를 호출하면,
-                //    새로 넣으려는 날짜가 기존 제약 범위를 벗어날 경우 flatpickr가
-                //    그 값을 무시(보정)해버려 종료일이 안 바뀌는 문제가 생긴다.
-                //    그래서 먼저 제약을 풀고(null) 두 날짜를 모두 반영한 뒤,
-                //    마지막에 정확한 min/max 제약을 다시 건다.
                 startPicker.set('maxDate', null);
                 endPicker.set('minDate', null);
-
                 startPicker.setDate(start, false);
                 endPicker.setDate(end, false);
-
                 startPicker.set('maxDate', end);
                 endPicker.set('minDate', start);
             }
-
             function applyRecentDays(days) {
                 var today = new Date();
-                var from  = addDays(today, -(days - 1));
-                setRange(from, today);
+                setRange(addDays(today, -(days - 1)), today);
             }
 
-            if (!startInput.value || !endInput.value) {
+            // ✅ 핵심: 페이지 로드 시 input에 이미 값이 있으면 flatpickr 내부 상태도 동기화
+            var initStart = parseFormatted(startInput.value);
+            var initEnd   = parseFormatted(endInput.value);
+            if (initStart && initEnd) {
+                setRange(initStart, initEnd);
+            } else {
                 applyRecentDays(5);
             }
 
-            /* 초기 세팅 후 카드 기간 즉시 반영 */
             syncTimePeriod();
-
             autoSubmitEnabled = true;
 
+            // ✅ recentPeriodBtn: autoSubmit 잠금
             document.getElementById('recentPeriodBtn').addEventListener('click', function () {
+                autoSubmitEnabled = false;
                 applyRecentDays(5);
-                submitSearchForm();
+                autoSubmitEnabled = true;
+                setTimeout(function () { submitSearchForm(); }, 0);
             });
 
+            // ✅ dateBackBtn: autoSubmit 잠금
             document.getElementById('dateBackBtn').addEventListener('click', function () {
                 var curStart = parseFormatted(startInput.value);
                 var curEnd   = parseFormatted(endInput.value);
 
                 if (!curStart || !curEnd) {
+                    autoSubmitEnabled = false;
                     applyRecentDays(5);
-                    submitSearchForm();
+                    autoSubmitEnabled = true;
+                    setTimeout(function () { submitSearchForm(); }, 0);
                     return;
                 }
 
-                var dayMs    = 24 * 60 * 60 * 1000;
-                var rangeDays = Math.round((curEnd.getTime() - curStart.getTime()) / dayMs) + 1;
+                var rangeDays = Math.round((curEnd.getTime() - curStart.getTime()) / (24*60*60*1000)) + 1;
+                var newEnd    = addDays(curStart, -1);
+                var newStart  = addDays(newEnd, -(rangeDays - 1));
 
-                var newEnd   = addDays(curStart, -1);
-                var newStart = addDays(newEnd, -(rangeDays - 1));
-
+                autoSubmitEnabled = false;
                 setRange(newStart, newEnd);
-                submitSearchForm();
+                autoSubmitEnabled = true;
+                setTimeout(function () { submitSearchForm(); }, 0);
             });
         })();
     </script>

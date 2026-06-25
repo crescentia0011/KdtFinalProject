@@ -55,7 +55,7 @@
 					    <option th:each="user : ${users}"
 					            th:value="${user.userCode}"
 					            th:text="${user.userName}"
-					            th:selected="${user.userCode == param.userCode}">
+					            th:selected="${user.userCode == userCode}">
 					    </option>
 					</select>
                 </div>
@@ -215,7 +215,7 @@
 		       th:classappend="${currentPage <= 1} ? 'disabled'"
 		       class="page-btn">&lt; 이전</a>
 		
-		    <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+		     <th:block th:if="${totalPages > 0}" th:each="i : ${#numbers.sequence(1, totalPages)}">
 		        <a th:href="@{/project/worklog(page=${i}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames})}"
 		           th:text="${i}"
 		           th:classappend="${i == currentPage} ? 'active'"
@@ -296,22 +296,51 @@
                 var today = new Date();
                 setRange(addDays(today, -(days - 1)), today);
             }
-            if (!startInput.value || !endInput.value) applyRecentDays(5);
+            var initStart = parseFormatted(startInput.value);
+            var initEnd   = parseFormatted(endInput.value);
+
+            if (initStart && initEnd) {
+                setRange(initStart, initEnd);
+            } else {
+                applyRecentDays(5);
+            }
+
             syncTimePeriod();
             autoSubmitEnabled = true;
-
+            
             document.getElementById('recentPeriodBtn').addEventListener('click', function () {
-                applyRecentDays(5); submitSearchForm();
+                autoSubmitEnabled = false;
+                applyRecentDays(5);
+                autoSubmitEnabled = true;
+
+                setTimeout(function () {
+                    submitSearchForm();
+                }, 0);
             });
+
             document.getElementById('dateBackBtn').addEventListener('click', function () {
                 var curStart = parseFormatted(startInput.value);
                 var curEnd   = parseFormatted(endInput.value);
-                if (!curStart || !curEnd) { applyRecentDays(5); submitSearchForm(); return; }
+
+                if (!curStart || !curEnd) {
+                    applyRecentDays(5);
+                    submitSearchForm();
+                    return;
+                }
+
                 var rangeDays = Math.round((curEnd.getTime() - curStart.getTime()) / (24*60*60*1000)) + 1;
                 var newEnd    = addDays(curStart, -1);
                 var newStart  = addDays(newEnd, -(rangeDays - 1));
+
+                // ✅ setRange 전에 autoSubmit 잠깐 끄기
+                autoSubmitEnabled = false;
                 setRange(newStart, newEnd);
-                submitSearchForm();
+                autoSubmitEnabled = true;
+
+                // ✅ DOM 반영 완전히 끝난 뒤 submit
+                setTimeout(function () {
+                    submitSearchForm();
+                }, 0);
             });
         })();
     </script>

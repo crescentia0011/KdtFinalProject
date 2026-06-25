@@ -38,6 +38,7 @@ public class CodeValueServiceImpl implements CodeValueService {
 	// 등록
 	@Override
 	public long addCodeValue(CodeValueVO codeValueVO, String type) {
+		//기본값(defaultYn)이 "Y"이면 기존 기본값을 모두 "N"으로 변경
 		if ("Y".equals(codeValueVO.getDefaultYn())) {
 	        codeValueMapper.resetAllDefaultYn(type); 
 	    }
@@ -50,6 +51,7 @@ public class CodeValueServiceImpl implements CodeValueService {
 	// 수정 (데이터 1개씩 수정 가능)
 	@Override
 	public void modifyCodeValue(CodeValueVO codeValueVO, String type) {
+		//사용여부가 "N"이면 기본값도 "N"으로 변경, 기본값이 "Y"이면 같은 종류의 다른 기본값을 "N"으로 변경
 		if ("N".equals(codeValueVO.getUsingYn())) {
 	        codeValueVO.setDefaultYn("N");
 	    }
@@ -63,7 +65,7 @@ public class CodeValueServiceImpl implements CodeValueService {
 	    codeValueMapper.updateCodeValue(codeValueVO);
 	}
 
-	// 수정 (모든 기본값을 N으로 변경)
+	// 수정 (수정 시 모든 기본값을 N으로 변경)
 	@Override
 	public void resetDefaultYn(Map<String, Object> params) {
 	    codeValueMapper.resetDefaultYn(params);
@@ -71,6 +73,7 @@ public class CodeValueServiceImpl implements CodeValueService {
 
 	// 추가 등록 시 모든 기본값을 N으로 변경
 	@Override
+	//등록 시 해당 종류(type)의 모든 기본값을 "N"으로 변경하는 메서드입니다
 	public void resetAllDefaultYn(String type) {
 	    codeValueMapper.resetAllDefaultYn(type);
 	}

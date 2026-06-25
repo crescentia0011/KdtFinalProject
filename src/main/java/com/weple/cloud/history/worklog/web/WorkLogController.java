@@ -10,6 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.weple.cloud.admin.service.UserService;
+import com.weple.cloud.admin.service.UserVO;
 import com.weple.cloud.history.worklog.service.WorkLogService;
 import com.weple.cloud.history.worklog.service.WorkLogVO;
 import com.weple.cloud.project.service.ProjectService;
@@ -19,13 +21,16 @@ import com.weple.cloud.project.service.ProjectVO;
 public class WorkLogController {
 	private final WorkLogService workLogService;
 	private final ProjectService projectService;
-	//private final UserService userService;
+	private final UserService userService;
 	
 	@Autowired
-	public WorkLogController(WorkLogService workLogService, ProjectService projectService) {
+	public WorkLogController(
+			WorkLogService workLogService,
+			ProjectService projectService,
+			UserService userService) {
 		this.workLogService = workLogService;
 		this.projectService = projectService;
-		//this.userService = userService;
+		this.userService = userService;
 	}
 	
 	// 작업내역 조회
@@ -41,10 +46,18 @@ public class WorkLogController {
 		
 		 // 날짜 기본값: 최근 5일
 		if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty()) {
-            LocalDate today = LocalDate.now();
-            endDate = today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
-            startDate = today.minusDays(4).format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
-        }
+		    LocalDate today = LocalDate.now();
+		    StringBuilder redirectUrl = new StringBuilder("redirect:/worklog");
+		    redirectUrl.append("?startDate=").append(today.minusDays(4).format(DateTimeFormatter.ofPattern("yyyy.MM.dd")));
+		    redirectUrl.append("&endDate=").append(today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")));
+		    if (projectId != null && !projectId.isEmpty())
+		        redirectUrl.append("&projectId=").append(projectId);
+		    if (userCode != null && !userCode.isEmpty())
+		        redirectUrl.append("&userCode=").append(userCode);
+		    if (typeNames != null)
+		        for (String t : typeNames) redirectUrl.append("&typeNames=").append(t);
+		    return redirectUrl.toString();
+		}
 
         int pageSize = 10;
         int offset = (page - 1) * pageSize;
@@ -59,6 +72,9 @@ public class WorkLogController {
 		
 		List<ProjectVO> projectList = projectService.findAll("");
 		model.addAttribute("projects", projectList);
+		
+		List<UserVO> userList = userService.findAllActiveUsers();
+		model.addAttribute("users", userList);
 		
 		model.addAttribute("workLogList", list);
 		model.addAttribute("projectId", projectId);

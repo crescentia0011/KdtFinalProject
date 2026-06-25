@@ -64,4 +64,86 @@
           AND NVL(owner_yn, 0) = 0
           AND (#{actorOwnerYn} = 1 OR NVL(admin_yn, 0) = 0)
     </update>
+
+    <!-- 신규 사용자 등록 전 로그인 아이디 중복 여부를 확인합니다. -->
+    <select id="countUserByLoginId" resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE login_id = #{loginId}
+    </select>
+
+    <!-- 신규 사용자 등록 전 이메일 중복 여부를 확인합니다. -->
+    <select id="countUserByEmail" resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE UPPER(email) = UPPER(#{email})
+    </select>
+
+    <!-- 관리자가 직접 생성한 계정은 가입승인 없이 같은 회사의 활성 사용자로 등록합니다. -->
+    <insert id="insertUser" parameterType="com.weple.cloud.system.service.UserManagementCreateVO">
+        <!-- 회원가입과 같은 usr-yyyymmdd-번호 규칙으로 신규 사용자 코드를 먼저 발급합니다. -->
+        <selectKey keyProperty="userCode"
+                   resultType="string"
+                   order="BEFORE">
+            SELECT
+                'USR-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
+                (
+                    NVL(
+                        MAX(
+                            TO_NUMBER(
+                                SUBSTR(
+                                    user_code,
+                                    LENGTH('USR-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-') + 1
+                                )
+                            )
+                        ),
+                        0
+                    ) + 1
+                )
+            FROM users
+            WHERE user_code LIKE 'USR-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
+              AND REGEXP_LIKE(
+                    SUBSTR(
+                        user_code,
+                        LENGTH('USR-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-') + 1
+                    ),
+                    '^[0-9]+$'
+                  )
+        </selectKey>
+
+        INSERT INTO users
+        (
+            user_code,
+            company_id,
+            login_id,
+            password,
+            user_name,
+            email,
+            phone_number,
+            create_date,
+            status,
+            owner_yn,
+            admin_yn,
+            web_notification_yn,
+            email_notification_yn,
+            notification_area
+        )
+        VALUES
+        (
+            #{userCode},
+            #{companyId},
+            #{loginId},
+            #{password},
+            #{userName},
+            #{email},
+            #{phoneNumber},
+            SYSDATE,
+            'a2',
+            0,
+            NVL(#{adminYn}, 0),
+            #{webNotificationYn},
+            #{emailNotificationYn},
+            'ALL'
+        )
+    </insert>
 </mapper>

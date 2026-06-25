@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.admin.mapper.UserMapper">
+	<!-- 전체 작업내역 - 활성 사용자 전체 목록(a2) -->
+	<select id="selectAllActiveUsers" resultType="com.weple.cloud.admin.service.UserVO">
+		SELECT user_code,
+			   user_name,
+			   login_id,
+			   status
+		FROM users
+		WHERE status = 'a2'
+		ORDER BY user_name
+	</select>
+	<!-- 프로젝트 내 작업내역 - 해당 프로젝트 구성원(사용자) 목록 -->
+	<select id="selectUsersByProjectId" resultType="com.weple.cloud.admin.service.UserVO">
+		SELECT u.user_code,
+			   u.user_name,
+			   u.login_id,
+			   u.status
+		FROM users u
+		INNER JOIN members m
+				ON u.user_code = m.user_code
+		WHERE u.status = 'a2'
+			AND m.project_id = #{projectId}
+		ORDER BY u.user_name
+	</select>
+</mapper>

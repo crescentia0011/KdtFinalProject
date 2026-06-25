@@ -1,7 +1,10 @@
 package com.weple.cloud.task.web;
 
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,15 +12,21 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.history.task.service.TaskHistoryService;
 import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.task.service.TaskCommentVO;
+import com.weple.cloud.task.service.TaskHistoryDTO;
 import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskService;
+import com.weple.cloud.task.service.TaskSpentTimeVO;
+import com.weple.cloud.task.service.TaskUpdateHistoryVO;
 import com.weple.cloud.task.service.TaskVO;
 
 import lombok.RequiredArgsConstructor;
@@ -29,8 +38,9 @@ public class TaskController {
     
 	private final TaskService taskService;
 	private final ProjectService projectService;
-	private final TaskHistoryService taskHistoryService; // 작업내역 일감 불러오기-은지
+	private final TaskHistoryService taskHistoryService; // 작업내역 일감 불러오기
 	
+	//프로젝트 내부 일감 목록 페이지 로드
 	@GetMapping("/project/task")
     public String projectTaskList(@RequestParam("projectId") Long pId,Model model) {
 		
@@ -44,6 +54,7 @@ public class TaskController {
         return "weple/task/list";
     }
 	
+	//일감 등록 페이지 로드 + 선택 목록 값 로드
 	@GetMapping("/project/task/insert")
     public String projectTaskListInsert(@RequestParam("projectId") Long pId,@AuthenticationPrincipal LoginUserDetails loginUser,Model model) {
 		String userCode = loginUser.getLoginUser().getUserCode();
@@ -71,6 +82,7 @@ public class TaskController {
         return "weple/task/register";
     }
 	
+	//일감 등록 처리
 	@PostMapping("/project/task/insert")
 	public String taskInsertProcess(@RequestParam("projectId") Long pId,
 									@AuthenticationPrincipal LoginUserDetails loginUser,
@@ -92,22 +104,97 @@ public class TaskController {
 	    return "redirect:/project/task?projectId=" + pId;
 	}
 	
+	//일감 상세조회 값 로드
 	@GetMapping("/project/task/detail/{tId}")
 	public String taskDetail(@PathVariable("tId") String tId,@RequestParam("projectId") Long pId,@AuthenticationPrincipal LoginUserDetails loginUser,Model model,TaskVO taskVO) {
 			
+
+		
 		TaskVO taskDetail = taskService.findTaskDetail(tId);
 		List<TaskCommentVO> taskComment = taskService.findTaskComment(tId);
-		System.out.println("여기" + taskComment);
 		List<TaskVO> childTaskList = taskService.findChildTask(tId);
+		List<TaskHistoryDTO> updateHistoryList = taskService.taskUpdateHistory(tId);
+		List<TaskSpentTimeVO>spentTimeList = taskService.taskSpentTime(tId);
+		
+		if (loginUser != null && loginUser.getLoginUser() != null) {
+	        model.addAttribute("currentUserCode", loginUser.getLoginUser().getUserCode());
+	    } else {
+	        model.addAttribute("currentUserCode", null);
+	    }
+		
 		model.addAttribute("currentMenu", "task");
 		model.addAttribute("projectId",pId);
 		model.addAttribute("taskDetail",taskDetail);
 		model.addAttribute("chlidTaskList",childTaskList);
 		model.addAttribute("taskComment" , taskComment);
+		model.addAttribute("updateHistoryList",updateHistoryList);
+		model.addAttribute("spentTimeList", spentTimeList);
 		return "weple/task/detail";
 	}
 	
+	//일감 댓글 등록 post 처리
+	@PostMapping("/api/task/comments/{tId}")
+    @ResponseBody
+    public ResponseEntity<?> addComment(@RequestBody TaskCommentVO commentVO,@PathVariable("tId") String tId, @AuthenticationPrincipal LoginUserDetails loginUser) {
+        
+		String userCode = loginUser.getLoginUser().getUserCode();
+	    commentVO.setUserCode(userCode);
+	    commentVO.setTaskId(tId);
+        
+        int result = taskService.insertTaskComment(commentVO);
+        
+        if (result > 0) {
+            return ResponseEntity.ok(Map.of("message", "댓글이 등록되었습니다."));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "댓글 등록에 실패했습니다."));
+        }
+    }
 	
+	// 댓글 수정 처리
+	@PutMapping("/api/task/comments/{commentId}")
+	@ResponseBody
+	public ResponseEntity<?> updateComment(
+	        @PathVariable("commentId") Long commentId,
+	        @RequestBody TaskCommentVO commentVO,
+	        @AuthenticationPrincipal LoginUserDetails loginUser) {
+	    
+
+		String userCode = loginUser.getLoginUser().getUserCode();
+	    
+	    commentVO.setCommentId(commentId);
+	    commentVO.setUserCode(userCode); 
+	    
+	    int result = taskService.updateTaskComment(commentVO);
+	    
+	    if (result > 0) {
+	        return ResponseEntity.ok(Map.of("message", "수정되었습니다."));
+	    } else {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "수정 권한이 없거나 실패했습니다."));
+	    }
+	}
+
+
+	// 댓글 삭제 처리
+	@DeleteMapping("/api/task/comments/{commentId}")
+	@ResponseBody
+	public ResponseEntity<?> deleteComment(
+	        @PathVariable("commentId") Long commentId,
+	        @AuthenticationPrincipal LoginUserDetails loginUser) {
+	    
+
+	    String userCode = loginUser.getLoginUser().getUserCode();
+	    
+	    int result = taskService.deleteTaskComment(commentId, userCode);
+	    
+	    if (result > 0) {
+	        return ResponseEntity.ok(Map.of("message", "삭제되었습니다."));
+	    } else {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "삭제 권한이 없거나 실패했습니다."));
+	    }
+	}
+
+	
+	// 전체 일감 조회 페이지 로드
 	@GetMapping("/task/all-list")
 	public String allTaskList(@AuthenticationPrincipal LoginUserDetails loginUser , Model model) {
 		String userCode = loginUser.getLoginUser().getUserCode();
@@ -119,7 +206,7 @@ public class TaskController {
 		
 	}
 	
-	// 1. 수정 페이지 이동 (GET)
+	// 프로젝트 내부 수정 페이지 로드 + 선택 값 목록 로드 + 기존값 로드
 	@GetMapping("/project/task/update/{tId}")
 	public String taskUpdateForm(@PathVariable("tId") String tId, @RequestParam("projectId") Long pId, @AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
 		
@@ -131,6 +218,7 @@ public class TaskController {
 	    //nav 일감 돌아가기 위해서 projectId 넘김
 	    model.addAttribute("currentMenu", "task");
 	    model.addAttribute("projectId",pId);
+	    // 수정할 기존값 넘김
 	    model.addAttribute("taskDetail",taskDetail);
 	    model.addAttribute("loginUserCode",userCode);
 		
@@ -152,7 +240,7 @@ public class TaskController {
 	    return "weple/task/fragment-edit"; // 생성한 수정 페이지 HTML 경로
 	}
 
-	// 2. 수정 처리 (POST)
+	// 일감 수정 처리 
 	@PostMapping("/project/task/update")
 	public String taskUpdateProcess(@RequestParam("projectId") Long pId,
 	                                @AuthenticationPrincipal LoginUserDetails loginUser,
@@ -164,9 +252,6 @@ public class TaskController {
 	    taskVO.setProjectId(pId);
 	    taskVO.setUserCode(userCode); 
 
-
-	    
-	    
 	    // 수정 전 값 먼저 조회-은지
 	    TaskVO before = taskService.findTaskDetail(taskVO.getTaskId());
 	    String oldTitle = before.getTaskTitle();
@@ -186,62 +271,56 @@ public class TaskController {
 	    return "redirect:/project/task/detail/" + taskVO.getTaskId() + "?projectId=" + pId;
 	}
 	
+	// 일감 삭제 소프트 딜리트 처리 (sql update 처리)
 	@PostMapping("/project/task/delete/{tId}")
-	public void taskDeleteProcess(@RequestParam("projectId") Long pId,@PathVariable("tId") String tId) {
-		taskService.deleteTask(tId);
-	}
-	
-		
-	@DeleteMapping("/project/task/delete")
 	public String taskDeleteProcess(
-			@RequestParam("projectId") Long pId,
-			@RequestParam("tId") String tId,
-			@AuthenticationPrincipal LoginUserDetails loginUser) {
-		
-		// userCode 가져와야 누가 삭제했는지 저장 가능-은지
-		String userCode = loginUser.getLoginUser().getUserCode();
-		
-		// 삭제 전 값 먼저 조회-은지
-		TaskVO before = taskService.findTaskDetail(tId);
-		String oldTitle = before.getTaskTitle();
+	        @RequestParam("projectId") Long pId, 
+	        @PathVariable("tId") String tId,
+	        @AuthenticationPrincipal LoginUserDetails loginUser) {
+	    
+	    // 로그인한 유저 코드 가져오기 (누가 삭제했는지 기록)
+	    String userCode = loginUser.getLoginUser().getUserCode();
+	    
+	    // 삭제 전 값 먼저 조회 (이력 저장을 위한 기존 데이터)
+	    System.out.println("taskID: " + tId);
+	    TaskVO before = taskService.findTaskDetail(tId);
+	    System.out.println("aaa:" + before);
+	    String oldTitle = before.getTaskTitle();
 	    String oldTypeName = before.getTypeIdName();
 	    
-	    // 소프트 딜리트-은지
+	    // 소프트 딜리트 실행 (기존 공통 로직)
 	    taskService.deleteTask(tId);
 	    
-	 // 삭제 이력 저장-은지
+	    // 삭제 이력 저장
 	    taskHistoryService.insertHistory(
 	        tId, userCode, "DELETE",
 	        oldTitle, null,   
 	        oldTypeName, null  
 	    );
 	    
-		
-		return "redirect:/project/task" + "?projectId=" +pId;
-		
+	    // 해당 프로젝트의 일감 목록 페이지로 리다이렉트
+	    return "redirect:/project/task?projectId=" + pId;
 	}
-//	@PostMapping("/project/task/comment/add")
-//    @ResponseBody // ★ 일반 @Controller에서 JSON 응답을 내보내기 위해 필수!
-//    public ResponseEntity<?> taskCommentAdd(@RequestBody TaskCommentVO commentVO,
-//                                            @AuthenticationPrincipal LoginUserDetails loginUser) {
-//        try {
-//            // 로그인한 사용자의 고유 코드 세팅
-//            String userCode = loginUser.getLoginUser().getUserCode();
-//            commentVO.setUserCode(userCode);
-//
-//            // DB에 댓글 Insert
-//            taskService.addTaskComment(commentVO);
-//
-//            // 성공 반환 (자바스크립트 쪽에서 data.success == true 로 받게 됨)
-//            return ResponseEntity.ok().body(Map.of("success", true));
-//            
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            // 에러 발생 시 500 에러와 함께 메시지 반환
-//            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", e.getMessage()));
-//        }
-//    }
 	
+	// 댓글만 ajax 목록 다시 불러오기
+	@GetMapping("/api/task/comments/fragment/{tId}")
+	public String getCommentFragment(@PathVariable("tId") String tId, Model model, @AuthenticationPrincipal LoginUserDetails loginUser) {
+		String userCode = loginUser.getLoginUser().getUserCode();
+	    // 최신 댓글 목록 다시 조회
+	    List<TaskCommentVO> taskComment = taskService.findTaskComment(tId);
+	    model.addAttribute("taskComment", taskComment);
+	    
+	    // 권한 처리를 위한 로그인 유저 코드 세팅
+	    if (loginUser != null && loginUser.getLoginUser() != null) {
+	        model.addAttribute("currentUserCode", userCode);
+	    } else {
+	        model.addAttribute("currentUserCode", null);
+	    }
+	    
+	    // commentArea 부분만 로드
+	    return "weple/task/detail :: #commentArea";
+	}
+
 
 
 }

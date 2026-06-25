@@ -15,4 +15,5 @@ public class PermissionVO {
 	private String permissionCode;
     private String permissionTag;
     private String permissionName;
+    private String tagLabel;
 }

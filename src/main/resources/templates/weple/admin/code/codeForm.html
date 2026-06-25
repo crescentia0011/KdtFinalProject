@@ -86,12 +86,14 @@
 	            const isDefaultChecked = defaultCheckbox ? defaultCheckbox.checked : false;
 	            const isUsingChecked = usingCheckbox ? usingCheckbox.checked : false;
 
+	            //사용중이 아닌데 기본값 체크
 	            if (isDefaultChecked && !isUsingChecked) {
 	                e.preventDefault();
 	                alert("사용중이 아닌 항목은 기본값으로 설정할 수 없습니다.");
 	                return false;
 	            }
 
+	            //기본값 체크
 	            if (isDefaultChecked) {
 	                e.preventDefault(); 
 	                

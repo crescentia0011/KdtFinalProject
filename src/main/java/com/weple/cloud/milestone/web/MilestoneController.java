@@ -56,20 +56,17 @@ public class MilestoneController {
         int pageSize = 20;
         List<TaskVO> paginatedTasks = milestoneService.getMilestoneTasksWithPaging(projectId, milestoneId, page, pageSize);
         
-        // 총 일감 개수 기반 페이징 처리를 위한 전체 카운트 (화면 페이징 네비게이션용)
-        int totalTaskCount = 0;
-        if (detailInfo.getStatusStats() != null) {
-            totalTaskCount = detailInfo.getStatusStats().stream().mapToInt(TaskGroupStatVO::getTotalCount).sum();
-        }
+        // DB에서 매핑되어 넘어온 총 일감 개수를 바로 활용 (Stream 연산 제거로 최적화)
+        int totalTaskCount = detailInfo.getTotalTaskCount();
 
-        // 3. 화면 데이터 바인딩
+        model.addAttribute("projectId", projectId); 
         model.addAttribute("detail", detailInfo);
         model.addAttribute("taskList", paginatedTasks);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalTasks", totalTaskCount);
         model.addAttribute("totalPages", (int) Math.ceil((double) totalTaskCount / pageSize));
 
-        return "project/milestone/detail"; // 상세조회 Thymeleaf 경로
+        return "weple/milestone/detail"; // 상세조회 Thymeleaf 경로
     }
 	
 
@@ -130,7 +127,7 @@ public class MilestoneController {
 	// 삭제하기 
 	@PostMapping("/delete/{milestoneId}")
 	@ResponseBody
-	public ResponseEntity<String> milestoneDelete(@PathVariable("milestoneId") Long milestoneId) {
+	public ResponseEntity<String> milestoneDelete(@PathVariable Long milestoneId) {
 		int result = milestoneService.deleteMilestone(milestoneId);
 		if (result > 0) {
 			return ResponseEntity.ok("SUCCESS");

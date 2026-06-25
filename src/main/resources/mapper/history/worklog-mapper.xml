@@ -19,24 +19,26 @@
                     th.action_type,
                     th.action_at + INTERVAL '9' HOUR AS actionAt
                 FROM task_history th
-                LEFT JOIN task t ON th.task_id = t.task_id
-                LEFT JOIN project p ON t.project_id = p.project_id
-                LEFT JOIN users u ON th.changed_by = u.user_code
-                LEFT JOIN task_types tt ON t.type_id = tt.type_id
+                INNER JOIN task t
+                	ON th.task_id = t.task_id 
+                INNER JOIN users u
+                	ON th.changed_by = u.user_code
+                INNER JOIN task_types tt
+                	ON t.type_id = tt.type_id
+                LEFT JOIN project p
+                	ON t.project_id = p.project_id
                 LEFT JOIN task_history_detail d_title
                        ON th.history_id = d_title.history_id
                       AND d_title.field_name = 'task_title'
                 LEFT JOIN task_history_detail d_type
                        ON th.history_id = d_type.history_id
                       AND d_type.field_name = 'type_name'
-                LEFT OUTER JOIN work_time w ON t.task_id = w.task_id
                 LEFT OUTER JOIN common_code cc
                             ON t.task_status = cc.common_id
                            AND cc.common_code = '0E'
                 <where>
                     <if test="projectId != null and projectId != ''">
-                        AND (p.project_id = #{projectId}
-                        OR p.project_id IS NULL)
+                        AND t.project_id = #{projectId}
                     </if>
                     <if test="userCode != null and userCode != ''">
                         AND u.user_code = #{userCode}
@@ -65,18 +67,20 @@
     <select id="countAll" resultType="int">
         SELECT COUNT(*)
         FROM task_history th
-        INNER JOIN task t
+        LEFT JOIN task t
                 ON th.task_id = t.task_id
-                AND t.deleted_yn = 'N'
-        INNER JOIN project p
+        LEFT JOIN project p
                 ON t.project_id = p.project_id
-        INNER JOIN users u
+        LEFT JOIN users u
                 ON th.changed_by = u.user_code
-        INNER JOIN task_types tt
+        LEFT JOIN task_types tt
                 ON t.type_id = tt.type_id
+        LEFT JOIN task_history_detail d_type
+        		ON th.history_id = d_type.history_id
+        		AND d_type.field_name = 'type_name'
         <where>
             <if test="projectId != null and projectId != ''">
-                AND p.project_id = #{projectId}
+                AND t.project_id = #{projectId}
             </if>
             <if test="userCode != null and userCode != ''">
                 AND u.user_code = #{userCode}
@@ -88,7 +92,7 @@
                 AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY - INTERVAL '9' HOUR
             </if>
             <if test="typeNames != null and typeNames.size() > 0">
-                AND tt.type_name IN
+                AND NVL(d_type.new_value, tt.type_name) IN
                 <foreach collection="typeNames" item="type" open="(" separator="," close=")">
                     #{type}
                 </foreach>

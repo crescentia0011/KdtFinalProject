@@ -12,4 +12,7 @@ public interface UserManagementService {
 
     // 기업최고관리자만 부여받은 관리자의 상태를 변경할 수 있도록 사용자 상태를 변경
     void changeUserStatus(Long companyId, int actorOwnerYn, String userCode, String status);
+
+    // 관리자가 입력한 신규 사용자 정보를 검증한 뒤 같은 회사의 활성 사용자로 등록
+    void createUser(Long companyId, int actorOwnerYn, UserManagementCreateVO user);
 }

@@ -9,6 +9,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.weple.cloud.admin.service.UserService;
+import com.weple.cloud.admin.service.UserVO;
 import com.weple.cloud.history.worklog.service.WorkLogVO;
 import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.project.service.ProjectVO;
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class ProjectWorkLogController {
 	private final ProjectWorkLogService projectWorkLogService;
 	private final ProjectService projectService;
+	private final UserService userService;
 
     @GetMapping("/project/worklog")
     public String projectWorkLogList(
@@ -34,11 +37,21 @@ public class ProjectWorkLogController {
     	
     	if (startDate == null || startDate.isBlank()) {
     	    LocalDate today = LocalDate.now();
-
-    	    return "redirect:/project/worklog"
-    	            + "?projectId=" + projectId
-    	            + "&startDate=" + today.minusDays(4).format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
-    	            + "&endDate=" + today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+    	    
+    	    StringBuilder redirectUrl = new StringBuilder("redirect:/project/worklog");
+    	    redirectUrl.append("?projectId=").append(projectId);
+    	    redirectUrl.append("&startDate=").append(today.minusDays(4).format(DateTimeFormatter.ofPattern("yyyy.MM.dd")));
+    	    redirectUrl.append("&endDate=").append(today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")));
+    	    
+    	    if (userCode != null && !userCode.isBlank()) {
+    	        redirectUrl.append("&userCode=").append(userCode);
+    	    }
+    	    if (typeNames != null) {
+    	        for (String t : typeNames) {
+    	            redirectUrl.append("&typeNames=").append(t);
+    	        }
+    	    }
+    	    return redirectUrl.toString();
     	}
         
         int pageSize = 10;
@@ -54,11 +67,14 @@ public class ProjectWorkLogController {
         
         ProjectVO project = projectService.findById(projectId);
         List<String> moduleNames = projectService.findModuleNames(Long.parseLong(projectId));
+        
+        // 프로젝트 구성원 사용자 목록
+        List<UserVO> userList = userService.findUsersByProjectId(projectId);
+        model.addAttribute("users", userList);
 
         model.addAttribute("workLogList", list);
         model.addAttribute("project", project);
         model.addAttribute("moduleNames", moduleNames);
-
         model.addAttribute("projectId", projectId);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);

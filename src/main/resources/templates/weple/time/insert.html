@@ -13,30 +13,32 @@
 				<h3>소요시간 등록</h3>
 			</div>
 
-			<form th:action="@{/insertTotalTime}" method="post"
-				class="insert-form">
+			<form th:action="@{/insertProjectTime}" th:object="${workTimeVO}" method="post" class="insert-form">
 				<div class="form-group">
 				    <label>프로젝트 <span>*</span></label> 
-				    <select name="projectId" required>
-				        <option value="">선택하세요.</option>
-				        <option th:each="p : ${projectList}" 
-				                th:value="${p.projectId}" 
-				                th:text="${p.projectName}">프로젝트명</option>
-				    </select>
+				    <select th:field="*{projectId}" class="form-control" onchange="location.href='/insertProjectTime?projectId=' + this.value">
+					    <option value="" disabled selected hidden>프로젝트명을 선택하세요.</option>
+					    <option th:each="p : ${projectList}" 
+					            th:value="${p.projectId}" 
+					            th:text="${p.projectTitle}"></option>
+					</select>
 				</div>
 
 				<div class="form-group">
 					<label>일감</label>
 					<div class="input-inline">
-						<select name="taskId">
-							<option value="">선택하세요.</option>
+						<select th:field="*{taskId}" class="form-control">
+						    <option value="" disabled selected hidden>일감을 선택하세요.</option>
+						    <option th:each="t : ${taskList}"
+						    		th:value="${t.taskId}"
+						    		th:text="${t.taskTitle}"></option>
 						</select>
 					</div>
 				</div>
 
 				<div class="form-group">
-					<label>사용자 <span>*</span></label> <input type="text"
-						name="userCode" placeholder="사용자를 입력하세요." required>
+					<label>사용자 <span>*</span></label>
+					<input type="text" name="userCode" placeholder="사용자를 입력하세요." required>
 				</div>
 
 				<div class="form-group">
@@ -46,18 +48,25 @@
 
 				<div class="form-group">
 					<label>소요시간 <span>*</span></label> <input type="number"
-						name="spentHour" step="0.1" placeholder="시간 입력" required>
+						name="spentHour" step="0.1" placeholder="시간을 입력하세요." required>
 				</div>
 
 				<div class="form-group">
 					<label>설명</label>
-					<textarea name="spentContent" rows="3"></textarea>
+					<select th:field="*{taskId}" class="form-control">
+					<option value="" disabled selected hidden>일감 설명을 선택하세요.</option>
+					<option th:each="t : ${taskList}"
+					        th:value="${t.taskId}"
+					        th:text="${t.taskDescribee}"></option>
 				</div>
 
 				<div class="form-group">
-					<label>작업분류 <span>*</span></label> <select name="workNameLabel"
-						required>
-						<option value="">--- 선택하세요 ---</option>
+					<label>작업분류 <span>*</span></label>
+					<select name="workNameLabel" class="form-control" required>
+					    <option value="" disabled selected hidden>작업분류를 선택하세요.</option>
+					    <option th:each="v : ${workTypeList}" 
+				            	th:value="${v.taskClassificationId}" 
+				            	th:text="${v.workName != null ? v.workName : v.priorityName}"> </option>
 					</select>
 				</div>
 
@@ -110,12 +119,21 @@ worktime-container {
 	color: #d32f2f;
 }
 
-.form-group input, .form-group select, .form-group textarea {
-	flex: 1;
-	height: 38px;
-	padding: 0 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
+.form-group input, .form-group textarea {
+    flex: 1;
+    height: 38px; 
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-group select {
+    flex: 1;
+    height: auto; /* select는 고정 높이를 주지 않는 것이 안전합니다 */
+    min-height: 38px; /* 최소 높이만 유지 */
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .form-group textarea {

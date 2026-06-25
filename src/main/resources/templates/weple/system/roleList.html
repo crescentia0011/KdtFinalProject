@@ -14,12 +14,19 @@
     <h3 class="role-title">역할 및 권한</h3>
     <div class="role-card">
 
+        <div class="role-toolbar">
+            <a th:href="@{/system/role/create}" class="role-create-btn">
+                <i class="fas fa-plus"></i>
+                <span>역할 등록</span>
+            </a>
+        </div>
+
         <div class="role-table-wrap">
             <table class="role-table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th class="text-left">역할명</th>
+                        <th>역할명</th>
                         <th>생성일자</th>
                         <th>관리</th>
                     </tr>
@@ -30,18 +37,32 @@
                     </tr>
                     <tr th:each="role : ${roleList}">
                         <td th:text="${role.roleId}"></td>
-                        <td class="text-left">
-                            <a th:href="@{/system/role/create(roleId=${role.roleId})}"
-                               class="role-link"
-                               th:text="${role.roleName}"></a>
-                        </td>
+                        <td class="text-left" th:text="${role.roleName}"></td>
                         <td th:text="${role.createdAt != null ? #dates.format(role.createdAt,'yyyy/MM/dd') : '-'}"></td>
-                        <td>
-                            <form th:action="@{/system/role/delete}" method="post">
-                                <input type="hidden" name="roleId" th:value="${role.roleId}">
-                                <button type="button" class="delete-btn delete-role-btn">
-								    삭제
-								</button>
+                        <td style="position:relative; text-align:center;"
+                            onclick="event.stopPropagation();">
+                            <div class="dropdown-wrapper">
+                                <span class="more-options-btn"
+                                      onclick="toggleDropdown(this)">•••</span>
+                                <div class="dropdown-menu-box">
+                                    <button type="button"
+                                            class="dropdown-item edit-btn"
+                                            th:onclick="|location.href='@{/system/role/edit(roleId=${role.roleId})}'|">
+                                        ✏️ 편집
+                                    </button>
+                                    <button type="button"
+                                            class="dropdown-item delete-btn delete-role-btn"
+                                            th:data-role-id="${role.roleId}">
+                                        🗑️ 삭제
+                                    </button>
+                                </div>
+                            </div>
+                            <form th:action="@{/system/role/delete}"
+                                  method="post"
+                                  class="delete-form"
+                                  style="display:none;">
+                                <input type="hidden" name="roleId"
+                                       th:value="${role.roleId}">
                             </form>
                         </td>
                     </tr>
@@ -82,7 +103,7 @@
 
             document.querySelectorAll(".delete-role-btn").forEach(function (btn) {
                 btn.addEventListener("click", function () {
-                    deleteForm = this.closest("form");
+                    deleteForm = this.closest("td").querySelector(".delete-form");
                     document.getElementById("confirmModal").style.display = "flex";
                 });
             });
@@ -114,6 +135,21 @@
         } else {
             window.addEventListener("load", initRoleList);
         }
+
+        function toggleDropdown(el) {
+            document.querySelectorAll('.dropdown-menu-box').forEach(function (menu) {
+                if (menu !== el.nextElementSibling) {
+                    menu.classList.remove('show');
+                }
+            });
+            el.nextElementSibling.classList.toggle('show');
+        }
+
+        document.addEventListener('click', function () {
+            document.querySelectorAll('.dropdown-menu-box').forEach(function (menu) {
+                menu.classList.remove('show');
+            });
+        });
     </script>
 </section>
 </body>

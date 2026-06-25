@@ -3,6 +3,7 @@ package com.weple.cloud.system.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +23,16 @@ import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.system.service.CodeValueService;
 import com.weple.cloud.system.service.CodeValueVO;
 import com.weple.cloud.system.service.GroupService;
+import com.weple.cloud.system.service.GroupUserService;
 import com.weple.cloud.system.service.RoleService;
-import com.weple.cloud.system.service.SelectTotalTimeService;
-import com.weple.cloud.system.service.SelectTotalTimeVO;
+import com.weple.cloud.system.service.RoleVO;
 import com.weple.cloud.system.service.SystemGroupUserVO;
 import com.weple.cloud.system.service.SystemGroupVO;
 import com.weple.cloud.system.service.SystemProjectService;
 import com.weple.cloud.system.service.SystemProjectVO;
 import com.weple.cloud.system.service.TaskTypeService;
 import com.weple.cloud.system.service.TaskTypeVO;
-import com.weple.cloud.system.service.UserService;
+import com.weple.cloud.system.service.UserManagementCreateVO;
 import com.weple.cloud.system.service.UserManagementService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,7 +44,7 @@ import lombok.RequiredArgsConstructor;
 public class SystemController {
 
 	private final GroupService groupService;
-	private final UserService userService;
+	private final GroupUserService groupuserService;
 	private final CodeValueService codeValueService;
 
 	// ---------------------------- 그룹 종류 --------------------------
@@ -85,7 +86,7 @@ public class SystemController {
 	// 전체조회
 	@GetMapping("groupUserList")
 	public String systemGroupUserList(@RequestParam(value = "groupId", required = false) Integer groupId, Model model) {
-		List<SystemGroupUserVO> allList = userService.findGroupUserAll(); // 전체 사용자 목록 가져오기
+		List<SystemGroupUserVO> allList = groupuserService.findGroupUserAll(); // 전체 사용자 목록 가져오기
 		List<SystemGroupUserVO> list = (groupId != null) // 그룹 ID가 있다면
 				? allList.stream().filter(user -> groupId.equals(user.getGroupId())).toList() // 해당 그룹 사용자만 필터링
 				: allList; // 없으면 전체 목록 사용
@@ -101,7 +102,7 @@ public class SystemController {
 	// 그룹 내 사용자 등록 폼
 	@GetMapping("groupUserInsert")
 	public String groupUserInsertForm(@RequestParam(value = "groupId", required = false) Integer groupId, Model model) {
-		List<SystemGroupUserVO> allList = userService.findGroupUserAll(); // 전체 사용자 목록을 DB에서 가져옴 (allList 변수에 담음)
+		List<SystemGroupUserVO> allList = groupuserService.findGroupUserAll(); // 전체 사용자 목록을 DB에서 가져옴 (allList 변수에 담음)
 		List<SystemGroupUserVO> currentGroupUsers = (groupId != null) // 현재 선택된 그룹에 속한 사용자들만 뽑아냄
 				// groupId가 있다면 그 그룹 ID와 일치하는 유저만 필터링, 없으면 빈 목록(ArrayList)을 생성
 				? allList.stream().filter(user -> groupId.equals(user.getGroupId())).toList()
@@ -127,7 +128,7 @@ public class SystemController {
 		Integer companyId = (Integer) session.getAttribute("companyId"); // 세션에서 회사 ID를 가져옴
 
 		List<String> userIds = (currentUserIds != null) ? currentUserIds : List.of(); // 화면에서 선택한 유저 리스트 생성
-		List<SystemGroupUserVO> allList = userService.findGroupUserAll(); // 전체 사용자 목록 가져옴
+		List<SystemGroupUserVO> allList = groupuserService.findGroupUserAll(); // 전체 사용자 목록 가져옴
 
 		for (SystemGroupUserVO user : allList) {
 			String userCode = user.getUserCode();
@@ -137,10 +138,10 @@ public class SystemController {
 
 			if (userIds.contains(userCode)) {// 선택된 유저라면
 				vo.setGroupId(groupId);// 현재 그룹 ID 할당
-				userService.addGroupUser(vo);// DB 업데이트
+				groupuserService.addGroupUser(vo);// DB 업데이트
 			} else if (groupId.equals(user.getGroupId())) { // 기존엔 포함됐으나 이번에 해제된 유저라면
 				vo.setGroupId(0);// 그룹에서 제외(ID를 0으로 변경)
-				userService.modefyGroupUser(vo);// DB 업데이트
+				groupuserService.modefyGroupUser(vo);// DB 업데이트
 			}
 		}
 		return "redirect:/groupList";
@@ -149,7 +150,7 @@ public class SystemController {
 	// 그룹 내 사용자 수정 폼
 	@GetMapping("groupUserUpdate")
 	public String groupUserUpdateForm(@RequestParam("userCode") String userCode, Model model) {
-		List<SystemGroupUserVO> allUsers = userService.findGroupUserAll();
+		List<SystemGroupUserVO> allUsers = groupuserService.findGroupUserAll();
 		SystemGroupUserVO findVO = allUsers.stream()
 				.filter(user -> user.getUserCode() != null && user.getUserCode().equals(userCode)).findFirst()
 				.orElse(null);
@@ -160,7 +161,7 @@ public class SystemController {
 	// 그룹 내 사용자 수정 처리
 	@PostMapping("groupUserUpdate")
 	public String groupUserProcess(SystemGroupUserVO systemGroupUserVO) {
-		userService.modefyGroupUser(systemGroupUserVO);
+		groupuserService.modefyGroupUser(systemGroupUserVO);
 		return "redirect:/groupList";
 	}
 
@@ -168,7 +169,7 @@ public class SystemController {
 	@GetMapping("groupUserDelete")
 	public String groupUserDelete(@RequestParam("userCode") String userCode,
 			@RequestParam(value = "groupId", required = false) String groupId) {
-		userService.removeGroupUser(userCode);
+		groupuserService.removeGroupUser(userCode);
 
 		if (groupId == null || "null".equals(groupId) || groupId.trim().isEmpty()) {
 			return "redirect:/groupList";
@@ -538,11 +539,65 @@ public class SystemController {
 	    return "weple/system/roleList";
 	}
 	
-	// 역할 등록
+	// 역할 등록 폼
+	@GetMapping("/system/role/create")
+	public String roleCreateForm(Model model) {
+		model.addAttribute("permissionList", roleService.selectPermissionList());
+		model.addAttribute("mode", "create");
+		
+		model.addAttribute("sidebarMenu", "system");
+	    model.addAttribute("currentMenu", "systemrole");
+	    return "weple/system/roleCreate";
+	}
+	
+	// 역할 수정 폼
+	@GetMapping("/system/role/edit")
+	public String roleEditForm(@RequestParam Long roleId, Model model) {
+		model.addAttribute("role", roleService.selectRoleById(roleId));
+		model.addAttribute("checkedCodes", roleService.selectPermissionCodesByRoleid(roleId));
+		model.addAttribute("permissionList", roleService.selectPermissionList());
+		model.addAttribute("mode", "edit");
+		
+		model.addAttribute("sidebarMenu", "system");
+	    model.addAttribute("currentMenu", "systemrole");
+	    return "weple/system/roleCreate";
+	}
 	
 	// 역할 등록 처리
+	@PostMapping("/system/role/create")
+	public String roleCreateProcess(@AuthenticationPrincipal LoginUserDetails loginUser,
+									RoleVO roleVO,
+									RedirectAttributes redirectAttributes) {
+		// 로그인한 관리자 ID 세팅
+		roleVO.setCompanyId(loginUser.getLoginUser().getCompanyId());
+		int result = roleService.saveRole(roleVO);
+		if(result > 0) {
+			redirectAttributes.addFlashAttribute("toastMessage", "역할이 등록되었습니다.");
+		}
+		return "redirect:/system/role";
+	}
+	
+	// 역할 수정 처리
+	@PostMapping("/system/role/edit")
+	public String roleEditProcess(RoleVO roleVO,
+								  RedirectAttributes redirectAttributes) {
+		int result = roleService.updateRole(roleVO);
+		if(result > 0) {
+			redirectAttributes.addFlashAttribute("toastMessage", "역할이 수정되었습니다.");
+		}
+		return "edirect:/system/role";
+	}
 	
 	// 역할 삭제
+	@PostMapping("/system/role/delete")
+	public String deleteRole(@RequestParam Long roleId,
+			 				 RedirectAttributes redirectAttributes) {
+		int result = roleService.deleteRole(roleId);
+		if(result > 0) {
+			redirectAttributes.addFlashAttribute("toastMessage", "역할이 삭제되었습니다.");
+		}
+		return "redirect:/system/role";
+	}
 	
 
 	// ---------------------------- 사용자 관리 --------------------------
@@ -580,81 +635,62 @@ public class SystemController {
 		return "weple/admin/user/list";
 	}
 
+	// 신규 사용자 등록 화면으로 이동합니다.
+	@GetMapping("/userList/insert")
+	public String userManagementInsertForm(Model model) {
+		model.addAttribute("sidebarMenu", "system");
+		model.addAttribute("currentMenu", "systemuser");
+		model.addAttribute("menu", "user");
+		return "weple/admin/user/insert";
+	}
+
+	// 화면에서 입력한 신규 사용자 정보를 현재 관리자의 회사 사용자로 등록합니다.
+	@PostMapping("/userList/insert")
+	public String userManagementInsert(@AuthenticationPrincipal LoginUserDetails loginUser,
+			@ModelAttribute UserManagementCreateVO user,
+			RedirectAttributes redirectAttributes) {
+		try {
+			int actorOwnerYn = Integer.valueOf(1).equals(loginUser.getLoginUser().getOwnerYn()) ? 1 : 0;
+			userManagementService.createUser(loginUser.getLoginUser().getCompanyId(), actorOwnerYn, user);
+			redirectAttributes.addFlashAttribute("userSuccess", "신규 사용자가 등록되었습니다.");
+			return "redirect:/userList";
+		} catch (IllegalArgumentException | IllegalStateException ex) {
+			redirectAttributes.addFlashAttribute("userError", ex.getMessage());
+			redirectAttributes.addFlashAttribute("userForm", user);
+			return "redirect:/userList/insert";
+		}
+	}
+
 	// 상태 스위치는 a2(활성)와 a3(비활성) 값만 받아 같은 회사 사용자 상태를 변경합니다.
 	@PostMapping("/userList/{userCode}/status")
-	public String changeUserStatus(@AuthenticationPrincipal LoginUserDetails loginUser,
+	public Object changeUserStatus(@AuthenticationPrincipal LoginUserDetails loginUser,
 			@PathVariable String userCode,
 			@RequestParam String status,
 			@RequestParam(defaultValue = "1") int page,
 			@RequestParam(required = false) String keyword,
+			HttpServletRequest request,
 			RedirectAttributes redirectAttributes) {
+		boolean ajaxRequest = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+
 		try {
 			int actorOwnerYn = Integer.valueOf(1).equals(loginUser.getLoginUser().getOwnerYn()) ? 1 : 0;
 			userManagementService.changeUserStatus(loginUser.getLoginUser().getCompanyId(), actorOwnerYn, userCode, status);
+			if (ajaxRequest) {
+				return ResponseEntity.ok(Map.of(
+						"status", status,
+						"message", "a2".equals(status) ? "활성화되었습니다." : "비활성화되었습니다."));
+			}
 			redirectAttributes.addFlashAttribute("userSuccess", "사용자 상태가 변경되었습니다.");
 		} catch (IllegalArgumentException ex) {
+			if (ajaxRequest) {
+				return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+			}
 			redirectAttributes.addFlashAttribute("userError", ex.getMessage());
 		}
 		String searchParameter = keyword == null || keyword.isBlank()
 				? "" : "&keyword=" + java.net.URLEncoder.encode(keyword.trim(), java.nio.charset.StandardCharsets.UTF_8);
 		return "redirect:/userList?page=" + Math.max(page, 1) + searchParameter;
 	}
-
-	// -------------------------------전체 소요시간------------------------------
-	private final SelectTotalTimeService selectTotalTimeService;
-	
-	// 전체조회
-	@GetMapping("totalTimeList")
-	public String totalTimeList(Model model) {
-		List<SelectTotalTimeVO> list = selectTotalTimeService.findSelectTotalTimeAll();
-		model.addAttribute("totalTimeList", list);
-		model.addAttribute("sidebarMenu", "time");
-		return "weple/time/all-total";
-	}
-	
-	// 등록 폼
-	@GetMapping("/insertTotalTime")
-	public String insertTotalTimeForm(Model model) {
-		SystemProjectVO vo = new SystemProjectVO();
-		vo.setStatus("ACTIVE");
-	    
-	    model.addAttribute("projectList", systemProjectService.selectProjectList(vo));
-	    //model.addAttribute("taskList", taskService.findAll()); 
-	    model.addAttribute("workClassList", codeValueService.findCodeValueAll());
-	    model.addAttribute("user", userService.findGroupUserAll());
-	    
-	    return "weple/time/insert";
-	}
-	
-	//등록 처리
-	@PostMapping("/insertTotalTime")
-	public String insertTotalTimeProcess(SelectTotalTimeVO selectTotalTimeVO) {
-		selectTotalTimeService.addSelectTotalTime(selectTotalTimeVO);
-		return "redirect:/totalTimeList";
-	}
-	
-	// 수정 폼
-	@GetMapping("/updateTotalTime")
-    public String modifyTotalTimeForm(@RequestParam("workId") long workId, Model model) {
-        //SelectTotalTimeVO vo = selectTotalTimeService.modifySelectTotalTime(workId);
-        //model.addAttribute("totalTime", vo);
-        return "weple/time/insert";
-    }
-	
-	// 수정 처리
-	@PostMapping("/updateTotalTime")
-    public String modifyTotalTimeProcess(SelectTotalTimeVO selectTotalTimeVO) {
-        selectTotalTimeService.modifySelectTotalTime(selectTotalTimeVO);
-        return "redirect:/totalTimeList";
-    }
-	
-	// 삭제
-	@GetMapping("/deleteTotalTime")
-    public String deleteWork(@RequestParam("workId") long workId) {
-		long result = selectTotalTimeService.removeSelectTotalTime(workId);
-	    System.out.println("삭제 시도 ID: " + workId + ", 결과: " + result);
-        return "redirect:/totalTimeList";
-    }
 		
 }
 

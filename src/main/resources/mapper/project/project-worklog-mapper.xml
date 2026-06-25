@@ -48,7 +48,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY - INTERVAL '9' HOUR
                     </if>
                     <if test="typeNames != null and typeNames.size() > 0">
-                        AND tt.type_name IN
+                        AND NVL(d_type.new_value, tt.type_name) IN
                         <foreach collection="typeNames" item="type" open="(" separator="," close=")">
                             #{type}
                         </foreach>
@@ -64,12 +64,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="countProjectWorkLog" resultType="int">
         SELECT COUNT(*)
         FROM task_history th
-        INNER JOIN task t
+        LEFT JOIN task t
         		ON th.task_id = t.task_id
-        INNER JOIN users u
+        LEFT JOIN users u
         		ON th.changed_by = u.user_code
-        INNER JOIN task_types tt
+        LEFT JOIN task_types tt
         		ON t.type_id     = tt.type_id
+        LEFT JOIN task_history_detail d_type
+      			ON th.history_id = d_type.history_id
+      			AND d_type.field_name = 'type_name'
         <where>
             t.project_id = #{projectId}
             <if test="userCode != null and userCode != ''">
@@ -82,7 +85,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY - INTERVAL '9' HOUR
             </if>
             <if test="typeNames != null and typeNames.size() > 0">
-                AND tt.type_name IN
+                AND NVL(d_type.new_value, tt.type_name) IN
                 <foreach collection="typeNames" item="type" open="(" separator="," close=")">
                     #{type}
                 </foreach>

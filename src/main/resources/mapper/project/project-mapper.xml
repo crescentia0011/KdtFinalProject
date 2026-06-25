@@ -9,11 +9,21 @@
 	        p.project_describe,
 	        p.created_at,
 	        p.finish_date,
-	        c.default_describe AS status
+	        CASE
+            WHEN p.finish_date IS NOT NULL
+                 AND p.finish_date &lt;= TRUNC(SYSDATE)
+            THEN '완료'
+
+            WHEN EXISTS (
+                SELECT 1
+                FROM task t
+                WHERE t.project_id = p.project_id
+            )
+            THEN '진행 중'
+
+            ELSE '신규'
+        END AS status
 	    FROM project p
-	    LEFT JOIN common_code c
-	        ON p.status = c.common_id
-	        AND c.common_code = '0J'
 	    <where>
 	        <if test="keyword != null and keyword != ''">
 	            p.project_title LIKE '%' || #{keyword} || '%'
@@ -40,11 +50,21 @@
                     p.project_describe,
                     p.created_at,
                     p.finish_date,
-                    c.default_describe AS status
+                    CASE
+                    WHEN p.finish_date IS NOT NULL
+                         AND p.finish_date &lt;= TRUNC(SYSDATE)
+                    THEN '완료'
+
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM task t
+                        WHERE t.project_id = p.project_id
+                    )
+                    THEN '진행 중'
+
+                    ELSE '신규'
+                END AS status
                 FROM project p
-                LEFT JOIN common_code c
-                    ON p.status = c.common_id
-                    AND c.common_code = '0J'
                 <where>
                     <if test="keyword != null and keyword != ''">
                         p.project_title LIKE '%' || #{keyword} || '%'
@@ -78,11 +98,21 @@
             p.project_describe,
             p.created_at,
             p.finish_date,
-            c.default_describe AS status
+            CASE
+            WHEN p.finish_date IS NOT NULL
+                 AND p.finish_date &lt;= TRUNC(SYSDATE)
+            THEN '완료'
+
+            WHEN EXISTS (
+                SELECT 1
+                FROM task t
+                WHERE t.project_id = p.project_id
+            )
+            THEN '진행 중'
+
+            ELSE '신규'
+        END AS status
         FROM project p
-        LEFT OUTER JOIN common_code c
-            ON p.status = c.common_id
-            AND c.common_code = '0J'
         WHERE p.project_id = #{projectId}
     </select>
     

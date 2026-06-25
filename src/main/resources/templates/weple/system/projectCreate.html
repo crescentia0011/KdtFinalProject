@@ -15,11 +15,9 @@
         <div id="toastWrap" class="toast-wrap" th:if="${toastError}">
             <div class="toast-msg toast-error" th:text="${toastError}"></div>
         </div>
-
         <div class="project-toolbar-top">
             <h3 class="project-title">프로젝트 생성</h3>
         </div>
-
         <div class="project-card">
             <form id="projectForm" method="post" th:action="@{/system/project}">
 
@@ -28,13 +26,11 @@
                     <input type="text" id="projectTitle" name="projectTitle"
                            class="form-input-text" placeholder="프로젝트명을 입력하세요." required>
                 </div>
-
                 <div class="form-group-row">
                     <label for="projectDescribe" class="form-label">설명</label>
                     <textarea id="projectDescribe" name="projectDescribe"
                               class="form-textarea" placeholder="프로젝트의 설명을 입력하세요."></textarea>
                 </div>
-
                 <div class="form-group-row">
                     <label for="projectIdentifier" class="form-label required">식별자</label>
                     <div class="identifier-input-wrap">
@@ -43,7 +39,6 @@
                                placeholder="식별자를 입력하세요 (예: my-project)" required>
                     </div>
                 </div>
-
                 <div class="form-group-row">
                     <label class="form-label">날짜</label>
                     <div class="date-row">
@@ -61,7 +56,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="form-group-row">
                     <div class="module-label-row">
                         <label class="form-label required">모듈</label>
@@ -70,29 +64,99 @@
                             <button type="button" class="module-ctrl-btn" id="deselectAll">전체해제</button>
                         </div>
                     </div>
-
                     <div class="module-box-container">
                         <div class="module-flex-layout">
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b1" checked><span class="custom-check-box"></span><span class="module-text">개요</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b2" checked><span class="custom-check-box"></span><span class="module-text">작업내역</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b3" checked><span class="custom-check-box"></span><span class="module-text">로드맵</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b4" checked><span class="custom-check-box"></span><span class="module-text">일감</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b5" checked><span class="custom-check-box"></span><span class="module-text">소요시간</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b6" checked><span class="custom-check-box"></span><span class="module-text">간트차트</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b12" checked><span class="custom-check-box"></span><span class="module-text">테스트</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b7" checked><span class="custom-check-box"></span><span class="module-text">위키</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b8" checked><span class="custom-check-box"></span><span class="module-text">저장소</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b9" checked><span class="custom-check-box"></span><span class="module-text">칸반보드</span></label></div>
-                            <div class="module-item-wrapper"><label class="checkbox-inline"><input type="checkbox" name="moduleNames" value="b10" checked><span class="custom-check-box"></span><span class="module-text">캘린더</span></label></div>
-                            <!-- 설정: checked 고정, JS로 클릭 차단 -->
                             <div class="module-item-wrapper">
-                                <label class="checkbox-inline" id="labelSettings">
-                                    <input type="checkbox" name="moduleNames" value="b11"
-                                           checked id="moduleSettings">
-                                    <span class="custom-check-box"></span>
-                                    <span class="module-text">설정</span>
-                                </label>
-                            </div>
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b1">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">개요</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b2">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">작업내역</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b3">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">마일스톤</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b4">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">일감</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b5">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">소요시간</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b6">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">간트차트</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b12">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">테스트</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b7">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">위키</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b13">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">파일관리</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b8">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">저장소</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b9">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">칸반보드</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b10">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">캘린더</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline"  id="labelSettings">
+                                <input type="checkbox" name="moduleNames" value="b11" id="moduleSettings" checked>
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">설정</span>
+                            </label>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -149,18 +213,6 @@
                     });
             });
 
-            // 폼 제출 시 최소 1개 체크 검증
-            document.getElementById("projectForm").addEventListener("submit", function (e) {
-                const checked = document.querySelectorAll('input[name="moduleNames"]:checked');
-                if (checked.length === 0) {
-                    e.preventDefault();
-                    const wrap = document.createElement("div");
-                    wrap.className = "toast-wrap";
-                    wrap.innerHTML = '<div class="toast-msg toast-error">최소 1개 이상의 모듈을 선택해야 합니다.</div>';
-                    document.querySelector(".project-page").prepend(wrap);
-                    setTimeout(() => wrap.remove(), 3500);
-                }
-            });
 
             // 토스트 자동 제거
             const toastWrap = document.getElementById("toastWrap");

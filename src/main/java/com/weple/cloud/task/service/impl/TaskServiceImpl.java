@@ -1,9 +1,13 @@
 package com.weple.cloud.task.service.impl;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,26 +15,31 @@ import org.springframework.web.multipart.MultipartFile;
 import com.weple.cloud.file.FileInfoVO;
 import com.weple.cloud.file.FileVO;
 import com.weple.cloud.file.mapper.FileMapper;
+import com.weple.cloud.milestone.mapper.MilestoneMapper;
 import com.weple.cloud.task.mapper.TaskMapper;
 import com.weple.cloud.task.service.TaskCommentVO;
+import com.weple.cloud.task.service.TaskHistoryDTO;
+import com.weple.cloud.task.service.TaskHistoryDetailDTO;
 import com.weple.cloud.task.service.TaskMemberVO;
 import com.weple.cloud.task.service.TaskMilestoneVO;
 import com.weple.cloud.task.service.TaskParentVO;
 import com.weple.cloud.task.service.TaskPriorityVO;
 import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskService;
+import com.weple.cloud.task.service.TaskSpentTimeVO;
 import com.weple.cloud.task.service.TaskStatusVO;
 import com.weple.cloud.task.service.TaskTypeListVO;
+import com.weple.cloud.task.service.TaskUpdateHistoryVO;
 import com.weple.cloud.task.service.TaskVO;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 	private final FileMapper fileMapper;
 	private final TaskMapper taskMapper;
+	private final MilestoneMapper milestoneMapper;
 	
 	@Value("${file.upload.task-dir}")
     private String uploadDir;
@@ -122,6 +131,12 @@ public class TaskServiceImpl implements TaskService {
             
             fileMapper.insertFileInfo(fileInfoVO);
         }
+        
+        // insert 성공하고, milestoneId 값이 null 이 아닐경우 ->  마일스톤 상태값 변경하기 (일감 진척도에 따른 마일스톤 상태[진행 중/완료] 체크)
+        if (result > 0 && taskVO.getMilestoneId() != null) {
+            syncMilestoneStatus(taskVO.getMilestoneId());
+        }
+        
         return result;
     }
 
@@ -180,6 +195,11 @@ public class TaskServiceImpl implements TaskService {
 
 	    // 기존 일감 정보 업데이트
 	    taskMapper.updateTask(taskVO);
+
+	    // milestoneId 값이 있을 경우 -> 마일스톤 상태 변경하기 (진척도==100% -> closed, 진척도 < 100% -> active) 
+	    if (taskVO.getMilestoneId() != null) {
+	        syncMilestoneStatus(taskVO.getMilestoneId());
+	    }
 	    
 	    // 추가된 파일이 존재할 경우 업로드 및 버전 관리 진행 (기존 코드 유지)
 	    if (files != null && !files.isEmpty()) {
@@ -233,14 +253,91 @@ public class TaskServiceImpl implements TaskService {
 	        }
 	    }
 	}
-	// 삭제
+	// 일감 삭제
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void deleteTask(String tId) {
+		
+		// 1. 삭제 전 해당 일감의 마일스톤 ID 조회
+	    Long milestoneId = taskMapper.getMilestoneIdByTaskId(tId);
+	    
+	    // 2. 일감 삭제
 		taskMapper.deleteTask(tId);
+		
+		// 3. 마일스톤이 있었다면 상태 동기화
+	    if (milestoneId != null) {
+	        syncMilestoneStatus(milestoneId);
+	    }
 	}
+	//댓글 목록 조회
 	@Override
 	public List<TaskCommentVO>findTaskComment(String tId) {
 		return taskMapper.taskCommentList(tId);
 	}
+	//댓글 등록
+	@Transactional
+	@Override
+	public int insertTaskComment(TaskCommentVO commentVO) {
+		System.out.println("들어온값:" + commentVO);
+		return  taskMapper.insertTaskComment(commentVO);
+	}
+	//댓글 수정
+	@Transactional
+	@Override
+	public int updateTaskComment(TaskCommentVO commentVO) {
+		return taskMapper.updateTaskComment(commentVO);
+	}
+	//댓글 삭제
+	@Transactional
+	@Override
+	public int deleteTaskComment(Long commentId ,String userCode) {
+		return taskMapper.deleteTaskComment(commentId , userCode );
+	}
+	
+	// 항목 변경이력
+	@Override
+	public List<TaskHistoryDTO> taskUpdateHistory(String tId) {
+	    List<TaskUpdateHistoryVO> list = taskMapper.taskUpdateHistory(tId);
 
+	    Map<Long, TaskHistoryDTO> hisMap = new LinkedHashMap<>();
+
+	    for (TaskUpdateHistoryVO value : list) {
+
+	        TaskHistoryDTO historyDTO = hisMap.get(value.getHistoryId());
+
+	        if (historyDTO == null) {
+	            historyDTO = new TaskHistoryDTO();
+	            historyDTO.setHistoryId(value.getHistoryId());
+	            historyDTO.setUserName(value.getUserName());
+	            historyDTO.setActionAt(value.getActionAt());
+	            historyDTO.setDetails(new ArrayList<>());
+
+	            hisMap.put(value.getHistoryId(), historyDTO);
+	        }
+
+	        TaskHistoryDetailDTO detailDTO = new TaskHistoryDetailDTO();
+	        detailDTO.setFieldName(value.getFieldName());
+	        detailDTO.setOldValue(value.getOldValue());
+	        detailDTO.setNewValue(value.getNewValue());
+
+	        historyDTO.getDetails().add(detailDTO);
+	    }
+
+	    return new ArrayList<>(hisMap.values());
+	}
+	//소요시간
+	@Override
+	public List<TaskSpentTimeVO> taskSpentTime(String tId) {
+		
+		return taskMapper.taskSpentTime(tId);
+		}
+	
+	private void syncMilestoneStatus(Long milestoneId) {
+	    if (milestoneId != null && milestoneId > 0) {
+	        milestoneMapper.updateMilestoneStatusByTaskProgress(milestoneId);
+	    }
+	
 }
+	}
+
+

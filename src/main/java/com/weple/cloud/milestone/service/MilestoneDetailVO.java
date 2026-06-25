@@ -9,7 +9,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(callSuper = true)
-public class MilestoneDetailVO extends MilestoneVO {
+public class MilestoneDetailVO extends MilestoneInfoVO {
     // 시간 추적 통계 데이터
     private double totalEstimatedHours; // 연결된 모든 일감의 추정시간 총합
     private double totalSpentHours;     // 연결된 모든 일감의 소요시간 총합
@@ -20,5 +20,4 @@ public class MilestoneDetailVO extends MilestoneVO {
     private List<TaskGroupStatVO> typeStats;     // 유형별 완료 여부
     private List<TaskGroupStatVO> managerStats;  // 담당자별 완료 여부
     
-    private int delayDays;
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.weple.cloud.system.service.SystemGroupUserVO;
 
-public interface UserMapper {
+public interface GroupUserMapper {
 	// ---------------------------- 그룹 내 사용자 --------------------------
 	// 전체조회
 	public List<SystemGroupUserVO> selectGroupUserAll();

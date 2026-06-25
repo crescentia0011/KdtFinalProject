@@ -45,13 +45,14 @@
             </div>
 
             <div class="form-group-row">
-                <label for="projectIdentifier" class="form-label required">식별자</label>
+                <label for="projectIdentifier" class="form-label">식별자</label>
                 <div class="identifier-input-wrap">
-                    <input type="text" id="projectIdentifier" name="projectIdentifier"
-                           class="form-input-text"
-                           placeholder="식별자를 입력하세요 (예: my-project)"
-                           th:value="${project.projectIdentifier}"
-                           required>
+                    <input type="text"
+					       id="projectIdentifier"
+					       name="projectIdentifier"
+					       class="form-input-text"
+					       th:value="${project.projectIdentifier}"
+					       readonly>
                 </div>
             </div>
 
@@ -113,7 +114,7 @@
                                 <input type="checkbox" name="moduleNames" value="b3"
                                        th:checked="${project.moduleNames != null and project.moduleNames.contains('b3')}">
                                 <span class="custom-check-box"></span>
-                                <span class="module-text">로드맵</span>
+                                <span class="module-text">마일스톤</span>
                             </label>
                         </div>
                         <div class="module-item-wrapper">
@@ -158,6 +159,14 @@
                         </div>
                         <div class="module-item-wrapper">
                             <label class="checkbox-inline">
+                                <input type="checkbox" name="moduleNames" value="b13"
+                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b13')}">
+                                <span class="custom-check-box"></span>
+                                <span class="module-text">파일관리</span>
+                            </label>
+                        </div>
+                        <div class="module-item-wrapper">
+                            <label class="checkbox-inline">
                                 <input type="checkbox" name="moduleNames" value="b8"
                                        th:checked="${project.moduleNames != null and project.moduleNames.contains('b8')}">
                                 <span class="custom-check-box"></span>
@@ -181,9 +190,8 @@
                             </label>
                         </div>
                         <div class="module-item-wrapper">
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="moduleNames" value="b11"
-                                       th:checked="${project.moduleNames != null and project.moduleNames.contains('b11')}">
+                            <label class="checkbox-inline"  id="labelSettings">
+                                <input type="checkbox" name="moduleNames" value="b11" id="moduleSettings" checked>
                                 <span class="custom-check-box"></span>
                                 <span class="module-text">설정</span>
                             </label>
@@ -221,10 +229,15 @@
         });
 
         // 전체해제
-        document.getElementById("deselectAll").addEventListener("click", function () {
-            document.querySelectorAll('input[name="moduleNames"]')
-                .forEach(cb => cb.checked = false);
-        });
+        document.getElementById("deselectAll")
+		.addEventListener("click", function () {
+		    document.querySelectorAll('input[name="moduleNames"]')
+		        .forEach(cb => {
+		            if(cb.value !== "b11"){
+		                cb.checked = false;
+		            }
+		        });
+		});
 
         // 폼 제출 시 최소 1개 체크 검증
         document.getElementById("projectForm").addEventListener("submit", function (e) {

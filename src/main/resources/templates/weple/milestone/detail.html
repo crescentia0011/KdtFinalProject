@@ -8,9 +8,97 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 <section>
+
+	<script>
+	document.addEventListener("DOMContentLoaded", function () {
+	    
+	    // =======================================================
+	    // 1. 드롭다운 셀렉트 박스 전환 제어 및 펼침 리셋 로직
+	    // =======================================================
+	    const selectEl = document.getElementById("statSectionSelect");
+	    
+	    if (selectEl) {
+	        selectEl.addEventListener("change", function () {
+	            const selectedValue = this.value;
+	            
+	            document.querySelectorAll(".stat-toggle-content").forEach(function (content) {
+	                content.classList.remove("active");
+	                
+	                // 다른 드롭다운으로 전환할 때, 기존에 펼쳐져 있던 더보기 버튼이 있다면 다시 접어두는 센스
+	                const openBtn = content.querySelector(".stat-more-btn");
+	                if (openBtn && openBtn.textContent.includes("접기")) {
+	                    openBtn.click(); 
+	                }
+	            });
+	            
+	            const targetContent = document.getElementById("stat-" + selectedValue);
+	            if (targetContent) {
+	                targetContent.classList.add("active");
+	            }
+	        });
+	    }
+	
+	    // =======================================================
+	    // 2. 무한 확장 대응: 5개 초과 시 '더보기' 버튼 동적 생성 로직
+	    // =======================================================
+	    document.querySelectorAll(".stat-toggle-content").forEach(function (content) {
+	        const rows = content.querySelectorAll(".stat-item-row");
+	        
+	        // 등록된 통계 아이템이 5개를 초과하는 경우에만 작동
+	        if (rows.length > 5) {
+	            
+	            // 1) 5번째(인덱스 5) 데이터부터 끝까지 숨김 클래스 부여
+	            for (let i = 5; i < rows.length; i++) {
+	                rows[i].classList.add("hidden-stat-row");
+	            }
+	
+	            // 2) 버튼을 담을 컨테이너 세팅
+	            const btnWrap = document.createElement("div");
+	            btnWrap.className = "stat-more-btn-wrap";
+	            
+	            // 3) 버튼 엘리먼트 생성 및 텍스트 커스텀 (담당자 탭일 때는 문구 분기 처리)
+	            const btn = document.createElement("button");
+	            btn.className = "stat-more-btn";
+	            btn.type = "button";
+	            
+	            const isManagerTab = (content.id === "stat-manager");
+	            const hiddenCount = rows.length - 5;
+	            btn.textContent = isManagerTab ? `담당자 더보기 ▽ (${hiddenCount}명 더보기)` : `더보기 ▽ (${hiddenCount}개 더보기)`;
+	
+	            // 4) 조립 후 화면 부착
+	            btnWrap.appendChild(btn);
+	            content.appendChild(btnWrap);
+	
+	            // 5) 더보기 버튼 클릭 토글 이벤트 바인딩
+	            btn.addEventListener("click", function () {
+	                // 현재 접혀있는 상태인지 여부 확인
+	                const isCollapsed = rows[5].classList.contains("hidden-stat-row");
+	                
+	                // 숨겨진 열들을 토글 토글
+	                for (let i = 5; i < rows.length; i++) {
+	                    if (isCollapsed) {
+	                        rows[i].classList.remove("hidden-stat-row");
+	                    } else {
+	                        rows[i].classList.add("hidden-stat-row");
+	                    }
+	                }
+	
+	                // 토글 상태에 맞춰 버튼 텍스트 변경
+	                if (isCollapsed) {
+	                    btn.textContent = "접기 △";
+	                } else {
+	                    btn.textContent = isManagerTab ? `담당자 더보기 ▽ (${hiddenCount}명 더보기)` : `더보기 ▽ (${hiddenCount}개 더보기)`;
+	                }
+	            });
+	        }
+	    });
+	});
+	</script>
+
     <div class="milestone-page">
         <div class="milestone-page-header">
             <h1 class="milestone-page-title">마일스톤 상세조회</h1>
@@ -56,85 +144,104 @@
                 </span>
             </div>
 
-            <div class="milestone-time-tracking">
-                <div class="time-card card-estimated">
-                    <span class="time-label">⏳ 총 추정 시간</span>
-                    <span class="time-value" th:text="${detail.totalEstimatedHours} + ' 시간'">45.5 시간</span>
-                </div>
-                <div class="time-card card-spent">
-                    <span class="time-label">⏱️ 총 소요 시간</span>
-                    <span class="time-value" th:text="${detail.totalSpentHours} + ' 시간'">32.0 시간</span>
-                </div>
-            </div>
-
-            <div class="milestone-stat-grid">
-                <div class="stat-column">
-                    <h4 class="stat-column-title">📌 상태별 일감 완료</h4>
-                    <div class="stat-list-box">
-                        <div class="stat-item-row" th:each="stat : ${detail.statusStats}">
-                            <span class="stat-name" th:text="${stat.groupName}">진행 중</span>
-                            <div class="stat-mini-progress">
-                                <div class="stat-mini-bar-wrap">
-                                    <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
-                                </div>
-                                <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">2/5</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-column">
-                    <h4 class="stat-column-title">🔥 우선순위별 일감 완료</h4>
-                    <div class="stat-list-box">
-                        <div class="stat-item-row" th:each="stat : ${detail.priorityStats}">
-                            <span class="stat-name" th:text="${stat.groupName}">높음</span>
-                            <div class="stat-mini-progress">
-                                <div class="stat-mini-bar-wrap">
-                                    <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
-                                </div>
-                                <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">22/30</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-column">
-                    <h4 class="stat-column-title">🛠️ 유형별 일감 완료</h4>
-                    <div class="stat-list-box">
-                        <div class="stat-item-row" th:each="stat : ${detail.typeStats}">
-                            <span class="stat-name" th:text="${stat.groupName}">Bug</span>
-                            <div class="stat-mini-progress">
-                                <div class="stat-mini-bar-wrap">
-                                    <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
-                                </div>
-                                <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">5/8</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-column">
-                    <h4 class="stat-column-title">👤 담당자별 일감 완료</h4>
-                    <div class="stat-list-box">
-                        <div class="stat-item-row" th:each="stat : ${detail.managerStats}">
-                            <span class="stat-name" th:text="${stat.groupName}">홍길동</span>
-                            <div class="stat-mini-progress">
-                                <div class="stat-mini-bar-wrap">
-                                    <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
-                                </div>
-                                <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">3/4</span>
-                            </div>
-                        </div>
-                        <div class="stat-empty-text" th:if="${#lists.isEmpty(detail.managerStats)}">배정된 담당자가 없습니다.</div>
-                    </div>
-                </div>
-            </div>
+            <div class="milestone-dashboard-wrapper">
+    
+			    <div class="time-card-combined">
+			        <h4 class="dashboard-card-title">⏱️ 시간 추적 통계</h4>
+			        <div class="time-info-row info-estimated">
+			            <span class="time-label">⏳ 총 추정 시간</span>
+			            <span class="time-value" th:text="${detail.totalEstimatedHours} + ' 시간'">45.5 시간</span>
+			        </div>
+			        <div class="time-card-divider"></div>
+			        <div class="time-info-row info-spent">
+			            <span class="time-label">⏱️ 총 소요 시간</span>
+			            <span class="time-value" th:text="${detail.totalSpentHours} + ' 시간'">32.0 시간</span>
+			        </div>
+			    </div>
+			
+			    <div class="stat-dropdown-container">
+			        <div class="stat-dropdown-header">
+			            <h4 class="dashboard-card-title">📊 조건별 일감 통계</h4>
+			            <select id="statSectionSelect" class="stat-select-box">
+			                <option value="status">📌 상태별 일감 완료</option>
+			                <option value="priority">🔥 우선순위별 일감 완료</option>
+			                <option value="type">🏷️ 유형별 일감 완료</option>
+			                <option value="manager">👤 담당자별 일감 완료</option>
+			            </select>
+			        </div>
+			
+			        <div id="stat-status" class="stat-toggle-content active">
+			            <div class="stat-list-box">
+			                <div class="stat-item-row" th:each="stat : ${detail.statusStats}">
+			                    <span class="stat-name" th:text="${stat.groupName}">진행 중</span>
+			                    <div class="stat-mini-progress">
+			                        <div class="stat-mini-bar-wrap">
+			                            <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+			                        </div>
+			                        <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">2/5</span>
+			                    </div>
+			                </div>
+			                <div th:if="${#lists.isEmpty(detail.statusStats)}" class="stat-empty-text">통계 데이터가 없습니다.</div>
+			            </div>
+			        </div>
+			
+			        <div id="stat-priority" class="stat-toggle-content">
+			            <div class="stat-list-box">
+			                <div class="stat-item-row" th:each="stat : ${detail.priorityStats}">
+			                    <span class="stat-name" th:text="${stat.groupName}">높음</span>
+			                    <div class="stat-mini-progress">
+			                        <div class="stat-mini-bar-wrap">
+			                            <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+			                        </div>
+			                        <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">22/30</span>
+			                    </div>
+			                </div>
+			                <div th:if="${#lists.isEmpty(detail.priorityStats)}" class="stat-empty-text">통계 데이터가 없습니다.</div>
+			            </div>
+			        </div>
+			
+			        <div id="stat-type" class="stat-toggle-content">
+			            <div class="stat-list-box">
+			                <div class="stat-item-row" th:each="stat : ${detail.typeStats}">
+			                    <span class="stat-name" th:text="${stat.groupName}">기능 구현</span>
+			                    <div class="stat-mini-progress">
+			                        <div class="stat-mini-bar-wrap">
+			                            <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+			                        </div>
+			                        <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">5/10</span>
+			                    </div>
+			                </div>
+			                <div th:if="${#lists.isEmpty(detail.typeStats)}" class="stat-empty-text">통계 데이터가 없습니다.</div>
+			            </div>
+			        </div>
+			
+			        <div id="stat-manager" class="stat-toggle-content">
+			            <div class="stat-list-box">
+			                <div class="stat-item-row" th:each="stat : ${detail.managerStats}">
+			                    <span class="stat-name" th:text="${stat.groupName}">홍길동</span>
+			                    <div class="stat-mini-progress">
+			                        <div class="stat-mini-bar-wrap">
+			                            <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+			                        </div>
+			                        <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">3/4</span>
+			                    </div>
+			                </div>
+			                <div th:if="${#lists.isEmpty(detail.managerStats)}" class="stat-empty-text">통계 데이터가 없습니다.</div>
+			            </div>
+			        </div>
+			
+			    </div>
+			</div>
 
             <div class="connected-tasks-section">
                 <h3 class="connected-tasks-title">연결된 일감 목록 (최신순)</h3>
                 
                 <div class="task-list-card">
-                    <div class="task-item-row" th:each="task : ${taskList}">
+                    <div class="task-item-row" 
+                    	th:each="task : ${taskList}"
+                    	th:onclick="|location.href='@{/project/task/detail/{id}(id=${task.taskId}, projectId=${projectId})}'|"
+                    	style="cursor: pointer;">
+                    	
                         <div class="task-col col-id" th:text="'#' + ${task.taskId}">#1</div>
                         
                         <div class="task-col col-type">
@@ -142,7 +249,7 @@
                         </div>
                         
                         <div class="task-col col-name">
-                            <a th:href="@{/project/task/detail(taskId=${task.taskId})}" th:text="${task.taskTitle}">일감명</a>
+                            <span  th:text="${task.taskTitle}">일감명</span>
                         </div>
                         
                         <div class="task-col col-progress">

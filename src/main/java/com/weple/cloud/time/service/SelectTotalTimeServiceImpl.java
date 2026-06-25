@@ -1,11 +1,11 @@
-package com.weple.cloud.system.service;
+package com.weple.cloud.time.service;
 
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.weple.cloud.system.mapper.SelectTotalTimeMapper;
+import com.weple.cloud.time.mapper.SelectTotalTimeMapper;
 
 import lombok.RequiredArgsConstructor;
 

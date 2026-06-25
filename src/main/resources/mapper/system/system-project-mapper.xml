@@ -23,14 +23,26 @@
                     p.project_title,
                     p.project_describe,
                     p.project_identifier,
-                    c.default_describe AS status,
+                    
+                     CASE
+				        WHEN p.finish_date IS NOT NULL
+				             AND p.finish_date &lt;= TRUNC(SYSDATE)
+				        THEN '완료'
+				
+				        WHEN EXISTS (
+				            SELECT 1
+				            FROM task t
+				            WHERE t.project_id = p.project_id
+				        )
+				        THEN '진행 중'
+				
+				        ELSE '신규'
+				    END AS status,
+                    
                     p.start_date,
                     p.finish_date,
                     p.created_at
                 FROM project p
-                LEFT JOIN common_code c
-                    ON p.status = c.common_id
-                   AND c.common_code = '0J'
                 <where>
                     <if test="keyword != null and keyword != ''">
                         p.project_title LIKE '%' || #{keyword} || '%'
@@ -118,18 +130,53 @@
         ) t
     </insert>
     
+    <!-- 프로젝트 단건 조회 -->
+    <select id="selectProjectById" parameterType="long" resultType="com.weple.cloud.system.service.SystemProjectVO">
+    	SELECT project_id,
+    		   project_title,
+    		   project_describe,
+    		   project_identifier,
+    		   
+    		   CASE
+		           WHEN finish_date IS NOT NULL
+		                AND finish_date &lt;= TRUNC(SYSDATE)
+		           THEN '완료'
+		
+		           WHEN EXISTS (
+		               SELECT 1
+		               FROM task t
+		               WHERE t.project_id = p.project_id
+		           )
+		           THEN '진행 중'
+		
+		           ELSE '신규'
+		       END AS status,
+    		   
+    		   start_date,
+    		   finish_date,
+    		   created_at
+    	FROM project p
+    	WHERE p.project_id = #{projectId}
+    </select>
+    
     <!-- 프로젝트 수정 -->
     <update id="updateProject" parameterType="com.weple.cloud.system.service.SystemProjectVO">
     	UPDATE project
 	    SET project_title = #{projectTitle},
 	        project_describe = #{projectDescribe},
 	        project_identifier = #{projectIdentifier},
-	        status = #{status},
 	        start_date = #{startDate},
 	        finish_date = #{finishDate}
 	    WHERE project_id = #{projectId}
     </update>
-
+    
+    <!-- 기존 모듈 매핑 삭제 -->
+	<delete id="deleteModuleMapping" parameterType="long">
+		DELETE
+		FROM module_mapping
+		WHERE project_id = #{projectId}
+	</delete>
+	
     <!-- 프로젝트 삭제 -->
     <delete id="deleteProject">
         DELETE

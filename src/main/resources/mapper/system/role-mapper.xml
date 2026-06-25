@@ -1,15 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.weple.cloud.system.mapper.RoleMapper">
-<!-- 역할 목록 조회 -->
+	<!-- 역할 목록 조회 -->
 	<select id="selectRoleList" resultType="com.weple.cloud.system.service.RoleVO">
-	SELECT
-            r.role_id,
-            r.company_id,
-            r.role_name,
-            c.created_at
-        FROM roles r
-        LEFT JOIN companies c ON r.company_id = c.company_id
-        ORDER BY r.role_id
+		SELECT r.role_id,
+	           r.company_id,
+	           r.role_name,
+	           c.created_at
+	    FROM roles r
+	    LEFT JOIN companies c
+	    	   ON r.company_id = c.company_id
+	    ORDER BY r.role_id
 	</select>
+	
+	<!-- 역할 단건 조회 -->
+	<select id="selectRoleById" parameterType="long" resultType="com.weple.cloud.system.service.RoleVO">
+		SELECT r.role_id,
+			   r.company_id,
+			   r.role_name,
+			   c.created_at
+		FROM roles r
+		LEFT JOIN companies c
+			   ON r.company_id = c.company_id
+		WHERE r.role_id = #{roleId}
+	</select>
+	
+	<!-- 전체 권한 목록 -->
+	<select id="selectPermissionList" resultType="com.weple.cloud.system.service.PermissionVO">
+		SELECT p.permission_code,
+			   p.permission_tag,
+			   p.permission_name
+			   c.default_describe AS tagLable
+		FROM permissions p
+		LEFT JOIN common_code c
+			   ON p.permission_tag = c.common_id
+			  AND c.common_code = "0K"
+		ORDER BY p.permission_tag, p.permission_code
+	</select>
+	
+	<!-- 역할에 매핑된 권한 코드 목록 -->
+	<select id="selectPermissionCodesByRoleId" parameterType="long" resultType="string">
+		SELECT permission_code
+		FROM role_permissions
+		WHERE role_id = #{roleId}
+	</select>
+	
+	<!-- 역할 등록 -->
+	<insert id="insertRole" parameterType="com.weple.cloud.system.service.RoleVO">
+		<selectKey keyProperty="roleId" resultType="long" order="BEFORE">
+			SELECT NVL(MAX(role_id), 0) + 1
+			FROM roles
+		</selectKey>
+			INSERT INTO roles (role_id, company_id, role_name)
+			VALUES (#{roleId}, #{companyId}, #{roleName})
+	</insert>
+	
+	<!-- 역할-권한 매핑 등록 -->
+	<insert id="insertRolePermission">
+		INSERT INTO role_permissions(role_id, permission_code)
+		VALUES (#{roleId}, #{permissionCode})
+	</insert>
+	
+	<!-- 역할 이름 수정 -->
+	<update id="updateRole" parameterType="com.weple.cloud.system.service.RoleVO">
+		UPDATE roles
+		SET role_name = #{roleName}
+		WHERE role_id = #{roleId}
+	</update>
+	
+	<!-- 역할-권한 매핑 전체 삭제 -->
+	<delete id="deleteRolePermissions" parameterType="long">
+		DELETE
+		FROM role_permissions
+		WHERE role_id = #{roleId}
+	</delete>
+	
+	<!-- 역할 삭제 -->
+	<delete id="deleteRole" parameterType="long">
+		DELETE
+		FROM roles
+		WHERE role_id = #{roleId}
+	</delete>
 </mapper>

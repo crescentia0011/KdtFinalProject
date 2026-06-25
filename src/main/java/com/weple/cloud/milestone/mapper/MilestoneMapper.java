@@ -40,6 +40,8 @@ public interface MilestoneMapper {
 	
 	// 삭제
 	public int deleteMilestone(Long milestoneId);
-
+	
+	// 진척도에 따라 마일스톤 상태 자동 업데이트
+	public void updateMilestoneStatusByTaskProgress(@Param("milestoneId") Long milestoneId);
 	
 }

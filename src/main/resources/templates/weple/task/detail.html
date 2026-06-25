@@ -1,278 +1,430 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
-	<link rel="stylesheet" th:href="@{/css/task/task-detail.css}">
-	<link rel="stylesheet" th:href="@{/css/repository/repository.css}">
+<title>WEPLE - 공통 관리</title>
+<link rel="stylesheet" th:href="@{/css/task/task-detail.css}">
+<link rel="stylesheet" th:href="@{/css/repository/repository.css}">
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </head>
 <body>
 
-<section>
-    
-<div class="task-detail-container" th:object="${taskDetail}">
-    
-        <div class="task-header">
-            <div class="header-left">
-                <span class="badge" th:text="*{typeIdName}"></span>
-                <h1 class="task-id" th:text="|#*{taskId}|"></h1>
-            </div>
-            
-            <div class="header-right action-buttons">
-                <button class="btn btn-edit" th:onclick="|location.href='@{/project/task/update/{id}(id=*{taskId}, projectId=${projectId})}'|">✏️ 수정</button>
-                <button class="btn btn-log">⏱️ 작업시간 기록</button>
-<button type="button" class="btn btn-delete task-delete-trigger" 
-        th:data-task-id="*{taskId}" 
-        th:data-task-title="*{taskTitle}"
-        th:data-project-id="${projectId}"
-        style="cursor: pointer;">
-    🗑️ 삭제
-</button>
-            </div>
-        </div>
+	<section>
 
-        <div class="task-main-card">
-            <div class="task-title-area">
-                <p class="category-path"  th:if="*{milestoneTitle} != null" th:text="'마일스톤 : ' + *{milestoneTitle}"></p>
-                <h2 class="task-title" th:text="*{taskTitle} "></h2>
-                <p class="task-meta">
-                    <span class="author" th:text="*{taskWriter}"></span>
-                </p>
-            </div>
+		<div class="task-detail-container" th:object="${taskDetail}">
 
-            <div class="task-info-grid">
-                <div class="info-column">
-                    <div class="info-row"><span class="label">상태:</span> <span class="value bold" th:text="*{taskStatus}">신규</span></div>
-                    <div class="info-row"><span class="label">우선순위:</span> <span class="value priority-badge" th:text="*{priority}">매우낮음</span></div>
-                    <div class="info-row"><span class="label">담당자:</span> <span class="value link-color" th:text="*{taskManager}">Redmine Admin</span></div>
-                </div>
-                <div class="info-column">
-                    <div class="info-row"><span class="label">시작일:</span> <span class="value" th:text="*{startDate}">2026/06/11</span></div>
-                    <div class="info-row"><span class="label">완료일:</span> <span class="value danger-color" th:text="*{finishDate}">2026/06/12</span></div>
-                    
-                    <div class="info-row align-center">
-                        <span class="label">진척도:</span> 
-                        <div class="progress-container">
-                            <div class="progress-bar-bg">
-                                <div class="progress-bar-fill" th:style="|width: *{taskProgress ?: 0}%|"></div>
-                            </div>
-                            <span class="progress-percent" th:text="|*{taskProgress ?: 0}%|">60%</span>
-                        </div>
-                    </div>
-                    <div class="info-row"><span class="label">추정시간:</span> <span class="value link-color bold" th:text="|*{estimatedTime ?: 0} 시간|">4:00 시간</span></div>
-                </div>
-            </div>
+			<div class="task-header">
+				<div class="header-left">
+					<span class="badge" th:text="*{typeIdName}"></span>
+					<h1 class="task-id" th:text="|#*{taskId}|"></h1>
+				</div>
 
-            <div class="task-section description-area">
-                <div class="section-title">설명</div>
-                <div class="section-content" th:text="*{taskDescribe}">
-                    일감 내용
-                </div>
-            </div>
-
-            <div class="task-section files-area">
-    		<div class="section-title">파일</div>
-    			<div class="section-content">
-        			<div class="file-item" th:each="file : *{fileList}">
-            			<div class="file-info">
-                			<a href="#" class="file-link" th:text="|${file.logicalName} - version ${file.versionNumber}|"></a>
-                			<span class="file-size" th:text="${file.fileSize} + ' bytes'"></span>
-            			</div>
-            			<span class="file-date" th:text="${#dates.format(file.uploadedAt, 'yyyy.MM.dd HH:mm')}"></span>
-        			</div>
-        
-        			<div th:if="*{fileList == null or fileList.isEmpty()}">
-            			<span id="noFileTextSpan" >첨부된 파일이 없습니다.</span>
-        			</div>
-    			</div>
+				<div class="header-right action-buttons">
+					<button class="btn btn-edit"
+						th:onclick="|location.href='@{/project/task/update/{id}(id=*{taskId}, projectId=${projectId})}'|">✏️
+						수정</button>
+					<button class="btn btn-log">⏱️ 작업시간 기록</button>
+					<button type="button" class="btn btn-delete task-delete-trigger"
+						th:data-task-id="*{taskId}" th:data-task-title="*{taskTitle}"
+						th:data-project-id="${projectId}" style="cursor: pointer;">
+						🗑️ 삭제</button>
+				</div>
 			</div>
 
-            <div class="task-section subtasks-area">
-    			<div class="section-title">
-        			<span>하위 일감</span>
-        			<a th:href="@{/project/task/insert(projectId=${projectId})}" class="btn-add">추가</a>
-    			</div>
-    
-    		<div class="section-content">
-        		<div th:each="sub : ${chlidTaskList}" 
-             		style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-            
-            	<span id="childTaskArrow" >↳</span>
-            
-            	<a id ="childTaskName" th:href="@{/project/task/detail/{id}(id=${sub.taskId}, projectId=${projectId})}" 
-               		th:text="${sub.taskTitle}" >
-               		하위 일감 제목
-            	</a>
-        		</div>
-        
-        		<div id = "noChildTask" th:if="${#lists.isEmpty(chlidTaskList)}">
-           			 등록된 하위 일감이 존재하지 않습니다.
-        		</div>
-    		</div>
+			<div class="task-main-card">
+				<div class="task-title-area">
+					<p class="category-path" th:if="*{milestoneTitle} != null"
+						th:text="'마일스톤 : ' + *{milestoneTitle}"></p>
+					<h2 class="task-title" th:text="*{taskTitle} "></h2>
+					<p class="task-meta">
+						<span class="author" th:text="*{taskWriter}"></span>
+					</p>
+				</div>
+
+				<div class="task-info-grid">
+					<div class="info-column">
+						<div class="info-row">
+							<span class="label">상태:</span> <span class="value bold"
+								th:text="*{taskStatus}">신규</span>
+						</div>
+						<div class="info-row">
+							<span class="label">우선순위:</span> <span
+								class="value priority-badge" th:text="*{priority}">매우낮음</span>
+						</div>
+						<div class="info-row">
+							<span class="label">담당자:</span> <span class="value link-color"
+								th:text="*{taskManager}">Redmine Admin</span>
+						</div>
+						<div class="info-row">
+							<span class="label">소요시간:</span> <span class="value link-color"
+								th:text="|*{spentHoursSum} 시간|"></span>
+						</div>
+					</div>
+					<div class="info-column">
+						<div class="info-row">
+							<span class="label">시작일:</span> <span class="value"
+								th:text="*{startDate}">2026/06/11</span>
+						</div>
+						<div class="info-row">
+							<span class="label">완료일:</span> <span class="value danger-color"
+								th:text="*{finishDate}">2026/06/12</span>
+						</div>
+
+						<div class="info-row align-center">
+							<span class="label">진척도:</span>
+							<div class="progress-container">
+								<div class="progress-bar-bg">
+									<div class="progress-bar-fill"
+										th:style="|width: *{taskProgress ?: 0}%|"></div>
+								</div>
+								<span class="progress-percent" th:text="|*{taskProgress ?: 0}%|">60%</span>
+							</div>
+						</div>
+						<div class="info-row">
+							<span class="label">추정시간:</span> <span
+								class="value link-color bold"
+								th:text="|*{estimatedTime ?: 0} 시간|">4:00 시간</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="task-section description-area">
+					<div class="section-title">설명</div>
+					<div class="section-content" th:text="*{taskDescribe}">일감 내용
+					</div>
+				</div>
+
+				<div class="task-section files-area">
+					<div class="section-title">파일</div>
+					<div class="section-content">
+						<div class="file-item" th:each="file : *{fileList}">
+							<div class="file-info">
+								<a href="#" class="file-link"
+									th:text="|${file.logicalName} - version ${file.versionNumber}|"></a>
+								<span class="file-size" th:text="${file.fileSize} + ' bytes'"></span>
+							</div>
+							<span class="file-date"
+								th:text="${#dates.format(file.uploadedAt, 'yyyy.MM.dd HH:mm')}"></span>
+						</div>
+
+						<div th:if="*{fileList == null or fileList.isEmpty()}">
+							<span id="noFileTextSpan">첨부된 파일이 없습니다.</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="task-section subtasks-area">
+					<div class="section-title">
+						<span>하위 일감</span> <a
+							th:href="@{/project/task/insert(projectId=${projectId})}"
+							class="btn-add">추가</a>
+					</div>
+
+					<div class="section-content">
+						<div th:each="sub : ${chlidTaskList}"
+							style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+
+							<span id="childTaskArrow">↳</span> <a id="childTaskName"
+								th:href="@{/project/task/detail/{id}(id=${sub.taskId}, projectId=${projectId})}"
+								th:text="${sub.taskTitle}"> 하위 일감 제목 </a>
+						</div>
+
+						<div id="noChildTask" th:if="${#lists.isEmpty(chlidTaskList)}">
+							등록된 하위 일감이 존재하지 않습니다.</div>
+					</div>
+				</div>
+
 			</div>
 
-        </div>
+			<div class="task-history-section">
+				<div class="tabs-header">
+					<button type="button" onclick="openTab(event, 'tab-history')"
+						class="tab-button active">항목 변경이력</button>
+					<button type="button" onclick="openTab(event, 'tab-comments')"
+						class="tab-button">댓글</button>
+					<button type="button" onclick="openTab(event, 'tab-time')"
+						class="tab-button">소요시간</button>
+				</div>
 
-        <div class="task-history-section">
-            <div class="tabs-header">
-                <button onclick="openTab(event, 'tab-history')" class="tab-button active">항목 변경이력</button>
-                <button onclick="openTab(event, 'tab-comments')" class="tab-button">댓글</button>
-                <button onclick="openTab(event, 'tab-time')" class="tab-button">소요시간</button>
-            </div>
+				<div class="tab-content-box">
 
-            <div class="tab-content-box">
-                
-                <div id="tab-history" class="tab-content">
-                    <div class="history-list">
-                        <div class="history-item">
-                            <div class="history-top">
-                                <div>
-                                    <strong>Redmine Admin</strong>님이 <span>약 2시간 전</span> 에 변경
-                                </div>
-                                <span class="history-index">#1</span>
-                            </div>
-                            <div class="history-details">
-                                진척도물(들)을 <span>10</span>에서 <strong>40</strong>(으)로 변경되었습니다.
-                            </div>
-                        </div>
-                    </div>
-                </div>
+					<div id="tab-history" class="tab-content active"
+						style="display: block;">
+						<div class="history-list">
 
-                <div id="tab-comments" class="tab-content" style="display: none;">
-    <div class="comment-header-title" style="margin-bottom: 15px; font-size: 15px;">
-        <strong>댓글 <span style="color: #3b82f6;" th:text="${taskComment != null ? taskComment.size() : 0}">0</span></strong>
-    </div>
+							<div class="history-item"
+								th:each="history, stat : ${updateHistoryList}">
+								<div class="history-top">
+									<div>
+										<strong th:text="${history.userName}"></strong>님이 <span
+											th:text="${#temporals.format(history.actionAt, 'yyyy-MM-dd HH:mm')}">에
+											</span>변경함
+									</div>
+									<span class="history-index" th:text="'#' + ${stat.count}">#1</span>
+								</div>
 
-    <div class="comment-input-box main-comment-input">
-        <textarea id="mainCommentContent" placeholder="댓글 내용을 입력하세요..."></textarea>
-        <div class="comment-submit-area">
-            <button type="button" onclick="submitComment(null)">댓글 등록</button>
-        </div>
-    </div>
+								<div class="history-details">
+									<div class="history-detail-row"
+										th:each="detail : ${history.details}">
+										<!-- 하드코딩 , 받아오는값 맞춰서 바꿔야됨 2개밖에 모름 지금 -->
+										<strong
+											th:text="${
+                                				detail.fieldName == 'task_title' ? '제목' :
+                                				detail.fieldName == 'task_describe' ? '설명' :
+                                				detail.fieldName == 'task_status' ? '상태' :
+                                				detail.fieldName == 'priority' ? '우선순위' :
+                                				detail.fieldName == 'task_manager' ? '담당자' :
+                                				detail.fieldName == 'start_date' ? '시작일' :
+                                				detail.fieldName == 'finish_date' ? '완료일' :
+                                				detail.fieldName == 'estimated_time' ? '추정시간' :
+                                				detail.fieldName == 'task_progress' ? '진척도' :
+                                				detail.fieldName == 'milestone_id' ? '마일스톤' :
+                                				detail.fieldName == 'type_name' ? '일감유형' :
+                                				detail.fieldName
+                            			}">우선순위</strong>을(를)
+										<span th:text="${detail.oldValue}"></span>에서 <strong
+											th:text="${detail.newValue}"></strong>로 변경했습니다.
+									</div>
+								</div>
+							</div>
 
-    <div id="tab-comments" class="tab-content" style="display: none;">
-    <div class="comment-header-title" style="margin-bottom: 15px; font-size: 15px;">
-        <strong>댓글 <span style="color: #3b82f6;" th:text="${taskComment != null ? taskComment.size() : 0}">0</span></strong>
-    </div>
+							<div
+								th:if="${updateHistoryList == null or updateHistoryList.isEmpty()}"
+								style="text-align: center; padding: 30px; color: #94a3b8;">
+								변경 이력이 없습니다.</div>
 
-    <div class="comment-input-box main-comment-input">
-        <textarea id="mainCommentContent" placeholder="댓글 내용을 입력하세요..."></textarea>
-        <div class="comment-submit-area">
-            <button type="button" onclick="submitComment(null)">댓글 등록</button>
-        </div>
-    </div>
+						</div>
+					</div>
 
-    <div class="comment-list">
-        <th:block th:each="comment : ${taskComment}" th:if="${comment.parentCommentId == null}">
-            
-            <div class="comment-item root-comment">
-                <div class="comment-header">
-                    <div class="user-info">
-                        <div class="profile-img"></div>
-                        <strong th:text="${comment.userCode}">user01</strong>
-                        <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'yyyy.MM.dd HH:mm')}">2026.06.11 14:20</span>
-                    </div>
-                </div>
-                <div class="comment-body" th:text="${comment.taskComment}">
-                    원댓글 내용입니다.
-                </div>
-                <div class="comment-actions">
-                    <span class="reply-btn" th:data-id="${comment.commentId}" onclick="toggleReplyForm(this.getAttribute('data-id'), null)">답글</span>
-                </div>
-            </div>
+					<div id="tab-comments" class="tab-content" style="display: none;">
+						<div class="comment-header-title"
+							style="margin-bottom: 15px; font-size: 15px;">
+							<strong> 댓글 <span id="commentCount" style="color: #3b82f6;" 
+								th:text="${taskComment != null ? taskComment.size() : 0}"></span>
+							</strong>
+						</div>
 
-            <div th:id="'reply-form-' + ${comment.commentId}" class="comment-input-box reply-input-form" style="display: none;">
-                <textarea th:id="'reply-content-' + ${comment.commentId}" placeholder="답글을 입력하세요..."></textarea>
-                <div class="comment-submit-area">
-                    <button type="button" class="btn-cancel" th:data-id="${comment.commentId}" onclick="toggleReplyForm(this.getAttribute('data-id'), null)">취소</button>
-                    <button type="button" th:data-id="${comment.commentId}" onclick="submitComment(this.getAttribute('data-id'))">답글 등록</button>
-                </div>
-            </div>
+						<div class="comment-input-box main-comment-input">
+							<textarea id="mainCommentContent" placeholder="댓글 내용을 입력하세요..."></textarea>
+							<div class="comment-submit-area">
+								<button type="button" onclick="submitComment(null)">댓글
+									등록</button>
+							</div>
+						</div>
 
-            <th:block th:each="reply : ${taskComment}" th:if="${reply.parentCommentId == comment.commentId}">
-                <div class="reply-wrapper">
-                    <div class="reply-icon">└</div>
-                    <div class="comment-item reply-comment">
-                        <div class="comment-header">
-                            <div class="user-info">
-                                <div class="profile-img"></div>
-                                <strong th:text="${reply.userCode}">user02</strong>
-                                <span class="comment-date" th:text="${#temporals.format(reply.createdAt, 'yyyy.MM.dd HH:mm')}">2026.06.11 15:30</span>
-                            </div>
-                        </div>
-                        <div class="comment-body" th:text="${reply.taskComment}">
-                            대댓글 내용입니다.
-                        </div>
-                        <div class="comment-actions">
-                            <span class="reply-btn" th:data-id="${comment.commentId}" th:data-user="${reply.userCode}" onclick="toggleReplyForm(this.getAttribute('data-id'), this.getAttribute('data-user'))">답글</span>
-                        </div>
-                    </div>
-                </div>
-            </th:block>
-            </th:block>
-        <div th:if="${taskComment == null or taskComment.isEmpty()}" style="text-align: center; padding: 30px; color: #94a3b8;">
-            등록된 댓글이 없습니다.
-        </div>
-    </div>
-</div>
-</div>
+						<div class="comment-list" id="commentArea">
+							<th:block th:each="comment : ${taskComment}"
+								th:if="${comment.parentCommentId == null or comment.parentCommentId == 0}">
 
-                <div id="tab-time" class="tab-content" style="display: none;">
-                    <table class="time-table">
-                        <thead>
-                            <tr>
-                                <th>날짜</th>
-                                <th>사용자</th>
-                                <th>활동</th>
-                                <th>시간</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2026-06-11</td>
-                                <td class="user-name">Redmine Admin</td>
-                                <td>개발 및 설계</td>
-                                <td class="time-value">2.00 시간</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+								<!-- 원댓글 -->
+								<div class="comment-item root-comment"
+									th:style="${comment.userCode == null} ? 'opacity: 0.6;' : ''">
+									<div class="comment-header">
+										<div class="user-info">
+											<div class="profile-img"></div>
 
-            </div>
-        </div>
+											<strong th:if="${comment.userCode != null}"
+												th:text="|${comment.userName}(${comment.email})|"></strong>
 
-        <div class="task-footer-actions">
-            <div class="export-box">
-                내보내기: <a href="#" class="export-link">PDF</a>
-            </div>
-        </div>
+											<strong th:if="${comment.userCode == null}"
+												style="color: #94a3b8; font-weight: normal;"></strong> <span
+												class="comment-date"
+												th:text="${#temporals.format(comment.createdAt, 'yyyy.MM.dd HH:mm')}"></span>
+										</div>
+									</div>
 
-    </div>
-    <dialog class="repository-delete-dialog" id="taskDeleteDialog" aria-labelledby="taskDeleteDialogTitle">
-    <div class="repository-delete-dialog-header">
-        <h2 id="taskDeleteDialogTitle">일감 삭제</h2>
-        <button class="repository-dialog-close" type="button" aria-label="닫기" data-task-delete-close>&times;</button>
-    </div>
-    <p><strong id="taskDeleteName" style="color: #ff4d4f;">일감명</strong>을(를) 삭제합니다. 하위 일감이나 관련 데이터가 함께 영향받을 수 있으며, 이 작업은 되돌릴 수 없습니다.</p>
-    
-    <form id="taskDeleteForm" method="post">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        
-        <label for="taskDeleteConfirmationName">
-            <span id="taskDeletePrompt">삭제하려면 일감명을 입력하세요.</span>
-            <input id="taskDeleteConfirmationName" name="confirmationName" type="text" required autocomplete="off">
-        </label>
-        
-        <div class="repository-dialog-actions">
-            <button class="repository-button repository-button-secondary" type="button" data-task-delete-close>취소</button>
-            <button class="repository-button repository-button-danger" type="submit" id="taskDeleteSubmitBtn" disabled>삭제 확인</button>
-        </div>
-    </form>
-</dialog>
+									<div th:id="'comment-text-' + ${comment.commentId}"
+										class="comment-body" th:text="${comment.taskComment}"
+										th:style="${comment.userCode == null} ? 'color: #94a3b8; font-style: italic;' : ''">
+										원댓글 내용입니다.</div>
 
-    <script th:src="@{/js/task/task-detail.js}"></script>
-</section>
+									<!-- 수정 폼 -->
+									<div th:id="'edit-form-' + ${comment.commentId}"
+										class="comment-input-box edit-input-form"
+										style="display: none; margin-top: 10px;">
+										<textarea th:id="'edit-content-' + ${comment.commentId}"
+											th:text="${comment.taskComment}"></textarea>
+										<div class="comment-submit-area">
+											<button type="button" class="btn-cancel"
+												th:data-id="${comment.commentId}"
+												onclick="toggleEditForm(this.getAttribute('data-id'))">취소</button>
+											<button type="button" th:data-id="${comment.commentId}"
+												onclick="updateComment(this.getAttribute('data-id'))">수정
+												완료</button>
+										</div>
+									</div>
+
+									<div class="comment-actions"
+										th:if="${comment.userCode != null}">
+										<span class="reply-btn" th:data-id="${comment.commentId}"
+											onclick="toggleReplyForm(this.getAttribute('data-id'), null)">답글</span>
+
+										<th:block
+											th:if="${currentUserCode != null and currentUserCode == comment.userCode}">
+											<span class="edit-btn" th:data-id="${comment.commentId}"
+												onclick="toggleEditForm(this.getAttribute('data-id'))"
+												style="margin-left: 10px; cursor: pointer; color: #64748b;">수정</span>
+											<span class="delete-btn" th:data-id="${comment.commentId}"
+												onclick="deleteComment(this.getAttribute('data-id'))"
+												style="margin-left: 10px; cursor: pointer; color: #ef4444;">삭제</span>
+										</th:block>
+									</div>
+								</div>
+
+								<!-- 답글 입력 폼 -->
+								<div th:id="'reply-form-' + ${comment.commentId}"
+									class="comment-input-box reply-input-form"
+									style="display: none;">
+									<textarea th:id="'reply-content-' + ${comment.commentId}"
+										placeholder="답글을 입력하세요..."></textarea>
+									<div class="comment-submit-area">
+										<button type="button" class="btn-cancel"
+											th:data-id="${comment.commentId}"
+											onclick="toggleReplyForm(this.getAttribute('data-id'), null)">취소</button>
+										<button type="button" th:data-id="${comment.commentId}"
+											onclick="submitComment(this.getAttribute('data-id'))">답글
+											등록</button>
+									</div>
+								</div>
+
+								<!-- 대댓글 -->
+								<th:block th:each="reply : ${taskComment}"
+									th:if="${reply.parentCommentId == comment.commentId}">
+									<div class="reply-wrapper">
+										<div class="reply-icon">└</div>
+
+										<div class="comment-item reply-comment"
+											th:style="${reply.userCode == null} ? 'opacity: 0.6;' : ''">
+											<div class="comment-header">
+												<div class="user-info">
+													<div class="profile-img"></div>
+
+													<strong th:if="${reply.userCode != null}"
+														th:text="|${reply.userName}(${reply.email})|"></strong> <strong
+														th:if="${reply.userCode == null}"
+														style="color: #94a3b8; font-weight: normal;"></strong> <span
+														class="comment-date"
+														th:text="${#temporals.format(reply.createdAt, 'yyyy.MM.dd HH:mm')}"></span>
+												</div>
+											</div>
+
+											<div th:id="'comment-text-' + ${reply.commentId}"
+												class="comment-body" th:text="${reply.taskComment}"
+												th:style="${reply.userCode == null} ? 'color: #94a3b8; font-style: italic;' : ''">
+												대댓글 내용입니다.</div>
+
+											<!-- 대댓글 수정 폼 -->
+											<div th:id="'edit-form-' + ${reply.commentId}"
+												class="comment-input-box edit-input-form"
+												style="display: none; margin-top: 10px;">
+												<textarea th:id="'edit-content-' + ${reply.commentId}"
+													th:text="${reply.taskComment}"></textarea>
+												<div class="comment-submit-area">
+													<button type="button" class="btn-cancel"
+														th:data-id="${reply.commentId}"
+														onclick="toggleEditForm(this.getAttribute('data-id'))">취소</button>
+													<button type="button" th:data-id="${reply.commentId}"
+														onclick="updateComment(this.getAttribute('data-id'))">수정
+														완료</button>
+												</div>
+											</div>
+
+											<div class="comment-actions"
+												th:if="${reply.userCode != null}">
+												<span class="reply-btn" th:data-id="${comment.commentId}"
+													th:data-user="${reply.userName}"
+													onclick="toggleReplyForm(this.getAttribute('data-id'), this.getAttribute('data-user'))">답글</span>
+
+												<th:block
+													th:if="${currentUserCode != null and currentUserCode == reply.userCode}">
+													<span class="edit-btn" th:data-id="${reply.commentId}"
+														onclick="toggleEditForm(this.getAttribute('data-id'))"
+														style="margin-left: 10px; cursor: pointer; color: #64748b;">수정</span>
+													<span class="delete-btn" th:data-id="${reply.commentId}"
+														onclick="deleteComment(this.getAttribute('data-id'))"
+														style="margin-left: 10px; cursor: pointer; color: #ef4444;">삭제</span>
+												</th:block>
+											</div>
+										</div>
+									</div>
+								</th:block>
+
+							</th:block>
+
+							<div th:if="${taskComment == null or taskComment.isEmpty()}"
+								style="text-align: center; padding: 30px; color: #94a3b8;">
+								등록된 댓글이 없습니다.</div>
+						</div>
+					</div>
+
+
+					<div id="tab-time" class="tab-content" style="display: none;">
+						<table class="time-table">
+							<thead>
+								<tr>
+									<th>날짜</th>
+									<th>사용자</th>
+									<th>활동</th>
+									<th>시간</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>2026-06-11</td>
+									<td class="user-name">Redmine Admin</td>
+									<td>개발 및 설계</td>
+									<td class="time-value">2.00 시간</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+				</div>
+			</div>
+
+			<div class="task-footer-actions">
+				<div class="export-box">
+					내보내기: <a href="#" class="export-link">PDF</a>
+				</div>
+			</div>
+
+		</div>
+		<dialog class="repository-delete-dialog" id="taskDeleteDialog"
+			aria-labelledby="taskDeleteDialogTitle">
+		<div class="repository-delete-dialog-header">
+			<h2 id="taskDeleteDialogTitle">일감 삭제</h2>
+			<button class="repository-dialog-close" type="button" aria-label="닫기"
+				data-task-delete-close>&times;</button>
+		</div>
+		<p>
+			<strong id="taskDeleteName" style="color: #ff4d4f;">일감명</strong>을(를)
+			삭제합니다. 하위 일감이나 관련 데이터가 함께 영향받을 수 있으며, 이 작업은 되돌릴 수 없습니다.
+		</p>
+
+		<form id="taskDeleteForm" method="post">
+			<input type="hidden" th:name="${_csrf.parameterName}"
+				th:value="${_csrf.token}"> <label
+				for="taskDeleteConfirmationName"> <span
+				id="taskDeletePrompt">삭제하려면 일감명을 입력하세요.</span> <input
+				id="taskDeleteConfirmationName" name="confirmationName" type="text"
+				required autocomplete="off">
+			</label>
+
+			<div class="repository-dialog-actions">
+				<button class="repository-button repository-button-secondary"
+					type="button" data-task-delete-close>취소</button>
+				<button class="repository-button repository-button-danger"
+					type="submit" id="taskDeleteSubmitBtn" disabled>삭제 확인</button>
+			</div>
+		</form>
+		</dialog>
+		<script th:inline="javascript">
+			const TaskId = /*[[${taskDetail.taskId}]]*/'default_tId';
+		</script>
+		<script th:src="@{/js/task/task-detail.js}"></script>
+	</section>
 
 </body>
 </html>

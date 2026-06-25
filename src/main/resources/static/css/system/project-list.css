@@ -191,56 +191,6 @@
     color: #adb5bd;
 }
 
-/* ===== 관리 버튼 그룹 ===== */
-.action-btn-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-/* 수정 버튼 */
-.edit-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 70px;
-    height: 32px;
-    border-radius: 999px;
-    background: #eef4ff;
-    color: #4d84ff;
-    font-size: 12px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: background .2s;
-}
-
-.edit-btn:hover {
-    background: #ddeaff;
-    color: #3970eb;
-    text-decoration: none;
-}
-
-/* 삭제 버튼 */
-.delete-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 70px;
-    height: 32px;
-    border: none;
-    border-radius: 999px;
-    background: #ffe9ec;
-    color: #ef4444;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.delete-btn:hover {
-    background: #ffd8de;
-}
-
 /* delete-form이 자체 높이를 갖지 않도록 */
 .delete-form {
     margin: 0;
@@ -329,4 +279,81 @@
     .project-table {
         min-width: 1000px;
     }
+}
+
+/* ===========================
+   드롭다운 메뉴
+   =========================== */
+
+.dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.more-options-btn {
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 6px 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: all .2s ease;
+}
+
+.more-options-btn:hover {
+    color: #475569;
+    background-color: #f1f5f9;
+}
+
+.dropdown-menu-box {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    min-width: 85px;
+    padding: 4px 0;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.dropdown-menu-box.show {
+    display: block;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 13px;
+    cursor: pointer;
+    color: #334155;
+    transition: background .15s ease;
+}
+
+.dropdown-item:hover {
+    background: #f8fafc;
+}
+
+.dropdown-item.edit-btn:hover {
+    background: #eff6ff;
+}
+
+.dropdown-item.delete-btn {
+    color: #ef4444;
+}
+
+.dropdown-item.delete-btn:hover {
+    background: #fef2f2;
+}
+
+.delete-form {
+    margin: 0;
 }

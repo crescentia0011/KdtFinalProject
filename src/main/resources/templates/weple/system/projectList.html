@@ -76,15 +76,34 @@
 						          th:text="${project.status != null and project.status != ''} ? ${project.status} : '-'">
 						    </span>
 						</td>
-                        <td>
-						    <div class="action-btn-group">
-						        <a th:href="@{/system/project/update/{id}(id=${project.projectId})}"
-						           class="edit-btn">수정</a>
-						        <form th:action="@{/system/project/delete}" method="post" class="delete-form">
-						            <input type="hidden" name="projectId" th:value="${project.projectId}">
-						            <button type="button" class="delete-btn delete-project-btn">삭제</button>
-						        </form>
+                        <td style="position: relative; text-align: center;"
+						    onclick="event.stopPropagation();">
+						    <div class="dropdown-wrapper">
+						        <span class="more-options-btn" onclick="toggleDropdown(this)">•••</span>
+						        <div class="dropdown-menu-box">
+						            <button type="button"
+						                    class="dropdown-item edit-btn"
+						                    th:onclick="|location.href='@{/system/project/update/{id}(id=${project.projectId})}'|">
+						                ✏️ 편집
+						            </button>
+						            <button type="button"
+						                    class="dropdown-item delete-btn delete-project-btn"
+						                    th:data-project-id="${project.projectId}"
+						                    th:data-project-title="${project.projectTitle}">
+						                🗑️ 삭제
+						            </button>
+						        </div>
 						    </div>
+						    <form th:action="@{/system/project/delete}"
+						          method="post"
+						          class="delete-form"
+						          style="display:none;">
+						        <input type="hidden" name="projectId"
+						               th:value="${project.projectId}">
+						        <input type="hidden"
+						               th:name="${_csrf.parameterName}"
+						               th:value="${_csrf.token}">
+						    </form>
 						</td>
                     </tr>
                 </tbody>
@@ -143,11 +162,12 @@
 
             document.querySelectorAll(".delete-project-btn").forEach(function (btn) {
                 btn.addEventListener("click", function () {
-                    deleteForm = this.closest("form");
+
+                    deleteForm = this.closest("td").querySelector(".delete-form");
+
                     document.getElementById("confirmModal").style.display = "flex";
                 });
             });
-
             window.closeModal = function () {
                 document.getElementById("confirmModal").style.display = "none";
             };
@@ -178,6 +198,22 @@
         } else {
             window.addEventListener("load", initProjectList);
         }
+        
+        function toggleDropdown(el) {
+            document.querySelectorAll('.dropdown-menu-box').forEach(menu => {
+                if (menu !== el.nextElementSibling) {
+                    menu.classList.remove('show');
+                }
+            });
+
+            el.nextElementSibling.classList.toggle('show');
+        }
+
+        document.addEventListener('click', function () {
+            document.querySelectorAll('.dropdown-menu-box').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        });
     </script>
 
 </section>

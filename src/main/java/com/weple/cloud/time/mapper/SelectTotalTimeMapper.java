@@ -1,10 +1,10 @@
-package com.weple.cloud.system.mapper;
+package com.weple.cloud.time.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.weple.cloud.system.service.SelectTotalTimeVO;
+import com.weple.cloud.time.service.SelectTotalTimeVO;
 
 
 public interface SelectTotalTimeMapper {

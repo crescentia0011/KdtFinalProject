@@ -121,6 +121,7 @@
 
 .info-row .label {
     width: 100px;
+    font-size:11pt;
     color: #666;
 }
 
@@ -498,3 +499,87 @@
 .comment-body { font-size: 14px; color: #334155; white-space: pre-wrap; margin-bottom: 12px; line-height: 1.5; }
 .comment-actions .reply-btn { font-size: 12px; color: #64748b; cursor: pointer; }
 .comment-actions .reply-btn:hover { text-decoration: underline; color: #3b82f6; }
+
+
+
+
+/*토스트 메세지쪽*/
+.toast-wrap {
+        position: fixed;
+        top: 24px;
+        right: 24px; /* 💡 left 대신 right를 주어 오른쪽 맨 위로 고정 */
+        z-index: 9999;
+        animation: toastFadeOut 3.5s forwards; 
+    }
+    .toast-msg {
+        padding: 13px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        text-align: center;
+        min-width: 250px; 
+    }
+    .toast-error { background-color: #e53e3e; }
+    .toast-success { background-color: #38a169; }
+
+    /* 💡 오른쪽 위에서 자연스럽게 내려오고 올라가도록 애니메이션 수정 */
+    @keyframes toastFadeOut {
+        0%   { opacity: 0; transform: translateY(-20px); }
+        10%  { opacity: 1; transform: translateY(0); } 
+        75%  { opacity: 1; transform: translateY(0); } 
+        100% { opacity: 0; transform: translateY(-20px); } 
+    }
+
+    /* ==========================================
+       2. 커스텀 삭제 확인 모달 (Confirm) 스타일 - 화면 정중앙 절대 고정
+       ========================================== */
+    .custom-modal-overlay {
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100vw;  
+        height: 100vh; 
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 10000; 
+        opacity: 0; 
+        visibility: hidden; 
+        transition: all 0.2s ease-in-out;
+    }
+    .custom-modal-overlay.show { opacity: 1; visibility: visible; }
+    
+    .custom-modal-box {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -60%); 
+        
+        background: #fff; 
+        padding: 25px 30px; 
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        text-align: center; 
+        width: 320px;
+        transition: transform 0.2s ease-in-out;
+    }
+    .custom-modal-overlay.show .custom-modal-box { transform: translate(-50%, -50%); }
+    
+    .custom-modal-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 10px; }
+    .custom-modal-desc { font-size: 14px; color: #6b7280; margin-bottom: 24px; line-height: 1.5; }
+    .custom-modal-btns { display: flex; justify-content: center; gap: 8px; }
+
+    /* 모달 버튼 디자인 */
+    .modal-btn-cancel {
+        padding: 7px 16px; border: 1px solid #ced4da; background: #fff; 
+        border-radius: 5px; color: #495057; font-size: 13px; cursor: pointer; transition: 0.2s;
+        min-width: 70px;
+    }
+    .modal-btn-cancel:hover { background: #f8f9fa; }
+    
+    .modal-btn-delete {
+        padding: 7px 16px; border: 1px solid #e53e3e; background: #e53e3e; 
+        border-radius: 5px; color: #fff; font-size: 13px; cursor: pointer; transition: 0.2s;
+        min-width: 70px;
+    }
+    .modal-btn-delete:hover { background: #c53030; border-color: #c53030; }
