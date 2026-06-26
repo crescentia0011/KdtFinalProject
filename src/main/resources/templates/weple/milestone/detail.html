@@ -97,46 +97,145 @@
 	        }
 	    });
 	});
+	
+	document.addEventListener("DOMContentLoaded", function() {
+	    const dialog = document.getElementById('milestoneDeleteDialog');
+	    const confirmInput = document.getElementById('milestoneDeleteConfirmationName');
+	    const submitBtn = document.getElementById('milestoneDeleteSubmitBtn');
+	    const deleteNameSpan = document.getElementById('milestoneDeleteName');
+	    const promptSpan = document.getElementById('milestoneDeletePrompt');
+	    const milestoneIdInput = document.getElementById('milestoneDeleteId');
+
+	    if (!dialog) return;
+
+	    // 1. 삭제 버튼 클릭 시 모달 오픈 및 데이터 세팅
+	    document.querySelectorAll('.milestone-delete-trigger').forEach(function (button) {
+	        button.addEventListener('click', function () {
+	            const milestoneId = button.dataset.milestoneId;
+	            const milestoneTitle = button.dataset.milestoneTitle;
+
+	            // 데이터 동적 주입
+	            milestoneIdInput.value = milestoneId;
+	            deleteNameSpan.textContent = milestoneTitle;
+	            promptSpan.textContent = '삭제하려면 ' + milestoneTitle + '을(를) 입력하세요.';
+	            confirmInput.value = '';
+	            
+	            // 버튼 상태 초기화 (비활성화)
+	            submitBtn.disabled = true;
+
+	            // 실시간 텍스트 일치 여부 검사
+	            confirmInput.oninput = function() {
+	                if (this.value.trim() === milestoneTitle.trim()) {
+	                    submitBtn.disabled = false;
+	                } else {
+	                    submitBtn.disabled = true;
+	                }
+	            };
+
+	            dialog.showModal();
+	        });
+	    });
+
+	    // 2. 닫기 버튼 이벤트 처리 (취소 및 X 버튼)
+	    document.querySelectorAll('[data-milestone-delete-close]').forEach(function (button) {
+	        button.addEventListener('click', function () {
+	            dialog.close();
+	        });
+	    });
+	});
 	</script>
 
     <div class="milestone-page">
         <div class="milestone-page-header">
             <h1 class="milestone-page-title">마일스톤 상세조회</h1>
-            <a th:href="@{/project/milestone/list(projectId=${detail.projectId})}" class="milestone-add-link">← 목록으로 돌아가기</a>
+            <a th:href="@{/project/milestone(projectId=${detail.projectId})}" class="milestone-add-link">← 목록으로 돌아가기</a>
         </div>
 
         <div class="milestone-container">
             
             <div class="milestone-header" th:data-milestone-id="${detail.milestoneId}">
-                <div class="view-mode-container" style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
-                    <div class="milestone-title-group">
-                        <span class="milestone-icon">📋</span>
-                        <h2 class="milestone-title" th:text="${detail.milestoneTitle}">설계</h2>
-                        
-                        <span class="milestone-badge" 
-                              th:classappend="${detail.milestoneStatus == 'g2' ? 'badge-success' : 'badge-process'}"
-                              th:text="${detail.milestoneStatus == 'g2' ? '완료' : '진행 중'}">진행 중</span>
-                        
-                        <span class="milestone-due-date" 
-                              th:if="${detail.finishDate != null}"
-                              th:text="${#temporals.format(detail.finishDate, 'yyyy.MM.dd')} + ' 까지'">2026.03.01 까지</span>
-                        
-                        <span class="milestone-badge badge-delay-text" 
-                              th:if="${detail.delayDays > 0}" 
-                              th:text="'지연됨 (D+' + ${detail.delayDays} + ')'">지연됨 (D+2)</span>
-                        
-                        <span class="milestone-describe" th:text="${detail.milestoneDescribe}">마일스톤 설명</span>
-                    </div>
-                    <button type="button" class="milestone-edit-btn" onclick="enableEditMode(this)">마일스톤 편집</button>
-                </div>
-            </div>
-
-            <div class="milestone-progress-row">
-                <div class="milestone-progress-bar-wrap">
-                    <div class="milestone-progress-bar" th:style="'width: ' + ${detail.progressPercentage} + '%'"></div>
-                </div>
-                <span class="milestone-progress-percent" th:text="${detail.progressPercentage} + '%'">100%</span>
-            </div>
+                
+		    <div class="view-mode-container" style="display: flex; width: 100%; justify-content: space-between; align-items: flex-start; gap: 20px;">
+		        <div class="milestone-title-group" style="display: flex; flex-direction: column; gap: 8px;">
+		            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+		                <span class="milestone-icon">📋</span>
+		                <h2 class="milestone-title" style="margin: 0;">
+		                    <span th:text="${detail.milestoneTitle}">설계</span>
+		                </h2>
+		                
+		                <span class="milestone-badge" 
+		                      th:classappend="${detail.milestoneStatus == 'g2' ? 'badge-success' : 'badge-process'}"
+		                      th:text="${detail.milestoneStatus == 'g2' ? '완료' : '진행 중'}">진행 중</span>
+		                
+		                <span class="milestone-due-date" 
+		                      th:if="${detail.finishDate != null}"
+		                      th:text="${#temporals.format(detail.finishDate, 'yyyy.MM.dd')} + ' 까지'">2026.03.01 까지</span>
+		                
+		                <span class="milestone-badge badge-delay-text" 
+		                      th:if="${detail.delayDays > 0}" 
+		                      th:text="'지연됨 (D+' + ${detail.delayDays} + ')'">지연됨 (D+2)</span>
+		            </div>
+		            
+		            
+		        </div>
+		        <div class="milestone-action-group" style="display: flex; gap: 8px; flex-shrink: 0;">
+		            <button type="button" class="milestone-edit-btn" onclick="enableEditMode(this)">편집</button>
+		            <button type="button" class="milestone-delete-btn milestone-delete-trigger" 
+				            th:data-milestone-id="${detail.milestoneId}"
+				            th:data-milestone-title="${detail.milestoneTitle}">삭제</button>
+		        </div>
+		    </div>
+		
+		    <div class="edit-mode-container" style="display: none; width: 100%; flex-direction: column; gap: 12px;">
+		        <div style="display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 20px;">
+		            <div class="milestone-edit-inputs" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+		                <input type="text" class="edit-title-input" th:value="${detail.milestoneTitle}" placeholder="마일스톤명 입력" />
+		                
+		                <input type="date" class="edit-date-input" th:value="${detail.finishDate}" />
+		                
+		                <div style="display: flex; align-items: center; gap: 8px;">
+		                    <label class="switch-label" style="position: relative; display: inline-block; width: 44px; height: 22px; margin: 0;">
+		                        <input type="checkbox" class="edit-status-toggle" 
+		                               th:checked="${detail.milestoneStatus == 'g2'}"
+		                               th:disabled="${detail.progressPercentage < 100}"
+		                               onchange="toggleStatusText(this)" />
+		                        <span class="slider round"></span>
+		                    </label>
+		                    <span class="switch-text" 
+		                          th:data-progress="${detail.progressPercentage}"
+		                          th:text="${detail.progressPercentage < 100 ? '진척도 100% 필수' : (detail.milestoneStatus == 'g2' ? '완료 처리' : '진행 중')}"
+		                          style="font-size: 12px; color: #888; user-select: none;">진척도 100% 필수</span>
+		                </div>
+		            </div>
+		            
+		            <div class="milestone-action-btns" style="flex-shrink: 0;">
+		                <button type="button" class="milestone-cancel-btn" onclick="cancelEditMode(this)">취소</button>
+		                <button type="button" class="milestone-save-btn" onclick="saveMilestone(this)">변경</button>
+		            </div>
+		        </div>
+		        
+		        <div style="width: 100%;">
+		            <input type="text" class="edit-describe-input" th:value="${detail.milestoneDescribe}" placeholder="마일스톤 설명 입력" style="width: 100%; box-sizing: border-box; padding: 6px 10px;" />
+		        </div>
+		    </div>
+		    
+		</div>
+		
+		<div class="milestone-progress-row" style="display: flex; align-items: center; gap: 15px; width: 100%;">
+		    <div class="milestone-progress-bar-wrap" style="flex-shrink: 0; width: 200px; background-color: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+		        <div class="milestone-progress-bar" th:style="'width: ' + ${detail.progressPercentage} + '%; background-color: #4A90E2; height: 100%;'"></div>
+		    </div>
+		    
+		    <span class="milestone-progress-percent" th:text="${detail.progressPercentage} + '%'" style="flex-shrink: 0; font-weight: bold; min-width: 40px; color: #333;">100%</span>
+		    
+		    <span class="milestone-describe" 
+		          th:if="${detail.milestoneDescribe != null}"
+		          th:text="${detail.milestoneDescribe}" 
+		          th:title="${detail.milestoneDescribe}"
+		          style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000; font-size: 16px;">
+		        마일스톤 설명
+		    </span>
+		</div>
             
             <div class="milestone-task-summary">
                 <span th:text="${totalTasks} + '일감 (' + ${detail.closedTaskCount} + ' 건 완료 — ' + (${detail.progressPercentage == 100} ? '모두 완료' : '진행중') + ')'">
@@ -287,6 +386,30 @@
                     <a th:href="@{/project/milestone/detail(milestoneId=${detail.milestoneId}, page=${currentPage + 1})}"
                        th:classappend="${currentPage == totalPages} ? 'disabled-link' : ''" class="page-link-btn">다음</a>
                 </div>
+                
+                <dialog class="milestone-delete-dialog" id="milestoneDeleteDialog" aria-labelledby="milestoneDeleteDialogTitle">
+				    <div class="milestone-delete-dialog-header">
+				        <h2 id="milestoneDeleteDialogTitle">마일스톤 삭제</h2>
+				        <button class="milestone-dialog-close" type="button" aria-label="닫기" data-milestone-delete-close>&times;</button>
+				    </div>
+				    <p><strong id="milestoneDeleteName" style="color: #ff4d4f;">마일스톤명</strong>을(를) 삭제합니다. 하위 일감이나 관련 데이터가 함께 영향받을 수 있으며, 이 작업은 되돌릴 수 없습니다.</p>
+				    
+				    <form th:action="@{/project/milestone/delete}" method="post" id="milestoneDeleteForm">
+				        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+				        <input type="hidden" name="projectId" th:value="${projectId}">
+				        <input id="milestoneDeleteId" type="hidden" name="milestoneId">
+				        
+				        <label for="milestoneDeleteConfirmationName">
+				            <span id="milestoneDeletePrompt">삭제하려면 마일스톤명을 입력하세요.</span>
+				            <input id="milestoneDeleteConfirmationName" name="confirmationName" type="text" required autocomplete="off">
+				        </label>
+				        
+				        <div class="milestone-dialog-actions">
+				            <button class="milestone-button milestone-button-secondary" type="button" data-milestone-delete-close>취소</button>
+				            <button class="milestone-button milestone-button-danger" type="submit" id="milestoneDeleteSubmitBtn" disabled>삭제 확인</button>
+				        </div>
+				    </form>
+				</dialog>
 
             </div>
             

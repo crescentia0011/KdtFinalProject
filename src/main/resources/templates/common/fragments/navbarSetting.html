@@ -20,9 +20,9 @@
             <a th:href="@{/system/role}" 
                th:class="${menu == 'role'} ? 'active' : ''">역할 및 권한</a>
         </li>
-        <li>
+        <li th:classappend="${currentMenu == 'taskType'} ? 'active' : ''">
             <a th:href="@{/system/taskType}" 
-               th:class="${menu == 'issueType'} ? 'active' : ''">일감 유형</a>
+               th:class="${menu == 'taskType'} ? 'active' : ''">일감 유형</a>
         </li>
         <li>
             <a th:href="@{/issueStatusList}" 

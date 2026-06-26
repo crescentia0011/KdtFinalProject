@@ -195,13 +195,19 @@ public class SystemController {
 	public String systemTaskTypeList(@AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
 		Long companyId = loginUser.getLoginUser().getCompanyId();
 		List<TaskTypeVO> list = taskTypeService.findTaskTypeAll(companyId);
+		model.addAttribute("sidebarMenu", "system");
+		model.addAttribute("currentMenu", "taskType");
+		model.addAttribute("menu", "taskType");
 		model.addAttribute("taskTypes", list);
 		return "weple/system/taskType/list";
 	}
 
 	// 등록페이지 조회
 	@GetMapping("/system/taskType/insert")
-	public String taskTypeInsert() {
+	public String taskTypeInsert(Model model) {
+		model.addAttribute("sidebarMenu", "system");
+		model.addAttribute("currentMenu", "taskType");
+		model.addAttribute("menu", "taskType");
 		return "weple/system/taskType/register";
 	}
 

@@ -125,14 +125,10 @@ public class MilestoneController {
 	}
 
 	// 삭제하기 
-	@PostMapping("/delete/{milestoneId}")
-	@ResponseBody
-	public ResponseEntity<String> milestoneDelete(@PathVariable Long milestoneId) {
-		int result = milestoneService.deleteMilestone(milestoneId);
-		if (result > 0) {
-			return ResponseEntity.ok("SUCCESS");
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("FAIL");
-		}
+	@PostMapping("/delete")
+	public String milestoneDelete(@RequestParam Long projectId, @RequestParam Long milestoneId) {
+		milestoneService.deleteMilestone(milestoneId);
+		
+		return "redirect:/project/milestone?projectId=" + projectId;
 	}
 }
