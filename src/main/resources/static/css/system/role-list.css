@@ -65,6 +65,8 @@
 .role-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
+    overflow: visible;
 }
 
 .role-table thead {
@@ -78,6 +80,18 @@
     color: #5d6b87;
     text-align: center;
     border-bottom: 1px solid #e9edf5;
+}
+
+/* 컬럼 너비 고정 */
+.role-table th:nth-child(1) { width: 25%; }   
+.role-table th:nth-child(2) { width: 25%; }  
+.role-table th:nth-child(3) { width: 25%; }   
+.role-table th:nth-child(4) { width: 25%; }   
+
+/* 역할명 th만 왼쪽 정렬 */
+.role-table th.th-name {
+    text-align: left;
+    padding-left: 20px;
 }
 
 .role-table td {

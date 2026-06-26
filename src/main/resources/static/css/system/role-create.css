@@ -1,108 +1,226 @@
-.role-create-page{
-    padding:20px;
+/* ===================== 역할 등록/수정 페이지 ===================== */
+.role-create-page {
+    padding: 20px 25px;
+    min-height: 100vh;
 }
 
-.role-create-card{
-    background:#fff;
-    border:1px solid #e5e7eb;
-    border-radius:10px;
-    padding:25px;
+.role-create-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px 32px;
+    border: 1px solid #e5e9f0;
+    box-shadow: 0 1px 6px rgba(0,0,0,.04);
 }
 
-.role-create-title{
-    font-size:20px;
-    font-weight:700;
-    margin-bottom:25px;
+.role-create-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #222;
+    margin: 0 0 16px 4px;
 }
 
-.form-group-row{
-    margin-bottom:20px;
+/* ── 역할 이름 행 ── */
+.name-row {
+    margin-bottom: 24px;
 }
 
-.form-label{
-    display:block;
-    margin-bottom:8px;
-    font-size:13px;
-    font-weight:600;
+.name-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.form-input-text{
-    width:100%;
-    height:42px;
-    padding:0 14px;
-
-    border:1px solid #dcdfe4;
-    border-radius:6px;
+.perm-box-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4b525a;
+    margin-bottom: 4px;
 }
 
-.permission-block{
-    border:1px solid #e5e7eb;
-    border-radius:8px;
-    margin-bottom:12px;
-    overflow:hidden;
+/* 필수 * 표시 */
+.required::after {
+    content: " *";
+    color: #e53e3e;
+    font-weight: bold;
 }
 
-.permission-title{
-    background:#fafafa;
-    border-bottom:1px solid #e5e7eb;
-
-    padding:12px 16px;
-
-    font-size:13px;
-    font-weight:700;
+/* ── 역할 이름 입력 ── */
+.role-name-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    color: #111;
+    transition: border-color .2s;
+}
+.role-name-input:focus {
+    border-color: #4d84ff;
+    box-shadow: 0 0 0 3px rgba(77,132,255,.1);
+    outline: none;
 }
 
-.permission-list{
-    display:flex;
-    flex-wrap:wrap;
-
-    gap:16px 40px;
-
-    padding:16px;
+/* ── 전체선택/해제 컨트롤 행 ── */
+.perm-ctrl-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
 }
 
-.permission-item{
-    min-width:220px;
-
-    display:flex;
-    align-items:center;
-
-    gap:6px;
-
-    font-size:13px;
+.perm-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4b525a;
 }
 
-.permission-item input{
-    width:15px;
-    height:15px;
-
-    accent-color:#4d84ff;
+.perm-ctrl-btns {
+    display: flex;
+    gap: 8px;
 }
 
-.button-group-right{
-    display:flex;
-    justify-content:flex-end;
-
-    gap:10px;
-
-    margin-top:25px;
+.perm-ctrl-btn {
+    padding: 5px 14px;
+    font-size: 13px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    background: #fff;
+    color: #495057;
+    cursor: pointer;
+    transition: all .2s;
+}
+.perm-ctrl-btn:hover {
+    background: #4d84ff;
+    border-color: #4d84ff;
+    color: #fff;
 }
 
-.page-btn{
-    min-width:90px;
-    height:40px;
-
-    border-radius:6px;
-    cursor:pointer;
+/* ── 권한 박스 외곽 ── */
+.perm-box-outer {
+    border: 1px solid #e1e4e6;
+    border-radius: 6px;
+    background: #fff;
+    padding: 4px 24px;
 }
 
-.btn-cancel{
-    border:1px solid #dcdfe4;
-    background:#fff;
+/* ── 카테고리 그룹 ── */
+.perm-group {
+    padding: 18px 0 16px;
 }
 
-.btn-submit{
-    border:none;
-    background:#4d84ff;
-    color:#fff;
+.perm-group-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4b525a;
+    margin-bottom: 14px;
+}
+
+/* ── 체크박스 그리드: 찌그러짐 방지 ── */
+.perm-checks {
+    display: grid;
+    /* 최소 200px 보장, 나머지는 균등 분배 */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px 16px;
+    width: 100%;
+}
+
+/* ── 체크박스 아이템 ── */
+.perm-check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    user-select: none;
+    /* 찌그러짐 방지 */
+    min-width: 0;
+    white-space: nowrap;
+}
+
+/* 실제 input 숨김 */
+.perm-check-item input[type="checkbox"] {
+    display: none;
+}
+
+/* 커스텀 체크박스 */
+.custom-check-box {
+    width: 16px;
+    height: 16px;
+    min-width: 16px; /* 찌그러짐 방지 */
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+    background: #fff;
+    flex-shrink: 0;
+    transition: background .15s, border-color .15s;
+}
+
+.perm-check-item input[type="checkbox"]:checked + .custom-check-box {
+    background: #4d84ff;
+    border-color: #4d84ff;
+}
+
+.perm-check-item input[type="checkbox"]:checked + .custom-check-box::after {
+    content: "✓";
+    position: absolute;
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.perm-text {
+    white-space: nowrap;
+    word-break: keep-all;
+    line-height: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── 카테고리 간 구분선 ── */
+.perm-divider {
+    border: none;
+    border-top: 1px solid #eaeef4;
+    margin: 0;
+}
+
+/* ── 버튼 영역 ── */
+.btn-area {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f3f5;
+}
+
+.page-btn {
+    min-width: 90px;
+    height: 40px;
+    padding: 0 22px;
+    font-size: 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+}
+.page-btn:hover { opacity: .88; }
+
+.btn-cancel {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #6b7280;
+}
+
+.btn-submit {
+    border: none;
+    background: #4d84ff;
+    color: #fff;
 }

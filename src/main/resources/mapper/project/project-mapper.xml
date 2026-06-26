@@ -77,7 +77,7 @@
         WHERE rn > #{offset}
     </select>
     
-	<!-- 전체 건수 -->
+	<!-- 전체 건수 조회 -->
     <select id="countAll" resultType="int">
         SELECT COUNT(*)
         FROM project p
@@ -122,5 +122,44 @@
 	    FROM module_mapping
 	    WHERE project_id = #{projectId}
 	</select>
+	
+	<!-- 설정 페이지 - 프로젝트 설정 정보 단건 조회 (식별자 포함) -->
+	<select id="selectSettingById" parameterType="long" resultType="com.weple.cloud.project.service.ProjectVO">
+		SELECT project_id,
+			   project_title,
+			   project_describe,
+			   project_identifier
+		FROM project
+		WHERE project_id = #{projectId}
+	</select>
+	
+	<!-- 설정 페이지 - 프로젝트 기본 정보 수정 (제목, 설명) -->
+	<update id="updateProjectSetting">
+		UPDATE project
+		SET project_title = #{projectTitle},
+			project_describe = #{projectDescribe}
+		WHERE project_id = #{projectId}
+	</update>
+	
+	<!-- 설정 페이지 - 모듈 전체 삭제 -->
+	<delete id="deleteModuleMapping" parameterType="long">
+		DELETE
+		FROM module_mapping
+		WHERE project_id = #{projectId}
+	</delete>
+	
+	<!-- 설정 페이지 - 모듈 단건 삽입 -->
+	<insert id="insertModuleMapping">
+		INSERT INTO module_mapping (
+						module_map_id,
+						project_id,
+						module_name
+									)
+		VALUES (
+						(SELECT NVL(MAX(module_map_id), 0) + 1 FROM module_mapping),
+						#{projectId},
+						#{module_name}
+				)
+	</insert>
 	
 </mapper>

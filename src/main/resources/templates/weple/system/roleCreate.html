@@ -9,47 +9,48 @@
 </head>
 <body>
 <section class="role-create-page">
+    <h3 class="role-create-title"
+        th:text="${mode == 'edit'} ? '역할 수정' : '역할 등록'"></h3>
     <div class="role-create-card">
-
-        <h3 class="role-create-title"
-            th:text="${mode == 'edit'} ? '역할 수정' : '역할 등록'"></h3>
 
         <form method="post"
               th:action="${mode == 'edit'} ? @{/system/role/edit} : @{/system/role/create}">
 
-            <!-- 수정 모드: roleId hidden -->
+            <!-- CSRF 추가 -->
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
             <input th:if="${mode == 'edit'}" type="hidden"
                    name="roleId" th:value="${role.roleId}">
 
             <!-- ① 역할 이름 -->
-            <div class="perm-row">
-                <div class="perm-badge">1</div>
+            <div class="perm-row name-row">
                 <div class="perm-box name-box">
-                    <span class="perm-box-label">역할 이름</span>
-                    <input type="text" name="roleName" class="role-name-input"
+                    <span class="perm-box-label required">역할 이름</span>
+                    <input type="text"
+                           name="roleName"
+                           class="role-name-input"
                            th:value="${mode == 'edit'} ? ${role.roleName} : ''"
-                           placeholder="역할 이름을 입력하세요." required>
+                           placeholder="역할 이름을 입력하세요."
+                           required>
                 </div>
             </div>
 
-            <!--
-                ②~ 권한 섹션
-                tagLabel(한글) 기준으로 섹션을 나눔.
-                iterStat 을 활용해 섹션 번호는 2부터 시작.
-                같은 tagLabel 권한들은 한 .perm-box 안에 나열.
+            <!-- 전체선택/해제 컨트롤 -->
+            <div class="perm-ctrl-row">
+                <span class="perm-section-title">권한 설정</span>
+                <div class="perm-ctrl-btns">
+                    <button type="button" class="perm-ctrl-btn" id="selectAll">전체선택</button>
+                    <button type="button" class="perm-ctrl-btn" id="deselectAll">전체해제</button>
+                </div>
+            </div>
 
-                [Thymeleaf 처리 전략]
-                - 권한 목록을 tagLabel별로 묶는 작업은 Java(Controller 또는 Service)에서
-                  LinkedHashMap<String, List<PermissionVO>> 으로 전달하는 게 가장 깔끔합니다.
-                - 아래는 Controller에서 groupedPermissions(Map)을 전달한다고 가정한 버전입니다.
-            -->
-            <th:block th:each="entry, entryStat : ${groupedPermissions}">
-                <div class="perm-row">
-                    <div class="perm-badge"
-                         th:text="${entryStat.index + 2}"></div>
-                    <div class="perm-box">
-                        <span class="perm-box-label"
-                              th:text="${entry.key}"></span>
+            <!-- ②~⑧ 권한 섹션 -->
+            <div class="perm-box-outer">
+                <th:block th:each="entry, stat : ${groupedPermissions}">
+                    <div class="perm-group">
+                        <div class="perm-group-label" th:text="${entry.key}"></div>
                         <div class="perm-checks">
                             <label class="perm-check-item"
                                    th:each="perm : ${entry.value}">
@@ -60,12 +61,14 @@
                                                      and checkedCodes != null
                                                      and #lists.contains(checkedCodes,
                                                                          perm.permissionCode)}">
-                                <span th:text="${perm.permissionName}"></span>
+                                <span class="custom-check-box"></span>
+                                <span class="perm-text" th:text="${perm.permissionName}"></span>
                             </label>
                         </div>
                     </div>
-                </div>
-            </th:block>
+                    <hr th:if="${!stat.last}" class="perm-divider">
+                </th:block>
+            </div>
 
             <div class="btn-area">
                 <button type="button" class="page-btn btn-cancel"
@@ -76,6 +79,17 @@
 
         </form>
     </div>
+
+    <script>
+        document.getElementById("selectAll").addEventListener("click", function () {
+            document.querySelectorAll('input[name="permissionCodes"]')
+                .forEach(cb => cb.checked = true);
+        });
+        document.getElementById("deselectAll").addEventListener("click", function () {
+            document.querySelectorAll('input[name="permissionCodes"]')
+                .forEach(cb => cb.checked = false);
+        });
+    </script>
 </section>
 </body>
 </html>

@@ -1,0 +1,38 @@
+.project-setting-heading{
+    margin-bottom:30px;
+}
+
+.repository-title{
+    margin:0;
+    font-size:38px;
+    font-weight:700;
+    color:#2b4c7e;
+}
+
+.repository-setting-tabs{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:22px;
+    padding-bottom:12px;
+    border-bottom:1px solid #E5EAF4;
+}
+
+.repository-setting-tabs a{
+    padding:11px 22px;
+    border-radius:6px 6px 0 0;
+    text-decoration:none;
+    color:#6b7a90;
+    font-size:14px;
+    font-weight:600;
+    transition:.2s;
+}
+
+.repository-setting-tabs a:hover{
+    background:#EEF3FF;
+}
+
+.repository-setting-tabs a.active{
+    background:#5271ff;
+    color:#fff;
+}

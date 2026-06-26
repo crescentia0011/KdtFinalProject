@@ -1,6 +1,7 @@
 package com.weple.cloud.project.service;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -22,10 +23,14 @@ public class ProjectVO {
 	private Long projectId;
 	private String projectTitle;
 	private String projectDescribe;
+	private String projectIdentifier;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date createdAt;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date finishDate;
 	private String status;
+	
+	// 설정 페이지 - 활성화된 모듈명 목록
+	private List<String> moduleNames;
 	
 }

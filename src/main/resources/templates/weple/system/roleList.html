@@ -25,8 +25,8 @@
             <table class="role-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>역할명</th>
+                        <th>역할코드</th>
+                        <th class="th-name">역할명</th>
                         <th>생성일자</th>
                         <th>관리</th>
                     </tr>
@@ -38,7 +38,8 @@
                     <tr th:each="role : ${roleList}">
                         <td th:text="${role.roleId}"></td>
                         <td class="text-left" th:text="${role.roleName}"></td>
-                        <td th:text="${role.createdAt != null ? #dates.format(role.createdAt,'yyyy/MM/dd') : '-'}"></td>
+                        <td th:text="${role.createdAt != null
+                                       ? #dates.format(role.createdAt,'yyyy/MM/dd') : '-'}"></td>
                         <td style="position:relative; text-align:center;"
                             onclick="event.stopPropagation();">
                             <div class="dropdown-wrapper">
@@ -63,13 +64,16 @@
                                   style="display:none;">
                                 <input type="hidden" name="roleId"
                                        th:value="${role.roleId}">
+                                <!-- CSRF 추가 -->
+                                <input type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}">
                             </form>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-
     </div>
 
     <!-- 삭제 확인 모달 -->
@@ -111,7 +115,6 @@
             window.closeModal = function () {
                 document.getElementById("confirmModal").style.display = "none";
             };
-
             window.submitDelete = function () {
                 if (deleteForm) {
                     document.getElementById("confirmModal").style.display = "none";
@@ -130,17 +133,12 @@
             }
         }
 
-        if (document.readyState === "complete") {
-            initRoleList();
-        } else {
-            window.addEventListener("load", initRoleList);
-        }
+        if (document.readyState === "complete") { initRoleList(); }
+        else { window.addEventListener("load", initRoleList); }
 
         function toggleDropdown(el) {
             document.querySelectorAll('.dropdown-menu-box').forEach(function (menu) {
-                if (menu !== el.nextElementSibling) {
-                    menu.classList.remove('show');
-                }
+                if (menu !== el.nextElementSibling) menu.classList.remove('show');
             });
             el.nextElementSibling.classList.toggle('show');
         }
