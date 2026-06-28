@@ -459,6 +459,21 @@
            마일스톤 상세조회 전용 추가 디자인 스펙
         ========================================== */
 		
+		.connected-tasks-header {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    margin-bottom: 13px;
+		}
+		
+		.connected-tasks-title {
+		    margin: 0;
+		}
+		
+		.milestone-add-link {
+		    text-decoration: none;
+		}
+		
         /* 1. 시간 추적 영역 스펙 */
         .milestone-time-tracking {
             display: flex;

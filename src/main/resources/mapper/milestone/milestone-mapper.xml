@@ -12,23 +12,32 @@
         <result property="milestoneStatus" column="milestone_status"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+        <result property="parentMilestoneId" column="parent_milestone_id"/>
     </resultMap>
 
-    <resultMap id="MilestoneInfoResultMap" type="MilestoneInfoVO" extends="MilestoneResultMap">
-        <result property="totalTaskCount" column="total_task_count"/>
-        <result property="closedTaskCount" column="closed_task_count"/>
+    <resultMap id="ParentMilestoneInfoResultMap" type="MilestoneInfoVO" extends="MilestoneResultMap">
+        <result property="totalMilestoneCount" column="total_milestone_count"/>
+        <result property="closedMilestoneCount" column="closed_milestone_count"/>
         <result property="progressPercentage" column="progress_percentage"/>
         <result property="delayDays" column="delay_days"/>
         
-        <collection property="recentTasks" ofType="TaskVO">
-            <id property="taskId" column="task_id"/>
-            <result property="taskTitle" column="task_title"/>
-            <result property="taskProgress" column="task_progress"/>
-            <result property="finishDate" column="task_finish_date"/>
-            <result property="taskManager" column="task_manager_name"/>
-            <result property="typeName" column="type_name"/>
-            <result property="defaultDescribe" column="default_describe"/>
-        </collection>
+        <collection property="childMilestones" ofType="MilestoneInfoVO" resultMap="ChildMilestoneInfoResultMap"/>
+    </resultMap>
+    
+    <resultMap id="ChildMilestoneInfoResultMap" type="MilestoneInfoVO">
+        <id property="milestoneId" column="child_milestone_id"/>
+        <result property="projectId" column="child_project_id"/>
+        <result property="userCode" column="child_user_code"/> 
+        <result property="milestoneTitle" column="child_milestone_title"/>
+        <result property="milestoneDescribe" column="child_milestone_describe"/>
+        <result property="finishDate" column="child_finish_date"/>
+        <result property="milestoneStatus" column="child_milestone_status"/>
+        <result property="createdAt" column="child_created_at"/>
+        <result property="updatedAt" column="child_updated_at"/>
+        <result property="parentMilestoneId" column="milestone_id"/> <result property="totalTaskCount" column="child_total_task_count"/>
+        <result property="closedTaskCount" column="child_closed_task_count"/>
+        <result property="progressPercentage" column="child_progress_percentage"/>
+        <result property="delayDays" column="child_delay_days"/>
     </resultMap>
     
     <resultMap id="milestoneDetailMap" type="MilestoneDetailVO" extends="MilestoneResultMap">
@@ -42,80 +51,85 @@
     </resultMap>
 
 
-	<!-- 상세조회
-		마일스톤 아이디 | 프로젝트 아이디 | 회원 코드 | 마일스톤 제목 | 마일스톤 설명 | 목표 완료일 | 마일스톤 상태 | 생성일자 | 수정일자 | 연결된 일감 전체 개수 | 
-		
-		연결된 일감 완료 개수 | 진척도(일감 평균) | 지연일자 | 일감 아이디 | 일감명 | 일감 진척도 | 일감 완료 예정일 | 담당자명 | 일감유형명 | 공통코드 설명 |     
 	
-	 -->
-    <select id="selectMilestoneAll" parameterType="long" resultMap="MilestoneInfoResultMap">
-    
-    SELECT 
-        m.milestone_id, 
-        m.project_id, 
-        m.user_code, 
-        m.milestone_title, 
-        m.milestone_describe, 
-        m.finish_date, 
-        m.milestone_status AS milestone_status,
-        m.created_at,
-        m.updated_at,
-        NVL(stats.total_count, 0) AS total_task_count,
-        NVL(stats.closed_count, 0) AS closed_task_count,
-        NVL(stats.avg_progress, 0) AS progress_percentage,
+    <select id="selectMilestoneAll" parameterType="long" resultMap="ParentMilestoneInfoResultMap">
+        WITH 
+        /* 1) 각 마일스톤별 일감 통계 계산 (하위 마일스톤의 통계 기반이 됨) */
+        task_stats AS (
+            SELECT 
+                milestone_id,
+                COUNT(*) AS total_task_count,
+                COUNT(CASE WHEN task_progress = 100 THEN 1 END) AS closed_task_count,
+                ROUND(AVG(NVL(task_progress, 0))) AS progress_percentage
+            FROM task
+            WHERE project_id = #{projectId}
+            GROUP BY milestone_id
+        ),
         
-        CASE 
-            WHEN NVL(stats.avg_progress, 0) &lt; 100 AND TRUNC(SYSDATE) > TRUNC(m.finish_date)
-            THEN TRUNC(SYSDATE) - TRUNC(m.finish_date)
-            ELSE 0 
-        END AS delay_days,
+        /* 2) 하위 마일스톤 데이터를 기반으로 상위 마일스톤용 롤업 통계 계산 */
+        parent_stats AS (
+            SELECT 
+                c.parent_milestone_id,
+                COUNT(c.milestone_id) AS total_milestone_count,
+                COUNT(CASE WHEN c.milestone_status = 'g2' THEN 1 END) AS closed_milestone_count, -- 'g2'가 완료 상태 공통코드라고 가정
+                ROUND(AVG(NVL(ts.progress_percentage, 0))) AS parent_progress
+            FROM milestone c
+            LEFT JOIN task_stats ts ON c.milestone_id = ts.milestone_id
+            WHERE c.project_id = #{projectId} AND c.parent_milestone_id IS NOT NULL
+            GROUP BY c.parent_milestone_id
+        )
         
-        t.task_id, 
-        t.task_title, 
-        t.task_progress, 
-        t.finish_date AS task_finish_date,
-        u.user_name AS task_manager_name,
-        tt.type_name AS type_name,
-        cc.default_describe AS default_describe
-    FROM milestone m
-    
-    /* [튜닝 1] 해당 프로젝트의 일감만 그룹바이 하도록 서브쿼리 내부 필터링 추가 */
-    LEFT JOIN (
         SELECT 
-            milestone_id,
-            COUNT(*) AS total_count,
-            COUNT(CASE WHEN task_progress = 100 THEN 1 END) AS closed_count,
-            ROUND(AVG(NVL(task_progress, 0))) AS avg_progress
-        FROM task
-        WHERE project_id = #{projectId}  GROUP BY milestone_id
-    ) stats ON m.milestone_id = stats.milestone_id
-    
-    /* [튜닝 2] 해당 프로젝트의 일감 범위 내에서만 정렬 및 ROW_NUMBER()를 매기도록 수정 */
-    LEFT JOIN (
-        SELECT tk.task_id,
-        	   tk.milestone_id,
-	           tk.task_title,
-	           tk.task_progress,
-	           tk.finish_date,
-	           tk.task_manager,
-	           tk.type_id,
-	           tk.task_status,
-	           tk.created_at,
-               ROW_NUMBER() OVER (PARTITION BY milestone_id ORDER BY created_at DESC) AS rn
-        FROM task tk
-        WHERE project_id = #{projectId}  ) t ON m.milestone_id = t.milestone_id AND t.rn &lt;= 5
-    
-    /* [튜닝 3] 일감이 가진 담당자 회원코드와 일치하는 회원 정보     */
-    LEFT JOIN users u ON t.task_manager = u.user_code
-    
-    /* [튜닝 4] 일감이 가진 일감유형 아이디와 일치하는 일감유형 정보 */
-    LEFT JOIN task_types tt ON t.type_id = tt.type_id
-    
-    /* [튜닝 5] 일감이 가진 일감상태가 공통코드 테이블의 아이디와 일치하는 공통코드 정보 */
-    LEFT JOIN common_code cc ON t.task_status = cc.common_id
-    WHERE m.project_id = #{projectId}
-    ORDER BY m.created_at DESC, t.created_at DESC
-</select>
+            /* ======= 최상위(부모) 마일스톤 컬럼 ======= */
+            m.milestone_id, 
+            m.project_id, 
+            m.user_code, 
+            m.milestone_title, 
+            m.milestone_describe, 
+            m.finish_date, 
+            m.milestone_status,
+            m.created_at,
+            m.updated_at,
+            NVL(ps.total_milestone_count, 0)  AS total_milestone_count,
+            NVL(ps.closed_milestone_count, 0) AS closed_milestone_count,
+            NVL(ps.parent_progress, 0)         AS progress_percentage,
+            CASE 
+                WHEN NVL(ps.parent_progress, 0) &lt; 100 AND TRUNC(SYSDATE) > TRUNC(m.finish_date)
+                THEN TRUNC(SYSDATE) - TRUNC(m.finish_date)
+                ELSE 0 
+            END AS delay_days,
+            
+            /* ======= 하위(자식) 마일스톤 컬럼 (접두어 child_ 부여) ======= */
+            c.milestone_id                     AS child_milestone_id,
+            c.project_id                       AS child_project_id,
+            c.user_code                        AS child_user_code,
+            c.milestone_title                  AS child_milestone_title,
+            c.milestone_describe               AS child_milestone_describe,
+            c.finish_date                      AS child_finish_date,
+            c.milestone_status                 AS child_milestone_status,
+            c.created_at                       AS child_created_at,
+            c.updated_at                       AS child_updated_at,
+            NVL(cts.total_task_count, 0)       AS child_total_task_count,
+            NVL(cts.closed_task_count, 0)      AS child_closed_task_count,
+            NVL(cts.progress_percentage, 0)    AS child_progress_percentage,
+            CASE 
+                WHEN NVL(cts.progress_percentage, 0) &lt; 100 AND TRUNC(SYSDATE) > TRUNC(c.finish_date)
+                THEN TRUNC(SYSDATE) - TRUNC(c.finish_date)
+                ELSE 0 
+            END AS child_delay_days
+            
+        FROM milestone m
+        /* 상위 마일스톤 통계 조인 */
+        LEFT JOIN parent_stats ps ON m.milestone_id = ps.parent_milestone_id
+        /* 하위 마일스톤 관계 조인 */
+        LEFT JOIN milestone c ON m.milestone_id = c.parent_milestone_id
+        /* 하위 마일스톤의 일감 통계 조인 */
+        LEFT JOIN task_stats cts ON c.milestone_id = cts.milestone_id
+        
+        /* 메인 조건: 최상위 부모 마일스톤만 조회 축으로 설정 */
+        WHERE m.project_id = #{projectId} AND m.parent_milestone_id IS NULL
+        ORDER BY m.created_at DESC, c.created_at ASC
+    </select>
 
 	<!-- 상세조회
 		마일스톤 아이디 | 프로젝트 아이디 | 회원 코드 | 마일스톤 제목 | 마일스톤 설명 | 목표 완료일 | 마일스톤 상태 | 생성일자 | 수정일자 | 연결된 일감 전체 개수 | 연결된 일감 완료 개수 | 진척도(일감 평균) | 지연일자 | 추정시간 | 소요시간 |   
@@ -236,33 +250,121 @@
     </select>
 
     <insert id="insertMilestone" parameterType="MilestoneVO">
-    <selectKey resultType="Long" keyProperty="milestoneId" order="BEFORE">
-        SELECT 
-            NVL(MAX(milestone_id), 0) + 1 AS milestoneId
-        FROM milestone
-    </selectKey>
-        INSERT INTO milestone (
-            milestone_id, 
-            project_id, 
-            user_code, 
-            milestone_title, 
-            milestone_describe, 
-            finish_date,
-            milestone_status, 
-            created_at,
-            updated_at
-        ) VALUES (
-            #{milestoneId}, 
-            #{projectId},
-            #{userCode}, 
-            #{milestoneTitle},
-            #{milestoneDescribe},
-            #{finishDate, jdbcType=DATE},
-            #{milestoneStatus},
-            SYSDATE,
-            NULL
-        )
-    </insert>
+	    <selectKey resultType="Long" keyProperty="milestoneId" order="BEFORE">
+	        SELECT 
+	            NVL(MAX(milestone_id), 0) + 1 AS milestoneId
+	        FROM milestone
+	    </selectKey>
+	    INSERT INTO milestone (
+	        milestone_id, 
+	        project_id, 
+	        user_code, 
+	        milestone_title, 
+	        milestone_describe, 
+	        finish_date,
+	        milestone_status, 
+	        parent_milestone_id,  created_at,
+	        updated_at
+	    ) VALUES (
+	        #{milestoneId}, 
+	        #{projectId},
+	        #{userCode}, 
+	        #{milestoneTitle},
+	        #{milestoneDescribe},
+	        #{finishDate, jdbcType=DATE},
+	        #{milestoneStatus},
+	        #{parentMilestoneId, jdbcType=NUMERIC}, SYSDATE,
+	        NULL
+	    )
+	</insert>
+	
+	<update id="updateTasksMilestoneId">
+	    UPDATE task
+	    SET milestone_id = #{milestoneId}
+	    WHERE project_id = #{projectId}
+	      AND task_id IN
+	    <foreach collection="taskIds" item="taskId" open="(" separator="," close=")">
+	        #{taskId}
+	    </foreach>
+	</update>
+    
+    <!-- 상위 마일스톤 조회 -->
+    <select id="selectMilestoneListByProjectId" resultType="MilestoneVO">
+    SELECT 
+        milestone_id       AS milestoneId,
+        milestone_title    AS milestoneTitle
+    FROM milestone
+    WHERE project_id = #{projectId}
+      AND parent_milestone_id IS NULL
+    ORDER BY created_at DESC
+</select>
+    
+    <!-- 연결안된 일감 개수 조회 -->
+    <select id="selectUnassignedTasksCount" resultType="int">
+	    SELECT COUNT(*)
+	    FROM task t
+	    LEFT OUTER JOIN users u      ON t.task_manager = u.user_code
+	    LEFT OUTER JOIN task_types tt ON t.type_id = tt.type_id
+	    WHERE t.milestone_id IS NULL 
+	      AND t.project_id = #{projectId}
+	      <if test="taskStatus != null and taskStatus != ''">
+	      AND t.task_status = #{taskStatus}
+	      </if>
+	      <if test="priority != null and priority != ''">
+	      AND t.priority = #{priority}
+	      </if>
+	      <if test="taskManager != null and taskManager != ''">
+	      AND u.user_name = #{taskManager}
+	      </if>
+	      <if test="typeId != null">
+	      AND t.type_id = #{typeId}
+	      </if>
+	</select>
+	
+	<!-- 연결안된 일감 데이터 조회 -->
+	<select id="selectUnassignedTasks" resultType="TaskVO">
+	    SELECT * FROM (
+	        SELECT a.*, ROWNUM AS rnum FROM (
+	            SELECT 
+	                t.task_id          AS taskId,
+	                t.task_title       AS taskTitle,
+	                t.task_describe    AS taskDescribe,
+	                t.task_status      AS taskStatus,
+	                t.priority         AS priority,
+	                u.user_name        AS taskManager,   
+	                tt.type_name       AS typeName,
+	                t.start_date       AS startDate,
+	                t.finish_date      AS finishDate,
+	                t.task_progress    AS taskProgress,
+	                t.project_id       AS projectId
+	            FROM task t
+	            LEFT OUTER JOIN users u      ON t.task_manager = u.user_code
+	            LEFT OUTER JOIN task_types tt ON t.type_id = tt.type_id
+	            WHERE t.milestone_id IS NULL 
+	              AND t.project_id = #{projectId}
+	              <if test="taskStatus != null and taskStatus != ''">
+	              AND t.task_status = #{taskStatus}
+	              </if>
+	              <if test="priority != null and priority != ''">
+	              AND t.priority = #{priority}
+	              </if>
+	              <if test="taskManager != null and taskManager != ''">
+	              AND u.user_name = #{taskManager}
+	              </if>
+	              <if test="typeId != null">
+	              AND t.type_id = #{typeId}
+	              </if>
+	            ORDER BY t.created_at DESC
+	        ) a WHERE ROWNUM &lt;= #{endRow}
+	    ) WHERE rnum &gt;= #{startRow}
+	</select>
+	
+	
+	<select id="selectTaskTypeList" resultType="TaskTypeVO">
+	    SELECT type_id AS typeId, type_name AS typeName 
+	    FROM task_types 
+	    ORDER BY type_id ASC
+	</select>
 
     <update id="updateMilestone" parameterType="MilestoneVO">
         UPDATE milestone

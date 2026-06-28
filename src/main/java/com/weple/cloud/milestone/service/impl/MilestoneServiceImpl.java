@@ -10,8 +10,10 @@ import com.weple.cloud.milestone.service.MilestoneInfoVO;
 import com.weple.cloud.milestone.service.MilestoneService;
 import com.weple.cloud.milestone.service.MilestoneVO;
 import com.weple.cloud.milestone.service.TaskGroupStatVO;
+import com.weple.cloud.system.service.TaskTypeVO;
 import com.weple.cloud.task.service.TaskVO;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -68,12 +70,45 @@ public class MilestoneServiceImpl implements MilestoneService {
 	
 
     // 마일스톤 등록
+    @Transactional // [핵심] 두 작업을 하나의 단위로 묶어 무결성 보장
+    @Override
+    public void addMilestone(MilestoneVO milestoneVO, List<String> taskIds) {
+        
+        // 1. 마일스톤 데이터 저장 (실행 완료 후 milestoneVO 내부에 새 milestoneId가 자동 주입됨)
+        milestoneMapper.insertMilestone(milestoneVO);
+        
+        // 2. 화면에서 체크하여 넘어온 일감 ID 목록이 존재할 경우에만 벌크 업데이트 실행
+        if (taskIds != null && !taskIds.isEmpty()) {
+            milestoneMapper.updateTasksMilestoneId(
+                milestoneVO.getProjectId(),
+                milestoneVO.getMilestoneId(), 
+                taskIds
+            );
+        }
+    }
+	
+	
+	
+	// 상위 마일스톤 조회
 	@Override
-	public int addMilestone(MilestoneVO milestoneVO) {
-		int result = milestoneMapper.insertMilestone(milestoneVO);
-		// 성공 시 1, 실패 시 -1 반환
-		return result == 1 ? 1 : -1;
+	public List<MilestoneVO> getMilestoneListByProjectId(Long projectId) {
+	    return milestoneMapper.selectMilestoneListByProjectId(projectId);
 	}
+	
+	@Override
+    public List<TaskTypeVO> getTaskTypeList() {
+        return milestoneMapper.selectTaskTypeList();
+    }
+
+    @Override
+    public List<TaskVO> getUnassignedTaskList(Long projectId, int startRow, int endRow, String taskStatus, String priority, String taskManager, Long typeId) {
+        return milestoneMapper.selectUnassignedTasks(projectId, startRow, endRow, taskStatus, priority, taskManager, typeId);
+    }
+
+    @Override
+    public int getUnassignedTaskCount(Long projectId, String taskStatus, String priority, String taskManager, Long typeId) {
+        return milestoneMapper.selectUnassignedTasksCount(projectId, taskStatus, priority, taskManager, typeId);
+    }
 
 	// 마일스톤 편집
 	@Override
