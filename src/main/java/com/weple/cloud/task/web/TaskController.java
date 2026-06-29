@@ -258,6 +258,9 @@ public class TaskController {
 		List<TaskVO> childTaskList = taskService.findChildTask(tId);
 		List<TaskHistoryDTO> updateHistoryList = taskService.taskUpdateHistory(tId);
 		List<TaskSpentTimeVO> spentTimeList = taskService.taskSpentTime(tId);
+		Long spentSum = spentTimeList.stream()
+		        .mapToLong(TaskSpentTimeVO::getSpentHour)
+		        .sum();
 		
 		model.addAttribute("currentUserCode", userCode);
 		model.addAttribute("currentMenu", "task");
@@ -267,6 +270,7 @@ public class TaskController {
 		model.addAttribute("taskComment", taskComment);
 		model.addAttribute("updateHistoryList", updateHistoryList);
 		model.addAttribute("spentTimeList", spentTimeList);
+		model.addAttribute("spentSum", spentSum);
 		model.addAttribute("taskPerms",taskPerms);
 		model.addAttribute("isAdminOrOwner",isAdminOrOwner);
 		return "weple/task/detail";

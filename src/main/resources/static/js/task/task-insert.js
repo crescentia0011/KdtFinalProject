@@ -5,6 +5,25 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 };
 
+
+const startDateInput = document.getElementById('startDate');
+    const finishDateInput = document.getElementById('finishDate');
+
+    startDateInput.addEventListener('change', function() {
+        // 시작일이 선택되면 완료일의 최소 선택 가능일(min)을 시작일로 설정
+        if (this.value) {
+            finishDateInput.min = this.value;
+            
+            // 만약 기존에 입력된 완료일이 새로운 시작일보다 앞선다면 완료일 초기화
+            if (finishDateInput.value && finishDateInput.value < this.value) {
+                finishDateInput.value = '';
+                alert('완료일은 시작일보다 빠를 수 없습니다. 다시 선택해주세요.');
+            }
+        } else {
+            finishDateInput.removeAttribute('min');
+        }
+    });
+
 document.addEventListener("DOMContentLoaded", function() {
     // ==========================================
     // 1. 상위 일감 찾는 검색창 함수

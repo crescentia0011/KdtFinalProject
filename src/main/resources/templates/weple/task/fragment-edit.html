@@ -4,7 +4,7 @@
       th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
 <meta charset="UTF-8">
-<title>일감 수정</title>
+<title>WEPLE</title>
 <link rel="stylesheet" th:href="@{/css/task/task-insert.css}">
 </head>
 <body>
@@ -74,6 +74,7 @@
 				<div class="col-md-6">
 					<label class="form-label">담당자</label> 
 					<select class="form-control form-select" name="taskManager">
+						<option value="">담당자 지정안함</option>
                         <option th:value="${loginUserCode}" th:selected="${taskDetail.taskManagerId == loginUserCode}"><< 내게 할당 >></option>
                         <option th:each="member : ${memberList}" 
                                 th:value="${member.userCode}" 
@@ -83,14 +84,14 @@
 				</div>
 				<div class="col-md-6">
 					<label class="form-label">시작일</label> 
-					<input type="date" class="form-control" name="startDate" th:value="*{startDate}">
+					<input type="date" class="form-control" id="startDate" name="startDate" th:value="*{startDate}">
 				</div>
 			</div>
 
 			<div class="row" style="margin-bottom: 20px;">
 				<div class="col-md-6">
 					<label class="form-label">완료일</label> 
-					<input type="date" class="form-control" name="finishDate" th:value="*{finishDate}">
+					<input type="date" class="form-control" id="finishDate" name="finishDate" th:value="*{finishDate}">
 				</div>
 				<div class="col-md-6">
 					<label class="form-label">추정시간</label>

@@ -50,14 +50,14 @@
 			u.user_name AS userName
 		FROM members m
 			INNER JOIN users u ON m.user_code = u.user_code
-		WHERE m.project_id = #{pId} <!-- 추후에 선택된 프로젝트 id로 값 바뀌어야 함 -->
+		WHERE m.project_id = #{pId} 
 	</select>
 	<select id="taskParents" resultType="TaskParentVO" ><!-- 일감등록 현재 선택된 프로젝트에 상위일감들의 목록 조회 -->
 		SELECT 
 			task_id AS taskId,
 			task_title AS taskTitle
 		FROM task
-		WHERE parent_task_id IS NULL AND project_id = #{pId}
+		WHERE project_id = #{pId}
 	</select>
 	<select id="taskPriorities" resultType="TaskPriorityVO"><!-- 일감등록 등록된 우선순위 목록 -->
 		SELECT 
@@ -69,7 +69,7 @@
 	<select id="taskMilestones" resultType="TaskMilestoneVO"><!-- 일감등록 마일스톤 목록 -->
 		SELECT milestone_id, milestone_title
 		FROM milestone
-		WHERE project_id = #{pId} AND milestone_status = 'g1'
+		WHERE project_id = #{pId} AND milestone_status = 'g1' AND parent_milestone_id IS NOT NULL
 	</select>
 	
 <insert id="insertTask" parameterType="TaskVO">

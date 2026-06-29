@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.weple.cloud.file.FileDownloadDTO;
 import com.weple.cloud.file.FileInfoVO;
 import com.weple.cloud.file.FileVO;
-import com.weple.cloud.file.FileDownloadDTO;
+import com.weple.cloud.file.ProjectFileVO;
+import com.weple.cloud.file.ProjectFileVersionsVO;
 
 
 // fileinfoVO , fileVO 재사용 가능 파일 테이블 2개의 VO
@@ -28,4 +30,30 @@ public interface FileMapper {
     void restoreFile(Long fileId);
     
     FileDownloadDTO selectFileForDownload(Long versionId);
+    
+    // -------------------------------파일관리------------------------------
+ 	// 전체조회
+    public List<ProjectFileVO> projectFileAll();
+    
+    // 상세조회
+    public ProjectFileVO projectFileInfo(String fileId);
+    
+    // 등록
+    public long insertProjectFile(ProjectFileVO projectFileVO);
+    
+    // 삭제
+    public long deleteProjectFile(String fileId);
+    
+    // -------------------------------파일 버전------------------------------
+  	// 전체조회
+    List<ProjectFileVersionsVO> projectFileVersionAll(String fileId);
+    
+    // 상세조회
+    public ProjectFileVersionsVO projectFileVersionInfo(String versionId);
+    
+    // 등록
+    public long insertProjectFileVersion(ProjectFileVersionsVO projectFileVersionsVO);
+    
+    // 삭제
+    public long deleteProjectFileVersion(String versionId);
 }

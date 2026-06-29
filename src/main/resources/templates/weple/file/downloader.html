@@ -1,127 +1,347 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org/"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
 <title>WEPLE - 다운로드 이력</title>
 <link rel="stylesheet" href="/css/system/project-create.css">
 </head>
 <body>
-<section>
-<div class="file-wrap">
+	<section>
+		<div class="file-wrap">
 
-  <div class="file-toolbar" style="margin-bottom:16px;">
-    <h3 class="file-page-title">파일관리 &gt; 다운로드 이력</h3>
-    <div class="file-toolbar-right">
-      <div class="search-field">
-        <input type="text" id="searchInput" placeholder="다운로더 또는 파일명을 검색하세요." style="width:240px;">
-        <button type="button" class="btn-icon-search" onclick="searchHistory()">🔍</button>
-      </div>
-      <button class="page-btn" onclick="history.back()">← 목록</button>
-    </div>
-  </div>
+			<div class="file-toolbar" style="margin-bottom: 16px;">
+				<h3 class="file-page-title">파일관리 &gt; 다운로드 이력</h3>
+				<div class="file-toolbar-right">
+					<div class="file-search-box">
+						<button type="button" class="file-search-btn"
+							onclick="searchHistory()">
+							<svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+								stroke="currentColor" stroke-width="1.5">
+            <circle cx="7" cy="7" r="5"></circle>
+            <path d="M11 11l3.5 3.5"></path>
+          </svg>
+						</button>
+						<input type="text" id="searchKeyword" class="file-search-input"
+							placeholder="다운로더 또는 파일명을 검색하세요." oninput="searchHistory()"
+							onkeydown="if(event.key==='Enter') searchHistory()">
+					</div>
+					<button class="page-btn" onclick="history.back()">← 목록</button>
+				</div>
+			</div>
 
-  <div class="project-card" style="padding:0;">
-    <table class="file-table">
-      <thead>
-        <tr>
-          <th width="60">NO.</th>
-          <th>다운로더</th>
-          <th>파일명</th>
-          <th>연결 일감</th>
-          <th>파일 크기</th>
-          <th>파일 버전</th>
-          <th>다운로드 일시</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>김위플</td>
-          <td>기획서_v2.pdf</td>
-          <td>#3 메인화면 설계</td>
-          <td>2.4 MB</td>
-          <td><span class="version-badge">v2.0</span></td>
-          <td>2026-06-25 10:14</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>이개발</td>
-          <td>UI_가이드라인.png</td>
-          <td>-</td>
-          <td>1.1 MB</td>
-          <td><span class="version-badge">v1.0</span></td>
-          <td>2026-06-24 15:32</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>박미나</td>
-          <td>회의록_0625.docx</td>
-          <td>#7 스프린트 회의</td>
-          <td>320 KB</td>
-          <td><span class="version-badge">v1.0</span></td>
-          <td>2026-06-25 18:05</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+			<div class="table-container">
+				<table class="file-table">
+					<thead>
+						<tr>
+							<th width="60">NO.</th>
+							<th>다운로더</th>
+							<th>파일명</th>
+							<th>연결 일감</th>
+							<th>파일 크기</th>
+							<th>파일 버전</th>
+							<th>다운로드 일시</th>
+						</tr>
+					</thead>
+					<tbody id="downloaderTableBody">
+						<tr th:if="${#lists.isEmpty(downloadHistoryList)}">
+							<td colspan="7" class="empty-row">다운로드 이력이 없습니다.</td>
+						</tr>
+						<tr th:each="item, stat : ${downloadHistoryList}">
+							<td th:text="${stat.index + 1}">1</td>
+							<td th:text="${item.uploader != null} ? ${item.uploader} : '-'">-</td>
+							<td
+								th:text="${item.logicalName != null} ? ${item.logicalName} : '-'">-</td>
+							<td><span th:if="${item.taskId != null}"
+								class="task-badge-linked"
+								th:text="${item.taskTitle != null} ? ${item.taskTitle} : ${item.taskId}"></span>
+								<span th:if="${item.taskId == null}" class="task-badge-none">-</span>
+							</td>
+							<td
+								th:text="${item.fileSize != null and item.fileSize != 0} ? ${item.fileSize} + ' B' : '-'">-</td>
+							<td><span class="version-badge"
+								th:text="${item.versionNumber != null and item.versionNumber != 0} ? 'v' + ${item.versionNumber} + '.0' : 'v1.0'">v1.0</span>
+							</td>
+							<td
+								th:text="${item.uploadedAt != null} ? ${#dates.format(item.uploadedAt, 'yyyy-MM-dd HH:mm')} : '-'">-</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 
-  <!-- 페이징 -->
-  <div class="paging-row">
-    <button class="pg-btn pg-disabled">이전</button>
-    <button class="pg-btn pg-active">1</button>
-    <button class="pg-btn">2</button>
-    <button class="pg-btn">다음</button>
-  </div>
+			<!-- 페이징 -->
+			<div class="file-bottom-area">
+				<div class="file-paging"></div>
+			</div>
 
-</div>
+		</div>
 
-<script>
+		<script>
 function showToast(msg, type) {
-  var old = document.getElementById('_toastWrap');
+  const old = document.getElementById('_toastWrap');
   if (old) old.remove();
-  var wrap = document.createElement('div');
+  const wrap = document.createElement('div');
   wrap.id = '_toastWrap';
   wrap.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;';
-  var box = document.createElement('div');
+  const box = document.createElement('div');
   box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
   box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
   box.textContent = msg;
   wrap.appendChild(box);
   document.body.appendChild(wrap);
-  setTimeout(function() {
+  setTimeout(() => {
     wrap.style.transition = 'opacity 0.4s';
     wrap.style.opacity = '0';
-    setTimeout(function() { wrap.remove(); }, 400);
+    setTimeout(() => wrap.remove(), 400);
   }, 2500);
 }
 
+// 페이징
+let currentPage = 1;
+const itemsPerPage = 10;
+let allRows = [];
+let filteredRows = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  allRows = Array.from(document.querySelectorAll('#downloaderTableBody tr')).filter(row => row.cells.length > 1);
+  filteredRows = allRows.slice();
+  showPage(1);
+});
+
+function showPage(page) {
+  currentPage = page;
+  allRows.forEach(row => row.style.display = 'none');
+  const start = (page - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  filteredRows.slice(start, end).forEach(row => row.style.display = '');
+  updatePagination(Math.ceil(filteredRows.length / itemsPerPage));
+}
+
+function updatePagination(pageCount) {
+  const pagingDiv = document.querySelector('.file-paging');
+  if (pageCount === 0) pageCount = 1;
+  pagingDiv.innerHTML =
+    `<button class="fp-btn" onclick="showPage(Math.max(1, currentPage - 1))">&lt; 이전</button>` +
+    `<div id="dl-page-numbers" style="display:flex; gap:5px; align-items:center;"></div>` +
+    `<button class="fp-btn" onclick="showPage(Math.min(${pageCount}, currentPage + 1))">다음 &gt;</button>`;
+  const numberSpan = document.getElementById('dl-page-numbers');
+  for (let i = 1; i <= pageCount; i++) {
+    const a = document.createElement('a');
+    a.href = '#';
+    a.innerText = i;
+    a.style.cssText = 'display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:6px; text-decoration:none; color:#4A5568; font-size:13px;';
+    if (i === currentPage) { a.style.background = '#8B7CF8'; a.style.color = '#fff'; a.style.fontWeight = 'bold'; }
+    a.onclick = (e) => { e.preventDefault(); showPage(i); };
+    numberSpan.appendChild(a);
+  }
+}
+
+// 검색
 function searchHistory() {
-  showToast('검색 기능은 서버 연동 후 사용 가능합니다.', 'error');
+  const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+  if (!keyword) {
+    filteredRows = allRows.slice();
+  } else {
+    filteredRows = allRows.filter(row => {
+      const downloader = row.cells[1] ? row.cells[1].innerText.toLowerCase() : '';
+      const fileName = row.cells[2] ? row.cells[2].innerText.toLowerCase() : '';
+      return downloader.includes(keyword) || fileName.includes(keyword);
+    });
+  }
+  currentPage = 1;
+  showPage(1);
 }
 </script>
 
-<style>
-.file-wrap { max-width: 1100px; margin: 24px auto; padding: 0 20px; }
-.file-toolbar { display: flex; justify-content: space-between; align-items: center; }
-.file-page-title { font-size: 20px; font-weight: 700; color: #333; margin: 0; }
-.file-toolbar-right { display: flex; align-items: center; gap: 10px; }
-.search-field { display: flex; align-items: center; gap: 6px; }
-.search-field input { height: 34px; border: 1px solid #ced4da; border-radius: 5px; padding: 0 10px; font-size: 13px; outline: none; }
-.btn-icon-search { height: 34px; padding: 0 10px; border: 1px solid #ced4da; border-radius: 5px; background: #fff; cursor: pointer; }
-.file-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.file-table thead tr { background: #f7f8fa; }
-.file-table th, .file-table td { padding: 11px 12px; border-bottom: 1px solid #e8edf2; text-align: left; vertical-align: middle; }
-.file-table th { font-weight: 600; color: #64748b; }
-.file-table tbody tr:hover { background: #f9fafb; }
-.version-badge { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
-.empty-row { text-align: center; color: #aaa; padding: 40px; }
-.paging-row { display: flex; justify-content: center; gap: 4px; margin-top: 20px; }
-.pg-btn { padding: 6px 12px; border: 1px solid #ced4da; border-radius: 5px; background: #fff; color: #495057; font-size: 13px; cursor: pointer; text-decoration: none; transition: .15s; }
-.pg-btn:hover { background: #e9ecef; }
-.pg-active { background: #007bff !important; color: #fff !important; border-color: #007bff !important; }
-.pg-disabled { pointer-events: none; color: #aaa; }
+		<style>
+:root {
+	--weple-purple: #8B7CF8;
+	--weple-purple-dark: #7868F2;
+	--weple-purple-light: #F5F3FF;
+	--weple-purple-border: #DDD6FE;
+	--weple-text: #4A5568;
+	--weple-text-dark: #1a1a2e;
+	--weple-text-muted: #94a3b8;
+	--weple-bg: #FAFAFC;
+	--weple-white: #ffffff;
+	--weple-border: #EEEAFE;
+}
+
+.file-wrap {
+	max-width: 1100px;
+	margin: 24px auto;
+	padding: 0 20px;
+}
+
+.file-toolbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.file-page-title {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--weple-text-dark);
+	margin: 0;
+}
+
+.file-toolbar-right {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.file-search-box {
+	position: relative;
+	width: 260px;
+}
+
+.file-search-btn {
+	position: absolute;
+	left: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: #999;
+	padding: 0;
+	display: flex;
+	align-items: center;
+}
+
+.file-search-btn:hover {
+	color: var(--weple-purple);
+}
+
+.file-search-input {
+	width: 100%;
+	padding: 8px 12px 8px 34px;
+	border: 1px solid var(--weple-purple-border);
+	border-radius: 10px;
+	font-size: 13px;
+	outline: none;
+	transition: .2s;
+	box-sizing: border-box;
+}
+
+.file-search-input::placeholder {
+	color: var(--weple-text-muted);
+}
+
+.file-search-input:focus {
+	border-color: var(--weple-purple);
+	box-shadow: 0 0 0 2px rgba(139, 124, 248, 0.1);
+}
+
+.page-btn {
+	padding: 7px 16px;
+	border: 1px solid var(--weple-purple-border);
+	border-radius: 6px;
+	background: var(--weple-white);
+	color: var(--weple-text);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: .15s;
+}
+
+.page-btn:hover {
+	background: var(--weple-purple-light);
+	color: var(--weple-purple-dark);
+	border-color: var(--weple-purple);
+}
+
+.table-container {
+	border-radius: 10px;
+	overflow: hidden;
+	border: 1px solid var(--weple-purple-border);
+}
+
+.file-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.file-table thead tr {
+	background: #FCFBFF;
+}
+
+.file-table th, .file-table td {
+	padding: 11px 14px;
+	border-bottom: 1px solid var(--weple-border);
+	text-align: left;
+	vertical-align: middle;
+}
+
+.file-table th {
+	font-weight: 600;
+	color: var(--weple-text);
+}
+
+.file-table tbody tr:hover {
+	background: var(--weple-purple-light);
+}
+
+.task-badge-linked {
+	background: var(--weple-purple-light);
+	color: var(--weple-purple-dark);
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.task-badge-none {
+	color: var(--weple-text-muted);
+}
+
+.version-badge {
+	background: var(--weple-purple-light);
+	color: var(--weple-purple);
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.empty-row {
+	text-align: center;
+	color: var(--weple-text-muted);
+	padding: 40px;
+}
+
+.file-bottom-area {
+	margin-top: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.file-paging {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.fp-btn {
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: var(--weple-text-muted);
+	font-weight: 500;
+	font-size: 13px;
+	padding: 5px 10px;
+	transition: color .15s;
+}
+
+.fp-btn:hover {
+	color: var(--weple-purple-dark);
+}
 </style>
-</section>
+	</section>
 </body>
 </html>

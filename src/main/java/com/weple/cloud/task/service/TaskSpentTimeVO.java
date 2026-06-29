@@ -15,5 +15,6 @@ public class TaskSpentTimeVO {
 	private String userName;
 	private String spentContent;
 	private int spentHour;
+	private Double spentHoursSum;
 	private LocalDateTime createdAt;
 }

@@ -6,182 +6,182 @@
 <title>WEPLE</title>
 </head>
 <body>
-<section>
-<div class="insert-wrap">
+	<section>
+		<div class="insert-wrap">
 
-  <!-- ① 프로젝트명 상단 중앙 -->
-  <div class="project-header">
-    <span class="project-label">프로젝트</span>
-    <!-- projectId 있으면 고정 텍스트, 없으면(관리자) 셀렉트박스 -->
-    <span class="project-name"
-          th:if="${workTimeVO.projectId != null and workTimeVO.projectId != 0}"
-          th:text="${currentProject.projectTitle}">프로젝트명</span>
-    <select id="projectSelect" name="projectId" class="project-select"
-            th:if="${workTimeVO.projectId == null or workTimeVO.projectId == 0}"
-            onchange="onProjectChange(this.value)">
-      <option value="" disabled selected hidden>프로젝트를 선택하세요.</option>
-      <option th:each="p : ${projectList}"
-              th:value="${p.projectId}"
-              th:text="${p.projectTitle}"></option>
-    </select>
-  </div>
+			<!-- ① 프로젝트명 상단 중앙 -->
+			<div class="project-header">
+			    <span class="project-label"></span>
+			    <span class="project-name"
+			        th:if="${workTimeVO.projectId != null and workTimeVO.projectId != 0}"
+			        th:text="${currentProject.projectTitle}">프로젝트명</span> <select
+			        id="projectSelect" name="projectId" class="project-select"
+			        th:if="${workTimeVO.projectId == null or workTimeVO.projectId == 0}"
+			        onchange="onProjectChange(this.value)">
+			        <option value="" disabled selected hidden>프로젝트를 선택하세요.</option>
+			        <option th:each="p : ${projectList}" th:value="${p.projectId}"
+			            th:text="${p.projectTitle}"></option>
+			    </select>
+			</div>
 
-  <!-- ② 일감 검색 카드 -->
-  <div class="task-card">
-    <div class="task-card-title">일감 선택</div>
+			<!-- ② 일감 검색 카드 -->
+			<div class="task-card">
+				<div class="task-card-title">일감 선택</div>
 
-    <!-- 검색창 -->
-    <div class="search-row">
-      <div class="search-input-wrap">
-        <input type="text" id="taskSearchInput" placeholder="일감명을 입력하세요" autocomplete="off">
-        <button class="btn-clear" id="btnClear" onclick="clearSearch()" title="검색어 지우기" style="display:none;">✕</button>
-      </div>
-      <button class="btn-search" onclick="filterTasks()">검색</button>
-    </div>
+				<!-- 검색창 -->
+				<div class="search-row">
+					<div class="search-input-wrap">
+						<input type="text" id="taskSearchInput" placeholder="일감명을 입력하세요"
+							autocomplete="off">
+						<button class="btn-clear" id="btnClear" onclick="clearSearch()"
+							title="검색어 지우기" style="display: none;">✕</button>
+					</div>
+					<button class="btn-search" onclick="filterTasks()">검색</button>
+				</div>
 
-    <!-- 일감 테이블 -->
-    <div class="table-wrap">
-      <table class="task-table">
-        <colgroup>
-          <col style="width:44px">
-          <col style="width:28%">
-          <col style="width:28%">
-          <col style="width:14%">
-          <col style="width:14%">
-          <col style="width:12%">
-        </colgroup>
-        <thead>
-          <tr>
-            <th></th>
-            <th>일감명</th>
-            <th>설명</th>
-            <th>담당자</th>
-            <th>유형</th>
-            <th>마감일</th>
-          </tr>
-        </thead>
-        <tbody id="taskTableBody">
-          <tr id="emptyRow">
-            <td colspan="6" class="empty-row">등록된 일감이 없습니다.</td>
-          </tr>
-          <tr th:each="t : ${taskList}"
-              th:data-title="${t.taskTitle}"
-              th:data-describe="${t.taskDescribe}"
-              th:data-id="${t.taskId}"
-              th:data-estimated="${t.estimatedTime}"
-              th:data-manager="${t.taskManager}"
-              th:data-type="${t.typeName}"
-              th:data-finish="${t.finishDate}">
-            <td class="td-check">
-              <input type="radio" name="taskRadio" th:value="${t.taskId}">
-            </td>
-            <td class="td-ellipsis" th:text="${t.taskTitle}"></td>
-            <td class="td-ellipsis td-desc" th:text="${t.taskDescribe}"></td>
-            <td class="td-ellipsis" th:text="${t.taskManager}"></td>
-            <td class="td-ellipsis" th:text="${t.typeName}"></td>
-            <td class="td-ellipsis" th:text="${t.finishDate}"></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+				<!-- 일감 테이블 -->
+				<div class="table-wrap">
+					<table class="task-table">
+						<colgroup>
+							<col style="width: 44px">
+							<col style="width: 28%">
+							<col style="width: 28%">
+							<col style="width: 14%">
+							<col style="width: 14%">
+							<col style="width: 12%">
+						</colgroup>
+						<thead>
+							<tr>
+								<th></th>
+								<th>일감명</th>
+								<th>설명</th>
+								<th>담당자</th>
+								<th>유형</th>
+								<th>마감일</th>
+							</tr>
+						</thead>
+						<tbody id="taskTableBody">
+							<tr id="emptyRow">
+								<td colspan="6" class="empty-row">등록된 일감이 없습니다.</td>
+							</tr>
+							<tr th:each="t : ${taskList}" th:data-title="${t.taskTitle}"
+								th:data-describe="${t.taskDescribe}" th:data-id="${t.taskId}"
+								th:data-estimated="${t.estimatedTime}"
+								th:data-manager="${t.taskManager}" th:data-type="${t.typeName}"
+								th:data-finish="${t.finishDate}"
+								th:data-progress="${t.taskProgress != null} ? ${t.taskProgress} : 0">
+								<td class="td-check"><input type="radio" name="taskRadio"
+									th:value="${t.taskId}"></td>
+								<td class="td-ellipsis" th:text="${t.taskTitle}"></td>
+								<td class="td-ellipsis td-desc" th:text="${t.taskDescribe}"></td>
+								<td class="td-ellipsis" th:text="${t.taskManager}"></td>
+								<td class="td-ellipsis" th:text="${t.typeName}"></td>
+								<td class="td-ellipsis" th:text="${t.finishDate}"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
-    <!-- 페이징 -->
-    <div class="paging-row" id="pagingArea"></div>
+				<!-- 페이징 -->
+				<div class="paging-row" id="pagingArea"></div>
 
-    <!-- 선택 버튼 -->
-    <div class="select-btn-row">
-      <button class="btn-select" onclick="openModal()">선택</button>
-    </div>
-  </div>
+				<!-- 선택 버튼 -->
+				<div class="select-btn-row">
+					<button class="btn-select" onclick="openModal()">선택</button>
+				</div>
+			</div>
 
-</div>
+		</div>
 
-<!-- ③ 소요시간 입력 모달 -->
-<div id="timeModal" class="modal-backdrop" style="display:none;">
-  <div class="modal-box">
-    <div class="modal-header">
-      <span class="modal-title">소요시간 등록</span>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
+		<!-- ③ 소요시간 입력 모달 -->
+		<div id="timeModal" class="modal-backdrop" style="display: none;">
+			<div class="modal-box">
+				<div class="modal-header">
+					<span class="modal-title">소요시간 등록</span>
+					<button class="modal-close" onclick="closeModal()">✕</button>
+				</div>
 
-    <form th:action="@{/insertProjectTime}" method="post">
-      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-      <input type="hidden" id="modalProjectId" name="projectId" th:value="${workTimeVO.projectId}">
-      <input type="hidden" id="modalTaskId" name="taskId">
+				<form th:action="@{/insertProjectTime}" method="post">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+					<input type="hidden" id="modalProjectId" name="projectId" th:value="${workTimeVO.projectId}">
+					<input type="hidden" id="modalTaskId" name="taskId">
+					<input type="hidden" name="returnTaskId" th:value="${taskId}">
 
-      <!-- 선택된 일감 정보 요약 -->
-      <div class="modal-task-summary">
-        <div class="summary-row">
-          <span class="s-label">일감</span>
-          <span class="s-value" id="summaryTitle">-</span>
-        </div>
-        <div class="summary-row">
-          <span class="s-label">설명</span>
-          <span class="s-value" id="summaryDesc">-</span>
-        </div>
-      </div>
+					<!-- 선택된 일감 정보 요약 -->
+					<div class="modal-task-summary">
+						<div class="summary-row">
+							<span class="s-label">일감</span> <span class="s-value"
+								id="summaryTitle">-</span>
+						</div>
+						<div class="summary-row">
+							<span class="s-label">설명</span> <span class="s-value"
+								id="summaryDesc">-</span>
+						</div>
+					</div>
 
-      <!-- 사용자 -->
-      <div class="modal-field modal-field-user">
-        <label>사용자 <span class="req">*</span></label>
-        <div class="user-search-wrap">
-          <input type="text" id="userSearchInput" placeholder="이름으로 검색" autocomplete="off">
-          <input type="hidden" id="selectedUserCode" name="userCode" required>
-          <ul id="userDropdown" class="user-dropdown"></ul>
-        </div>
-      </div>
-      <!-- Thymeleaf로 userList JS 배열 생성 -->
-      <script th:inline="javascript">
+					<!-- 사용자 -->
+					<div class="modal-field modal-field-user">
+						<label>사용자 <span class="req">*</span></label>
+						<div class="user-search-wrap">
+							<input type="text" id="userSearchInput" placeholder="이름으로 검색"
+								autocomplete="off"> <input type="hidden"
+								id="selectedUserCode" name="userCode" required>
+							<ul id="userDropdown" class="user-dropdown"></ul>
+						</div>
+					</div>
+					<!-- Thymeleaf로 userList JS 배열 생성 -->
+					<script th:inline="javascript">
         const userList = /*[[${userList}]]*/ [];
       </script>
 
-      <!-- 작업일자 -->
-      <div class="modal-field">
-        <label>작업일자 <span class="req">*</span></label>
-        <input type="date" name="workDate" required>
-      </div>
+					<!-- 작업일자 -->
+					<div class="modal-field">
+						<label>작업일자 <span class="req">*</span></label> <input type="date"
+							name="workDate" required>
+					</div>
 
-      <!-- 소요시간 -->
-      <div class="modal-field">
-        <label>소요시간(h) <span class="req">*</span></label>
-        <input type="number" id="spentHourInput" name="spentHour" min="0" step="1" placeholder="시간 입력" required>
-      </div>
+					<!-- 소요시간 -->
+					<div class="modal-field">
+						<label>소요시간(h) <span class="req">*</span></label> <input
+							type="number" id="spentHourInput" name="spentHour" min="0"
+							step="1" placeholder="시간 입력" required>
+					</div>
 
-      <!-- 작업분류 -->
-      <div class="modal-field">
-        <label>작업분류 <span class="req">*</span></label>
-        <select name="workName" required>
-          <option value="" disabled selected hidden>작업분류를 선택하세요.</option>
-          <option th:each="v : ${workTypeList}"
-                  th:value="${v.taskClassificationId}"
-                  th:text="${v.workName}"></option>
-        </select>
-      </div>
+					<!-- 작업분류 -->
+					<div class="modal-field">
+						<label>작업분류 <span class="req">*</span></label> <select
+							name="workName" required>
+							<option value="" disabled selected hidden>작업분류를 선택하세요.</option>
+							<option th:each="v : ${workTypeList}"
+								th:value="${v.taskClassificationId}" th:text="${v.workName}"></option>
+						</select>
+					</div>
 
-      <!-- 진척도 -->
-      <div class="modal-field">
-        <label>진척도</label>
-        <div class="progress-wrap">
-          <input type="range" id="progressRange" name="progress" min="0" max="100" value="0">
-          <span id="progressText" class="progress-text">0%</span>
-        </div>
-      </div>
+					<!-- 진척도 -->
+					<div class="modal-field">
+						<label>진척도</label>
+						<div class="progress-wrap">
+							<input type="range" id="progressRange" name="progress" min="0"
+								max="100" value="0"> <span id="progressText"
+								class="progress-text">0%</span>
+						</div>
+					</div>
 
-      <!-- 내용 -->
-      <div class="modal-field modal-field-textarea">
-        <label>내용</label>
-        <textarea name="spentContent" rows="3" placeholder="작업 내용을 입력하세요"></textarea>
-      </div>
+					<!-- 내용 -->
+					<div class="modal-field modal-field-textarea">
+						<label>내용</label>
+						<textarea name="spentContent" rows="3" placeholder="작업 내용을 입력하세요"></textarea>
+					</div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" onclick="closeModal()">취소</button>
-        <button type="submit" class="btn-submit">등록</button>
-      </div>
-    </form>
-  </div>
-</div>
+					<div class="modal-footer">
+						<button type="button" class="btn-cancel" onclick="closeModal()">취소</button>
+						<button type="submit" class="btn-submit">등록</button>
+					</div>
+				</form>
+			</div>
+		</div>
 
-<script th:inline="javascript">
+		<script th:inline="javascript">
 
 /* ── 토스트 & 컨펌 공통 함수 ── */
 function showToast(msg, type) {
@@ -246,6 +246,7 @@ function rebuildTaskRows(tasks) {
     tr.dataset.manager  = t.taskManager  || '';
     tr.dataset.type     = t.typeName     || '';
     tr.dataset.finish   = t.finishDate   || '';
+    tr.dataset.progress = t.taskProgress || 0;
     tr.innerHTML = `
       <td class="td-check"><input type="radio" name="taskRadio" value="${t.taskId}"></td>
       <td class="td-ellipsis">${escHtml(t.taskTitle)}</td>
@@ -262,7 +263,8 @@ function rebuildTaskRows(tasks) {
       estimated:parseFloat(tr.dataset.estimated)||0,
       manager:  tr.dataset.manager,
       type:     tr.dataset.type,
-      finish:   tr.dataset.finish
+      finish:   tr.dataset.finish,
+      progress: parseInt(tr.dataset.progress) || 0
     });
   });
 
@@ -287,7 +289,8 @@ document.querySelectorAll('#taskTableBody tr[data-id]').forEach(tr => {
     estimated:parseFloat(tr.dataset.estimated)||0,
     manager:  tr.dataset.manager  || '',
     type:     tr.dataset.type     || '',
-    finish:   tr.dataset.finish   || ''
+    finish:   tr.dataset.finish   || '',
+    progress: parseInt(tr.dataset.progress) || 0
   });
 });
 
@@ -367,8 +370,10 @@ function openModal() {
   document.getElementById('modalTaskId').value = selectedRow.id;
   document.getElementById('summaryTitle').textContent = selectedRow.title    || '-';
   document.getElementById('summaryDesc').textContent  = selectedRow.describe || '-';
-  document.getElementById('progressRange').value = 0;
-  document.getElementById('progressText').textContent = '0%';
+  // 진척도를 일감 현재 진척도로 초기화
+  const initProgress = selectedRow.progress || 0;
+  document.getElementById('progressRange').value = initProgress;
+  document.getElementById('progressText').textContent = initProgress + '%';
   document.getElementById('spentHourInput').value = '';
   resetUserSearch();
 
@@ -447,14 +452,6 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-// 소요시간 → 진척도 자동계산
-document.getElementById('spentHourInput').addEventListener('input', function() {
-  if (!selectedRow || !selectedRow.estimated) return;
-  const pct = Math.min(Math.round((parseFloat(this.value)||0) / selectedRow.estimated * 100), 100);
-  document.getElementById('progressRange').value = pct;
-  document.getElementById('progressText').textContent = pct + '%';
-});
-
 document.getElementById('progressRange').addEventListener('input', function() {
   document.getElementById('progressText').textContent = this.value + '%';
 });
@@ -463,361 +460,531 @@ document.getElementById('progressRange').addEventListener('input', function() {
 
 // 초기 렌더
 renderTable();
+
+// taskId가 있으면 해당 일감만 선택 가능하게 제한
+const urlTaskId = /*[[${taskId != null ? taskId : ''}]]*/ '';
+if (urlTaskId) {
+    document.querySelectorAll('#taskTableBody tr[data-id]').forEach(tr => {
+        const radio = tr.querySelector('input[name="taskRadio"]');
+        if (tr.dataset.id === urlTaskId) {
+            radio.checked = true;
+            tr.style.background = '#f0f7ff';
+        } else {
+            if (radio) radio.disabled = true;
+            tr.style.opacity = '0.4';
+            tr.style.pointerEvents = 'none';
+            tr.style.cursor = 'default';
+        }
+    });
+}
 </script>
 
-<style>
+		<style>
 /* ── 전체 래퍼 ── */
 .insert-wrap {
-  max-width: 1000px;
-  margin: 32px auto;
-  padding: 0 16px;
-  font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
-  font-size: 14px;
-  color: #333;
+	max-width: 1000px;
+	margin: 32px auto;
+	padding: 0 16px;
+	font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+	font-size: 14px;
+	color: #333;
 }
 
 /* ── 프로젝트 헤더 ── */
 .project-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin-bottom: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	margin-bottom: 28px;
 }
+
 .project-label {
-  font-size: 13px;
-  color: #888;
-  font-weight: 600;
-  flex-shrink: 0;
+	font-size: 13px;
+	color: #888;
+	font-weight: 600;
+	flex-shrink: 0;
 }
+
 .project-name {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1a1a2e;
-  border-bottom: 2px solid #1976d2;
-  padding-bottom: 2px;
+	font-size: 20px;
+	font-weight: 700;
+	color: #1a1a2e;
+	border-bottom: 2px solid #1976d2;
+	padding-bottom: 2px;
 }
+
 .project-select {
-  min-width: 260px;
-  height: 40px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 0 12px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a1a2e;
-  outline: none;
-  border-bottom: 2px solid #1976d2;
+	min-width: 260px;
+	height: 40px;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	padding: 0 12px;
+	font-size: 15px;
+	font-weight: 600;
+	color: #1a1a2e;
+	outline: none;
+	border-bottom: 2px solid #1976d2;
 }
-.project-select:focus { border-color: #1976d2; }
+
+.project-select:focus {
+	border-color: #1976d2;
+}
 
 /* ── 일감 카드 ── */
 .task-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	padding: 24px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
 }
+
 .task-card-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1976d2;
-  margin-bottom: 16px;
+	font-size: 16px;
+	font-weight: 700;
+	color: #1976d2;
+	margin-bottom: 16px;
 }
 
 /* ── 검색창 ── */
 .search-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+	display: flex;
+	gap: 8px;
+	margin-bottom: 16px;
 }
+
 .search-input-wrap {
-  flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
+	flex: 1;
+	position: relative;
+	display: flex;
+	align-items: center;
 }
+
 .search-input-wrap input {
-  width: 100%;
-  height: 38px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 0 36px 0 12px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color .2s;
+	width: 100%;
+	height: 38px;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	padding: 0 36px 0 12px;
+	font-size: 14px;
+	outline: none;
+	transition: border-color .2s;
 }
-.search-input-wrap input:focus { border-color: #1976d2; }
+
+.search-input-wrap input:focus {
+	border-color: #1976d2;
+}
+
 .btn-clear {
-  position: absolute;
-  right: 8px;
-  width: 22px;
-  height: 22px;
-  border: none;
-  background: #cbd5e1;
-  color: #fff;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
+	position: absolute;
+	right: 8px;
+	width: 22px;
+	height: 22px;
+	border: none;
+	background: #cbd5e1;
+	color: #fff;
+	border-radius: 50%;
+	cursor: pointer;
+	font-size: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
 }
-.btn-clear:hover { background: #94a3b8; }
+
+.btn-clear:hover {
+	background: #94a3b8;
+}
+
 .btn-search {
-  height: 38px;
-  padding: 0 20px;
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
+	height: 38px;
+	padding: 0 20px;
+	background: #1976d2;
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 600;
 }
-.btn-search:hover { background: #1565c0; }
+
+.btn-search:hover {
+	background: #1565c0;
+}
 
 /* ── 일감 테이블 ── */
-.table-wrap { overflow-x: auto; }
+.table-wrap {
+	overflow-x: auto;
+}
+
 .task-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  table-layout: fixed;
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 14px;
+	table-layout: fixed;
 }
-.task-table thead tr { background: #f7f8fa; }
+
+.task-table thead tr {
+	background: #f7f8fa;
+}
+
 .task-table th, .task-table td {
-  padding: 11px 12px;
-  border-bottom: 1px solid #e8edf2;
-  text-align: left;
-  vertical-align: middle;
-  overflow: hidden;
+	padding: 11px 12px;
+	border-bottom: 1px solid #e8edf2;
+	text-align: left;
+	vertical-align: middle;
+	overflow: hidden;
 }
-.task-table th { font-weight: 600; color: #64748b; }
-.task-table tbody tr:hover { background: #f0f7ff; cursor: pointer; }
-.td-check { text-align: center; overflow: visible; }
+
+.task-table th {
+	font-weight: 600;
+	color: #64748b;
+}
+
+.task-table tbody tr:hover {
+	background: #f0f7ff;
+	cursor: pointer;
+}
+
+.td-check {
+	text-align: center;
+	overflow: visible;
+}
+
 .td-ellipsis {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
-.td-desc { color: #888; font-size: 13px; }
-.empty-row { text-align: center; color: #aaa; padding: 30px 0; }
-.task-table input[type="radio"] { width: 16px; height: 16px; cursor: pointer; accent-color: #1976d2; }
+
+.td-desc {
+	color: #888;
+	font-size: 13px;
+}
+
+.empty-row {
+	text-align: center;
+	color: #aaa;
+	padding: 30px 0;
+}
+
+.task-table input[type="radio"] {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	accent-color: #1976d2;
+}
 
 /* ── 페이징 ── */
 .paging-row {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 16px;
+	display: flex;
+	justify-content: center;
+	gap: 4px;
+	margin-top: 16px;
 }
+
 .pg-btn {
-  min-width: 32px;
-  height: 32px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #555;
-  transition: .15s;
+	min-width: 32px;
+	height: 32px;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+	border-radius: 5px;
+	cursor: pointer;
+	font-size: 13px;
+	color: #555;
+	transition: .15s;
 }
-.pg-btn:hover { background: #f0f7ff; border-color: #1976d2; color: #1976d2; }
-.pg-active { background: #1976d2 !important; color: #fff !important; border-color: #1976d2 !important; }
+
+.pg-btn:hover {
+	background: #f0f7ff;
+	border-color: #1976d2;
+	color: #1976d2;
+}
+
+.pg-active {
+	background: #1976d2 !important;
+	color: #fff !important;
+	border-color: #1976d2 !important;
+}
 
 /* ── 선택 버튼 ── */
 .select-btn-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 16px;
 }
+
 .btn-select {
-  height: 38px;
-  padding: 0 28px;
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+	height: 38px;
+	padding: 0 28px;
+	background: #1976d2;
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
 }
-.btn-select:hover { background: #1565c0; }
+
+.btn-select:hover {
+	background: #1565c0;
+}
 
 /* ── 모달 ── */
 .modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, .45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
 }
+
 .modal-box {
-  background: #fff;
-  border-radius: 10px;
-  width: 480px;
-  max-width: 95vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 12px 40px rgba(0,0,0,.18);
+	background: #fff;
+	border-radius: 10px;
+	width: 480px;
+	max-width: 95vw;
+	max-height: 90vh;
+	overflow-y: auto;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, .18);
 }
+
 .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 18px 24px;
+	border-bottom: 1px solid #e2e8f0;
+	background: #f8fafc;
+	position: sticky;
+	top: 0;
+	z-index: 1;
 }
-.modal-title { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+
+.modal-title {
+	font-size: 16px;
+	font-weight: 700;
+	color: #1a1a2e;
+}
+
 .modal-close {
-  background: none;
-  border: none;
-  font-size: 18px;
-  color: #94a3b8;
-  cursor: pointer;
-  line-height: 1;
+	background: none;
+	border: none;
+	font-size: 18px;
+	color: #94a3b8;
+	cursor: pointer;
+	line-height: 1;
 }
-.modal-close:hover { color: #475569; }
+
+.modal-close:hover {
+	color: #475569;
+}
+
 .modal-task-summary {
-  background: #f0f7ff;
-  border-left: 3px solid #1976d2;
-  margin: 20px 24px 8px;
-  padding: 12px 14px;
-  border-radius: 0 6px 6px 0;
+	background: #f0f7ff;
+	border-left: 3px solid #1976d2;
+	margin: 20px 24px 8px;
+	padding: 12px 14px;
+	border-radius: 0 6px 6px 0;
 }
-.summary-row { display: flex; gap: 10px; margin-bottom: 4px; font-size: 13px; }
-.summary-row:last-child { margin-bottom: 0; }
-.s-label { color: #94a3b8; font-weight: 600; min-width: 36px; }
-.s-value { color: #1e293b; }
+
+.summary-row {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 4px;
+	font-size: 13px;
+}
+
+.summary-row:last-child {
+	margin-bottom: 0;
+}
+
+.s-label {
+	color: #94a3b8;
+	font-weight: 600;
+	min-width: 36px;
+}
+
+.s-value {
+	color: #1e293b;
+}
+
 .modal-field {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 24px;
-  border-bottom: 1px solid #f1f5f9;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 24px;
+	border-bottom: 1px solid #f1f5f9;
 }
+
 .modal-field label {
-  width: 90px;
-  font-weight: 600;
-  color: #475569;
-  font-size: 13px;
-  flex-shrink: 0;
+	width: 90px;
+	font-weight: 600;
+	color: #475569;
+	font-size: 13px;
+	flex-shrink: 0;
 }
-.modal-field input[type="date"],
-.modal-field input[type="number"],
-.modal-field select {
-  flex: 1;
-  height: 36px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 0 10px;
-  font-size: 14px;
-  outline: none;
+
+.modal-field input[type="date"], .modal-field input[type="number"],
+	.modal-field select {
+	flex: 1;
+	height: 36px;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	padding: 0 10px;
+	font-size: 14px;
+	outline: none;
 }
-.modal-field input:focus,
-.modal-field select:focus { border-color: #1976d2; }
-.req { color: #ef4444; }
+
+.modal-field input:focus, .modal-field select:focus {
+	border-color: #1976d2;
+}
+
+.req {
+	color: #ef4444;
+}
 
 /* 사용자 검색 */
-.modal-field-user { position: relative; }
-.user-search-wrap { flex: 1; position: relative; }
+.modal-field-user {
+	position: relative;
+}
+
+.user-search-wrap {
+	flex: 1;
+	position: relative;
+}
+
 .user-search-wrap input[type="text"] {
-  width: 100%;
-  height: 36px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 0 10px;
-  font-size: 14px;
-  outline: none;
+	width: 100%;
+	height: 36px;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	padding: 0 10px;
+	font-size: 14px;
+	outline: none;
 }
-.user-search-wrap input[type="text"]:focus { border-color: #1976d2; }
+
+.user-search-wrap input[type="text"]:focus {
+	border-color: #1976d2;
+}
+
 .user-dropdown {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.1);
-  max-height: 180px;
-  overflow-y: auto;
-  z-index: 10000;
-  list-style: none;
-  margin: 4px 0 0;
-  padding: 4px 0;
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background: #fff;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+	max-height: 180px;
+	overflow-y: auto;
+	z-index: 10000;
+	list-style: none;
+	margin: 4px 0 0;
+	padding: 4px 0;
 }
+
 .user-dropdown li {
-  padding: 9px 12px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #333;
+	padding: 9px 12px;
+	cursor: pointer;
+	font-size: 14px;
+	color: #333;
 }
-.user-dropdown li:hover { background: #f0f7ff; color: #1976d2; }
+
+.user-dropdown li:hover {
+	background: #f0f7ff;
+	color: #1976d2;
+}
+
 .progress-wrap {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 }
-.progress-wrap input[type="range"] { flex: 1; accent-color: #1976d2; }
-.progress-text { width: 38px; font-weight: 700; color: #1976d2; text-align: right; }
-.modal-field-textarea { align-items: flex-start; padding-top: 12px; }
-.modal-field-textarea label { padding-top: 6px; }
+
+.progress-wrap input[type="range"] {
+	flex: 1;
+	accent-color: #1976d2;
+}
+
+.progress-text {
+	width: 38px;
+	font-weight: 700;
+	color: #1976d2;
+	text-align: right;
+}
+
+.modal-field-textarea {
+	align-items: flex-start;
+	padding-top: 12px;
+}
+
+.modal-field-textarea label {
+	padding-top: 6px;
+}
+
 .modal-field textarea {
-  flex: 1;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  resize: vertical;
-  min-height: 72px;
-  line-height: 1.5;
+	flex: 1;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	padding: 8px 10px;
+	font-size: 14px;
+	font-family: inherit;
+	outline: none;
+	resize: vertical;
+	min-height: 72px;
+	line-height: 1.5;
 }
-.modal-field textarea:focus { border-color: #1976d2; }
+
+.modal-field textarea:focus {
+	border-color: #1976d2;
+}
+
 .modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 16px 24px;
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	padding: 16px 24px;
+	background: #f8fafc;
+	border-top: 1px solid #e2e8f0;
 }
+
 .btn-cancel {
-  height: 38px;
-  padding: 0 22px;
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
+	height: 38px;
+	padding: 0 22px;
+	background: #fff;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	font-size: 14px;
+	cursor: pointer;
 }
-.btn-cancel:hover { background: #f1f5f9; }
+
+.btn-cancel:hover {
+	background: #f1f5f9;
+}
+
 .btn-submit {
-  height: 38px;
-  padding: 0 28px;
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+	height: 38px;
+	padding: 0 28px;
+	background: #1976d2;
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
 }
-.btn-submit:hover { background: #1565c0; }
+
+.btn-submit:hover {
+	background: #1565c0;
+}
 </style>
-</section>
+	</section>
 </body>
 </html>

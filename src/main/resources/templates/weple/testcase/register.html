@@ -1,14 +1,111 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+    <title>WEPLE</title>
+    <link rel="stylesheet" th:href="@{/css/testcase/testcase-insert.css}">
 </head>
 <body>
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+    <section class="tc-form-section">
+    <form th:action="@{/project/testcase/register}" method="post">
+        <div class="tc-form-container">
+            <div class="form-group">
+                <label>테스트 케이스 제목 입력 <span class="required">*</span></label>
+                <input type="text" class="form-control" name="title" placeholder="제목을 입력하세요" required>
+            </div>
+
+            <div class="form-row-5">
+                <div class="form-group" style="margin-bottom: 0; position: relative;">
+    <label>일감 연결</label>
+    <div class="input-group" style="display: flex; align-items: stretch; width: 100%;">
+        
+        <span class="input-group-addon"
+              style="display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #ddd; border-right: none; border-radius: 5px 0 0 5px; padding: 0 12px; font-size: 14px;">
+            🔍
+        </span>
+        
+        <input type="text" id="taskSearch" class="form-control" placeholder="일감 검색" autocomplete="off"
+               style="border-left: none; border-radius: 0 5px 5px 0 !important; flex: 1; margin: 0; box-shadow: none;">
+        
+        <input type="hidden" id="taskId" name="taskId">
+    </div>
+    
+    <div id="task-autocomplete-list" class="list-group shadow"
+         style="z-index: 10000; max-height: 200px; overflow-y: auto; display: none; position: absolute; left: 0; right: 0; top: 100%; border-radius: 0 0 4px 4px; background: #fff; border: 1px solid #ddd; border-top: none;">
+    </div>
+</div>
+
+    <div class="form-group" style="margin-bottom: 0;">
+        <label>진행상황 <span class="required">*</span></label>
+        <select class="form-control" name="status" required>
+            <option value="" disabled selected hidden>진행상황 선택</option>
+            <option th:each="code : ${statusList}"
+                    th:value="${code.defaultDescribe}"
+                    th:text="${code.defaultDescribe}"></option>
+        </select>
+    </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>담당자</label>
+                    <select class="form-control" name="testCaseManager">
+                    	<option value="">담당자 지정안함</option>
+                        <option th:value="${loginUserCode}">&lt;&lt; 내게 할당 &gt;&gt;</option>
+                        <option th:each="member : ${memberList}"
+                                th:value="${member.userCode}"
+                                th:text="|${member.userName} (${member.email})|"></option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>우선순위 <span class="required">*</span></label>
+                    <select class="form-control" name="priority" required>
+                        <option value="" disabled selected hidden>우선순위 선택</option>
+                        <option th:each="priority : ${priorityList}"
+                                th:value="${priority.priorityId}"
+                                th:text="${priority.priorityName}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>테스트 수행 날짜</label>
+                    <input type="date" class="form-control" name="testDate">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>테스트 여부 <span class="required">*</span></label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="isTested" value="Y" checked> 예
+                    </label>
+                    <label>
+                        <input type="radio" name="isTested" value="N"> 아니오
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>테스트 사항 및 결과 <span class="required">*</span></label>
+                <textarea class="form-control" name="testResult" placeholder="내용을 입력하세요" required></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>설명</label>
+                <textarea class="form-control" name="description" placeholder="설명을 입력하세요"></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-register">등록</button>
+        </div>
+    </form>
+    <script th:inline="javascript">
+    window.globalTaskList = /*[[${taskList}]]*/ [];
+</script>
+<script th:src="@{/js/testcase/testcase.js}"></script>
+</section>
 
 </body>
 </html>

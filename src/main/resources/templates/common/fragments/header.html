@@ -12,7 +12,7 @@
     
     <div class="header-profile-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
         
-        <a href="#" style="color: #4d84ff; font-size: 16px; position: relative; text-decoration: none; display: flex; align-items: center;">
+        <a href="#" style="font-size:16px; position:relative; text-decoration:none; display:flex; align-items:center;">
             <i class="fa fa-bell"></i>
             <span class="badge bg-red" style="position: absolute; top: -8px; right: -8px; font-size: 9px; padding: 2px 4px; background-color: red; color: white; border-radius: 50%;">6</span>
         </a>
@@ -36,6 +36,7 @@
 
 
 <style>
+/* 프로젝트명 */
 .header-title-area{
     flex:1;
     min-width:300px;
@@ -45,6 +46,106 @@
     margin:0;
     font-size:24px;
     font-weight:700;
-    color:#222;
+    color:#5B4B8A;
+    letter-spacing:-0.3px;
+}
+
+/* 우측 전체 */
+.header-profile-right{
+    display:flex !important;
+    align-items:center !important;
+    gap:18px !important;
+}
+
+/* ===== 알림 ===== */
+
+.header-profile-right > a{
+    width:36px;
+    height:36px;
+    display:flex !important;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    border-radius:50%;
+    background:#F6F2FF;
+    color:#8B7DDB !important;
+    transition:.2s;
+}
+
+.header-profile-right > a:hover{
+    background:#EEE8FF;
+    color:#6D5BD0 !important;
+}
+
+.header-profile-right .fa-bell{
+    font-size:18px;
+    color:#8B7DDB !important;
+}
+
+/* 알림 숫자 */
+.header-profile-right .badge{
+    min-width:17px;
+    height:17px;
+    padding:0 4px;
+    border-radius:20px;
+    background:#A78BFA !important;
+    color:#fff;
+    font-size:10px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:2px solid #fff;
+    top:-2px !important;
+    right:-3px !important;
+}
+
+/* ===== 프로필 ===== */
+
+.header-profile-right img{
+    width:36px !important;
+    height:36px !important;
+    border-radius:50%;
+    border:2px solid #DDD2FF;
+    object-fit:cover;
+}
+
+/* 이름 */
+
+.user-name{
+    font-size:14px !important;
+    font-weight:600 !important;
+    color:#5B4B8A !important;
+    white-space:nowrap;
+}
+
+/* ===== 로그아웃 ===== */
+
+.header-profile-right button{
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    color:#8B7DDB !important;
+    transition:.2s;
+}
+
+.header-profile-right button:hover{
+    background:#F6F2FF;
+    color:#6D5BD0 !important;
+}
+
+.header-profile-right .fa-sign-out{
+    font-size:17px;
+}
+
+/* 헤더 */
+
+.nav_menu{
+    background:#fff !important;
+    border-bottom:1px solid #EEE8FF !important;
+    box-shadow:0 2px 10px rgba(167,139,250,.05);
 }
 </style>

@@ -39,10 +39,18 @@ public class TimeController {
 	// 전체조회
 	@GetMapping("/projectTimeList")
 	public String projectTimeList(@RequestParam("projectId") long projectId,
+			@RequestParam(value = "taskId", required = false) String taskId,
 			@ModelAttribute("toastMessage") String toastMessage,
 			@ModelAttribute("toastError") String toastError,
 			Model model) {
 		List<WorkTimeVO> list = timeService.findProjectTimeAll(projectId);
+		// taskId가 있으면 해당 일감만 필터링
+		if (taskId != null && !taskId.isEmpty()) {
+		    list = list.stream()
+		        .filter(w -> taskId.equals(w.getTaskId()))
+		        .collect(Collectors.toList());
+		    model.addAttribute("filterTaskId", taskId);
+		}
 		model.addAttribute("projectTimeList", list);
 		if (!list.isEmpty()) {
 		    model.addAttribute("countSpentHour", list.get(0).getCountSpentHour());
@@ -57,7 +65,8 @@ public class TimeController {
 
 	// 등록 폼
 	@GetMapping("/insertProjectTime")
-	public String insertProjectTimeForm(@RequestParam(value="projectId", required=false) Long projectId, Model model) {
+	public String insertProjectTimeForm(@RequestParam(value="projectId", required=false) Long projectId,
+										@RequestParam(value="taskId", required=false) String taskId, Model model) {
 		List<ProjectVO> projectList = projectService.findAll("");
 		
 	    // 프로젝트 조회, 만약 조회 결과가 없으면 빈 객체라도 생성
@@ -98,6 +107,7 @@ public class TimeController {
 	    List<String> moduleNames = projectService.findModuleNames(projectId);
 	    model.addAttribute("moduleNames", moduleNames);
 	    
+	    model.addAttribute("taskId", taskId);
 	    model.addAttribute("workTimeVO", workTimeVO);
 		model.addAttribute("currentMenu", "time");
 		model.addAttribute("sidebarMenu", "project");
@@ -110,12 +120,17 @@ public class TimeController {
 
 	// 등록 처리
 	@PostMapping("/insertProjectTime")
-	public String insertProjectTimeProcess(WorkTimeVO workTimeVO, RedirectAttributes redirectAttributes) {
+	public String insertProjectTimeProcess(WorkTimeVO workTimeVO,
+										   @RequestParam(value="taskId", required=false) String taskId,
+										   RedirectAttributes redirectAttributes) {
 	    timeService.addProjectTime(workTimeVO);
 	    redirectAttributes.addFlashAttribute("toastMessage", "소요시간이 등록되었습니다.");
 	    if (workTimeVO.getProjectId() != null && workTimeVO.getProjectId() != 0) {
-	        redirectAttributes.addAttribute("projectId", workTimeVO.getProjectId());
-	        return "redirect:/projectTimeList";
+	        String redirectUrl = "redirect:/projectTimeList?projectId=" + workTimeVO.getProjectId();
+	        if (taskId != null && !taskId.isEmpty()) {
+	            redirectUrl += "&taskId=" + taskId;  // ✅ taskId 있으면 추가
+	        }
+	        return redirectUrl;
 	    }
 	    return "redirect:/totalTimeList";
 	}

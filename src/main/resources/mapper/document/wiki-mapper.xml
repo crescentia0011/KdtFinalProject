@@ -3,20 +3,24 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.weple.cloud.wiki.mapper.WikiMapper">
 
-    <!-- ResultMap -->
+    <!-- ═══════════════════════════════════════════════
+         ResultMap
+    ═══════════════════════════════════════════════ -->
     <resultMap id="wikiPageResultMap" type="com.weple.cloud.wiki.service.WikiPageVO">
-        <result column="wiki_page_id"   property="wikiPageId"/>
-        <result column="project_id"     property="projectId"/>
-        <result column="parent_page_id" property="parentPageId"/>
-        <result column="title"          property="title"/>
-        <result column="content"        property="content"        jdbcType="CLOB"/>
+        <result column="wiki_page_id"    property="wikiPageId"/>
+        <result column="project_id"      property="projectId"/>
+        <result column="parent_page_id"  property="parentPageId"/>
+        <result column="title"           property="title"/>
+        <result column="content"         property="content"       jdbcType="CLOB"/>
         <result column="current_version" property="currentVersion"/>
-        <result column="user_code"      property="userCode"/>
-        <result column="lock_user_code" property="lockUserCode"/>
-        <result column="locked_at"      property="lockedAt"/>
-        <result column="created_at"     property="createdAt"/>
-        <result column="update_at"      property="updateAt"/>
-        <result column="user_name"      property="userName"/>
+        <result column="user_code"       property="userCode"/>
+        <result column="lock_user_code"  property="lockUserCode"/>
+        <result column="locked_at"       property="lockedAt"/>
+        <result column="created_at"      property="createdAt"/>
+        <result column="update_at"       property="updateAt"/>
+        <result column="user_name"       property="userName"/>
+        <result column="user_email"      property="userEmail"/>
+        <result column="lock_user_name"  property="lockUserName"/>
     </resultMap>
 
     <resultMap id="wikiHistoryResultMap" type="com.weple.cloud.wiki.service.WikiHistoryVO">
@@ -24,13 +28,24 @@
         <result column="wiki_page_id"    property="wikiPageId"/>
         <result column="wiki_version"    property="wikiVersion"/>
         <result column="title"           property="title"/>
-        <result column="content"         property="content"   jdbcType="CLOB"/>
+        <result column="content"         property="content"  jdbcType="CLOB"/>
         <result column="user_code"       property="userCode"/>
         <result column="created_at"      property="createdAt"/>
         <result column="user_name"       property="userName"/>
     </resultMap>
 
-    <!-- 프로젝트 위키 목록 전체 조회 (트리용) -->
+    <resultMap id="wikiRelationResultMap" type="com.weple.cloud.wiki.service.WikiRelationVO">
+        <result column="wiki_relation_id" property="wikiRelationId"/>
+        <result column="wiki_page_id"     property="wikiPageId"/>
+        <result column="target_type"      property="targetType"/>
+        <result column="project_id"       property="projectId"/>
+        <result column="target_task_id"   property="targetTaskId"/>
+        <result column="target_wiki_id"   property="targetWikiId"/>
+        <result column="target_title"     property="targetTitle"/>
+        <result column="target_url"       property="targetUrl"/>
+    </resultMap>
+
+    <!-- 목록 (트리용) -->
     <select id="selectWikiList" resultMap="wikiPageResultMap">
         SELECT
             w.wiki_page_id,
@@ -41,14 +56,16 @@
             w.user_code,
             w.created_at,
             w.update_at,
-            u.user_name
+            u.user_name,
+            u.email AS user_email
         FROM wiki_pages w
-        LEFT JOIN users u ON w.user_code = u.user_code
+        LEFT JOIN users u
+        	   ON w.user_code = u.user_code
         WHERE w.project_id = #{projectId}
         ORDER BY w.created_at ASC
     </select>
 
-    <!-- 위키 단건 조회 -->
+    <!-- 단건 조회 -->
     <select id="selectWikiById" resultMap="wikiPageResultMap">
         SELECT
             w.wiki_page_id,
@@ -62,65 +79,58 @@
             w.locked_at,
             w.created_at,
             w.update_at,
-            u.user_name
+            u.user_name,
+            u.email AS user_email
         FROM wiki_pages w
-        LEFT JOIN users u ON w.user_code = u.user_code
+        LEFT JOIN users u
+        	   ON w.user_code = u.user_code
         WHERE w.wiki_page_id = #{wikiPageId}
     </select>
 
-    <!-- 위키 등록 -->
+    <!-- 등록 (selectKey로 wikiPageId VO에 반환 → insertWikiWithRelations 에서 사용) -->
     <insert id="insertWiki" parameterType="com.weple.cloud.wiki.service.WikiPageVO">
+        <selectKey keyProperty="wikiPageId" resultType="String" order="BEFORE">
+            SELECT 'WP-' || wiki_page_id_seq.NEXTVAL
+            FROM DUAL
+        </selectKey>
         INSERT INTO wiki_pages (
-            wiki_page_id,
-            project_id,
-            parent_page_id,
-            title,
-            content,
-            current_version,
-            user_code,
-            created_at,
-            update_at
+            wiki_page_id, project_id, parent_page_id,
+            title, content, current_version,
+            user_code, created_at, update_at
         ) VALUES (
-            'WP-' || wiki_page_id_seq.NEXTVAL,
+            #{wikiPageId},
             #{projectId},
-            #{parentPageId},
+            #{parentPageId, jdbcType=VARCHAR},
             #{title},
-            #{content,jdbcType=CLOB},
+            #{content, jdbcType=CLOB},
             1,
             #{userCode},
-            SYSDATE,
-            SYSDATE
+            SYSDATE, SYSDATE
         )
     </insert>
 
-    <!-- 위키 수정 - 프로시저 호출 (버전 백업 + 버전업 + 내용 업데이트) -->
+    <!-- 수정 (프로시저: 이전 버전 wiki_histories 백업 + 버전업 + 내용 갱신) -->
     <update id="updateWiki" parameterType="com.weple.cloud.wiki.service.WikiPageVO"
             statementType="CALLABLE">
         {CALL SP_SAVE_WIKI_VERSION(
             #{wikiPageId, mode=IN, jdbcType=VARCHAR},
-            #{title,      mode=IN, jdbcType=VARCHAR},
-            #{content,    mode=IN, jdbcType=CLOB},
-            #{userCode,   mode=IN, jdbcType=VARCHAR}
+            #{title, mode=IN, jdbcType=VARCHAR},
+            #{content, mode=IN, jdbcType=CLOB},
+            #{userCode, mode=IN, jdbcType=VARCHAR}
         )}
     </update>
 
-    <!-- 위키 삭제 -->
+    <!-- 삭제 -->
     <delete id="deleteWiki">
-        DELETE FROM wiki_pages
+        DELETE
+        FROM wiki_pages
         WHERE wiki_page_id = #{wikiPageId}
     </delete>
 
-    <!-- 위키 검색 (제목 기준) -->
+    <!-- 제목 검색 -->
     <select id="searchWiki" resultMap="wikiPageResultMap">
-        SELECT
-            wiki_page_id,
-            project_id,
-            parent_page_id,
-            title,
-            current_version,
-            user_code,
-            created_at,
-            update_at
+        SELECT wiki_page_id, project_id, parent_page_id,
+               title, current_version, user_code, created_at, update_at
         FROM wiki_pages
         WHERE project_id = #{projectId}
         <if test="keyword != null and keyword != ''">
@@ -129,7 +139,7 @@
         ORDER BY created_at ASC
     </select>
 
-    <!-- 변경 이력 목록 조회 -->
+    <!-- 이력 전체 목록 (버전 내림차순) -->
     <select id="selectHistoryList" resultMap="wikiHistoryResultMap">
         SELECT
             h.wiki_history_id,
@@ -145,19 +155,144 @@
         ORDER BY h.wiki_version DESC
     </select>
 
-    <!-- 특정 버전 조회 -->
+    <!-- 특정 버전 조회 (본문 포함) -->
     <select id="selectHistoryByVersion" resultMap="wikiHistoryResultMap">
         SELECT
-            wiki_history_id,
-            wiki_page_id,
-            wiki_version,
-            title,
-            content,
-            user_code,
-            created_at
+            wiki_history_id, wiki_page_id, wiki_version,
+            title, content, user_code, created_at
         FROM wiki_histories
         WHERE wiki_page_id = #{wikiPageId}
           AND wiki_version  = #{wikiVersion}
+    </select>
+    
+    <!--
+        잠금 획득:
+        - lock_user_code IS NULL → 아무도 안 잠근 경우 내가 잠금
+        - lock_user_code = #{userCode} → 내가 이미 잠근 경우 갱신(재진입)
+        - 다른 사람이 잠근 경우 WHERE 불충족 → 0 반환
+    -->
+    <update id="lockWiki">
+        UPDATE wiki_pages
+        SET lock_user_code = #{userCode},
+            locked_at      = SYSDATE
+        WHERE wiki_page_id = #{wikiPageId}
+          AND (lock_user_code IS NULL OR lock_user_code = #{userCode})
+    </update>
+
+    <!-- 잠금 해제: 본인 잠금만 해제 -->
+    <update id="unlockWiki">
+        UPDATE wiki_pages
+        SET lock_user_code = NULL,
+            locked_at      = NULL
+        WHERE wiki_page_id  = #{wikiPageId}
+          AND lock_user_code = #{userCode}
+    </update>
+
+    <!-- 잠금 정보 조회 (배너: 잠금자 이름 + 잠금 시각) -->
+    <select id="selectLockInfo" resultMap="wikiPageResultMap">
+        SELECT
+            w.wiki_page_id,
+            w.lock_user_code,
+            w.locked_at,
+            u.user_name AS lock_user_name
+        FROM wiki_pages w
+        LEFT JOIN users u ON w.lock_user_code = u.user_code
+        WHERE w.wiki_page_id = #{wikiPageId}
+    </select>
+    <!--
+        연관 문서 목록 조회
+        target_type = 'TASK' → task 테이블 JOIN
+        target_type = 'WIKI' → wiki_pages 테이블 JOIN
+    -->
+    <select id="selectRelationList" resultMap="wikiRelationResultMap">
+        SELECT
+            r.wiki_relation_id,
+            r.wiki_page_id,
+            r.target_type,
+            r.project_id,
+            r.target_task_id,
+            r.target_wiki_id,
+            CASE
+                WHEN r.target_type = 'TASK' THEN t.task_title
+                WHEN r.target_type = 'WIKI' THEN wt.title
+                ELSE NULL
+            END AS target_title,
+            CASE
+                WHEN r.target_type = 'TASK'
+                    THEN '/project/task/detail?projectId=' || r.project_id
+                         || '&amp;taskId=' || r.target_task_id
+                WHEN r.target_type = 'WIKI'
+                    THEN '/project/wiki?projectId=' || r.project_id
+                         || '&amp;wikiPageId=' || r.target_wiki_id
+                ELSE NULL
+            END AS target_url
+        FROM wiki_relations r
+        LEFT JOIN task      t  ON r.target_type = 'TASK' AND r.target_task_id = t.task_id
+        LEFT JOIN wiki_pages wt ON r.target_type = 'WIKI' AND r.target_wiki_id = wt.wiki_page_id
+        WHERE r.wiki_page_id = #{wikiPageId}
+        ORDER BY r.wiki_relation_id
+    </select>
+
+    <!-- 관계 추가 -->
+    <insert id="insertRelation" parameterType="com.weple.cloud.wiki.service.WikiRelationVO">
+        INSERT INTO wiki_relations (
+            wiki_relation_id, wiki_page_id, target_type,
+            project_id, target_task_id, target_wiki_id
+        ) VALUES (
+            'WR-' || wiki_relation_id_seq.NEXTVAL,
+            #{wikiPageId},
+            #{targetType},
+            #{projectId},
+            #{targetTaskId, jdbcType=VARCHAR},
+            #{targetWikiId, jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <!-- 관계 단건 삭제 -->
+    <delete id="deleteRelation">
+        DELETE FROM wiki_relations WHERE wiki_relation_id = #{wikiRelationId}
+    </delete>
+
+    <!-- 위키 삭제 시 관계 전체 삭제 -->
+    <delete id="deleteRelationByWikiId">
+        DELETE FROM wiki_relations WHERE wiki_page_id = #{wikiPageId}
+    </delete>
+
+    <!-- 해시태그 → 일감 검색 -->
+    <select id="searchTaskByHashtag" resultMap="wikiRelationResultMap">
+        SELECT
+            NULL            AS wiki_relation_id,
+            NULL            AS wiki_page_id,
+            'TASK'          AS target_type,
+            #{projectId}    AS project_id,
+            t.task_id       AS target_task_id,
+            NULL            AS target_wiki_id,
+            t.task_title    AS target_title,
+            '/project/task/detail?projectId=' || #{projectId}
+                || '&amp;taskId=' || t.task_id AS target_url
+        FROM task t
+        WHERE t.project_id = #{projectId}
+          AND t.task_title  LIKE '%' || #{keyword} || '%'
+          AND (t.deleted_yn IS NULL OR t.deleted_yn = 'N')
+        ORDER BY t.task_id
+    </select>
+
+    <!-- 해시태그 → 위키 검색 (#제목 키워드) -->
+    <select id="searchWikiByHashtag" resultMap="wikiRelationResultMap">
+        SELECT
+            NULL            AS wiki_relation_id,
+            NULL            AS wiki_page_id,
+            'WIKI'          AS target_type,
+            #{projectId}    AS project_id,
+            NULL            AS target_task_id,
+            w.wiki_page_id  AS target_wiki_id,
+            w.title         AS target_title,
+            '/project/wiki?projectId=' || #{projectId}
+                || '&amp;wikiPageId=' || w.wiki_page_id AS target_url
+        FROM wiki_pages w
+        WHERE w.project_id = #{projectId}
+          AND w.title LIKE '%' || #{keyword} || '%'
+        ORDER BY w.created_at
     </select>
 
 </mapper>

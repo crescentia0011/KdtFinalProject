@@ -32,8 +32,9 @@
         	<a href="#">간트차트</a>
         </li>
         
-        <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b12')}">
-        	<a href="#">테스트</a>
+        <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b12')}"
+        	th:classappend="${currentMenu == 'testcase'} ? 'active' : ''">
+        	<a th:href="@{/project/testcase(projectId=${projectId})}">테스트</a>
         </li>
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b7')}"
@@ -43,7 +44,7 @@
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b13')}"
             th:classappend="${currentMenu == 'file'} ? 'active' : ''">
-        	<a th:href="@{/project/{pid}/file(pid=${projectId})}">파일관리</a>
+        	<a th:href="@{/project/{pid}/file/projectFileList(pid=${projectId})}">파일관리</a>
         </li>
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b8') and hasRepository}"

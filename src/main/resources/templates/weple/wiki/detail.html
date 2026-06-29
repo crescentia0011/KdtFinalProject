@@ -1,208 +1,499 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org/"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
-
 <head>
     <meta charset="UTF-8">
     <title>위키</title>
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.css">
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor.min.css">
     <link rel="stylesheet" href="/css/wiki/wiki.css">
 </head>
-
 <body>
 <section class="wiki-page">
+
+    <!-- ★ 토스트 알림 컨테이너 (body 최상위에 위치) -->
+    <div id="wikiToastContainer" class="wiki-toast-container"></div>
+
+    <h3 class="wiki-page-title">위키</h3>
+
     <div class="wiki-layout">
 
-        <!-- ① 좌측 목록 패널 -->
+        <!-- ① 좌측: 위키 목록 박스 -->
         <div class="wiki-sidebar">
-            <div class="wiki-search-wrap">
-                <form method="get" th:action="@{/project/wiki}">
+            <!-- 위키 목록 레이블 → 최상단 -->
+            <div class="wiki-list-header">
+                <span class="wiki-list-label">위키 목록</span>
+            </div>
+
+            <!-- 검색 + 등록 -->
+            <div class="wiki-search-row">
+                <form method="get" th:action="@{/project/wiki}" class="wiki-search-form">
                     <input type="hidden" name="projectId" th:value="${projectId}">
                     <div class="wiki-search-box">
+                        <span class="wiki-search-icon">🔍</span>
                         <input type="text" name="keyword" class="wiki-search-input"
-                               placeholder="위키 검색" th:value="${keyword}">
-                        <button type="submit" class="wiki-search-btn">🔍</button>
+                               placeholder="위키 제목 검색"
+                               th:value="${keyword}"
+                               onchange="this.form.submit()">
                     </div>
                 </form>
-            </div>
-
-            <div class="wiki-sidebar-actions">
                 <a th:href="@{/project/wiki/register(projectId=${projectId})}"
-                   class="wiki-add-btn">+ 등록</a>
+                   class="wiki-add-btn">등록</a>
             </div>
 
-            <!-- 검색 결과 -->
-            <div th:if="${searchResult != null}">
-                <div class="wiki-tree-title">검색 결과</div>
-                <div th:if="${#lists.isEmpty(searchResult)}" class="wiki-empty">결과 없음</div>
-                <ul class="wiki-tree">
-                    <li th:each="wiki : ${searchResult}">
-                        <a th:href="@{/project/wiki(projectId=${projectId}, wikiPageId=${wiki.wikiPageId})}"
-                           th:text="${wiki.title}"
-                           th:classappend="${selectedWiki != null and selectedWiki.wikiPageId == wiki.wikiPageId} ? 'active' : ''">
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- 위키 트리 목록 -->
-            <div th:if="${searchResult == null}">
-                <div th:if="${#lists.isEmpty(wikiTree)}" class="wiki-empty">등록된 위키가 없습니다.</div>
-                <ul class="wiki-tree" th:unless="${#lists.isEmpty(wikiTree)}">
-                    <th:block th:replace="~{weple/wiki/detail :: wikiTreeFragment(${wikiTree})}"></th:block>
-                </ul>
+            <div class="wiki-tree-wrap">
+                <div th:if="${searchResult != null}">
+                    <div th:if="${#lists.isEmpty(searchResult)}" class="wiki-empty">결과 없음</div>
+                    <ul class="wiki-tree">
+                        <li th:each="wiki : ${searchResult}">
+                            <a th:href="@{/project/wiki(projectId=${projectId}, wikiPageId=${wiki.wikiPageId})}"
+                               th:text="${wiki.title}"
+                               th:classappend="${selectedWiki != null and selectedWiki.wikiPageId == wiki.wikiPageId} ? 'active' : ''"></a>
+                        </li>
+                    </ul>
+                </div>
+                <div th:if="${searchResult == null}">
+                    <div th:if="${#lists.isEmpty(wikiTree)}" class="wiki-empty">등록된 위키가 없습니다.</div>
+                    <ul class="wiki-tree" th:unless="${#lists.isEmpty(wikiTree)}">
+                        <th:block th:replace="~{weple/wiki/detail :: wikiTreeFragment(${wikiTree})}"></th:block>
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <!-- ② 중앙 문서 영역 -->
+        <!-- ② 중앙: 본문 박스 -->
         <div class="wiki-content-wrap">
             <div th:if="${selectedWiki == null}" class="wiki-empty-center">
                 좌측에서 문서를 선택하거나 새 위키를 등록하세요.
             </div>
 
             <th:block th:if="${selectedWiki != null}">
-                <!-- 제목 -->
-                <h2 class="wiki-doc-title" th:text="${selectedWiki.title}"></h2>
 
-                <!-- 작성자 + 수정일 + 버전 + 수정/삭제 버튼 한 줄 -->
-                <div class="wiki-doc-meta-row">
-                    <div class="wiki-doc-meta">
-                        <span class="wiki-author-icon">👤</span>
-                        <span class="wiki-author-name"
-                              th:text="${selectedWiki.userName + '(' + selectedWiki.userCode + ')'}"></span>
-                        <span class="wiki-meta-sep">⏱</span>
-                        <span class="wiki-updated-text">최종 수정일</span>
-                        <span class="wiki-updated-date"
-                              th:text="${#temporals.format(selectedWiki.updateAt, 'yyyy-MM-dd HH:mm')}"></span>
-                        <span class="wiki-version-badge"
-                              th:text="'버전 v' + ${selectedWiki.currentVersion}"></span>
-                    </div>
-                    <div class="wiki-doc-actions">
-                        <a th:href="@{/project/wiki/modify/{id}(id=${selectedWiki.wikiPageId}, projectId=${projectId})}"
-                           class="wiki-btn wiki-btn-edit">✏ 수정</a>
-                        <form th:action="@{/project/wiki/delete/{id}(id=${selectedWiki.wikiPageId})}"
-                              method="post" style="display:inline"
-                              onsubmit="return confirm('정말 삭제하시겠습니까?')">
-                            <input type="hidden" name="projectId" th:value="${projectId}">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                            <button type="submit" class="wiki-btn wiki-btn-delete">🗑 삭제</button>
-                        </form>
-                    </div>
+                <!-- 삭제용 hidden form: 레이아웃 밖에 위치 -->
+                <form th:action="@{/project/wiki/delete/{id}(id=${selectedWiki.wikiPageId})}"
+                      method="post"
+                      id="deleteForm"
+                      style="display:none">
+                    <input type="hidden" name="projectId" th:value="${projectId}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                </form>
+
+                <div class="wiki-doc-header">
+				    <div class="wiki-doc-left">
+				        <h2 class="wiki-doc-title" th:text="${selectedWiki.title}">
+				        </h2>
+				        <div class="wiki-doc-meta">
+				            <div class="wiki-author-wrap">
+				                <img src="/images/user-default.png"
+				                     class="wiki-author-img"
+				                     alt=""
+				                     onerror="this.style.display='none'">
+				                <span class="wiki-author-name"
+				                      th:text="${selectedWiki.userName != null ? selectedWiki.userName : ''}">
+				                </span>
+				                <span class="wiki-author-email"
+				                      th:if="${selectedWiki.userEmail != null and !#strings.isEmpty(selectedWiki.userEmail)}"
+				                      th:text="'(' + ${selectedWiki.userEmail} + ')'">
+				                </span>
+				            </div>
+				            <div class="wiki-updated-wrap">
+				                <span>⏱</span>
+				                <span>최종 수정일</span>
+				                <span th:text="${selectedWiki.updateAt != null ? #temporals.format(selectedWiki.updateAt,'yyyy-MM-dd HH:mm') : ''}">
+				                </span>
+				            </div>
+				            <span class="wiki-version-badge"
+				                  th:text="'버전 v' + ${selectedWiki.currentVersion}">
+				            </span>
+				        </div>
+				    </div>
+				    <div class="wiki-doc-actions" th:unless="${isVersionView}">
+				        <a th:href="@{/project/wiki/modify/{id}(id=${selectedWiki.wikiPageId}, projectId=${projectId})}"
+				           class="wiki-btn wiki-btn-edit">
+				            수정
+				        </a>
+				        <button type="button"
+				                class="wiki-btn wiki-btn-delete"
+				                onclick="wikiConfirm('정말 삭제하시겠습니까?', '삭제된 위키는 복구할 수 없습니다.', function(){ document.getElementById('deleteForm').submit(); })">
+				            삭제
+				        </button>
+				    </div>
+				</div>
+				<hr class="wiki-divider">
+
+                <div th:if="${selectedWiki.content == null or #strings.isEmpty(selectedWiki.content)}"
+                     class="wiki-no-content">
+                    등록된 내용이 없습니다. 수정 버튼을 눌러 내용을 작성해주세요.
                 </div>
 
-                <hr class="wiki-divider">
-
-                <!-- 본문 - Toast UI Viewer -->
+                <!-- Toast UI Viewer -->
                 <div id="wikiViewer" class="wiki-viewer-wrap"></div>
             </th:block>
         </div>
 
-        <!-- ③ 우측 문서 정보 + 변경 이력 패널 -->
-        <div class="wiki-info-panel" th:if="${selectedWiki != null}">
-            <!-- 문서 정보 -->
-            <div class="wiki-info-section">
-                <div class="wiki-info-title">문서 정보</div>
-                <div class="wiki-info-row">
-                    <span class="info-label">문서 ID</span>
-                    <span class="info-value" th:text="${selectedWiki.wikiPageId}"></span>
-                </div>
-                <div class="wiki-info-row">
-                    <span class="info-label">유형</span>
-                    <span class="info-value">개발 표준</span>
+        <!-- ③ 우측: 문서정보 + 변경이력 -->
+        <div class="wiki-right-col" th:if="${selectedWiki != null}">
+
+            <div class="wiki-info-box">
+                <div class="wiki-box-title">문서 정보</div>
+                <div class="wiki-info-body">
+                    <div class="wiki-info-row">
+                        <span class="info-label">문서 ID</span>
+                        <span class="info-value"
+                              th:text="${currentWiki != null ? currentWiki.wikiPageId : selectedWiki.wikiPageId}"></span>
+                    </div>
+                    <div class="wiki-info-row">
+                        <span class="info-label">태그</span>
+                        <span class="info-value">
+                            <a th:href="@{/project/wiki(projectId=${projectId}, keyword='태그')}"
+                               class="wiki-tag">#태그</a>
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <!-- 변경 이력 -->
-            <div class="wiki-info-section">
-                <div class="wiki-info-title">변경 이력</div>
-                <ul class="wiki-history-list">
-                    <!-- 현재 버전 -->
-                    <li class="wiki-history-item current">
-                        <span class="history-dot current-dot"></span>
-                        <div class="history-info">
-                            <span class="history-version"
-                                  th:text="'v' + ${selectedWiki.currentVersion} + ' (현재 버전)'"></span>
-                            <span class="history-user" th:text="${selectedWiki.userName}"></span>
-                            <span class="history-date"
-                                  th:text="${#temporals.format(selectedWiki.updateAt, 'yyyy-MM-dd HH:mm')}"></span>
-                        </div>
+            <!-- 변경 이력 박스 -->
+            <div class="wiki-history-box">
+                <div class="wiki-box-title">변경 이력</div>
+                <div class="wiki-history-body">
+                <ul class="wiki-history-list" id="historyList">
+
+                    <!-- 최신 버전 -->
+                    <li class="wiki-history-item"
+                        id="historyItem-latest"
+                        th:with="cw=${currentWiki != null ? currentWiki : selectedWiki}">
+                        <label class="history-radio-wrap">
+                            <input type="radio" name="historyVersion"
+                                   class="history-radio"
+                                   value="latest"
+                                   th:attr="data-wiki-id=${cw.wikiPageId},data-project-id=${projectId}">
+                        </label>
+                        <span class="history-version history-version-latest"
+                              th:text="'v' + ${cw.currentVersion} + ' (최신 버전)'"></span>
+                        <span class="history-user" th:text="${cw.userName}"></span>
+                        <span class="history-date"
+                              th:text="${cw.updateAt != null ? #temporals.format(cw.updateAt, 'yyyy-MM-dd HH:mm') : ''}"></span>
                     </li>
+
                     <!-- 이전 버전들 -->
-                    <li class="wiki-history-item" th:each="h : ${historyList}">
-                        <span class="history-dot"></span>
-                        <div class="history-info">
+                    <th:block th:if="${historyList != null}">
+                        <li class="wiki-history-item"
+                            th:each="h : ${historyList}"
+                            th:id="'historyItem-' + ${h.wikiVersion}">
+                            <label class="history-radio-wrap">
+                                <input type="radio" name="historyVersion"
+                                       class="history-radio"
+                                       th:value="${h.wikiVersion}"
+                                       th:attr="data-wiki-id=${selectedWiki.wikiPageId},data-project-id=${projectId}">
+                            </label>
                             <span class="history-version" th:text="'v' + ${h.wikiVersion}"></span>
                             <span class="history-user" th:text="${h.userName}"></span>
                             <span class="history-date"
                                   th:text="${#temporals.format(h.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-                        </div>
-                        <button class="history-view-btn"
-                                th:attr="data-wiki-id=${selectedWiki.wikiPageId},data-version=${h.wikiVersion}"
-                                onclick="viewVersion(this)">이 버전 보기</button>
-                    </li>
+                        </li>
+                    </th:block>
                 </ul>
+
+                <div class="history-view-wrap">
+                    <button type="button" class="history-view-btn" onclick="goToVersion()">
+                        이 버전 보기
+                    </button>
+                </div>
+                </div><!-- /wiki-history-body -->
             </div>
         </div>
 
+        <div th:if="${selectedWiki == null}"></div>
     </div>
 
-    <!-- 버전 보기 모달 -->
-    <div id="versionModal" class="wiki-modal-overlay" style="display:none">
-        <div class="wiki-modal">
-            <div class="wiki-modal-header">
-                <span id="modalVersionTitle">버전 보기</span>
-                <button onclick="closeVersionModal()" class="wiki-modal-close">✕</button>
-            </div>
-            <div id="versionViewer" class="wiki-viewer-wrap"></div>
-        </div>
-    </div>
-
-    <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-viewer.min.js"></script>
+    <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"></script>
     <script th:inline="javascript">
         /*<![CDATA[*/
-        const wikiContent = /*[[${selectedWiki != null ? selectedWiki.content : ''}]]*/ '';
+        var wikiContent    = /*[[${selectedWiki != null ? selectedWiki.content : ''}]]*/ '';
+        var isVersionView  = /*[[${isVersionView != null ? isVersionView : false}]]*/ false;
+        var viewingVersion = /*[[${isVersionView and selectedWiki != null ? selectedWiki.currentVersion : 0}]]*/ 0;
         /*]]>*/
 
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('wikiContent length:', wikiContent ? wikiContent.length : 0);
-            if (wikiContent) {
-                toastui.Editor.factory({
-                    el: document.getElementById('wikiViewer'),
-                    viewer: true,
-                    initialValue: wikiContent
-                });
+        /* ============================================================
+           ★ 커스텀 토스트 알림
+        ============================================================ */
+        var _toastContainer = null;
+
+        function getToastContainer() {
+            if (!_toastContainer) {
+                _toastContainer = document.getElementById('wikiToastContainer');
+                if (!_toastContainer) {
+                    _toastContainer = document.createElement('div');
+                    _toastContainer.id = 'wikiToastContainer';
+                    _toastContainer.className = 'wiki-toast-container';
+                    document.body.appendChild(_toastContainer);
+                }
             }
-        });
+            return _toastContainer;
+        }
 
-        function viewVersion(btn) {
-            const wikiId  = btn.dataset.wikiId;
-            const version = btn.dataset.version;
-            fetch('/project/wiki/history?wikiPageId=' + wikiId + '&wikiVersion=' + version)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('modalVersionTitle').textContent = 'v' + data.wikiVersion + ' 보기';
-                    const el = document.getElementById('versionViewer');
-                    el.innerHTML = '';
-                    toastui.Editor.factory({ el: el, viewer: true, initialValue: data.content || '' });
-                    document.getElementById('versionModal').style.display = 'flex';
+        var TOAST_ICONS = {
+            success: '✅',
+            error:   '❌',
+            warning: '⚠️',
+            info:    'ℹ️'
+        };
+
+        /**
+         * wikiToast(type, title, msg, duration)
+         * type: 'success' | 'error' | 'warning' | 'info'
+         */
+        function wikiToast(type, title, msg, duration) {
+            var container = getToastContainer();
+            var toast = document.createElement('div');
+            toast.className = 'wiki-toast toast-' + (type || 'info');
+
+            var icon  = TOAST_ICONS[type] || 'ℹ️';
+            var msgHtml = msg ? '<span class="wiki-toast-msg">' + msg + '</span>' : '';
+
+            toast.innerHTML =
+                '<span class="wiki-toast-icon">' + icon + '</span>' +
+                '<div class="wiki-toast-body">' +
+                    '<span class="wiki-toast-title">' + title + '</span>' +
+                    msgHtml +
+                '</div>' +
+                '<button class="wiki-toast-close" onclick="wikiToastClose(this.parentElement)">✕</button>';
+
+            container.appendChild(toast);
+
+            var ms = duration || 3200;
+            setTimeout(function() { wikiToastClose(toast); }, ms);
+        }
+
+        function wikiToastClose(el) {
+            if (!el || el.classList.contains('removing')) return;
+            el.classList.add('removing');
+            setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 220);
+        }
+
+        /* ============================================================
+           ★ 커스텀 Confirm 다이얼로그
+        ============================================================ */
+        function wikiConfirm(title, msg, onOk, onCancel) {
+            var overlay = document.createElement('div');
+            overlay.className = 'wiki-confirm-overlay';
+            overlay.innerHTML =
+                '<div class="wiki-confirm-box">' +
+                    '<p class="wiki-confirm-title">' + title + '</p>' +
+                    '<p class="wiki-confirm-msg">' + (msg || '') + '</p>' +
+                    '<div class="wiki-confirm-actions">' +
+                        '<button class="wiki-confirm-btn wiki-confirm-cancel" id="wikiConfirmNo">취소</button>' +
+                        '<button class="wiki-confirm-btn wiki-confirm-ok"     id="wikiConfirmYes">삭제</button>' +
+                    '</div>' +
+                '</div>';
+
+            document.body.appendChild(overlay);
+
+            document.getElementById('wikiConfirmYes').addEventListener('click', function() {
+                document.body.removeChild(overlay);
+                if (typeof onOk === 'function') onOk();
+            });
+            document.getElementById('wikiConfirmNo').addEventListener('click', function() {
+                document.body.removeChild(overlay);
+                if (typeof onCancel === 'function') onCancel();
+            });
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    document.body.removeChild(overlay);
+                    if (typeof onCancel === 'function') onCancel();
+                }
+            });
+        }
+
+        /* ============================================================
+           ★ 변경 이력 라디오 선택 → 아이템 강조 유지
+        ============================================================ */
+        function updateHistoryHighlight(radio) {
+            /* 모든 아이템 강조 해제 */
+            document.querySelectorAll('.wiki-history-item').forEach(function(li) {
+                li.classList.remove('selected-version');
+            });
+            /* 선택한 라디오의 부모 li 강조 */
+            if (radio) {
+                var li = radio.closest('.wiki-history-item');
+                if (li) li.classList.add('selected-version');
+            }
+        }
+
+        function bindHistoryRadios() {
+            document.querySelectorAll('input[name="historyVersion"]').forEach(function(r) {
+                r.addEventListener('change', function() {
+                    updateHistoryHighlight(this);
                 });
+            });
         }
 
-        function closeVersionModal() {
-            document.getElementById('versionModal').style.display = 'none';
+        /* ============================================================
+           ★ 현재 보고 있는 버전 라디오 복원
+           - isVersionView=true  → viewingVersion 에 해당하는 라디오 체크
+           - isVersionView=false → 'latest' 라디오 체크
+        ============================================================ */
+        function initRadio() {
+            var radios = document.querySelectorAll('input[name="historyVersion"]');
+            var targetVal = isVersionView && viewingVersion ? String(viewingVersion) : 'latest';
+
+            radios.forEach(function(r) {
+                if (r.value === targetVal) {
+                    r.checked = true;
+                    updateHistoryHighlight(r);
+                }
+            });
         }
+
+        /* ============================================================
+           Toast UI 한글 툴바
+        ============================================================ */
+        var KO_TOOLBAR_LABELS = {
+            'Heading':      '제목',
+            'Bold':         '굵게',
+            'Italic':       '기울임',
+            'Strike':       '취소선',
+            'HR':           '구분선',
+            'Quote':        '인용',
+            'Bullet List':  '글머리 기호',
+            'Ordered List': '번호 목록',
+            'Task':         '체크리스트',
+            'Indent':       '들여쓰기',
+            'Outdent':      '내어쓰기',
+            'Table':        '표',
+            'Image':        '이미지',
+            'Link':         '링크',
+            'Code':         '인라인 코드',
+            'Codeblock':    '코드 블록',
+            'Scroll Sync':  '스크롤 동기화',
+        };
+
+        function applyKoreanToolbar() {
+            document.querySelectorAll('.toastui-editor-toolbar-icons, .toastui-editor-toolbar button').forEach(function(btn) {
+                var tip = btn.getAttribute('aria-label') || btn.title || '';
+                if (KO_TOOLBAR_LABELS[tip]) {
+                    btn.setAttribute('aria-label', KO_TOOLBAR_LABELS[tip]);
+                    btn.title = KO_TOOLBAR_LABELS[tip];
+                }
+            });
+            document.querySelectorAll('.toastui-editor-mode-switch .tab-item').forEach(function(tab) {
+                var t = tab.textContent.trim();
+                if (t === 'Markdown') tab.textContent = '마크다운';
+                if (t === 'Wysiwyg')  tab.textContent = '편집 모드';
+            });
+        }
+
+        /* ============================================================
+           YouTube 임베드
+        ============================================================ */
+        function extractYoutubeId(url) {
+            if (!url) return null;
+            var patterns = [
+                /youtu\.be\/([^?&\s#]+)/,
+                /youtube\.com\/watch\?.*v=([^&\s]+)/,
+                /youtube\.com\/embed\/([^?&\s]+)/,
+                /youtube\.com\/v\/([^?&\s]+)/,
+                /youtube\.com\/shorts\/([^?&\s]+)/,
+            ];
+            for (var i = 0; i < patterns.length; i++) {
+                var m = url.match(patterns[i]);
+                if (m) return m[1];
+            }
+            return null;
+        }
+
+        function embedYoutubeLinks() {
+            var viewerEl = document.getElementById('wikiViewer');
+            if (!viewerEl) return;
+
+            var inserted = [];
+
+            /* <a> 태그 */
+            viewerEl.querySelectorAll('a').forEach(function(a) {
+                var vid = extractYoutubeId(a.href) || extractYoutubeId(a.textContent.trim());
+                if (!vid) return;
+                var wrap = document.createElement('div');
+                wrap.className = 'wiki-youtube-embed';
+                wrap.innerHTML = '<iframe src="https://www.youtube.com/embed/' + vid
+                    + '" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe>';
+                a.parentNode.insertBefore(wrap, a.nextSibling);
+                inserted.push(vid);
+            });
+
+            /* plain-text URL */
+            var walker = document.createTreeWalker(viewerEl, NodeFilter.SHOW_TEXT, null, false);
+            var nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+            nodes.forEach(function(node) {
+                var text = node.textContent.trim();
+                if (!text) return;
+                var vid = extractYoutubeId(text);
+                if (!vid || inserted.indexOf(vid) !== -1) return;
+                if (node.parentNode && node.parentNode.tagName === 'A') return;
+                var wrap = document.createElement('div');
+                wrap.className = 'wiki-youtube-embed';
+                wrap.innerHTML = '<iframe src="https://www.youtube.com/embed/' + vid
+                    + '" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe>';
+                node.parentNode.insertBefore(wrap, node.nextSibling);
+                inserted.push(vid);
+            });
+        }
+
+        /* ============================================================
+           뷰어 초기화
+        ============================================================ */
+        function initWikiViewer() {
+            var viewerEl = document.getElementById('wikiViewer');
+            if (!viewerEl || !wikiContent || !wikiContent.trim()) return;
+            if (viewerEl.children.length > 0) return;
+            try {
+                toastui.Editor.factory({ el: viewerEl, viewer: true, initialValue: wikiContent });
+                setTimeout(embedYoutubeLinks, 200);
+            } catch(e) {
+                console.error('Toast UI error:', e);
+            }
+        }
+
+        /* ============================================================
+           버전 이동
+        ============================================================ */
+        function goToVersion() {
+            var selected = document.querySelector('input[name="historyVersion"]:checked');
+            if (!selected) {
+                wikiToast('warning', '버전을 선택해주세요.', '변경 이력에서 버전을 선택한 후 눌러주세요.');
+                return;
+            }
+            var version   = selected.value;
+            var wikiId    = selected.getAttribute('data-wiki-id');
+            var projectId = selected.getAttribute('data-project-id');
+            if (version === 'latest') {
+                location.href = '/project/wiki?projectId=' + projectId + '&wikiPageId=' + encodeURIComponent(wikiId);
+            } else {
+                location.href = '/project/wiki/version?projectId=' + projectId
+                              + '&wikiPageId=' + encodeURIComponent(wikiId)
+                              + '&version=' + version;
+            }
+        }
+
+        /* ============================================================
+           DOMContentLoaded
+        ============================================================ */
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                initWikiViewer();
+                bindHistoryRadios();
+                initRadio();
+                applyKoreanToolbar();
+            }, 150);
+        });
     </script>
 
 </section>
 
-<!-- 위키 트리 재귀 fragment -->
 <th:block th:fragment="wikiTreeFragment(nodes)">
     <li th:each="node : ${nodes}">
         <a th:href="@{/project/wiki(projectId=${projectId}, wikiPageId=${node.wikiPageId})}"
            th:text="${node.title}"
-           th:classappend="${selectedWiki != null and selectedWiki.wikiPageId == node.wikiPageId} ? 'active' : ''">
-        </a>
+           th:classappend="${selectedWiki != null and selectedWiki.wikiPageId == node.wikiPageId} ? 'active' : ''"></a>
         <ul th:if="${node.children != null and !#lists.isEmpty(node.children)}">
             <th:block th:replace="~{weple/wiki/detail :: wikiTreeFragment(${node.children})}"></th:block>
         </ul>

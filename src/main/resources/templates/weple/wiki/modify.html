@@ -1,84 +1,276 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org/"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
-
 <head>
     <meta charset="UTF-8">
-    <title>위키 수정</title>
-    <!-- Toast UI Editor CSS -->
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+    <title>위키 내용 수정</title>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/3.2.2/toastui-editor.min.css">
     <link rel="stylesheet" href="/css/wiki/wiki.css">
 </head>
-
 <body>
 <section class="wiki-page">
 
-    <div class="wiki-form-wrap">
-        <h3 class="wiki-form-title">위키 수정</h3>
-
-        <form id="wikiForm" method="post" th:action="@{/project/wiki/modify}">
-            <input type="hidden" name="projectId"   th:value="${projectId}">
-            <input type="hidden" name="wikiPageId"  th:value="${wiki.wikiPageId}">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <input type="hidden" id="contentInput"  name="content">
-
-            <!-- 제목 -->
-            <div class="wiki-form-row">
-                <label class="wiki-form-label required">제목</label>
-                <input type="text" name="title" class="wiki-form-input"
-                       th:value="${wiki.title}" required>
-            </div>
-
-            <!-- 본문 - Toast UI Editor -->
-            <div class="wiki-form-row">
-                <label class="wiki-form-label required">본문</label>
-                <div id="wikiEditor"></div>
-            </div>
-
-            <!-- 버튼 -->
-            <div class="wiki-form-btn-area">
-                <button type="button" class="wiki-btn wiki-btn-cancel"
-                        onclick="history.back()">취소</button>
-                <button type="button" class="wiki-btn wiki-btn-save"
-                        onclick="submitForm()">저장</button>
-            </div>
-        </form>
+    <!-- 편집 잠금 배너 -->
+    <div class="wiki-modify-lock-banner">
+        <span class="wiki-modify-lock-icon">🔒</span>
+        <div class="wiki-modify-lock-text-wrap">
+            <span class="wiki-modify-lock-title">편집 잠금 상태</span>
+            <span class="wiki-modify-lock-desc">
+                문서를 수정하고 있습니다. 다른 사용자의 수정을 잠시 제한합니다.
+                <span th:if="${lockInfo != null and lockInfo.lockedAt != null}"
+                      th:text="'(잠금 시작 : ' + ${lockInfo.lockUserName} + ' '
+                               + ${#temporals.format(lockInfo.lockedAt,'yyyy-MM-dd HH:mm')} + ')'"></span>
+            </span>
+        </div>
     </div>
 
-</section>
+    <form id="wikiForm" method="post" th:action="@{/project/wiki/modify}">
+        <input type="hidden" name="projectId"  th:value="${projectId}">
+        <input type="hidden" name="wikiPageId" th:value="${wiki.wikiPageId}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <input type="hidden" id="contentInput" name="content">
 
-<!-- Toast UI Editor JS -->
-<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+        <!-- 제목 컨트롤 행 -->
+        <div class="wiki-modify-ctrl-row">
+            <span class="wiki-modify-title-label">
+                <span class="title-icon">📝</span>
+                문서 제목 <span class="required">*</span>
+            </span>
+            <input type="text" name="title" id="titleInput"
+                   class="wiki-modify-title-input"
+                   placeholder="문서 제목을 입력하세요."
+                   th:value="${wiki.title}" required>
+            <span class="wiki-modify-status-badge editing">수정 중</span>
+            <span class="wiki-modify-version-badge"
+                  th:text="'현재 v' + ${wiki.currentVersion}">현재 v1</span>
+            <div class="wiki-modify-action-btns">
+                <button type="button" class="wiki-register-btn wiki-register-btn-cancel"
+                        onclick="cancelEdit()">취소</button>
+                <button type="button" class="wiki-register-btn wiki-register-btn-save"
+                        onclick="submitWikiForm()">저장</button>
+            </div>
+        </div>
 
-<script th:inline="javascript">
-    const initialContent = /*[[${wiki.content}]]*/ '';
+        <!-- 2컬럼 바디 -->
+        <div class="wiki-modify-body">
 
-    const editor = new toastui.Editor({
-        el: document.getElementById('wikiEditor'),
-        height: '500px',
-        initialEditType: 'wysiwyg',
-        previewStyle: 'vertical',
-        initialValue: initialContent,
-        toolbarItems: [
-            ['heading', 'bold', 'italic', 'strike'],
-            ['hr', 'quote'],
-            ['ul', 'ol', 'task'],
-            ['table', 'link'],
-            ['code', 'codeblock']
-        ]
-    });
+            <!-- 에디터 카드 -->
+            <div class="wiki-modify-editor-card">
+                <div id="wikiEditor"></div>
 
-    function submitForm() {
-        const content = editor.getMarkdown();
-        if (!content.trim()) {
-            alert('본문을 입력하세요.');
-            return;
+                <!-- 연관 문서 (에디터 하단) -->
+                <div class="wiki-register-relation-area">
+                    <div class="wiki-register-relation-label">🔗 연관 문서</div>
+                    <div class="wiki-tag-chip-inline-wrap" id="tagInputArea" style="position:relative;">
+                        <ul class="wiki-tag-chip-inline-list" id="existingRelations" style="display:contents;">
+                            <li th:each="rel : ${relationList}"
+                                th:attr="data-relation-id=${rel.wikiRelationId}"
+                                style="display:inline-flex; align-items:center; gap:5px;
+                                       height:26px; padding:0 10px; border-radius:20px; margin:2px;
+                                       font-size:12px; font-weight:600;"
+                                th:classappend="${rel.targetType == 'TASK'} ? 'chip-task-li' : 'chip-wiki-li'">
+                                <span th:text="'#' + ${rel.targetTitle}"></span>
+                                <button type="button" class="wiki-chip-remove"
+                                        th:attr="onclick='removeExistingRelation(\'' + ${rel.wikiRelationId} + '\', this)'">✕</button>
+                            </li>
+                        </ul>
+                        <div id="tagChipList" style="display:contents;"></div>
+                        <input type="text" id="hashtagInput"
+                               class="wiki-hashtag-inline-input"
+                               placeholder="#일감 또는 #위키 제목"
+                               autocomplete="off">
+                        <div id="hashtagDropdown" class="wiki-hashtag-dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:9999;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 우측: 변경 이력 -->
+            <div class="wiki-modify-right">
+                <div class="wiki-modify-history-box">
+                    <span class="wiki-modify-history-title">변경 이력</span>
+                    <div class="wiki-modify-history-body">
+
+                        <!-- 현재 편집 중 -->
+                        <div class="wiki-history-card is-editing">
+                            <div class="whc-top">
+                                <span class="whc-version is-current"
+                                      th:text="'v' + ${wiki.currentVersion}">v1</span>
+                                <span class="whc-badge editing">편집중</span>
+                            </div>
+                            <span class="whc-desc">현재 문서를 수정하고 있습니다.</span>
+                            <div class="whc-meta">
+                                <span class="whc-user" th:text="${wiki.userName}"></span>
+                                <span th:text="${wiki.updateAt != null ? #temporals.format(wiki.updateAt,'yyyy-MM-dd HH:mm') : ''}"></span>
+                            </div>
+                        </div>
+
+                        <!-- 이전 버전 목록 (클릭 → 조회) -->
+                        <th:block th:if="${historyList != null and !#lists.isEmpty(historyList)}">
+                            <div class="wiki-history-card wiki-history-card-link"
+                                 th:each="h : ${historyList}"
+                                 th:attr="onclick='viewVersion(\'' + ${wiki.wikiPageId} + '\',' + ${h.wikiVersion} + ')'">
+                                <div class="whc-top">
+                                    <span class="whc-version" th:text="'v' + ${h.wikiVersion}">v0</span>
+                                    <span class="whc-badge old">이전 버전</span>
+                                </div>
+                                <span class="whc-desc" th:text="${h.title != null ? h.title : ''}"></span>
+                                <div class="whc-meta">
+                                    <span class="whc-user" th:text="${h.userName}"></span>
+                                    <span th:text="${h.createdAt != null ? #temporals.format(h.createdAt,'yyyy-MM-dd HH:mm') : ''}"></span>
+                                </div>
+                            </div>
+                        </th:block>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <script src="https://uicdn.toast.com/editor/3.2.2/toastui-editor-all.min.js"></script>
+    <script src="https://uicdn.toast.com/editor/latest/i18n/ko-kr.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var initialContent = /*[[${wiki.content != null ? wiki.content : ''}]]*/ '';
+        var wikiPageId     = /*[[${wiki.wikiPageId}]]*/ '';
+        var projectId      = /*[[${projectId}]]*/ 0;
+        var csrfHeader     = /*[[${_csrf.headerName}]]*/ '';
+        var csrfToken      = /*[[${_csrf.token}]]*/ '';
+        /*]]>*/
+
+        var selectedRelations = [];
+        var wikiEditor;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            wikiEditor = new toastui.Editor({
+                el: document.getElementById('wikiEditor'),
+                height: '100%',
+                minHeight: '480px',
+                initialEditType: 'markdown',
+                previewStyle: 'vertical',
+                language: 'ko-KR',
+                initialValue: initialContent,
+                toolbarItems: [
+                    ['heading', 'bold', 'italic', 'strike'],
+                    ['hr', 'quote'],
+                    ['ul', 'ol', 'task'],
+                    ['table', 'image', 'link'],
+                    ['code', 'codeblock']
+                ]
+            });
+        });
+
+        /* ── 저장 ── */
+        function submitWikiForm() {
+            var title = document.getElementById('titleInput').value.trim();
+            if (!title) { alert('문서 제목은 필수 입력 항목입니다.'); return; }
+            var content = wikiEditor.getMarkdown();
+            if (!content.trim()) { alert('내용을 입력하세요.'); return; }
+            document.getElementById('contentInput').value = content;
+            document.getElementById('wikiForm').submit();
         }
-        document.getElementById('contentInput').value = content;
-        document.getElementById('wikiForm').submit();
-    }
-</script>
 
+        /* ── 취소 (잠금 해제) ── */
+        function cancelEdit() {
+            fetch('/project/wiki/unlock?wikiPageId=' + encodeURIComponent(wikiPageId), {
+                method: 'POST',
+                headers: { [csrfHeader]: csrfToken }
+            }).finally(function () {
+                location.href = '/project/wiki?projectId=' + projectId + '&wikiPageId=' + encodeURIComponent(wikiPageId);
+            });
+        }
+
+        /* ── 브라우저 닫기 시 잠금 해제 ── */
+        window.addEventListener('beforeunload', function () {
+            navigator.sendBeacon('/project/wiki/unlock?wikiPageId=' + encodeURIComponent(wikiPageId) + '&_csrf=' + encodeURIComponent(csrfToken));
+        });
+
+        /* ── 이전 버전 조회 (새 탭으로 열기) ── */
+        function viewVersion(wikiPageId, version) {
+            window.open('/project/wiki/version?projectId=' + projectId
+                + '&wikiPageId=' + encodeURIComponent(wikiPageId)
+                + '&version=' + version, '_blank');
+        }
+
+        /* ── 기존 연관문서 삭제 ── */
+        function removeExistingRelation(relationId, btn) {
+            var headers = {};
+            headers[csrfHeader] = csrfToken;
+            fetch('/project/wiki/relation/' + encodeURIComponent(relationId), { method: 'DELETE', headers: headers })
+                .then(function(r){ if (r.ok) btn.closest('li').remove(); });
+        }
+
+        /* ── 해시태그 자동완성 ── */
+        var hashDebounce = null;
+        var inp = document.getElementById('hashtagInput');
+        var dd  = document.getElementById('hashtagDropdown');
+
+        inp.addEventListener('input', function () {
+            clearTimeout(hashDebounce);
+            var m = this.value.match(/#([\w가-힣ㄱ-ㅎa-zA-Z0-9\-_]+)$/);
+            if (!m || m[1].length < 1) { closeDD(); return; }
+            hashDebounce = setTimeout(function(){ fetchHashtag(m[1]); }, 250);
+        });
+
+        inp.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDD(); });
+
+        document.addEventListener('click', function(e){
+            if (!e.target.closest('#tagInputArea') && !e.target.closest('#hashtagDropdown')) closeDD();
+        });
+
+        function fetchHashtag(keyword) {
+            fetch('/project/wiki/hashtag/search?projectId=' + projectId + '&keyword=' + encodeURIComponent(keyword))
+                .then(function(r){ return r.json(); })
+                .then(function(list){ renderDD(list); });
+        }
+
+        function renderDD(list) {
+            dd.innerHTML = '';
+            if (!list || !list.length) { closeDD(); return; }
+            list.forEach(function(item) {
+                var div = document.createElement('div');
+                div.className = 'wiki-hashtag-item';
+                div.innerHTML = '<span class="wiki-relation-type-badge ' + (item.targetType==='TASK'?'badge-task':'badge-wiki') + '">'
+                    + (item.targetType==='TASK'?'일감':'위키') + '</span>'
+                    + '<span class="wiki-hashtag-item-title">#' + item.targetTitle + '</span>';
+                div.addEventListener('click', function(){ selectItem(item); });
+                dd.appendChild(div);
+            });
+            dd.style.display = 'block';
+        }
+
+        function closeDD() { dd.style.display='none'; dd.innerHTML=''; }
+
+        function selectItem(item) {
+            // 서버에 관계 저장
+            var headers = { 'Content-Type': 'application/json' };
+            headers[csrfHeader] = csrfToken;
+            fetch('/project/wiki/relation/add', {
+                method: 'POST', headers: headers,
+                body: JSON.stringify({
+                    wikiPageId: wikiPageId, targetType: item.targetType, projectId: projectId,
+                    targetTaskId: item.targetType==='TASK' ? item.targetTaskId : null,
+                    targetWikiId: item.targetType==='WIKI' ? item.targetWikiId : null
+                })
+            }).then(function(r){
+                if (r.ok) addChip(item);
+            });
+            inp.value = '';
+            closeDD();
+            inp.focus();
+        }
+
+        function addChip(item) {
+            var chip = document.createElement('span');
+            chip.className = 'wiki-tag-chip ' + (item.targetType==='TASK'?'chip-task':'chip-wiki');
+            chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:20px;margin:2px;font-size:12px;font-weight:600;';
+            chip.innerHTML = '#' + item.targetTitle
+                + ' <button type="button" class="wiki-chip-remove" onclick="this.closest(\'span\').remove()">✕</button>';
+            document.getElementById('tagChipList').appendChild(chip);
+        }
+    </script>
+
+</section>
 </body>
 </html>

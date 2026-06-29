@@ -13,43 +13,62 @@
 				style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
 				<h3 style="margin: 0; font-size: 22px; font-weight: 700;">소요시간</h3>
 				<button class="btn btn-primary"
-					th:onclick="|location.href='@{/insertProjectTime(projectId=${param.projectId != null ? param.projectId : ''})}'|">
+					th:onclick="|location.href='@{/insertProjectTime(projectId=${param.projectId != null ? param.projectId : ''}, taskId=${param.taskId != null ? param.taskId : ''})}'|">
 					+ 소요시간 등록</button>
+			</div>
+
+			<!-- 일감 필터 안내 -->
+			<div th:if="${filterTaskId != null}"
+				style="margin-bottom: 12px; padding: 10px 16px; background: #e8f4fd; border-left: 4px solid #1976d2; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+				<span style="font-size: 14px; color: #1976d2; font-weight: 600;">
+					일감 <strong th:text="${filterTaskId}"></strong> 의 소요시간 목록
+				</span> <a th:href="@{/projectTimeList(projectId=${projectId})}"
+					style="font-size: 13px; color: #1976d2; text-decoration: underline; cursor: pointer;">전체
+					보기</a>
 			</div>
 
 			<!-- 검색 영역 -->
 			<div class="search-box">
-	            <div class="search-title" style="margin-bottom: 10px; font-weight: bold; color: #1976d2; display: flex; align-items: center;">▼ 검색조건</div>
-	            <div class="search-top">
-	                <div class="search-left" id="search-container">
-	                    <div class="search-item" id="workTime-filter">
-	                        <label>작업시간</label>
-							    <input type="number" name="startTime" placeholder="최소시간" 
-							           style="height: 36px; padding: 0 10px;" >
-							    <span>~</span>
-							    <input type="number" name="endTime" placeholder="최대시간" 
-							           style="height: 36px; padding: 0 10px;">
-	                    </div>
-	                </div>
-	                <div class="search-right" style="position: relative;">
-	                    <button class="btn btn-primary" onclick="toggleFilterMenu()">검색조건 추가 ▼</button>
-	                    <div id="filter-menu" class="dropdown-menu-box" style="right:0; top: 40px; display:none; padding:10px; width: 150px; z-index:1000;">
-	                        <label><input type="checkbox" value="2" onchange="toggleFilter(this, 1)"> 작업일자</label><br>
-	                        <label><input type="checkbox" value="3" onchange="toggleFilter(this, 2)"> 사용자</label><br>
-	                        <label><input type="checkbox" value="4" onchange="toggleFilter(this, 3)"> 작업분류</label><br>
-	                        <label><input type="checkbox" value="5" onchange="toggleFilter(this, 4)"> 일감</label><br>
-	                        <label><input type="checkbox" value="6" onchange="toggleFilter(this, 5)"> 내용</label>
-	                    </div>
-	                </div>
-	            </div>
-	            <div class="search-bottom">
-	                <div class="search-action"><button class="btn btn-primary" onclick="applySearch()">적용</button><button class="btn btn-light" onclick="resetSearch()">지우기</button></div>
-	            </div>
-	        </div>
+				<div class="search-title"
+					style="margin-bottom: 10px; font-weight: bold; color: #1976d2; display: flex; align-items: center;">▼
+					검색조건</div>
+				<div class="search-top">
+					<div class="search-left" id="search-container">
+						<div class="search-item" id="workTime-filter">
+							<label>작업시간</label> <input type="number" name="startTime"
+								placeholder="최소시간" style="height: 36px; padding: 0 10px;">
+							<span>~</span> <input type="number" name="endTime"
+								placeholder="최대시간" style="height: 36px; padding: 0 10px;">
+						</div>
+					</div>
+					<div class="search-right" style="position: relative;">
+						<button class="btn btn-primary" onclick="toggleFilterMenu()">검색조건
+							추가 ▼</button>
+						<div id="filter-menu" class="dropdown-menu-box"
+							style="right: 0; top: 40px; display: none; padding: 10px; width: 150px; z-index: 1000;">
+							<label><input type="checkbox" value="2"
+								onchange="toggleFilter(this, 1)"> 작업일자</label><br> <label><input
+								type="checkbox" value="3" onchange="toggleFilter(this, 2)">
+								사용자</label><br> <label><input type="checkbox" value="4"
+								onchange="toggleFilter(this, 3)"> 작업분류</label><br> <label><input
+								type="checkbox" value="5" onchange="toggleFilter(this, 4)">
+								일감</label><br> <label><input type="checkbox" value="6"
+								onchange="toggleFilter(this, 5)"> 내용</label>
+						</div>
+					</div>
+				</div>
+				<div class="search-bottom">
+					<div class="search-action">
+						<button class="btn btn-primary" onclick="applySearch()">적용</button>
+						<button class="btn btn-light" onclick="resetSearch()">지우기</button>
+					</div>
+				</div>
+			</div>
 
 			<!-- 총 시간 -->
 			<div class="summary-area">
-				<span> 총 시간 : <strong th:text="${totalSpentHour + ':00'}">0:00</strong>
+				<span> 총 시간 : <strong
+					th:text="${totalSpentHour != null} ? ${totalSpentHour + ':00'} : '0:00'">0:00</strong>
 				</span>
 			</div>
 
@@ -70,19 +89,20 @@
 					</thead>
 					<tbody>
 						<tr th:if="${#lists.isEmpty(projectTimeList)}">
-							<td colspan="9">조회된 데이터가 없습니다.</td>
+							<td colspan="8">조회된 데이터가 없습니다.</td>
 						</tr>
-
 						<th:block th:each="time : ${projectTimeList}">
-							<tr>
+							<tr th:data-task-id="${time.taskId}">
 								<td th:text="${time.projectTitle}">프로젝트</td>
-								<td th:text="${time.workDate != null} ? ${#dates.format(time.workDate, 'yyyy/MM/dd')} : '-'">작업일자</td>
+								<td
+									th:text="${time.workDate != null} ? ${#dates.format(time.workDate, 'yyyy/MM/dd')} : '-'">작업일자</td>
 								<td th:text="${time.userName}">사용자</td>
 								<td th:text="${time.workNameLabel}">작업분류</td>
 								<td th:text="${time.taskTitle}">일감</td>
 								<td th:text="${time.spentContent}">내용</td>
 								<td class="time" th:text="${time.spentHour} + ':00'">시간</td>
-								<td style="position: relative; text-align: center;" onclick="event.stopPropagation();">
+								<td style="position: relative; text-align: center;"
+									onclick="event.stopPropagation();">
 									<div class="dropdown-wrapper">
 										<span class="more-options-btn" onclick="toggleDropdown(this)">•••</span>
 										<div class="dropdown-menu-box">
@@ -110,90 +130,27 @@
 				</div>
 			</div>
 		</div>
+
 		<script>
-	// 1. 공통 변수
-    const searchInput = document.querySelector("input[name='workTime']");
-    const searchBtn = document.querySelector(".search-action .btn-primary");
-    const clearBtn = document.querySelector(".btn-light");
-    const allRows = document.querySelectorAll(".data-table tbody tr:not([th\\:if])");
-    
-    let currentPage = 1;
-    const itemsPerPage = 10;
-	
- 	// 필터 토글
-    function toggleFilterMenu() {
-        const menu = document.getElementById('filter-menu');
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-    }
- 	
-	function toggleFilter(checkbox, colIndex) {
-	    const container = document.getElementById('search-container');
-	    if (checkbox.checked) {
-	        const div = document.createElement('div');
-	        div.className = 'search-item';
-	        div.id = 'filter-' + checkbox.value;
-	        const inputType = (colIndex === 1) ? 'date' : 'text'; 
-	        div.innerHTML = `
-	            <label style="width: 60px;">${checkbox.nextSibling.textContent.trim()}</label>
-	            <input type="${inputType}" data-col="${colIndex}" placeholder="검색어 입력" 
-	                   style="width: 180px; height: 36px; border: 1px solid #d6d6d6; border-radius: 4px; padding: 0 10px;">`;
-	        container.appendChild(div);
-	    } else {
-	        const el = document.getElementById('filter-' + checkbox.value);
-	        if(el) el.remove();
-	    }
-	}
-    
-	//외부 클릭해도 검색추가 닫힘
-    document.addEventListener('click', function(event) {
-        const menu = document.getElementById('filter-menu');
-        const btn = document.querySelector('.search-right button');
-        if (!menu.contains(event.target) && event.target !== btn) {
-            menu.style.display = 'none';
-        }
-    })
-    
-    let filteredRows = [];
-	document.addEventListener("DOMContentLoaded", function() {
-	    filteredRows = Array.from(allRows); 
+	const allRows = Array.from(document.querySelectorAll(".data-table tbody tr")).filter(row => row.cells.length > 1);
+	let filteredRows = allRows.slice();
+	let currentPage = 1;
+	const itemsPerPage = 10;
+
+	document.addEventListener('DOMContentLoaded', function() {
 	    showPage(1);
 	});
-    
+
 	function showPage(page) {
 	    currentPage = page;
 	    allRows.forEach(row => row.style.display = "none");
 	    const start = (page - 1) * itemsPerPage;
 	    const end = start + itemsPerPage;
-	    const pageRows = filteredRows.slice(start, end);
-	    pageRows.forEach(row => row.style.display = "");
+	    filteredRows.slice(start, end).forEach(row => row.style.display = "");
 	    updatePagination(Math.ceil(filteredRows.length / itemsPerPage));
 	}
-    
-    // 통합 검색 함수
-    function applySearch() {
-	    const inputs = document.querySelectorAll("#search-container input");
-	    const minHour = parseInt(document.querySelector("input[name='startTime']").value) || 0;
-	    const maxHour = parseInt(document.querySelector("input[name='endTime']").value) || 999;
-	    filteredRows = Array.from(allRows).filter(row => {
-	        let isMatch = true;
-	        const timeCell = row.cells[7].innerText; 
-	        const hour = parseInt(timeCell.split(':')[0]);
-	        if (hour < minHour || hour > maxHour) isMatch = false;
-	        
-	        inputs.forEach(input => {
-	            if (input.name === 'startTime' || input.name === 'endTime' || !input.value) return;
-	            const colIndex = parseInt(input.getAttribute('data-col')) + 1; 
-	            let cellValue = row.cells[colIndex]?.innerText.toLowerCase() || "";
-	            if (input.type === 'date') cellValue = cellValue.replace(/\//g, '-');
-	            if (!cellValue.includes(input.value.toLowerCase())) isMatch = false;
-	        });
-	        
-	        return isMatch;
-	    });
-	    showPage(1);
-	}
-	
-    function updatePagination(pageCount) {
+
+	function updatePagination(pageCount) {
 	    const pagingDiv = document.querySelector(".paging");
 	    if (pageCount === 0) pageCount = 1;
 	    pagingDiv.innerHTML = `
@@ -201,97 +158,130 @@
 	        <div id="page-numbers" style="display: flex; gap: 5px; align-items: center;"></div>
 	        <button class="page-btn" onclick="showPage(Math.min(${pageCount}, currentPage + 1))">다음 &gt;</button>
 	    `;
-
 	    const numberSpan = document.getElementById("page-numbers");
 	    for (let i = 1; i <= pageCount; i++) {
 	        const a = document.createElement("a");
 	        a.href = "#";
 	        a.innerText = i;
-	        a.style.display = "flex"; // 추가: 레이아웃 고정
-	        a.style.alignItems = "center";
-	        a.style.justifyContent = "center";
+	        a.style.cssText = "display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:4px; text-decoration:none; color:#666;";
 	        if (i === currentPage) a.className = "active";
 	        a.onclick = (e) => { e.preventDefault(); showPage(i); };
 	        numberSpan.appendChild(a);
 	    }
 	}
-    
-    function toggleDropdown(element) {
-	    const dropdownWrapper = element.parentElement;
-	    const menuBox = dropdownWrapper.querySelector('.dropdown-menu-box');
+
+	// 필터 토글
+	function toggleFilterMenu() {
+	    const menu = document.getElementById('filter-menu');
+	    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+	}
+
+	function toggleFilter(checkbox, colIndex) {
+	    const container = document.getElementById('search-container');
+	    if (checkbox.checked) {
+	        const div = document.createElement('div');
+	        div.className = 'search-item';
+	        div.id = 'filter-' + checkbox.value;
+	        const inputType = (colIndex === 1) ? 'date' : 'text';
+	        div.innerHTML = `
+	            <label style="width: 60px;">${checkbox.nextSibling.textContent.trim()}</label>
+	            <input type="${inputType}" data-col="${colIndex}" placeholder="검색어 입력"
+	                   style="width: 180px; height: 36px; border: 1px solid #d6d6d6; border-radius: 4px; padding: 0 10px;">`;
+	        container.appendChild(div);
+	    } else {
+	        const el = document.getElementById('filter-' + checkbox.value);
+	        if (el) el.remove();
+	    }
+	}
+
+	document.addEventListener('click', function(event) {
+	    const menu = document.getElementById('filter-menu');
+	    const btn = document.querySelector('.search-right button');
+	    if (menu && btn && !menu.contains(event.target) && event.target !== btn) {
+	        menu.style.display = 'none';
+	    }
+	});
+
+	// 통합 검색
+	function applySearch() {
+	    const inputs = document.querySelectorAll("#search-container input");
+	    const minHour = parseInt(document.querySelector("input[name='startTime']").value) || 0;
+	    const maxHour = parseInt(document.querySelector("input[name='endTime']").value) || 999;
+	    filteredRows = allRows.filter(row => {
+	        let isMatch = true;
+	        const timeCell = row.cells[6] ? row.cells[6].innerText : '';
+	        const hour = parseInt(timeCell.split(':')[0]);
+	        if (hour < minHour || hour > maxHour) isMatch = false;
+	        inputs.forEach(input => {
+	            if (input.name === 'startTime' || input.name === 'endTime' || !input.value) return;
+	            const colIndex = parseInt(input.getAttribute('data-col')) + 1;
+	            let cellValue = row.cells[colIndex]?.innerText.toLowerCase() || "";
+	            if (input.type === 'date') cellValue = cellValue.replace(/\//g, '-');
+	            if (!cellValue.includes(input.value.toLowerCase())) isMatch = false;
+	        });
+	        return isMatch;
+	    });
+	    showPage(1);
+	}
+
+	function resetSearch() {
+	    document.querySelectorAll("#search-container input").forEach(input => input.value = "");
+	    filteredRows = allRows.slice();
+	    showPage(1);
+	}
+
+	// 드롭다운
+	function toggleDropdown(element) {
+	    const menuBox = element.parentElement.querySelector('.dropdown-menu-box');
 	    document.querySelectorAll('.dropdown-menu-box').forEach(menu => {
 	        if (menu !== menuBox) menu.classList.remove('show');
 	    });
-
 	    menuBox.classList.toggle('show');
 	}
-		window.onclick = function(event) {
-		    if (!event.target.matches('.more-options-btn')) {
-		        document.querySelectorAll('.dropdown-menu-box').forEach(menu => {
-		            menu.classList.remove('show');
-		        });
-		    }
-		}
-        searchBtn.addEventListener("click", applySearch);
-        searchInput.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                applySearch();
-            }
-        });
-    
-    // 지우기 버튼 클릭 이벤트
-    function resetSearch() {
-	    const inputs = document.querySelectorAll("#search-container input");
-	    inputs.forEach(input => input.value = "");
-	    const rows = document.querySelectorAll(".data-table tbody tr");
-	    rows.forEach(row => row.style.display = "");
-	    showPage(1);
-	}
-	    
-	    //삭제버튼 컨펌
-	    function deleteWork(workId, projectId) {
-		    if(confirm("정말 삭제하시겠습니까?")) {
-		        location.href = `/deleteProjectTime?workId=${workId}&projectId=${projectId}`;
-		    }
-		}
-	    
-	    //CSV 내보내기
-	    function exportToCSV() {
-		    const today = new Date();
-		    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
-		    const fileName = `worktime_${dateStr}.csv`;
-		
-		    let csv = [];
-		    const rows = document.querySelectorAll(".data-table tr:not([style*='display: none'])");
-		
-		    for (let i = 0; i < rows.length; i++) {
-		        let row = [], cols = rows[i].querySelectorAll("td, th");
-		        for (let j = 0; j < cols.length; j++) {
-		            let text = cols[j].innerText.replace(/"/g, '""');
-		            row.push('"' + text + '"');
-		        }
-		        csv.push(row.join(","));
-		    }
-		
-		    const csvFile = new Blob(["\ufeff" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
-		    const downloadLink = document.createElement("a");
-		    downloadLink.href = URL.createObjectURL(csvFile);
-		    downloadLink.download = fileName;
-		    downloadLink.click();
+
+	window.onclick = function(event) {
+	    if (!event.target.matches('.more-options-btn')) {
+	        document.querySelectorAll('.dropdown-menu-box').forEach(menu => menu.classList.remove('show'));
 	    }
+	}
+
+	// 삭제
+	function deleteWork(workId, projectId) {
+	    if (confirm("정말 삭제하시겠습니까?")) {
+	        location.href = `/deleteProjectTime?workId=${workId}&projectId=${projectId}`;
+	    }
+	}
+
+	// CSV 내보내기
+	function exportToCSV() {
+	    const today = new Date();
+	    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
+	    const fileName = `worktime_${dateStr}.csv`;
+	    let csv = [];
+	    const rows = document.querySelectorAll(".data-table tr:not([style*='display: none'])");
+	    for (let i = 0; i < rows.length; i++) {
+	        let row = [], cols = rows[i].querySelectorAll("td, th");
+	        for (let j = 0; j < cols.length; j++) {
+	            let text = cols[j].innerText.replace(/"/g, '""');
+	            row.push('"' + text + '"');
+	        }
+	        csv.push(row.join(","));
+	    }
+	    const csvFile = new Blob(["\ufeff" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+	    const downloadLink = document.createElement("a");
+	    downloadLink.href = URL.createObjectURL(csvFile);
+	    downloadLink.download = fileName;
+	    downloadLink.click();
+	}
 	</script>
+
 		<style>
-/* =========================공통========================= */
-
-
 .worktime-container {
 	width: 95%;
 	margin: 25px auto;
 	min-height: auto;
 }
 
-/* =========================제목 및 검색 ========================= */
 .page-header {
 	margin-bottom: 15px;
 }
@@ -303,18 +293,11 @@
 }
 
 .search-box {
-    border: 1px solid #dcdfe6; /* 선을 다시 넣되 색상을 통일 */
-    border-radius: 6px;
-    background: #fff;
-    padding: 20px 25px;
-    margin-bottom: 20px;
-}
-
-.search-grid {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr); /* 3열 정렬 */
-	gap: 15px;
-	margin-bottom: 15px;
+	border: 1px solid #dcdfe6;
+	border-radius: 6px;
+	background: #fff;
+	padding: 20px 25px;
+	margin-bottom: 20px;
 }
 
 .search-top {
@@ -328,58 +311,55 @@
 	display: flex;
 	align-items: center;
 	gap: 15px;
+	flex-wrap: wrap;
 }
 
 #search-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 기본 3열 */
-    gap: 20px;
-    width: 100%;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
+	width: 100%;
 }
 
-/* 화면 크기가 줄어들 때 반응형 처리 */
-@media (max-width: 1200px) {
-    #search-container {
-        grid-template-columns: repeat(2, 1fr); /* 2열로 변경 */
-    }
+@media ( max-width : 1200px) {
+	#search-container {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
-@media (max-width: 768px) {
-    #search-container {
-        grid-template-columns: 1fr; /* 1열로 변경 (세로로 쌓임) */
-    }
+@media ( max-width : 768px) {
+	#search-container {
+		grid-template-columns: 1fr;
+	}
 }
 
-/* '작업시간' 항목이 그리드 깨뜨리지 않게 조정 */
 #workTime-filter {
-    grid-column: span 1; /* 필요시 span 2로 조정 가능 */
+	grid-column: span 1;
 }
 
 .search-item {
-    display: flex;
-    align-items: center; /* 세로 중앙 정렬 */
-    gap: 10px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 }
 
 .search-item label {
-    width: 70px; 
-    font-weight: 600;
-    flex-shrink: 0; /* 라벨이 찌그러지지 않게 함 */
+	width: 70px;
+	font-weight: 600;
+	flex-shrink: 0;
 }
 
-.search-item input[type="text"], 
-.search-item input[type="number"], 
-.search-item input[type="date"] {
-    border: 1px solid #dcdfe6; /* 모든 입력창 테두리 색상 통일 */
-    border-radius: 4px;
-    height: 36px;
-    padding: 0 10px;
-    flex-grow: 1; /* 입력창이 남은 공간을 채우게 함 */
+.search-item input[type="text"], .search-item input[type="number"],
+	.search-item input[type="date"] {
+	border: 1px solid #dcdfe6;
+	border-radius: 4px;
+	height: 36px;
+	padding: 0 10px;
+	flex-grow: 1;
 }
 
-/* 범위 검색(최소~최대) 구간이 있다면 */
 .search-item span {
-    margin: 0 5px; /* 물결표(~) 양옆 간격 */
+	margin: 0 5px;
 }
 
 .search-item select {
@@ -397,14 +377,11 @@
 	gap: 10px;
 }
 
-.search-left {
+.search-bottom {
 	display: flex;
-	flex-wrap: wrap; /* 여러 개 추가 시 아래로 줄바꿈 */
-	gap: 15px;
-	align-items: center;
+	justify-content: flex-end;
 }
 
-/* =========================버튼 ========================= */
 .btn {
 	min-width: 90px;
 	height: 36px;
@@ -433,7 +410,6 @@
 	background: #f5f5f5;
 }
 
-/* =========================테이블 영역 ========================= */
 .table-wrapper {
 	border: 1px solid #e2e2e2;
 	border-radius: 6px;
@@ -458,12 +434,11 @@
 	vertical-align: middle;
 }
 
-.data-table th:nth-child(1), .data-table td:nth-child(1), /* 프로젝트 */
-	.data-table th:nth-child(4), .data-table td:nth-child(4), /* 작업분류 */
-	.data-table th:nth-child(5), .data-table td:nth-child(5), /* 일감 */
-	.data-table th:nth-child(6), .data-table td:nth-child(6) /* 내용 */ {
+.data-table th:nth-child(1), .data-table td:nth-child(1), .data-table th:nth-child(4),
+	.data-table td:nth-child(4), .data-table th:nth-child(5), .data-table td:nth-child(5),
+	.data-table th:nth-child(6), .data-table td:nth-child(6) {
 	text-align: left;
-	padding-left: 15px; /* 이 열들은 그대로 15px 유지 */
+	padding-left: 15px;
 }
 
 .data-table th:nth-child(7), .data-table td:nth-child(7), .data-table th:nth-child(8),
@@ -473,26 +448,64 @@
 
 .data-table th:nth-child(1), .data-table td:nth-child(1) {
 	text-align: left;
-	padding-left: 25px; /* 여백을 키워서 테두리와의 간격을 넓힘 */
+	padding-left: 25px;
 }
 
-.data-table td:nth-child(1), .data-table td:nth-child(4), .data-table td:nth-child(5),
-	.data-table td:nth-child(6) {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-/* 텍스트 줄임 처리 (관리 셀 제외) */
 .data-table td:not(:last-child) {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-/* 관리 버튼(마지막 셀) 및 드롭다운 */
+.data-table td:nth-child(6) {
+	white-space: normal;
+	text-align: left;
+	padding-left: 15px;
+}
+
 .data-table td:last-child {
 	overflow: visible !important;
+}
+
+.data-table tbody tr:hover {
+	background: #f8fbff;
+}
+
+.data-table th:nth-child(1) {
+	width: 10%;
+}
+
+.data-table th:nth-child(2) {
+	width: 10%;
+}
+
+.data-table th:nth-child(3) {
+	width: 12%;
+}
+
+.data-table th:nth-child(4) {
+	width: 10%;
+}
+
+.data-table th:nth-child(5) {
+	width: 22%;
+	text-align: left;
+	padding-left: 15px;
+}
+
+.data-table th:nth-child(6) {
+	width: auto;
+	text-align: left;
+	padding-left: 15px;
+}
+
+.data-table th:nth-child(7) {
+	width: 8%;
+	font-weight: bold;
+}
+
+.data-table th:nth-child(8) {
+	width: 7%;
 }
 
 .dropdown-wrapper {
@@ -520,12 +533,12 @@
 	position: absolute;
 	right: 0;
 	top: 100%;
-	background-color: #ffffff;
+	background-color: #fff;
 	min-width: 90px;
-	box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+	box-shadow: 0px 4px 12px rgba(0, 0, 0, .12);
 	border: 1px solid #e2e8f0;
 	border-radius: 6px;
-	z-index: 999; /* z-index 높여서 가려짐 방지 */
+	z-index: 999;
 	padding: 4px 0;
 }
 
@@ -553,7 +566,6 @@
 	color: #ef4444;
 }
 
-/* =========================총 시간 영역 ========================= */
 .summary-area {
 	display: flex;
 	justify-content: flex-end;
@@ -563,52 +575,9 @@
 
 .summary-area strong {
 	color: #1976d2;
-	margin-left: 5px; /* 텍스트와 숫자 간 간격 추가 */
+	margin-left: 5px;
 }
 
-/* 열별 정렬 및 너비 설정 (체크박스 열 삭제 반영) */
-.data-table th:nth-child(1) {
-	width: 10%;
-} /* 프로젝트 */
-.data-table th:nth-child(2) {
-	width: 10%;
-} /* 작업일자 */
-.data-table th:nth-child(3) {
-	width: 12%;
-} /* 사용자 */
-.data-table th:nth-child(4) {
-	width: 10%;
-} /* 작업분류 */
-.data-table th:nth-child(5) {
-	width: 22%;
-	text-align: left;
-	padding-left: 15px;
-} /* 일감 */
-.data-table th:nth-child(6) {
-	width: auto;
-	text-align: left;
-	padding-left: 15px;
-} /* 내용 */
-.data-table th:nth-child(7) {
-	width: 8%;
-	font-weight: bold;
-} /* 시간 */
-.data-table th:nth-child(8) {
-	width: 7%;
-} /* 관리 */
-
-/* 내용 열(6번째) 줄바꿈 허용 */
-.data-table td:nth-child(6) {
-	white-space: normal;
-	text-align: left;
-	padding-left: 15px;
-}
-
-.data-table tbody tr:hover {
-	background: #f8fbff;
-}
-
-/* =========================하단 페이징 및 내보내기 ========================= */
 .bottom-area {
 	margin-top: 30px;
 	position: relative;
@@ -664,7 +633,6 @@
 	font-weight: 600;
 }
 
-/* =========================반응형 ========================= */
 @media ( max-width : 900px) {
 	.search-top {
 		flex-direction: column;

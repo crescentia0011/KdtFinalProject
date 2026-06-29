@@ -1,43 +1,13 @@
 /* ===================== 프로젝트 설정 페이지 ===================== */
-.settings-page {
-    padding: 20px;
-    min-height: 100vh;
-}
+.settings-page { padding: 28px 30px 36px; color: #384a66; }
 
-.settings-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #333;
-    margin: 0 0 20px 0;
-}
+.repository-title { margin: 0; color: #2b4c7e; font-size: 24px; font-weight: 700; }
+.repository-form-title { margin: 0 0 20px; color: #2b4c7e; font-size: 20px; font-weight: 700; }
 
 /* ── 탭 바 ── */
-.settings-tab-bar {
-    display: flex;
-    gap: 2px;
-    margin: 0 0 20px;
-    border-bottom: 1px solid #e6edf8;
-}
-
-.settings-tab-bar a {
-    padding: 9px 20px;
-    color: #7b8aa3;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    border-radius: 6px 6px 0 0;
-    transition: .15s;
-}
-
-.settings-tab-bar a.active {
-    background: #4d84ff;
-    color: #fff;
-}
-
-.settings-tab-bar a:not(.active):hover {
-    color: #4d84ff;
-    background: #f0f4ff;
-}
+.repository-setting-tabs { display: flex; gap: 2px; margin: 20px 0 28px; border-bottom: 1px solid #e6edf8; }
+.repository-setting-tabs a { padding: 9px 18px; color: #7b8aa3; font-size: 13px; font-weight: 600; text-decoration: none; }
+.repository-setting-tabs a.active { border-radius: 6px 6px 0 0; background: #5271ff; color: #fff; }
 
 /* ── 카드 ── */
 .settings-card {

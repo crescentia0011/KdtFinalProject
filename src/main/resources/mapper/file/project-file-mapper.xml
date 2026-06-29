@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.file.mapper.FileMapper">
+	<!-- 프로젝트 내 파일관리 -->
+	<!-- 전체조회 -->
+	<select id="projectFileAll" resultType="ProjectFileVO">
+		SELECT f.file_id
+	           , f.logical_name
+	           , f.is_deleted
+	           , f.created_at
+	           , t.task_id
+	           , t.task_title
+	           , p.project_id
+	           , p.project_title
+	           , fv.version_number
+	           , fv.file_size
+	           , fv.uploader
+	           , fv.uploaded_at
+	    FROM files f
+	    LEFT JOIN task t ON f.task_id = t.task_id
+	    LEFT JOIN project p ON t.project_id = p.project_id
+	    LEFT JOIN (
+	        SELECT file_id
+	             , version_number
+	             , file_size
+	             , uploader
+	             , uploaded_at
+	        FROM file_versions
+	        WHERE (file_id, version_number) IN (
+	            SELECT file_id, MAX(version_number)
+	            FROM file_versions
+	            GROUP BY file_id
+	        )
+	    ) fv ON f.file_id = fv.file_id
+	    WHERE f.is_deleted = 'N'
+	    ORDER BY f.created_at DESC
+	</select>
+	
+	<!-- 상세조회 -->
+	<select id="projectFileInfo" parameterType="String" resultType="ProjectFileVO">
+		SELECT f.file_id
+       		   , f.task_id
+       		   , f.post_id
+       		   , f.logical_name
+       		   , f.is_deleted
+       		   , f.created_at
+		FROM files f
+		JOIN file_versions fs ON f.file_id = fs.file_id
+		WHERE f.file_id = #{fileId}
+	</select>
+	
+	<!-- 등록 -->
+	<insert id="insertProjectFile" parameterType="ProjectFileVO">
+		<selectKey keyProperty="fileId"
+				   resultType="String"
+				   order="BEFORE">
+			SELECT 'FIL-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' || 
+               (SELECT NVL(MAX(TO_NUMBER(SUBSTR(file_id, 12))), 0) + 1
+                FROM files 
+                WHERE file_id LIKE 'FIL-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_%')
+        	FROM DUAL
+		</selectKey>
+		INSERT INTO files (
+							file_id
+							, task_id
+							, post_id
+							, logical_name
+							, is_deleted
+							, created_at
+						   )
+		VALUES(
+				#{fileId}
+				, #{fileId}
+				, #{postId}
+				, #{logicalName}
+				, #{isDeleted}
+				, #{createdAt}
+			  )
+	</insert>
+	
+	<!-- 파일 삭제 전 버전 전체 삭제 -->
+	<delete id="deleteProjectFileVersionByFileId" parameterType="String">
+	    DELETE FROM file_versions
+	    WHERE file_id = #{fileId}
+	</delete>
+
+	<!-- 삭제 -->
+	<delete id="deleteProjectFile" parameterType="String">
+		DELETE FROM files
+		WHERE file_id = #{fileId}
+	</delete>
+	
+	
+	<!-- 프로젝트 내 파일 버전 관리 -->
+	<!-- 전체조회 -->
+	<select id="projectFileVersionAll" parameterType="String" resultType="ProjectFileVersionsVO">
+	    SELECT fv.version_id
+	         	, fv.file_id
+	         	, fv.version_number
+	         	, fv.file_path
+	         	, fv.file_size
+	         	, fv.uploader
+	         	, fv.uploaded_at
+	         	, fv.saved_name
+	    FROM file_versions fv
+	    WHERE fv.file_id = #{fileId}
+	    ORDER BY fv.version_number
+	</select>
+	
+	<!-- 상세조회 -->
+	<select id="projectFileVersionInfo" parameterType="String" resultType="ProjectFileVersionsVO">
+	    SELECT fv.version_id
+	         	, fv.file_id
+	         	, fv.version_number
+	         	, fv.file_path
+	         	, fv.file_size
+	         	, fv.uploader
+	         	, fv.uploaded_at
+	        	, fv.saved_name
+	    FROM file_versions fv
+	    WHERE fv.version_id = #{versionId}
+	</select>
+	
+	<!-- 등록 -->
+	<insert id="insertProjectFileVersion" parameterType="ProjectFileVersionsVO">
+	    <selectKey keyProperty="versionId"
+	               resultType="String"
+	               order="BEFORE">
+	        SELECT 'VER-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' ||
+	               (SELECT NVL(MAX(TO_NUMBER(SUBSTR(version_id, 12))), 0) + 1
+	                FROM file_versions
+	                WHERE version_id LIKE 'VER-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_%')
+	        FROM DUAL
+	    </selectKey>
+	    INSERT INTO file_versions (
+	                                version_id
+	                              	, file_id
+	                              	, version_number
+	                              	, file_path
+	                              	, file_size
+	                              	, uploader
+	                              	, uploaded_at
+	                              	, saved_name
+	                              )
+	    VALUES (
+	             #{versionId}
+	           	 , #{fileId}
+	           	 , #{versionNumber}
+	           	 , #{filePath}
+	           	 , #{fileSize}
+	             , #{uploader}
+	           	 , #{uploadedAt}
+	           	 , #{savedName}
+	           )
+	</insert>
+	
+	<!-- 삭제 -->
+	<delete id="deleteProjectFileVersion" parameterType="String">
+	    DELETE FROM file_versions
+	    WHERE version_id = #{versionId}
+	</delete>
+</mapper>

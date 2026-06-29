@@ -1,220 +1,360 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org/"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
 <title>WEPLE - 파일관리</title>
 <link rel="stylesheet" href="/css/system/project-create.css">
 </head>
 <body>
-<section>
+	<section>
 
-<div class="file-wrap">
+		<div class="file-wrap">
 
-  <!-- 상단 타이틀 + 버튼 -->
-  <div class="file-toolbar">
-    <h3 class="file-page-title">파일관리</h3>
-    <div class="file-toolbar-right">
-      <!-- 검색 -->
-      <div class="file-search-form">
-        <div class="search-field">
-          <span class="search-label">파일명:</span>
-          <input type="text" id="searchKeyword" placeholder="파일명">
-        </div>
-        <div class="search-field">
-          <span class="search-label">일감명:</span>
-          <input type="text" id="searchTagKeyword" placeholder="일감명">
-        </div>
-        <button type="button" class="btn-icon-search" onclick="searchFiles()">🔍</button>
-      </div>
-      <!-- 파일 등록 버튼 -->
-      <button class="page-btn active" onclick="openUploadModal()">📁 파일 등록</button>
-      <!-- 다운로드 이력 버튼 -->
-      <button class="page-btn" onclick="goDownloadHistory()">👤 다운로드 이력</button>
-    </div>
-  </div>
+			<!-- 상단 타이틀 + 버튼 -->
+			<div class="file-toolbar">
+				<h3 class="file-page-title">파일관리</h3>
+				<div class="file-toolbar-right">
+					<button class="page-btn active" onclick="openUploadModal()">📁
+						파일 등록</button>
+					<button class="page-btn" onclick="goDownloadHistory()">👤
+						다운로드 이력</button>
+				</div>
+			</div>
 
-  <!-- 파일 목록 테이블 -->
-  <div class="project-card" style="padding:0;">
-    <table class="file-table">
-      <thead>
-        <tr>
-          <th>파일명</th>
-          <th>프로젝트명</th>
-          <th>연결 일감</th>
-          <th>일감 유형</th>
-          <th>크기</th>
-          <th>업로드 사용자</th>
-          <th>업로드일</th>
-          <th>파일 버전</th>
-          <th width="60">⬇</th>
-          <th width="60">🗑</th>
-        </tr>
-      </thead>
-      <tbody id="fileTableBody">
-        <tr>
-          <td><a class="file-name-link" href="#" onclick="goDetail(1); return false;">기획서_v2.pdf</a></td>
-          <td>WEPLE 프로젝트</td>
-          <td><span class="task-badge-linked">#3 메인화면 설계</span></td>
-          <td>디자인</td>
-          <td>2.4 MB</td>
-          <td>김위플</td>
-          <td>2026-06-20 14:32</td>
-          <td><span class="version-badge">v2.0</span></td>
-          <td class="td-center"><button class="icon-btn" title="다운로드" onclick="downloadFile(1)">⬇</button></td>
-          <td class="td-center"><button class="icon-btn icon-btn-del" title="삭제" onclick="deleteFile(1, 'linked')">🗑</button></td>
-        </tr>
-        <tr>
-          <td><a class="file-name-link" href="#" onclick="goDetail(2); return false;">UI_가이드라인.png</a></td>
-          <td>WEPLE 프로젝트</td>
-          <td><span class="task-badge-none">-</span></td>
-          <td>-</td>
-          <td>1.1 MB</td>
-          <td>이개발</td>
-          <td>2026-06-22 09:15</td>
-          <td><span class="version-badge">v1.0</span></td>
-          <td class="td-center"><button class="icon-btn" title="다운로드" onclick="downloadFile(2)">⬇</button></td>
-          <td class="td-center"><button class="icon-btn icon-btn-del" title="삭제" onclick="deleteFile(2, 'none')">🗑</button></td>
-        </tr>
-        <tr>
-          <td><a class="file-name-link" href="#" onclick="goDetail(3); return false;">회의록_0625.docx</a></td>
-          <td>프로젝트1</td>
-          <td><span class="task-badge-linked">#7 스프린트 회의</span></td>
-          <td>문서</td>
-          <td>320 KB</td>
-          <td>박미나</td>
-          <td>2026-06-25 16:48</td>
-          <td><span class="version-badge">v1.0</span></td>
-          <td class="td-center"><button class="icon-btn" title="다운로드" onclick="downloadFile(3)">⬇</button></td>
-          <td class="td-center"><button class="icon-btn icon-btn-del" title="삭제" onclick="deleteFile(3, 'linked')">🗑</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+			<!-- 검색 영역 (project-total 방식, 보라색 테마) -->
+			<div class="search-box">
+				<div class="search-title">▼ 검색조건</div>
+				<div class="search-top">
+					<div id="search-container">
+						<!-- 파일명이 메인 -->
+						<div class="search-item" id="fileName-filter">
+							<label>파일명</label> <input type="text" name="fileName"
+								placeholder="파일명을 입력하세요."
+								onkeydown="if(event.key==='Enter') applySearch()">
+						</div>
+					</div>
+					<div class="search-right-area">
+						<button class="page-btn active" onclick="toggleFilterMenu()">검색조건
+							추가 ▼</button>
+						<div id="filter-menu" class="filter-dropdown"
+							style="display: none;">
+							<label><input type="checkbox" value="2"
+								onchange="toggleFilter(this, 2)"> 연결 일감</label><br> <label><input
+								type="checkbox" value="5" onchange="toggleFilter(this, 5)">
+								업로드 사용자</label><br> <label><input type="checkbox" value="6"
+								onchange="toggleFilter(this, 6)"> 업로드일</label>
+						</div>
+					</div>
+				</div>
+				<div class="search-bottom">
+					<div class="search-action">
+						<button class="page-btn active" onclick="applySearch()">적용</button>
+						<button class="page-btn" onclick="resetSearch()">지우기</button>
+					</div>
+				</div>
+			</div>
 
-  <!-- 페이징 -->
-  <div class="paging-row">
-    <button class="pg-btn pg-disabled">이전</button>
-    <button class="pg-btn pg-active">1</button>
-    <button class="pg-btn">2</button>
-    <button class="pg-btn">다음</button>
-  </div>
+			<!-- 파일 목록 테이블 -->
+			<div class="table-container">
+				<table class="file-table">
+					<thead>
+						<tr>
+							<th>파일명</th>
+							<th>프로젝트명</th>
+							<th>연결 일감</th>
+							<th>일감 유형</th>
+							<th>크기</th>
+							<th>업로드 사용자</th>
+							<th>업로드일</th>
+							<th>파일 버전</th>
+							<th width="60" style="text-align: center;">다운로드</th>
+							<th width="60" style="text-align: center;">삭제</th>
+						</tr>
+					</thead>
+					<tbody id="fileTableBody">
+						<tr th:if="${#lists.isEmpty(projectFileList)}">
+							<td colspan="10" class="empty-row">등록된 파일이 없습니다.</td>
+						</tr>
+						<tr th:each="file : ${projectFileList}"
+							th:data-file-name="${file.logicalName}"
+							th:data-task-title="${file.taskTitle}"
+							th:data-uploader="${file.uploader}"
+							th:data-uploaded-at="${file.uploadedAt != null} ? ${#dates.format(file.uploadedAt, 'yyyy-MM-dd')} : (${file.createdAt != null} ? ${#dates.format(file.createdAt, 'yyyy-MM-dd')} : '')"
+							th:data-task-id="${file.taskId}">
+							<td><a class="file-name-link"
+								th:href="@{/project/{pid}/file/projectFileInfo(pid=${projectId}, fileId=${file.fileId})}"
+								th:text="${file.logicalName}">파일명</a></td>
+							<td
+								th:text="${file.projectTitle != null} ? ${file.projectTitle} : '-'">-</td>
+							<td><span th:if="${file.taskId != null}"
+								class="task-badge-linked"
+								th:text="${file.taskTitle != null} ? ${file.taskTitle} : ${file.taskId}"></span>
+								<span th:if="${file.taskId == null}" class="task-badge-none">-</span>
+							</td>
+							<td>-</td>
+							<td
+								th:text="${file.fileSize != null and file.fileSize != 0} ? ${file.fileSize} + ' B' : '-'">-</td>
+							<td th:text="${file.uploader != null} ? ${file.uploader} : '-'">-</td>
+							<td
+								th:text="${file.uploadedAt != null} ? ${#dates.format(file.uploadedAt, 'yyyy-MM-dd')} : (${file.createdAt != null} ? ${#dates.format(file.createdAt, 'yyyy-MM-dd')} : '-')">-</td>
+							<td><span class="version-badge"
+								th:text="${file.versionNumber != null and file.versionNumber != 0} ? 'v' + ${file.versionNumber} + '.0' : 'v1.0'">v1.0</span>
+							</td>
+							<td class="td-center">
+								<button class="icon-btn" title="다운로드"
+									th:data-file-id="${file.fileId}"
+									onclick="downloadFile(this.dataset.fileId)">⬇</button>
+							</td>
+							<td class="td-center">
+								<button class="icon-btn icon-btn-del" title="삭제"
+									th:data-file-id="${file.fileId}"
+									th:data-task-id="${file.taskId}"
+									th:data-file-name="${file.logicalName}"
+									onclick="deleteFile(this.dataset.fileId, this.dataset.taskId, this.dataset.fileName)">🗑</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 
-</div>
+			<!-- 페이징 -->
+			<div class="file-bottom-area">
+				<div class="file-paging"></div>
+			</div>
 
-<!-- 파일 업로드 모달 -->
-<div id="uploadModal" class="modal-backdrop" style="display:none;">
-  <div class="modal-box">
-    <div class="modal-header">
-      <span class="modal-title">파일 등록</span>
-      <button class="modal-close" onclick="closeUploadModal()">✕</button>
-    </div>
-    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-      <span class="drop-icon">☁</span>
-      <p class="drop-text">파일 선택 또는 드래그</p>
-      <p class="drop-sub" id="selectedFileName"></p>
-    </div>
-    <input type="file" id="fileInput" style="display:none;" onchange="onFileSelected(this)">
+		</div>
 
-    <div class="modal-form-group">
-      <label class="modal-label">프로젝트 (선택)</label>
-      <input type="text" class="form-input-text" value="현재 프로젝트" readonly>
-    </div>
-    <div class="modal-form-group">
-      <label class="modal-label">연결 일감 (선택)</label>
-      <select class="form-input-text">
-        <option value="">선택 안함</option>
-        <option value="3">#3 메인화면 설계</option>
-        <option value="7">#7 스프린트 회의</option>
-      </select>
-    </div>
-    <div class="modal-form-group">
-      <label class="modal-label">일감 유형 (선택)</label>
-      <select class="form-input-text">
-        <option value="">선택 안함</option>
-        <option>디자인</option>
-        <option>문서</option>
-      </select>
-    </div>
-    <div class="modal-form-group">
-      <label class="modal-label">태그 입력 <span class="req">*</span></label>
-      <input type="text" id="fileTagInput" class="form-input-text" placeholder="#디자인 #피그마">
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="page-btn btn-cancel" onclick="closeUploadModal()">취소</button>
-      <button type="button" class="page-btn active" onclick="submitUpload()">등록</button>
-    </div>
-  </div>
-</div>
+		<!-- 파일 업로드 모달 -->
+		<div id="uploadModal" class="modal-backdrop" style="display: none;">
+			<div class="modal-box">
+				<div class="modal-header">
+					<span class="modal-title">파일 등록</span>
+					<button class="modal-close" onclick="closeUploadModal()">✕</button>
+				</div>
+				<div class="drop-zone" id="dropZone"
+					onclick="document.getElementById('fileInput').click()">
+					<span class="drop-icon">☁</span>
+					<p class="drop-text">파일 선택 또는 드래그</p>
+					<p class="drop-sub" id="selectedFileName"></p>
+				</div>
+				<input type="file" id="fileInput" style="display: none;"
+					onchange="onFileSelected(this)">
+				<div class="modal-form-group">
+					<label class="modal-label">프로젝트 (선택)</label> <input type="text"
+						class="form-input-text" value="현재 프로젝트" readonly>
+				</div>
+				<div class="modal-form-group">
+					<label class="modal-label">연결 일감 (선택)</label> <select
+						class="form-input-text">
+						<option value="">선택 안함</option>
+					</select>
+				</div>
+				<div class="modal-form-group">
+					<label class="modal-label">태그 입력 <span class="req">*</span></label>
+					<input type="text" id="fileTagInput" class="form-input-text"
+						placeholder="#디자인 #피그마">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="page-btn btn-cancel"
+						onclick="closeUploadModal()">취소</button>
+					<button type="button" class="page-btn active"
+						onclick="submitUpload()">등록</button>
+				</div>
+			</div>
+		</div>
 
-<!-- 삭제 확인 모달 -->
-<div id="deleteModal" class="modal-backdrop" style="display:none;">
-  <div class="modal-box" style="max-width:360px;">
-    <div class="modal-header">
-      <span class="modal-title">파일 삭제</span>
-      <button class="modal-close" onclick="closeDeleteModal()">✕</button>
-    </div>
-    <div style="padding:24px; text-align:center;">
-      <p id="deleteMsg" style="font-size:15px; color:#1a1a2e; margin:0 0 24px; line-height:1.6;"></p>
-      <div style="display:flex; justify-content:center; gap:12px;">
-        <button class="page-btn" onclick="closeDeleteModal()">취소</button>
-        <button class="page-btn active" style="background:#e53e3e; border-color:#e53e3e;" onclick="confirmDelete()">삭제</button>
-      </div>
-    </div>
-  </div>
-</div>
+		<!-- 삭제 확인 모달 -->
+		<div id="deleteModal" class="modal-backdrop" style="display: none;">
+			<div class="modal-box" style="max-width: 380px;">
+				<div class="modal-header">
+					<span class="modal-title">파일 삭제</span>
+					<button class="modal-close" onclick="closeDeleteModal()">✕</button>
+				</div>
+				<div style="padding: 24px; text-align: center;">
+					<p id="deleteMsg"
+						style="font-size: 14px; color: #1a1a2e; margin: 0 0 24px; line-height: 1.7; white-space: pre-line;"></p>
+					<div style="display: flex; justify-content: center; gap: 12px;">
+						<button class="page-btn" onclick="closeDeleteModal()">취소</button>
+						<button class="page-btn active"
+							style="background: #e53e3e; border-color: #e53e3e;"
+							onclick="confirmDelete()">삭제</button>
+					</div>
+				</div>
+			</div>
+		</div>
 
-<script>
+		<script>
+// 토스트
 function showToast(msg, type) {
-  var old = document.getElementById('_toastWrap');
+  const old = document.getElementById('_toastWrap');
   if (old) old.remove();
-  var wrap = document.createElement('div');
+  const wrap = document.createElement('div');
   wrap.id = '_toastWrap';
   wrap.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;';
-  var box = document.createElement('div');
+  const box = document.createElement('div');
   box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
   box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
   box.textContent = msg;
   wrap.appendChild(box);
   document.body.appendChild(wrap);
-  setTimeout(function() {
+  setTimeout(() => {
     wrap.style.transition = 'opacity 0.4s';
     wrap.style.opacity = '0';
-    setTimeout(function() { wrap.remove(); }, 400);
+    setTimeout(() => wrap.remove(), 400);
   }, 2500);
 }
 
-function searchFiles() {
-  showToast('검색 기능은 서버 연동 후 사용 가능합니다.', 'error');
+// 페이징
+let currentPage = 1;
+const itemsPerPage = 10;
+let allRows = [];
+let filteredRows = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  allRows = Array.from(document.querySelectorAll('#fileTableBody tr[data-file-name]'));
+  filteredRows = allRows.slice();
+  showPage(1);
+});
+
+function showPage(page) {
+  currentPage = page;
+  allRows.forEach(row => row.style.display = 'none');
+  const start = (page - 1) * itemsPerPage;
+  filteredRows.slice(start, start + itemsPerPage).forEach(row => row.style.display = '');
+  updatePagination(Math.ceil(filteredRows.length / itemsPerPage));
 }
+
+function updatePagination(pageCount) {
+  const pagingDiv = document.querySelector('.file-paging');
+  if (pageCount === 0) pageCount = 1;
+  pagingDiv.innerHTML =
+    `<button class="fp-btn" onclick="showPage(Math.max(1, currentPage - 1))">&lt; 이전</button>` +
+    `<div id="file-page-numbers" style="display:flex; gap:5px; align-items:center;"></div>` +
+    `<button class="fp-btn" onclick="showPage(Math.min(${pageCount}, currentPage + 1))">다음 &gt;</button>`;
+  const numberSpan = document.getElementById('file-page-numbers');
+  for (let i = 1; i <= pageCount; i++) {
+    const a = document.createElement('a');
+    a.href = '#';
+    a.innerText = i;
+    a.style.cssText = 'display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:6px; text-decoration:none; color:#4A5568; font-size:13px;';
+    if (i === currentPage) { a.style.background = '#8B7CF8'; a.style.color = '#fff'; a.style.fontWeight = 'bold'; }
+    a.onclick = (e) => { e.preventDefault(); showPage(i); };
+    numberSpan.appendChild(a);
+  }
+}
+
+// 검색 필터 토글
+function toggleFilterMenu() {
+  const menu = document.getElementById('filter-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function toggleFilter(checkbox, colIndex) {
+  const container = document.getElementById('search-container');
+  if (checkbox.checked) {
+    const div = document.createElement('div');
+    div.className = 'search-item';
+    div.id = 'filter-col-' + colIndex;
+    const label = checkbox.nextSibling.textContent.trim();
+    const inputType = (colIndex === 6) ? 'date' : 'text';
+    div.innerHTML = `<label>${label}</label><input type="${inputType}" data-col="${colIndex}" placeholder="검색어 입력" onkeydown="if(event.key==='Enter') applySearch()">`;
+    container.appendChild(div);
+  } else {
+    const el = document.getElementById('filter-col-' + colIndex);
+    if (el) el.remove();
+  }
+}
+
+document.addEventListener('click', (event) => {
+  const menu = document.getElementById('filter-menu');
+  const btn = document.querySelector('.search-right-area button');
+  if (menu && btn && !menu.contains(event.target) && event.target !== btn) {
+    menu.style.display = 'none';
+  }
+});
+
+// 통합 검색
+function applySearch() {
+  const fileNameInput = document.querySelector("input[name='fileName']");
+  const fileNameKw = fileNameInput ? fileNameInput.value.trim().toLowerCase() : '';
+  const extraInputs = document.querySelectorAll('#search-container input[data-col]');
+
+  filteredRows = allRows.filter(row => {
+    let isMatch = true;
+
+    // 파일명 메인 검색 (0번 컬럼)
+    if (fileNameKw) {
+      const cellVal = row.cells[0] ? row.cells[0].innerText.toLowerCase() : '';
+      if (!cellVal.includes(fileNameKw)) isMatch = false;
+    }
+
+    // 추가 조건 검색
+    extraInputs.forEach(input => {
+      if (!input.value) return;
+      const colIndex = parseInt(input.getAttribute('data-col'));
+      let cellVal = row.cells[colIndex] ? row.cells[colIndex].innerText.toLowerCase() : '';
+      if (input.type === 'date') cellVal = cellVal.replace(/\//g, '-');
+      if (!cellVal.includes(input.value.toLowerCase())) isMatch = false;
+    });
+
+    return isMatch;
+  });
+  currentPage = 1;
+  showPage(1);
+}
+
+function resetSearch() {
+  document.querySelectorAll('#search-container input').forEach(input => input.value = '');
+  filteredRows = allRows.slice();
+  currentPage = 1;
+  showPage(1);
+}
+
+// 다운로드 이력
 function goDownloadHistory() {
-  showToast('다운로드 이력은 서버 연동 후 사용 가능합니다.', 'error');
+  const projectId = getProjectId();
+  location.href = '/project/' + projectId + '/file/downloader';
 }
-function goDetail(fileId) {
-  showToast('파일 상세는 서버 연동 후 사용 가능합니다.', 'error');
-}
+
 function downloadFile(fileId) {
   showToast('다운로드는 서버 연동 후 사용 가능합니다.', 'error');
 }
 
-var pendingDeleteId = null;
-function deleteFile(fileId, linkedStatus) {
+// 삭제
+let pendingDeleteId = null;
+
+function deleteFile(fileId, taskId, fileName) {
   pendingDeleteId = fileId;
-  var msg = linkedStatus === 'linked'
-    ? '연결된 일감과 파일을 정말 삭제하시겠습니까?\n삭제 후 복구가 불가능합니다.'
-    : '파일을 삭제하시겠습니까?';
+  let msg = '';
+  if (taskId && taskId !== 'null' && taskId !== '') {
+    msg = `"${fileName}" 파일을 삭제하시겠습니까?\n\n⚠️ 이 파일은 일감과 연결되어 있습니다.\n연결된 파일 버전도 함께 삭제됩니다.\n삭제 후 복구가 불가능합니다.`;
+  } else {
+    msg = `"${fileName}" 파일을 삭제하시겠습니까?\n삭제 후 복구가 불가능합니다.`;
+  }
   document.getElementById('deleteMsg').textContent = msg;
   document.getElementById('deleteModal').style.display = 'flex';
 }
+
 function closeDeleteModal() {
   document.getElementById('deleteModal').style.display = 'none';
   pendingDeleteId = null;
 }
+
 function confirmDelete() {
-  closeDeleteModal();
-  showToast('삭제는 서버 연동 후 사용 가능합니다.', 'error');
+  if (pendingDeleteId) {
+    const fileId = pendingDeleteId;
+    closeDeleteModal();
+    location.href = '/project/' + getProjectId() + '/file/deleteProjectFile?fileId=' + fileId;
+  }
 }
 
+function getProjectId() {
+  const match = location.pathname.match(/\/project\/([^\/]+)\/file/);
+  return match ? match[1] : '';
+}
+
+// 업로드 모달
 function openUploadModal() {
   document.getElementById('selectedFileName').textContent = '';
   document.getElementById('fileTagInput').value = '';
@@ -225,7 +365,7 @@ function closeUploadModal() {
 }
 function onFileSelected(input) {
   if (input.files && input.files[0]) {
-    var f = input.files[0];
+    const f = input.files[0];
     document.getElementById('selectedFileName').textContent = f.name;
     if (f.size > 5 * 1024 * 1024) {
       showToast('파일 크기는 5MB 이하여야 합니다.', 'error');
@@ -235,90 +375,475 @@ function onFileSelected(input) {
   }
 }
 function submitUpload() {
-  var fileInput = document.getElementById('fileInput');
-  if (!fileInput.files || !fileInput.files[0]) {
-    showToast('업로드할 파일을 선택해 주세요.', 'error'); return;
-  }
-  var tag = document.getElementById('fileTagInput').value.trim();
-  if (!tag) {
-    showToast('태그를 입력해 주세요.', 'error'); return;
-  }
+  if (!document.getElementById('fileInput').files[0]) { showToast('업로드할 파일을 선택해 주세요.', 'error'); return; }
+  if (!document.getElementById('fileTagInput').value.trim()) { showToast('태그를 입력해 주세요.', 'error'); return; }
   showToast('등록은 서버 연동 후 사용 가능합니다.', 'error');
   closeUploadModal();
 }
 
-// 드래그앤드랍
-var dropZone = document.getElementById('dropZone');
-['dragover','dragenter'].forEach(function(ev) {
-  dropZone.addEventListener(ev, function(e) { e.preventDefault(); dropZone.classList.add('drop-over'); });
-});
-['dragleave','drop'].forEach(function(ev) {
-  dropZone.addEventListener(ev, function(e) { e.preventDefault(); dropZone.classList.remove('drop-over'); });
-});
-dropZone.addEventListener('drop', function(e) {
-  var files = e.dataTransfer.files;
-  if (files && files[0]) {
-    document.getElementById('fileInput').files = files;
-    onFileSelected(document.getElementById('fileInput'));
-  }
+// 드래그앤드롭
+const dropZone = document.getElementById('dropZone');
+['dragover','dragenter'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('drop-over'); }));
+['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('drop-over'); }));
+dropZone.addEventListener('drop', e => {
+  const files = e.dataTransfer.files;
+  if (files && files[0]) { document.getElementById('fileInput').files = files; onFileSelected(document.getElementById('fileInput')); }
 });
 </script>
 
-<style>
-.file-wrap { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
-.file-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.file-page-title { font-size: 20px; font-weight: 700; color: #333; margin: 0; }
-.file-toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.file-search-form { display: flex; align-items: center; gap: 8px; }
-.search-field { display: flex; align-items: center; gap: 4px; font-size: 13px; }
-.search-label { color: #555; font-weight: 600; white-space: nowrap; }
-.file-search-form input[type="text"] {
-  height: 32px; border: 1px solid #ced4da; border-radius: 5px;
-  padding: 0 8px; font-size: 13px; width: 110px; outline: none;
+		<style>
+:root {
+	--weple-purple: #8B7CF8;
+	--weple-purple-dark: #7868F2;
+	--weple-purple-light: #F5F3FF;
+	--weple-purple-border: #DDD6FE;
+	--weple-text: #4A5568;
+	--weple-text-dark: #1a1a2e;
+	--weple-text-muted: #94a3b8;
+	--weple-bg: #FAFAFC;
+	--weple-white: #ffffff;
+	--weple-border: #EEEAFE;
 }
-.btn-icon-search {
-  height: 32px; padding: 0 10px; border: 1px solid #ced4da;
-  border-radius: 5px; background: #fff; cursor: pointer; font-size: 14px;
+
+.file-wrap {
+	max-width: 1200px;
+	margin: 24px auto;
+	padding: 0 20px;
 }
-.file-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.file-table thead tr { background: #f7f8fa; }
+
+/* 툴바 */
+.file-toolbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.file-page-title {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--weple-text-dark);
+	margin: 0;
+}
+
+.file-toolbar-right {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+/* 검색 박스 */
+.search-box {
+	border: 1px solid var(--weple-purple-border);
+	border-radius: 10px;
+	background: var(--weple-white);
+	padding: 18px 22px;
+	margin-bottom: 18px;
+	box-shadow: 0 2px 8px rgba(139, 124, 248, 0.06);
+}
+
+.search-title {
+	font-weight: 700;
+	color: var(--weple-purple);
+	margin-bottom: 14px;
+	font-size: 13px;
+	letter-spacing: 0.3px;
+}
+
+.search-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 12px;
+	margin-bottom: 14px;
+}
+
+#search-container {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 16px;
+	flex: 1;
+}
+
+@media ( max-width : 1200px) {
+	#search-container {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media ( max-width : 768px) {
+	#search-container {
+		grid-template-columns: 1fr;
+	}
+}
+
+#fileName-filter {
+	grid-column: span 1;
+}
+
+.search-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.search-item label {
+	width: 72px;
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--weple-text);
+	flex-shrink: 0;
+}
+
+.search-item input[type="text"], .search-item input[type="date"] {
+	flex: 1;
+	height: 36px;
+	border: 1px solid var(--weple-purple-border);
+	border-radius: 6px;
+	padding: 0 10px;
+	font-size: 13px;
+	outline: none;
+	transition: border-color .15s;
+	color: var(--weple-text-dark);
+}
+
+.search-item input:focus {
+	border-color: var(--weple-purple);
+	box-shadow: 0 0 0 2px rgba(139, 124, 248, 0.1);
+}
+
+.search-item input::placeholder {
+	color: var(--weple-text-muted);
+}
+
+.search-right-area {
+	position: relative;
+	flex-shrink: 0;
+}
+
+.filter-dropdown {
+	position: absolute;
+	right: 0;
+	top: 42px;
+	background: var(--weple-white);
+	border: 1px solid var(--weple-purple-border);
+	border-radius: 8px;
+	padding: 12px 16px;
+	width: 150px;
+	box-shadow: 0 4px 16px rgba(139, 124, 248, 0.12);
+	z-index: 1000;
+	line-height: 2;
+	font-size: 13px;
+	color: var(--weple-text);
+}
+
+.filter-dropdown label {
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.filter-dropdown input[type="checkbox"] {
+	accent-color: var(--weple-purple);
+}
+
+.search-bottom {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.search-action {
+	display: flex;
+	gap: 8px;
+}
+
+/* 버튼 */
+.page-btn {
+	padding: 7px 16px;
+	border: 1px solid var(--weple-purple-border);
+	border-radius: 6px;
+	background: var(--weple-white);
+	color: var(--weple-text);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: .15s;
+}
+
+.page-btn:hover {
+	background: var(--weple-purple-light);
+	color: var(--weple-purple-dark);
+	border-color: var(--weple-purple);
+}
+
+.page-btn.active {
+	background: var(--weple-purple);
+	color: #fff;
+	border-color: var(--weple-purple);
+}
+
+.page-btn.active:hover {
+	background: var(--weple-purple-dark);
+}
+
+.page-btn.btn-cancel {
+	color: var(--weple-text-muted);
+}
+
+/* 테이블 */
+.table-container {
+	border-radius: 10px;
+	overflow: hidden;
+	border: 1px solid var(--weple-purple-border);
+}
+
+.file-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.file-table thead tr {
+	background: #FCFBFF;
+}
+
 .file-table th, .file-table td {
-  padding: 11px 12px; border-bottom: 1px solid #e8edf2;
-  text-align: left; vertical-align: middle;
+	padding: 11px 14px;
+	border-bottom: 1px solid var(--weple-border);
+	text-align: left;
+	vertical-align: middle;
 }
-.file-table th { font-weight: 600; color: #64748b; }
-.file-table tbody tr:hover { background: #f9fafb; }
-.file-name-link { color: #007bff; text-decoration: none; font-weight: 500; }
-.file-name-link:hover { text-decoration: underline; }
-.task-badge-linked { background: #e0f0ff; color: #1976d2; padding: 2px 8px; border-radius: 10px; font-size: 12px; white-space: nowrap; }
-.task-badge-none { color: #aaa; }
-.version-badge { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
-.td-center { text-align: center; }
-.icon-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: #64748b; padding: 2px 4px; }
-.icon-btn:hover { color: #1976d2; }
-.icon-btn-del:hover { color: #e53e3e; }
-.empty-row { text-align: center; color: #aaa; padding: 40px; }
-.paging-row { display: flex; justify-content: center; gap: 4px; margin-top: 20px; }
-.pg-btn { padding: 6px 12px; border: 1px solid #ced4da; border-radius: 5px; background: #fff; color: #495057; font-size: 13px; cursor: pointer; text-decoration: none; transition: .15s; }
-.pg-btn:hover { background: #e9ecef; }
-.pg-active { background: #007bff !important; color: #fff !important; border-color: #007bff !important; }
-.pg-disabled { pointer-events: none; color: #aaa; }
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.modal-box { background: #fff; border-radius: 10px; width: 520px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,.18); }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid #e1e4e6; background: #f7f8fa; position: sticky; top: 0; }
-.modal-title { font-size: 16px; font-weight: 700; color: #333; }
-.modal-close { background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer; }
-.drop-zone { border: 2px dashed #ced4da; border-radius: 8px; margin: 20px 24px 4px; padding: 32px; text-align: center; cursor: pointer; transition: .2s; background: #fafafa; }
-.drop-zone:hover, .drop-zone.drop-over { border-color: #007bff; background: #f0f7ff; }
-.drop-icon { font-size: 32px; display: block; margin-bottom: 8px; color: #94a3b8; }
-.drop-text { font-size: 14px; color: #555; margin: 0; }
-.drop-sub { font-size: 13px; color: #007bff; margin: 6px 0 0; font-weight: 600; }
-.modal-form-group { padding: 10px 24px; }
-.modal-label { display: block; font-size: 13px; font-weight: 600; color: #4b525a; margin-bottom: 6px; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; background: #f7f8fa; border-top: 1px solid #e1e4e6; }
-.req { color: #e53e3e; }
+
+.file-table th {
+	font-weight: 600;
+	color: var(--weple-text);
+}
+
+.file-table tbody tr:hover {
+	background: var(--weple-purple-light);
+}
+
+.file-name-link {
+	color: var(--weple-purple-dark);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.file-name-link:hover {
+	text-decoration: underline;
+}
+
+.task-badge-linked {
+	background: var(--weple-purple-light);
+	color: var(--weple-purple-dark);
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 12px;
+	white-space: nowrap;
+	font-weight: 600;
+}
+
+.task-badge-none {
+	color: var(--weple-text-muted);
+}
+
+.version-badge {
+	background: var(--weple-purple-light);
+	color: var(--weple-purple);
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.td-center {
+	text-align: center;
+}
+
+.icon-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 16px;
+	color: var(--weple-text-muted);
+	padding: 2px 4px;
+	transition: color .15s;
+}
+
+.icon-btn:hover {
+	color: var(--weple-purple-dark);
+}
+
+.icon-btn-del:hover {
+	color: #e53e3e;
+}
+
+.empty-row {
+	text-align: center;
+	color: var(--weple-text-muted);
+	padding: 40px;
+}
+
+/* 페이징 */
+.file-bottom-area {
+	margin-top: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.file-paging {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.fp-btn {
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: var(--weple-text-muted);
+	font-weight: 500;
+	font-size: 13px;
+	padding: 5px 10px;
+	transition: color .15s;
+}
+
+.fp-btn:hover {
+	color: var(--weple-purple-dark);
+}
+
+/* 모달 */
+.modal-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, .55);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+}
+
+.modal-box {
+	background: var(--weple-white);
+	border-radius: 12px;
+	width: 520px;
+	max-width: 95vw;
+	max-height: 90vh;
+	overflow-y: auto;
+	box-shadow: 0 12px 40px rgba(139, 124, 248, .18);
+}
+
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 18px 24px;
+	border-bottom: 1px solid var(--weple-purple-border);
+	background: var(--weple-purple-light);
+	position: sticky;
+	top: 0;
+	border-radius: 12px 12px 0 0;
+}
+
+.modal-title {
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--weple-text-dark);
+}
+
+.modal-close {
+	background: none;
+	border: none;
+	font-size: 18px;
+	color: var(--weple-text-muted);
+	cursor: pointer;
+}
+
+.modal-close:hover {
+	color: var(--weple-purple);
+}
+
+.drop-zone {
+	border: 2px dashed var(--weple-purple-border);
+	border-radius: 8px;
+	margin: 20px 24px 4px;
+	padding: 32px;
+	text-align: center;
+	cursor: pointer;
+	transition: .2s;
+	background: var(--weple-bg);
+}
+
+.drop-zone:hover, .drop-zone.drop-over {
+	border-color: var(--weple-purple);
+	background: var(--weple-purple-light);
+}
+
+.drop-icon {
+	font-size: 32px;
+	display: block;
+	margin-bottom: 8px;
+	color: var(--weple-purple);
+}
+
+.drop-text {
+	font-size: 14px;
+	color: var(--weple-text);
+	margin: 0;
+}
+
+.drop-sub {
+	font-size: 13px;
+	color: var(--weple-purple-dark);
+	margin: 6px 0 0;
+	font-weight: 600;
+}
+
+.modal-form-group {
+	padding: 10px 24px;
+}
+
+.modal-label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--weple-text);
+	margin-bottom: 6px;
+}
+
+.form-input-text {
+	width: 100%;
+	height: 36px;
+	border: 1px solid var(--weple-purple-border);
+	border-radius: 6px;
+	padding: 0 10px;
+	font-size: 13px;
+	outline: none;
+	box-sizing: border-box;
+	transition: border-color .15s;
+}
+
+.form-input-text:focus {
+	border-color: var(--weple-purple);
+}
+
+.modal-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	padding: 16px 24px;
+	background: var(--weple-purple-light);
+	border-top: 1px solid var(--weple-purple-border);
+	border-radius: 0 0 12px 12px;
+}
+
+.req {
+	color: #e53e3e;
+}
 </style>
 
-</section>
+	</section>
 </body>
 </html>
