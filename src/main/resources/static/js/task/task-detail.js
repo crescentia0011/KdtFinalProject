@@ -173,10 +173,14 @@ function getCsrfToken() {
 	  
 		  // 💡 새롭게 추가하는 부분 새로고침 함수
 		  function reloadCommentList() {
-		      fetch(`/api/task/comments/fragment/${TaskId}`)
+
+		      const projectId = document.getElementById('currentProjectId').value; 
+
+		      fetch(`/api/task/comments/fragment/${TaskId}?projectId=${projectId}`)
 		          .then(response => response.text())
 		          .then(html => {
-		              document.getElementById('commentArea').innerHTML = html;
+
+		              document.getElementById('commentArea').outerHTML = html;
 
 		              const commentCount = document.querySelectorAll('#commentArea .comment-item').length;
 		              document.getElementById('commentCount').textContent = commentCount;

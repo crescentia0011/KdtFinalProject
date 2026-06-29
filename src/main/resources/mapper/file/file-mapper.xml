@@ -62,4 +62,20 @@
        SET is_deleted = 'N'
      WHERE file_id = #{fileId}
 </update>
+
+<select id="selectFileForDownload" resultType="FileDownloadDTO">
+SELECT
+    f.FILE_ID,
+    f.LOGICAL_NAME,
+    v.VERSION_ID,
+    v.FILE_PATH,
+    v.SAVED_NAME,
+    v.FILE_SIZE
+FROM files f
+JOIN file_versions v
+  ON f.FILE_ID = v.FILE_ID
+WHERE v.VERSION_ID = #{versionId}
+  AND f.IS_DELETED = 'N'
+</select>
+    
 </mapper>

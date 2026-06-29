@@ -105,98 +105,216 @@
 	margin-bottom: 4px;
 	box-shadow: none;
 }
-.progress-bar {
-	height: 100%;
-	background-color: #3b82f6;
-	box-shadow: none;
-}
-.progress-text {
-	font-size: 11px;
-	color: #64748b;
-	display: block;
+
+/* ==========================================================================
+   담당자 필터 전용 Choices.js 격리 스타일 (테이블 충돌 방지)
+   ========================================================================== */
+
+/* 1. 담당자 필터 영역 내부의 컨테이너만 너비 제한 */
+.filter-options .choices {
+    width: 100%;
+    max-width: 500px; /* 입력창 최대 가로 길이를 500px로 넉넉하게 늘림 */
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    margin-bottom: 0;
 }
 
-/* 알약 버튼 */
-.btn-pill-primary {
-	background-color: #3b82f6;
-	color: white;
-	border-radius: 6px;
-	border: none;
-	padding: 6px 16px;
-	font-weight: bold;
+/* 2. 담당자 필터 내부의 입력 및 선택 창 내부 */
+.filter-options .choices__inner {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    background-color: #fff !important;
+    padding: 8px 14px !important; /* 위아래, 좌우 여백을 더 넓혀서 시원하게 만듦 */
+    min-height: 44px !important;
+    display: flex !important;
+    flex-wrap: wrap !important; /* 태그가 많아지면 자연스럽게 다음줄로 넘어가게 */
+    align-items: center !important;
+    gap: 6px !important; /* 태그와 입력창 사이의 간격 고정 */
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
-.btn-pill-light {
-	background-color: #f1f5f9;
-	color: #64748b;
-	border: 1px solid #e2e8f0;
-	border-radius: 6px;
-	padding: 6px 16px;
+
+/* 포커스 효과 */
+.filter-options .choices.is-focused .choices__inner {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
 }
-/* 미니 팝업 전체 감싸는 곳 */
+
+/* 3. 실제 타이핑하는 입력창 영역이 찌그러지지 않도록 방지 */
+.filter-options .choices__input {
+    background-color: transparent !important;
+    font-size: 14px !important;
+    margin: 0 !important;
+    padding: 4px 0 !important;
+    max-width: 100% !important;
+    min-width: 300px !important; /* 입력창 최소 너비를 확보하여 '검색 결과 없음' 등이 찌그러지지 않게 함 */
+    flex-grow: 1 !important;    /* 남는 공간을 입력창이 꽉 채우도록 설정 */
+}
+
+/* 4. 선택된 담당자 '태그(배지)' 내부 글자 쪼개짐 방지 (★테이블 아이템과 격리 핵심) */
+.filter-options .choices__list--multiple .choices__item {
+    background-color: #0080ff !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-weight: 500;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    padding: 4px 10px !important;
+    margin: 0 !important; /* 간격은 부모의 gap 속성으로 조절 */
+    display: inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap !important; /* 중요: 태그 안의 이름이 절대 두 줄로 깨지지 않게 함 */
+}
+
+/* 태그 안의 X 버튼 */
+.filter-options .choices__list--multiple .choices__item .choices__button {
+    border-left: 1px solid #ced4da !important;
+    margin-left: 6px !important;
+    padding-left: 6px !important;
+    opacity: 0.6;
+}
+.filter-options .choices__list--multiple .choices__item .choices__button:hover {
+    opacity: 1;
+    color: #dc3545;
+}
+
+/* 5. 드롭다운 목록 상자 너비 및 패딩 확보 */
+.filter-options .choices__list--dropdown {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    margin-top: 6px !important;
+    z-index: 100;
+    width: 100% !important; /* 부모 너비에 100% 맞춤 */
+}
+
+/* 드롭다운 내부 아이템들 글자 안 깨지게 처리 */
+.filter-options .choices__list--dropdown .choices__item {
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+}
+
+/* 드롭다운 검색 결과가 없을 때 스타일 정의 */
+.filter-options .choices__list--dropdown .choices__item--not-found {
+    padding: 15px 0 !important;
+    text-align: center !important;
+    color: #6c757d !important;
+    font-size: 14px !important;
+}
+
+.filter-options .choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background-color: #f1f3f5 !important;
+    color: #212529 !important;
+}
+
+/* ==========================================================================
+   더보기(•••) 드롭다운 메뉴 스타일
+   ========================================================================== */
+
+/* 드롭다운 메뉴의 기준점이 되는 부모 요소 */
 .dropdown-wrapper {
-    position: relative;
+    position: relative; 
     display: inline-block;
 }
 
-/* ••• 버튼 자체 스타일 (클릭 반경 확대) */
+/* ••• 버튼 스타일 */
 .more-options-btn {
     cursor: pointer;
+    padding: 4px 8px;
     color: #94a3b8;
-    padding: 6px 12px;
-    font-size: 16px;
     font-weight: bold;
     border-radius: 4px;
-    transition: background 0.2s;
+    transition: background-color 0.2s;
+    user-select: none;
 }
 
-/* 마우스 올렸을 때 피드백을 주어 오클릭 방지 */
 .more-options-btn:hover {
-    color: #475569;
     background-color: #f1f5f9;
+    color: #334155;
 }
 
-/* 기본적으로 숨겨둘 편집/삭제 박스 */
+/* 드롭다운 박스 (기본적으로 숨김 처리) */
 .dropdown-menu-box {
-    display: none;
+    display: none; /* 핵심: 평소에는 숨겨둠 */
     position: absolute;
-    right: 0;
+    right: 0; /* 버튼 오른쪽 기준으로 정렬 */
     top: 100%;
+    margin-top: 4px;
     background-color: #ffffff;
-    min-width: 90px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+    min-width: 110px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    z-index: 100;
+    border-radius: 8px;
+    z-index: 1000; /* 테이블이나 다른 요소들보다 무조건 위에 뜨게 함 */
     padding: 4px 0;
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
 }
 
-/* 이 클래스가 붙으면 팝업이 나타남 */
+/* 자바스크립트로 show 클래스가 붙었을 때만 보이게 함 */
 .dropdown-menu-box.show {
     display: block;
 }
 
-/* 팝업 내부 버튼 공통 */
+/* 드롭다운 내부 버튼 아이템들 */
 .dropdown-item {
     display: block;
     width: 100%;
-    padding: 8px 14px;
+    padding: 8px 16px;
     text-align: left;
     background: none;
     border: none;
     font-size: 13px;
-    color: #334155;
+    color: #475569;
     cursor: pointer;
-    font-family: sans-serif;
+    transition: background-color 0.2s;
 }
 
 .dropdown-item:hover {
     background-color: #f8fafc;
+    color: #1e293b;
 }
 
-/* 삭제 버튼은 강조색 부여 */
-.dropdown-item.delete-btn {
-    color: #ef4444;
-}
+/* 삭제 버튼 호버 시 빨간색 강조 */
 .dropdown-item.delete-btn:hover {
+    color: #ef4444;
     background-color: #fef2f2;
+}
+
+
+/* =======================================
+   페이징(Pagination) 스타일
+======================================= */
+.pagination-wrap {
+    display: flex;
+    justify-content: center; /* 가운데 정렬 */
+    gap: 6px;
+    margin-top: 20px; /* 테이블과의 간격 */
+    margin-bottom: 20px;
+}
+
+.page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    text-decoration: none !important;
+    color: #5d6b87;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.page-btn.active {
+    background: #4d84ff;
+    color: #fff;
+    font-weight: 700;
+}
+
+.page-btn.disabled {
+    opacity: .3;
+    pointer-events: none;
+}
+
+.page-btn:hover:not(.active):not(.disabled) {
+    background: #eef4ff;
+    color: #4d84ff;
 }

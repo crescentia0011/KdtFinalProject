@@ -45,3 +45,21 @@ function redirectToInsertTask() {
             location.href = `/project/task/delete/${taskId}?projectId=${projectId}`;
         }
     }
+	document.addEventListener('DOMContentLoaded', function() {
+	    const element = document.getElementById('memberChoices');
+		const choices = new Choices(element, {
+		    removeItemButton: true,
+		    searchPlaceholderValue: '담당자 검색...',
+		    noResultsText: '검색 결과 없음',
+		    itemSelectText: '', // 마우스 올렸 때 뜨는 'Press to select'라는 무거운 텍스트를 제거합니다.
+		    shouldSort: false,
+		    searchFloor: 1,     // 1글자만 쳐도 검색 시작
+		    placeholder: true,
+		    placeholderValue: '담당자를 선택하세요'
+		});
+	});
+	
+	function goPage(pageNumber) {
+	            document.getElementById('pageInput').value = pageNumber;
+	            document.getElementById('searchForm').submit();
+	        }

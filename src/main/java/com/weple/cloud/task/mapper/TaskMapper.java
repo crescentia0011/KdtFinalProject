@@ -9,6 +9,7 @@ import com.weple.cloud.task.service.TaskCommentVO;
 import com.weple.cloud.task.service.TaskMemberVO;
 import com.weple.cloud.task.service.TaskMilestoneVO;
 import com.weple.cloud.task.service.TaskParentVO;
+import com.weple.cloud.task.service.TaskPermissionVO;
 import com.weple.cloud.task.service.TaskPriorityVO;
 import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskSpentTimeVO;
@@ -34,7 +35,7 @@ public interface TaskMapper {
 	
     public int insertTask(TaskVO taskVO);
     
-    public List<TaskVO> selectAllList(@Param("tManager") String tManager);
+    public List<TaskVO> selectAllList(Map<String,Object>allParams);
     
     public TaskVO taskDetail(@Param("tId") String tId);
     
@@ -66,5 +67,19 @@ public interface TaskMapper {
   
   // 소요시간의 진척도 자동계산 프로시저 - 민지
     public void updateHierarchicalProgress(@Param("taskId") String taskId);
+    
+    public List<TaskMemberVO> allMemberList();
+    
+    //일감 관련 권한 확인
+    public TaskPermissionVO checkTaskPermissions(@Param("userCode") String userCode, @Param("pId") Long pId);
+    
+    // [내부 일감] 총 개수
+    public int countAllWithFilters(Map<String, Object> params);
+
+    // [전체 일감 - 관리자/소유자용] 총 개수
+    public int countAllList(Map<String, Object> params);
+
+    // [전체 일감 - 일반 멤버용] 총 개수
+    public int countAllMyTasksWithFilters(Map<String, Object> params);
 
 }

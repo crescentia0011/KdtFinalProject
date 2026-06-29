@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.weple.cloud.file.FileInfoVO;
 import com.weple.cloud.file.FileVO;
+import com.weple.cloud.file.FileDownloadDTO;
 
 
 // fileinfoVO , fileVO 재사용 가능 파일 테이블 2개의 VO
@@ -25,4 +26,6 @@ public interface FileMapper {
     void updateFileDeletedStatus(Long fileId);
     void clearFileVersionInfo(Long fileId);
     void restoreFile(Long fileId);
+    
+    FileDownloadDTO selectFileForDownload(Long versionId);
 }

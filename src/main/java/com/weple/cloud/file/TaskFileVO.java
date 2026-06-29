@@ -7,12 +7,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @NoArgsConstructor
 @Getter
+@Setter
 @ToString
 public class TaskFileVO {
+	private Long versionId;
 	private String fileId;
 	private String logicalName;
     private Long fileSize;

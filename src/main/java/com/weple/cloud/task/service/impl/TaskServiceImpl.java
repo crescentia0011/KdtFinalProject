@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.weple.cloud.file.FileInfoVO;
 import com.weple.cloud.file.FileVO;
+import com.weple.cloud.file.FileDownloadDTO;
 import com.weple.cloud.file.mapper.FileMapper;
 import com.weple.cloud.milestone.mapper.MilestoneMapper;
 import com.weple.cloud.task.mapper.TaskMapper;
@@ -23,6 +24,7 @@ import com.weple.cloud.task.service.TaskHistoryDetailDTO;
 import com.weple.cloud.task.service.TaskMemberVO;
 import com.weple.cloud.task.service.TaskMilestoneVO;
 import com.weple.cloud.task.service.TaskParentVO;
+import com.weple.cloud.task.service.TaskPermissionVO;
 import com.weple.cloud.task.service.TaskPriorityVO;
 import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskService;
@@ -153,9 +155,9 @@ public class TaskServiceImpl implements TaskService {
 	
 	// 전체 일감 조회
 	@Override
-	public List<TaskVO> findAllList(String tManager) {
+	public List<TaskVO> findAllList(Map<String, Object> allParams) {
 		
-		return taskMapper.selectAllList(tManager);
+		return taskMapper.selectAllList(allParams);
 	}
 	// 프로젝트 전체 본인의 모든 일감 조회
 	@Override
@@ -347,6 +349,42 @@ public class TaskServiceImpl implements TaskService {
 
 		return taskMapper.findAllMyTasksWithFilters(allParams);
 	}
+	@Override
+	public List<TaskMemberVO> findAllMemberList() {
+		
+		return taskMapper.allMemberList();
 	}
+	//권한 확인
+	@Override
+	public TaskPermissionVO getTaskPermissions(String userCode, Long pId) {
+		TaskPermissionVO permissions = taskMapper.checkTaskPermissions(userCode, pId);
+		
+		// 권한 하나도 없어서 null 일때 타임리프에서 널포인터예외 뜨는거 빈객체 생성으로 방지
+		if (permissions == null) {
+            return new TaskPermissionVO(); 
+        }
+        
+        return permissions;
+	}
+	@Override
+    public int countAllWithFilters(Map<String, Object> params) {
+        return taskMapper.countAllWithFilters(params);
+    }
+
+    @Override
+    public int countAllList(Map<String, Object> params) {
+        return taskMapper.countAllList(params);
+    }
+
+    @Override
+    public int countAllMyTasksWithFilters(Map<String, Object> params) {
+        return taskMapper.countAllMyTasksWithFilters(params);
+    }
+    
+    @Override
+    public FileDownloadDTO getFileForDownload(Long versionId) {    	
+        return fileMapper.selectFileForDownload(versionId);
+    }
+}
 
 

@@ -4,6 +4,11 @@
 	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
 <title>WEPLE</title>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 <link rel="stylesheet" th:href="@{/css/task/task-list.css}">
 <link rel="stylesheet" th:href="@{/css/repository/repository.css}">
 </head>
@@ -14,7 +19,8 @@
 		<div
 			style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
 			<h3 style="color: #1e293b; font-weight: 700; margin: 0;">일감</h3>
-			<button type="button"
+			<button th:if="${isAdminOrOwner or taskPerms.k3Add != null}"
+				type="button"
 				th:onclick="|location.href='@{/project/task/insert(projectId=${param.projectId})}'|"
 				class="btn btn-sm text-primary fw-bold"
 				style="background: none; border: none; color: #3b82f6; font-weight: bold;">
@@ -23,7 +29,9 @@
 
 		<div class="filter-box">
 			<form id="searchForm" method="get" th:action="@{/project/task}">
-				<input type="hidden" name="projectId" th:value="${param.projectId}">
+				<input type="hidden" id="pageInput" name="page"
+					th:value="${currentPage != null ? currentPage : 1}"> <input
+					type="hidden" name="projectId" th:value="${param.projectId}">
 
 				<div class="row" style="margin-bottom: 20px;">
 					<div class="col-md-4 col-md-offset-8">
@@ -73,11 +81,11 @@
 				<div class="filter-row">
 					<div class="filter-label label-manager">담당자</div>
 					<div class="filter-options">
-						<label th:each="member : ${memberList}"> <input
-							type="checkbox" name="memberIds" th:value="${member.userCode}"
-							th:checked="${param.memberIds != null and #arrays.contains(param.memberIds, #strings.toString(member.userCode))}">
-							<span th:text="${member.userName}">홍길동</span>
-						</label>
+						<select id="memberChoices" name="memberIds" multiple>
+							<option th:each="member : ${memberList}"
+								th:value="${member.userCode}"
+								th:text="|${member.userName} (${member.email})|"></option>
+						</select>
 					</div>
 				</div>
 
@@ -139,7 +147,8 @@
 						<button type="button" class="btn-pill-light"
 							th:onclick="|location.href='@{/project/task(projectId=${param.projectId})}'|">🔄
 							지우기</button>
-						<button type="submit" class="btn-pill-primary">적용</button>
+						<button type="submit" class="btn-pill-primary"
+							onclick="document.getElementById('pageInput').value=1;">적용</button>
 					</div>
 				</div>
 			</form>
@@ -198,17 +207,22 @@
 								<span class="more-options-btn" onclick="toggleDropdown(this)">•••</span>
 
 								<div class="dropdown-menu-box">
-									<button type="button" class="dropdown-item edit-btn"
+									<button class="dropdown-item edit-btn"
+										th:if="${isAdminOrOwner or taskPerms.k3Edit != null or (taskPerms.k3Myedit != null and task.taskManagerId == loginUserCode)}"
 										th:onclick="|location.href='@{/project/task/update/{id}(id=${task.taskId}, projectId=${task.projectId})}'|">
 										✏️ 편집</button>
 
-									<button type="button"
-										class="dropdown-item delete-btn task-delete-trigger"
+									<button class="dropdown-item delete-btn task-delete-trigger"
+										th:if="${isAdminOrOwner or taskPerms.k3Delete != null}"
 										th:data-task-id="${task.taskId}"
 										th:data-task-title="${task.taskTitle}"
 										th:data-project-id="${task.projectId}">🗑️ 삭제</button>
+
+									<span
+										th:unless="${isAdminOrOwner or taskPerms.k3Edit != null or (taskPerms.k3Myedit != null and task.taskManagerId == loginUserCode) or taskPerms.k3Delete != null}"
+										style="padding: 10px; color: #999; font-size: 13px; display: block; text-align: center; white-space: nowrap;">
+										접근 권한 없음 </span>
 								</div>
-							</div>
 						</td>
 					</tr>
 					<tr th:if="${#lists.isEmpty(taskListinfo)}">
@@ -217,6 +231,24 @@
 					</tr>
 				</tbody>
 			</table>
+			<div class="pagination-wrap"
+				th:if="${totalPages != null and totalPages > 0}">
+				<a href="javascript:void(0);"
+					th:onclick="${currentPage != null and currentPage > 1} ? '|goPage(${currentPage - 1})|' : ''"
+					th:classappend="${currentPage == null or currentPage <= 1} ? 'disabled'"
+					class="page-btn">&lt; 이전</a>
+
+				<th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+					<a href="javascript:void(0);" th:onclick="|goPage(${i})|"
+						th:text="${i}" th:classappend="${i == currentPage} ? 'active'"
+						class="page-btn">1</a>
+				</th:block>
+
+				<a href="javascript:void(0);"
+					th:onclick="${currentPage != null and currentPage < totalPages} ? '|goPage(${currentPage + 1})|' : ''"
+					th:classappend="${currentPage == null or currentPage >= totalPages} ? 'disabled'"
+					class="page-btn">다음 &gt;</a>
+			</div>
 		</div>
 		<dialog class="repository-delete-dialog" id="taskDeleteDialog"
 			aria-labelledby="taskDeleteDialogTitle">

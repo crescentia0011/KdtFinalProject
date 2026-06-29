@@ -22,14 +22,22 @@
 				</div>
 
 				<div class="header-right action-buttons">
+
 					<button class="btn btn-edit"
-						th:onclick="|location.href='@{/project/task/update/{id}(id=*{taskId}, projectId=${projectId})}'|">✏️
-						수정</button>
-					<button class="btn btn-log">⏱️ 작업시간 기록</button>
+						th:if="${isAdminOrOwner} or ${taskPerms.k3Edit != null} or (${taskPerms.k3Myedit != null} and *{taskManagerId} == ${currentUserCode})"
+						th:onclick="|location.href='@{/project/task/update/{id}(id=*{taskId}, projectId=${projectId})}'|">
+						✏️ 수정</button>
+
+					<button class="btn btn-log"
+						th:onclick="|location.href='@{/projectTimeList(projectId=${projectId})}'|">⏱️
+						작업시간 기록</button>
+
 					<button type="button" class="btn btn-delete task-delete-trigger"
+						th:if="${isAdminOrOwner} or ${taskPerms.k3Delete != null}"
 						th:data-task-id="*{taskId}" th:data-task-title="*{taskTitle}"
 						th:data-project-id="${projectId}" style="cursor: pointer;">
 						🗑️ 삭제</button>
+
 				</div>
 			</div>
 
@@ -101,7 +109,10 @@
 					<div class="section-content">
 						<div class="file-item" th:each="file : *{fileList}">
 							<div class="file-info">
-								<a href="#" class="file-link"
+								<span style="color: red; font-weight: bold;">버전아이디:
+									[[${file.versionId}]]</span> <a
+									th:href="@{/project/download/{id}(id=${file.versionId})}"
+									class="file-link"
 									th:text="|${file.logicalName} - version ${file.versionNumber}|"></a>
 								<span class="file-size" th:text="${file.fileSize} + ' bytes'"></span>
 							</div>
@@ -197,7 +208,7 @@
 
 						</div>
 					</div>
-
+					<input type="hidden" id="currentProjectId" th:value="${projectId}">
 					<div id="tab-comments" class="tab-content" style="display: none;">
 						<div class="comment-header-title"
 							style="margin-bottom: 15px; font-size: 15px;">
@@ -207,7 +218,8 @@
 							</strong>
 						</div>
 
-						<div class="comment-input-box main-comment-input">
+						<div class="comment-input-box main-comment-input"
+							th:if="${isAdminOrOwner} or ${taskPerms.k3Comment != null}">
 							<textarea id="mainCommentContent" placeholder="댓글 내용을 입력하세요..."></textarea>
 							<div class="comment-submit-area">
 								<button type="button" onclick="submitComment(null)">댓글
@@ -258,7 +270,8 @@
 									</div>
 
 									<div class="comment-actions"
-										th:if="${comment.userCode != null}">
+										th:if="${comment.userCode != null} and (${isAdminOrOwner} or ${taskPerms?.k3Comment != null})">
+
 										<span class="reply-btn" th:data-id="${comment.commentId}"
 											onclick="toggleReplyForm(this.getAttribute('data-id'), null)">답글</span>
 
@@ -333,7 +346,8 @@
 											</div>
 
 											<div class="comment-actions"
-												th:if="${reply.userCode != null}">
+												th:if="${reply.userCode != null} and (${isAdminOrOwner} or ${taskPerms?.k3Comment != null})">
+
 												<span class="reply-btn" th:data-id="${comment.commentId}"
 													th:data-user="${reply.userName}"
 													onclick="toggleReplyForm(this.getAttribute('data-id'), this.getAttribute('data-user'))">답글</span>
