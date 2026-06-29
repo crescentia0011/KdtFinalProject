@@ -454,3 +454,27 @@
 		    background: #ffa39e;
 		    cursor: not-allowed;
 		}
+		
+		
+		/* 하위 마일스톤 구조에 맞춘 테이블 컬럼 너비 재조정 */
+        .col-id { width: 8%; color: #9ca3af; font-weight: 500; }
+        .col-name { width: 37%; font-weight: 600; color: #111827; }
+        .col-progress { width: 22%; gap: 10px; }
+        .col-summary { width: 20%; color: #4b5563; font-size: 15px; }
+        .col-status { width: 13%; justify-content: flex-end; gap: 5px; }
+        
+        /* 마일스톤 행 내부 배지 조정 */
+        .child-status-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .child-delay-badge {
+            background-color: #ffeef0;
+            color: #ff4f6b;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }

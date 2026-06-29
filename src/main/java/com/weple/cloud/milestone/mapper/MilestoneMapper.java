@@ -8,6 +8,7 @@ import com.weple.cloud.milestone.service.MilestoneDetailVO;
 import com.weple.cloud.milestone.service.MilestoneInfoVO;
 import com.weple.cloud.milestone.service.MilestoneVO;
 import com.weple.cloud.milestone.service.TaskGroupStatVO;
+import com.weple.cloud.system.service.TaskTypeVO;
 import com.weple.cloud.task.service.TaskVO;
 
 public interface MilestoneMapper {
@@ -34,6 +35,37 @@ public interface MilestoneMapper {
 	
 	// 등록
 	public int insertMilestone(MilestoneVO milestoneVO);
+	
+	// 마일스톤에 연결한 일감 업데이트
+	public void updateTasksMilestoneId(
+	        @Param("projectId") Long projectId,
+	        @Param("milestoneId") Long milestoneId, 
+	        @Param("taskIds") List<String> taskIds
+	    );
+	
+	// 상위 마일스톤 목록 조회
+	List<MilestoneVO> selectMilestoneListByProjectId(@Param("projectId") Long projectId);
+	
+	// 일감 유형 전체 목록 조회 전용 쿼리 매퍼
+    List<TaskTypeVO> selectTaskTypeList();
+
+    List<TaskVO> selectUnassignedTasks(
+        @Param("projectId") Long projectId, 
+        @Param("startRow") int startRow, 
+        @Param("endRow") int endRow, 
+        @Param("taskStatus") String taskStatus, 
+        @Param("priority") String priority, 
+        @Param("taskManager") String taskManager, 
+        @Param("typeId") Long typeId
+    );
+
+    int selectUnassignedTasksCount(
+        @Param("projectId") Long projectId, 
+        @Param("taskStatus") String taskStatus, 
+        @Param("priority") String priority, 
+        @Param("taskManager") String taskManager, 
+        @Param("typeId") Long typeId
+    );
 	
 	// 수정
 	public void updateMilestone(MilestoneVO milestoneVO);

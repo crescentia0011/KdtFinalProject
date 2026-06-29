@@ -71,3 +71,114 @@
 	border-radius: 6px;
 	padding: 8px 24px;
 }
+
+
+/* 일감 등록하기 버튼 스타일 */
+.btn-task-select {
+	background-color: #f1f5f9;
+	border: 1px solid #cbd5e1;
+	color: #334155;
+	font-weight: 600;
+	font-size: 13px;
+	padding: 6px 14px;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+.btn-task-select:hover {
+	background-color: #e2e8f0;
+	border-color: #94a3b8;
+}
+
+/* 선택한 일감 미리보기 박스 */
+.selected-tasks-preview-box {
+	border: 1px solid #e2e8f0;
+	background-color: #f8fafc;
+	padding: 12px 15px;
+	border-radius: 8px;
+	min-height: 50px;
+	font-size: 13px;
+	color: #64748b;
+}
+.selected-task-badge {
+	display: inline-block;
+	background-color: #eff6ff;
+	color: #2563eb;
+	border: 1px solid #bfdbfe;
+	padding: 3px 8px;
+	border-radius: 4px;
+	margin-right: 6px;
+	margin-bottom: 6px;
+	font-weight: 500;
+}
+
+/* 커스텀 모달 배경 레이어 수정 */
+.custom-modal {
+	display: none; 
+	position: fixed;
+	z-index: 1050;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(15, 23, 42, 0.4); 
+	
+	/* [해결] 가로, 세로 화면 정중앙 배치를 강제 설정 */
+	display: none; 
+	align-items: center;
+	justify-content: center;
+}
+
+/* 모달이 활성화 될 때 클래스 제어 */
+.custom-modal.show {
+	display: flex !important;
+}
+
+/* 모달 컨텐츠 상자 자체의 마진 초기화 */
+.custom-modal-content {
+	background-color: #fff;
+	border-radius: 12px;
+	width: 90%;
+	max-width: 850px;
+	margin: 0 auto; /* 강제 쏠림 방지 */
+	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+	animation: slideDown 0.25s ease-out;
+}
+
+@keyframes slideDown {
+	from { transform: translateY(-15px); opacity: 0; }
+	to { transform: translateY(0); opacity: 1; }
+}
+
+/* 부트스트랩 페이지네이션 커스텀 마우스 커서 */
+.page-link {
+	cursor: pointer;
+}
+.custom-modal-header {
+	padding: 16px 20px;
+	border-bottom: 1px solid #e2e8f0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.close-modal {
+	font-size: 24px;
+	font-weight: bold;
+	color: #94a3b8;
+	cursor: pointer;
+}
+.close-modal:hover { color: #334155; }
+.custom-modal-body { padding: 20px; }
+.custom-modal-footer {
+	padding: 16px 20px;
+	border-top: 1px solid #e2e8f0;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+}
+.modal-filter-box {
+	background-color: #f8fafc;
+	padding: 12px;
+	border-radius: 8px;
+	border: 1px solid #e2e8f0;
+}

@@ -38,4 +38,6 @@ public class MilestoneVO {
 	
 	@JsonFormat(pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
 	private LocalDateTime    updatedAt;
+	
+	private int parentMilestoneId;
 }
