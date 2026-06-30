@@ -124,9 +124,15 @@
     border: none;
     background: transparent;
     color: #9CA3AF;
-    font-size: 11px;
+    font-size: 18px;
+    line-height: 1;
     cursor: pointer;
     padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .notif-toast-close:hover { color: #6B7280; }
 
