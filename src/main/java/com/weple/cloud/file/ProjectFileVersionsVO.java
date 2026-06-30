@@ -24,4 +24,8 @@ public class ProjectFileVersionsVO {
 	private String uploader;                  //등록일자
 	@DateTimeFormat(pattern = "yyyy-MM-dd") 
 	private Date uploadedAt;                 //파일 서버 저장명
+	private String hashtag;                  //해시태그
+	
+	private String taskType;
+	private String logicalName;
 }

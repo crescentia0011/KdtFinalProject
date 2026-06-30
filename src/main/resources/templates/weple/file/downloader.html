@@ -44,27 +44,26 @@
 						</tr>
 					</thead>
 					<tbody id="downloaderTableBody">
-						<tr th:if="${#lists.isEmpty(downloadHistoryList)}">
-							<td colspan="7" class="empty-row">다운로드 이력이 없습니다.</td>
-						</tr>
-						<tr th:each="item, stat : ${downloadHistoryList}">
-							<td th:text="${stat.index + 1}">1</td>
-							<td th:text="${item.uploader != null} ? ${item.uploader} : '-'">-</td>
-							<td
-								th:text="${item.logicalName != null} ? ${item.logicalName} : '-'">-</td>
-							<td><span th:if="${item.taskId != null}"
-								class="task-badge-linked"
-								th:text="${item.taskTitle != null} ? ${item.taskTitle} : ${item.taskId}"></span>
-								<span th:if="${item.taskId == null}" class="task-badge-none">-</span>
-							</td>
-							<td
-								th:text="${item.fileSize != null and item.fileSize != 0} ? ${item.fileSize} + ' B' : '-'">-</td>
-							<td><span class="version-badge"
-								th:text="${item.versionNumber != null and item.versionNumber != 0} ? 'v' + ${item.versionNumber} + '.0' : 'v1.0'">v1.0</span>
-							</td>
-							<td
-								th:text="${item.uploadedAt != null} ? ${#dates.format(item.uploadedAt, 'yyyy-MM-dd HH:mm')} : '-'">-</td>
-						</tr>
+					    <tr th:if="${#lists.isEmpty(downloadHistoryList)}">
+					        <td colspan="7" class="empty-row">다운로드 이력이 없습니다.</td>
+					    </tr>
+					    <tr th:each="item, stat : ${downloadHistoryList}">
+					        <td th:text="${stat.index + 1}">1</td>
+					        <td th:text="${item.downloaderName != null} ? ${item.downloaderName} : ${item.downloader}">-</td>
+					        <td th:text="${item.logicalName != null} ? ${item.logicalName} : '-'">-</td>
+					        <td><span th:if="${item.taskId != null}"
+					            class="task-badge-linked"
+					            th:text="${item.taskTitle != null} ? ${item.taskTitle} : ${item.taskId}"></span>
+					            <span th:if="${item.taskId == null}" class="task-badge-none">-</span>
+					        </td>
+					        <td
+					            th:text="${item.fileSize != null and item.fileSize != 0} ? ${item.fileSize} + ' B' : '-'">-</td>
+					        <td><span class="version-badge"
+					            th:text="${item.versionNumber != null and item.versionNumber != 0} ? 'v' + ${item.versionNumber} + '.0' : 'v1.0'">v1.0</span>
+					        </td>
+					        <td
+					            th:text="${item.downloadedAt != null} ? ${#dates.format(item.downloadedAt, 'yyyy-MM-dd HH:mm')} : '-'">-</td>
+					    </tr>
 					</tbody>
 				</table>
 			</div>

@@ -30,6 +30,8 @@ import com.weple.cloud.system.service.RoleService;
 import com.weple.cloud.system.service.RoleVO;
 import com.weple.cloud.system.service.SystemGroupUserVO;
 import com.weple.cloud.system.service.SystemGroupVO;
+import com.weple.cloud.system.service.SystemModuleService;
+import com.weple.cloud.system.service.SystemModuleVO;
 import com.weple.cloud.system.service.SystemProjectService;
 import com.weple.cloud.system.service.SystemProjectVO;
 import com.weple.cloud.system.service.TaskTypeService;
@@ -824,5 +826,43 @@ public class SystemController {
 		return !Integer.valueOf(1).equals(userDetail.getOwnerYn())
 				&& !Integer.valueOf(1).equals(userDetail.getAdminYn());
 	}
-		
+	
+	// ---------------------------- 그룹 내 프로젝트 설정 (모듈) --------------------------
+	private final SystemModuleService systemModuleService;
+	// 전체조회
+	@GetMapping("/system/systemModules")
+	public String systemInsertModules(@AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
+	    Long companyId = loginUser.getLoginUser().getCompanyId();
+
+	    List<SystemModuleVO> moduleList = systemModuleService.findModuleAll();
+	    List<String> enabledCodes = systemModuleService.findEnabledModuleCodes(companyId);
+	    List<TaskTypeVO> taskTypeList = taskTypeService.findTaskTypeAll(companyId);
+
+	    model.addAttribute("moduleList", moduleList);
+	    model.addAttribute("enabledCodes", enabledCodes); // 이미 저장된 것 체크 표시용
+	    model.addAttribute("taskTypeList", taskTypeList);
+	    model.addAttribute("sidebarMenu", "system");
+	    model.addAttribute("currentMenu", "systemproject");
+	    return "weple/system/systemModules";
+	}
+
+	@PostMapping("/system/systemModules")
+	public String systemInsertModulesProcess(@AuthenticationPrincipal LoginUserDetails loginUser,
+	                                          @RequestParam(value = "enabledModules", required = false) List<String> enabledModules,
+	                                          RedirectAttributes redirectAttributes) {
+	    Long companyId = loginUser.getLoginUser().getCompanyId();
+
+	    try {
+	        systemModuleService.saveEnabledModules(companyId, enabledModules);
+	        redirectAttributes.addFlashAttribute("toastType", "success");
+	        redirectAttributes.addFlashAttribute("toastMessage", "모듈 설정이 저장되었습니다.");
+	    } catch (Exception e) {
+	        redirectAttributes.addFlashAttribute("toastType", "error");
+	        redirectAttributes.addFlashAttribute("toastMessage", "저장 중 오류가 발생했습니다.");
+	    }
+
+	    return "redirect:/system/systemModules";
+	}
+	
+	
 }

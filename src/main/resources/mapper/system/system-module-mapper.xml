@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.system.mapper.SystemModuleMapper">
+	 <select id="findModuleAll" resultType="SystemModuleVO">
+	    SELECT common_id
+	           , common_code
+	           , default_describe
+	    FROM common_code
+	    WHERE common_code = '0B'
+	    ORDER BY common_code
+	</select>
+    
+    <!-- 회사가 이미 노출 설정해둔 모듈 코드 목록 -->
+    <select id="findEnabledModuleCodes" parameterType="Long" resultType="String">
+        SELECT module_id
+        FROM modules
+        WHERE company_id = #{companyId}
+    </select>
+
+    <delete id="deleteModulesByCompany" parameterType="Long">
+        DELETE FROM modules
+        WHERE company_id = #{companyId}
+    </delete>
+
+    <insert id="insertModule">
+        INSERT INTO modules (module_id, module_name, company_id)
+        VALUES (#{moduleId}, #{moduleName}, #{companyId})
+    </insert>
+    
+    <select id="findTaskTypeAll" parameterType="Long" resultType="TaskTypeVO">
+	    SELECT type_id, type_name, task_type_describe
+	    FROM task_types
+	    WHERE company_id = #{companyId}
+	</select>
+	
+	
+</mapper>

@@ -17,11 +17,12 @@ public class ProjectFileVO {
 	// 파일 (file)
 	private String fileId; // 첨부파일 아이디
 	private String taskId; // 일감 아이디
-	private long postId; // 게시글 아이디
+	private Long postId; // 게시글 아이디
 	private String logicalName; // 파일명
 	private String isDeleted; // 삭제여부
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date createdAt; // 첨부일시
+	private Long projectId;
 	
 	// JOIN 필드 ✅
     private String taskTitle;
@@ -33,4 +34,8 @@ public class ProjectFileVO {
     private Date uploadedAt;
     private String userName;
     private String typeName;
+    private String taskType;
+    private String hashtag;
+    private String versionId;
+    
 }

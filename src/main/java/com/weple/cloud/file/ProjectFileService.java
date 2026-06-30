@@ -19,6 +19,9 @@ public interface ProjectFileService {
 	// 프로젝트별 구분
 	public long removeProjectFileVersionByFileId(String fileId);
 	
+	// 다운로드
+	public ProjectFileVersionsVO findVersionForDownload(String versionId);
+	
 	// -------------------------------파일 버전------------------------------
   	// 전체조회
 	List<ProjectFileVersionsVO> findProjectFileVersionAll(String fileId);
@@ -31,4 +34,9 @@ public interface ProjectFileService {
     
     // 삭제
 	public long removeProjectFileVersion(String versionId);
+	
+	// -------------------------------파일 히스토리------------------------------
+   	// 다운로드 이력
+	void recordDownloadHistory(String versionId, String downloader);
+	List<DownloadHistoryVO> findDownloadHistory(String projectId);
 }

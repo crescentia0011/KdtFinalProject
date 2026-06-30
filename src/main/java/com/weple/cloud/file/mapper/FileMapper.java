@@ -8,6 +8,7 @@ import com.weple.cloud.file.FileDownloadDTO;
 import com.weple.cloud.file.FileInfoVO;
 import com.weple.cloud.file.FileVO;
 import com.weple.cloud.file.ProjectFileVO;
+import com.weple.cloud.file.DownloadHistoryVO;
 import com.weple.cloud.file.ProjectFileVersionsVO;
 
 
@@ -47,6 +48,9 @@ public interface FileMapper {
     // 프로젝트별 구분
     public long deleteProjectFileVersionByFileId(String fileId);
     
+    // 다운로드
+    public ProjectFileVersionsVO findVersionForDownload(String versionId);
+    
     // -------------------------------파일 버전------------------------------
   	// 전체조회
     List<ProjectFileVersionsVO> projectFileVersionAll(String fileId);
@@ -59,4 +63,9 @@ public interface FileMapper {
     
     // 삭제
     public long deleteProjectFileVersion(String versionId);
+    
+    // -------------------------------파일 히스토리------------------------------
+   	// 다운로드 이력
+    long insertDownloadHistory(DownloadHistoryVO downloadHistoryVO);
+    List<DownloadHistoryVO> findDownloadHistory(String projectId);
 }
