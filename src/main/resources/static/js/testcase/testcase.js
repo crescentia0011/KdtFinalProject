@@ -1,22 +1,22 @@
 window.switchTab = function(tabId, clickedTabElement) {
-    // 1. 모든 탭 활성화 해제
+    //  모든 탭 활성화 해제
     const tabs = document.querySelectorAll('.tc-tab');
     tabs.forEach(tab => tab.classList.remove('active'));
     clickedTabElement.classList.add('active');
 
-    // 2. 모든 탭 컨텐츠 숨기기
+    //  모든 탭 컨텐츠 숨기기
     const contents = document.querySelectorAll('.tab-content');
     contents.forEach(content => {
         content.style.display = 'none';
     });
 
-    // 3. 선택한 탭 컨텐츠만 보이기
+    // 선택한 탭 컨텐츠만 보이기
     const targetContent = document.getElementById(tabId);
     if (targetContent) {
         targetContent.style.display = 'block';
     }
 
-    // 4. 검색창 숨김/보이기 처리
+    // 검색창 숨김/보이기 처리
     const searchBox = document.getElementById('search-box');
     if (searchBox) {
         if (tabId === 'tab-coverage') {
@@ -28,16 +28,14 @@ window.switchTab = function(tabId, clickedTabElement) {
 };
 
 document.addEventListener("DOMContentLoaded", function() {
-    // ==========================================
     // 테스트 케이스 등록용 일감 자동완성 검색 함수
-    // ==========================================
     const tasks = window.globalTaskList || [];
     const searchInput = document.getElementById("taskSearch");
     const hiddenInput = document.getElementById("taskId");
     const autocompleteList = document.getElementById("task-autocomplete-list");
 
     if (searchInput && autocompleteList) {
-        // 1. 키보드 입력 이벤트 핸들러
+        //  키보드 입력 이벤트 핸들러
         searchInput.addEventListener("input", function(e) {
             e.stopPropagation(); 
             
@@ -99,9 +97,15 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
 
-        // 2. 화면의 다른 곳을 클릭하면 검색 레이어가 닫히도록 설정
+        //  화면의 다른 곳을 클릭하면 검색 레이어가 닫히도록 설정
         document.addEventListener("click", function() {
             autocompleteList.style.display = "none";
         });
     }
 });
+
+// 페이징
+function goPage(pageNumber) {
+	            document.getElementById('pageInput').value = pageNumber;
+	            document.getElementById('searchForm').submit();
+	        }

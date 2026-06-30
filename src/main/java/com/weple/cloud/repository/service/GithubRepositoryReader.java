@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,16 @@ public class GithubRepositoryReader {
                                                String requestedDirectory, String requestedFilePath,
                                                int requestedCommitPage,
                                                LocalDate commitStartDate, LocalDate commitEndDate) {
+        return readRepository(repositoryUrl, requestedBranch, requestedDirectory, requestedFilePath,
+                requestedCommitPage, commitStartDate, commitEndDate, null);
+    }
+
+    // 저장소 설정값까지 받아 커밋 메시지의 일감 연결 규칙을 같이 적용함
+    public GithubRepositoryInfo readRepository(String repositoryUrl, String requestedBranch,
+                                               String requestedDirectory, String requestedFilePath,
+                                               int requestedCommitPage,
+                                               LocalDate commitStartDate, LocalDate commitEndDate,
+                                               RepositoryManageSettingVO repositorySetting) {
         String repositoryPath = toRepositoryPath(repositoryUrl);
         JsonNode repository = getJson(GITHUB_API + repositoryPath);
 
@@ -72,7 +83,7 @@ public class GithubRepositoryReader {
                 () -> readFilesOrEmpty(repositoryPath, info.getSelectedBranch(), info.getCurrentDirectory()));
         CompletableFuture<GithubCommitPage> commitsFuture = CompletableFuture.supplyAsync(
                 () -> readCommitsOrEmpty(repositoryPath, info.getSelectedBranch(), info.getCommitPage(),
-                        commitStartDate, commitEndDate));
+                        commitStartDate, commitEndDate, repositorySetting));
 
         info.setBranches(branchesFuture.join());
         info.setFiles(filesFuture.join());
@@ -354,9 +365,10 @@ public class GithubRepositoryReader {
 
     // 커밋 목록 조회 실패가 상세 화면 전체 실패로 번지지 않게 빈 페이지 정보로 처리합니다.
     private GithubCommitPage readCommitsOrEmpty(String repositoryPath, String branch, int page,
-                                                LocalDate commitStartDate, LocalDate commitEndDate) {
+                                                LocalDate commitStartDate, LocalDate commitEndDate,
+                                                RepositoryManageSettingVO repositorySetting) {
         try {
-            return readCommits(repositoryPath, branch, page, commitStartDate, commitEndDate);
+            return readCommits(repositoryPath, branch, page, commitStartDate, commitEndDate, repositorySetting);
         } catch (IllegalStateException ex) {
             return new GithubCommitPage(List.of(), page, false);
         }
@@ -374,7 +386,8 @@ public class GithubRepositoryReader {
 
     // /commits API의 Link 헤더에서 다음/마지막 페이지를 확인해 10개 단위 페이징에 사용합니다.
     private GithubCommitPage readCommits(String repositoryPath, String branch, int page,
-                                         LocalDate commitStartDate, LocalDate commitEndDate) {
+                                         LocalDate commitStartDate, LocalDate commitEndDate,
+                                         RepositoryManageSettingVO repositorySetting) {
         String commitUrl = GITHUB_API + repositoryPath + "/commits?sha="
                 + encodeQueryValue(branch) + "&per_page=" + COMMIT_PAGE_SIZE + "&page=" + page
                 + toCommitDateQuery(commitStartDate, commitEndDate);
@@ -388,7 +401,7 @@ public class GithubRepositoryReader {
             commitInfo.setSha(fullSha.substring(0, Math.min(fullSha.length(), 8)));
             commitInfo.setCommitUrl("https://github.com/" + repositoryPath + "/commit/" + fullSha);
             commitInfo.setMessage(commit.path("commit").path("message").asText());
-            commitInfo.setTaskId(extractTaskId(commitInfo.getMessage()));
+            commitInfo.setTaskId(extractTaskId(commitInfo.getMessage(), repositorySetting));
             commitInfo.setAuthorEmail(commit.path("commit").path("author").path("email").asText("-"));
             commitInfo.setCommittedAt(formatCommitDate(commit.path("commit").path("author").path("date").asText("-")));
             commitInfos.add(commitInfo);
@@ -399,13 +412,40 @@ public class GithubRepositoryReader {
         return new GithubCommitPage(commitInfos, totalPages, hasNextPage);
     }
 
-    // 구분자 설정을 적용하기 전 단계에서는 커밋 메시지 안의 TSK-YYMMDD_번호 형식만 자동 인식합니다.
-    private String extractTaskId(String commitMessage) {
+    // 참조 키워드가 붙은 일감 코드만 커밋 연결 대상으로 인식함
+    private String extractTaskId(String commitMessage, RepositoryManageSettingVO repositorySetting) {
         if (commitMessage == null || commitMessage.isBlank()) {
             return null;
         }
-        Matcher matcher = TASK_CODE_PATTERN.matcher(commitMessage);
-        return matcher.find() ? matcher.group() : null;
+        if (repositorySetting == null || !"Y".equals(repositorySetting.getCommitTextYn())) {
+            return null;
+        }
+
+        List<String> keywords = parseReferenceKeywords(repositorySetting.getTaskKeyword());
+        if (keywords.isEmpty()) {
+            return null;
+        }
+
+        // refs TSK-260624_5 같은 형태만 실제 일감 코드로 추출함
+        String keywordPattern = keywords.stream()
+                .map(Pattern::quote)
+                .collect(Collectors.joining("|"));
+        Pattern taskReferencePattern = Pattern.compile(
+                "(?i)(?:^|\\s)(?:" + keywordPattern + ")\\s+(" + TASK_CODE_PATTERN.pattern() + ")(?=\\s|$)");
+        Matcher matcher = taskReferencePattern.matcher(commitMessage);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    // 쉼표로 저장된 참조 키워드를 검색 가능한 목록으로 정리함
+    private List<String> parseReferenceKeywords(String keywords) {
+        if (keywords == null || keywords.isBlank()) {
+            return List.of();
+        }
+        return java.util.Arrays.stream(keywords.split(","))
+                .map(String::trim)
+                .filter(keyword -> !keyword.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     // 화면에서 선택한 날짜를 GitHub API가 받는 UTC ISO 시간 조건으로 변환합니다.

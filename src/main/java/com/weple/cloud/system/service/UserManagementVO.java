@@ -17,6 +17,7 @@ public class UserManagementVO {
     private String status;
     private String createdAt;
     private String lastLoginTime;
+    private Integer groupId;
     private String groupName;
     private Integer ownerYn;
     private Integer adminYn;

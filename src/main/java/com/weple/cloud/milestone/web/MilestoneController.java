@@ -31,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class MilestoneController {
 
 	private final MilestoneService milestoneService;
+	
+	private final ProjectService projectService;
 
 	// 마일스톤 전체 조회
 	@GetMapping
@@ -38,7 +40,9 @@ public class MilestoneController {
 		List<MilestoneInfoVO> list = milestoneService.selectMilestoneAll(projectId); 
 		
 		model.addAttribute("currentMenu", "milestone");
-		model.addAttribute("projectId", projectId); 
+		model.addAttribute("sidebarMenu", "project");
+		model.addAttribute("projectId", projectId);
+		model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
 		model.addAttribute("milestones", list);
 		
 		return "weple/milestone/list"; 
@@ -64,6 +68,8 @@ public class MilestoneController {
         model.addAttribute("detail", detailInfo);
         model.addAttribute("taskList", paginatedTasks);
         model.addAttribute("currentPage", page);
+        model.addAttribute("sidebarMenu", "project");
+        model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
         model.addAttribute("totalTasks", totalTaskCount);
         model.addAttribute("totalPages", (int) Math.ceil((double) totalTaskCount / pageSize));
 
@@ -74,7 +80,9 @@ public class MilestoneController {
 		@GetMapping("/version/insert")
 		public String versionInsertForm(@RequestParam Long projectId, Model model) {
 		    model.addAttribute("currentMenu", "milestone");
+		    model.addAttribute("sidebarMenu", "project");
 		    model.addAttribute("projectId", projectId);
+		    model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
 		    
 		    ProjectVO project = milestoneService.findById(projectId); 
 		    
@@ -112,7 +120,9 @@ public class MilestoneController {
 	@GetMapping("/insert")
 	public String milestoneInsertForm(@RequestParam Long projectId, Model model) {
 	    model.addAttribute("currentMenu", "milestone");
+	    model.addAttribute("sidebarMenu", "project");
 	    model.addAttribute("projectId", projectId);
+	    model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
 	    
 	    // 일감유형 목록 조회
 	    List<TaskTypeVO> taskTypeList = milestoneService.getTaskTypeList();
@@ -120,6 +130,13 @@ public class MilestoneController {
 	    
 	    List<MilestoneVO> parentMilestoneList = milestoneService.getMilestoneListByProjectId(projectId);
 	    model.addAttribute("parentMilestoneList", parentMilestoneList);
+	    
+	    ProjectVO project = milestoneService.findById(projectId); 
+	    
+	    model.addAttribute("projectId", projectId);
+	    // 날짜 포맷이 yyyy-MM-dd 형태여야 HTML date 인풋에 호환됩니다.
+	    model.addAttribute("projectStart", project.getCreatedAt()); 
+	    model.addAttribute("projectFinish", project.getFinishDate());
 	    
 	    return "weple/milestone/register";
 	}
@@ -152,8 +169,10 @@ public class MilestoneController {
 		@GetMapping("/update")
 		public String milestoneUpdateForm(@RequestParam Long projectId, @RequestParam Long milestoneId, Model model) {
 		    model.addAttribute("currentMenu", "milestone");
+		    model.addAttribute("sidebarMenu", "project");
 		    model.addAttribute("projectId", projectId);
 		    model.addAttribute("milestoneId", milestoneId);
+		    model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
 		    
 		    // 1. 수정할 마일스톤의 기존 상세 정보 조회
 		    MilestoneVO milestone = milestoneService.getMilestoneInfoById(milestoneId);
@@ -170,10 +189,17 @@ public class MilestoneController {
 		    List<MilestoneVO> parentMilestoneList = milestoneService.getMilestoneListForUpdate(projectId, milestoneId);
 		    model.addAttribute("parentMilestoneList", parentMilestoneList);
 		    
+		    ProjectVO project = milestoneService.findById(projectId); 
+		    
+		    model.addAttribute("projectId", projectId);
+		    // 날짜 포맷이 yyyy-MM-dd 형태여야 HTML date 인풋에 호환됩니다.
+		    model.addAttribute("projectStart", project.getCreatedAt()); 
+		    model.addAttribute("projectFinish", project.getFinishDate());
+		    
 		    return "weple/milestone/update"; // register.html 복사해서 만들 수정 폼 파일명
 		}
 
-		// 마일스톤 및 연결 일감 수정하기 (A안 반영)
+		// 마일스톤 및 연결 일감 수정하기
 		@PostMapping("/update")
 		public String milestoneUpdate(
 		        @RequestParam Long projectId,

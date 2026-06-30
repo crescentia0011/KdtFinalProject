@@ -57,6 +57,7 @@ public class TimeController {
 		    model.addAttribute("totalSpentHour", list.get(0).getTotalSpentHour());
 		}
 		model.addAttribute("sidebarMenu", "project");
+		model.addAttribute("project", projectService.findById(String.valueOf(projectId)));  // ✅ 이렇게
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("currentMenu", "time");
 		model.addAttribute("moduleNames", projectService.findModuleNames(projectId));
@@ -106,7 +107,9 @@ public class TimeController {
 	    //사이드바
 	    List<String> moduleNames = projectService.findModuleNames(projectId);
 	    model.addAttribute("moduleNames", moduleNames);
-	    
+	    if (projectId != null) {
+	        model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
+	    }
 	    model.addAttribute("taskId", taskId);
 	    model.addAttribute("workTimeVO", workTimeVO);
 		model.addAttribute("currentMenu", "time");
@@ -151,7 +154,8 @@ public class TimeController {
 	
 	// 수정 폼
 	@GetMapping("/updateProjectTime")
-	public String updateProjectTimeForm(@RequestParam("workId") long workId, Model model) {
+	public String updateProjectTimeForm(@RequestParam("workId") long workId,
+										@RequestParam(value="projectId", required=false) Long projectId, Model model) {
 		WorkTimeVO workTime = timeService.findProjectTimeOne(workId);
 		if (workTime == null) return "redirect:/projectTimeList";
 
@@ -168,6 +172,7 @@ public class TimeController {
 		model.addAttribute("userList", userList);
 		model.addAttribute("currentMenu", "time");
 		model.addAttribute("sidebarMenu", "project");
+		model.addAttribute("project", projectService.findById(String.valueOf(workTime.getProjectId())));
 		List<String> moduleNames = projectService.findModuleNames(workTime.getProjectId());
 		model.addAttribute("moduleNames", moduleNames);
 		return "weple/time/edit";

@@ -194,6 +194,9 @@ public class TaskController {
 	    model.addAttribute("parentTaskList", taskService.findParent(pId));
 	    
 	    model.addAttribute("milestoneList", taskService.findMilestone(pId));
+	    
+	    model.addAttribute("sidebarMenu", "project");
+	    model.addAttribute("project", projectService.findById(String.valueOf(pId)));
 
 	    
         return "weple/task/register";
@@ -210,20 +213,21 @@ public class TaskController {
 	    taskVO.setUserCode(userCode); 
 
 	    taskService.insertTask(taskVO, files);
-	    
+	    TaskVO createdTask = taskService.findTaskDetail(taskVO.getTaskId());
 	    // 작업내역 등록 - 은지
 	    taskHistoryService.insertHistory(
-	    	    taskVO.getTaskId(), userCode, "CREATE",
-	    	    null, taskVO.getTaskTitle(),   
-	    	    null, taskVO.getTypeIdName(),
-	    	    null, taskVO.getTaskStatus(),
-	    	    null, taskVO.getTaskManager(),
-	    	    null, taskVO.getPriority(),
-	    	    null, toStr(taskVO.getStartDate()),
-	    	    null, toStr(taskVO.getFinishDate()),
-	    	    null, toStr(taskVO.getEstimatedTime()),
-	    	    null, toStr(taskVO.getTaskProgress()),
-	    	    null, taskVO.getParentTaskId()
+	    		createdTask.getTaskId(), userCode, "CREATE",
+	    	    null, createdTask.getTaskTitle(), 
+	    	    null, createdTask.getTaskDescribe(),
+	    	    null, createdTask.getTypeIdName(),
+	    	    null, createdTask.getTaskStatus(),
+	    	    null, createdTask.getTaskManager(),
+	    	    null, createdTask.getPriority(),
+	    	    null, toStr(createdTask.getStartDate()),
+	    	    null, toStr(createdTask.getFinishDate()),
+	    	    null, toStr(createdTask.getEstimatedTime()),
+	    	    null, toStr(createdTask.getTaskProgress()),
+	    	    null, createdTask.getParentTaskTitle()
 	    	);
 	    
 	    return "redirect:/project/task?projectId=" + pId;
@@ -244,7 +248,7 @@ public class TaskController {
 		// 관리자 권한을 가지고 있는지
 		boolean isAdminOrOwner = (ownerYn != null && ownerYn == 1) || (adminYn != null && adminYn == 1);
 
-		// 🚨 [권한 체크] 프로젝트 구성원 확인
+		//  프로젝트 구성원 확인
 		List<TaskMemberVO> memberList = taskService.findMember(pId);
 		boolean isProjectMember = memberList.stream()
 				.anyMatch(member -> userCode.equals(member.getUserCode()));
@@ -262,6 +266,8 @@ public class TaskController {
 		        .mapToLong(TaskSpentTimeVO::getSpentHour)
 		        .sum();
 		
+		System.out.println("항목 변경 이력 :" + updateHistoryList);
+		
 		model.addAttribute("currentUserCode", userCode);
 		model.addAttribute("currentMenu", "task");
 		model.addAttribute("projectId", pId);
@@ -273,6 +279,8 @@ public class TaskController {
 		model.addAttribute("spentSum", spentSum);
 		model.addAttribute("taskPerms",taskPerms);
 		model.addAttribute("isAdminOrOwner",isAdminOrOwner);
+		model.addAttribute("sidebarMenu", "project");
+		model.addAttribute("project", projectService.findById(String.valueOf(pId)));
 		return "weple/task/detail";
 	}
 	
@@ -500,6 +508,8 @@ public class TaskController {
 	    model.addAttribute("priorityList", taskService.findPriority(companyId));
 	    model.addAttribute("parentTaskList", taskService.findParent(pId));
 	    model.addAttribute("milestoneList", taskService.findMilestone(pId));
+	    model.addAttribute("sidebarMenu", "project");
+	    model.addAttribute("project", projectService.findById(String.valueOf(pId)));
 
 	    return "weple/task/fragment-edit";
 	}
@@ -523,20 +533,23 @@ public class TaskController {
 	    
 	    // 수정 처리 서비스 호출 (VO 내부에 taskId가 hidden으로 담겨서 넘어옵니다)
 	    taskService.updateTask(taskVO, files, deletedFileIds);
+	    
+	    TaskVO after = taskService.findTaskDetail(taskVO.getTaskId());
  
 	    // 작업내역 저장-은지
 	    taskHistoryService.insertHistory(
 	    	  taskVO.getTaskId(), userCode, "UPDATE",
-	    	  before.getTaskTitle(),              taskVO.getTaskTitle(),
-	          before.getTypeIdName(),             taskVO.getTypeIdName(),
-	          before.getTaskStatus(),             taskVO.getTaskStatus(),
-	          before.getTaskManager(),            taskVO.getTaskManager(),
-	          before.getPriority(),               taskVO.getPriority(),
-	          toStr(before.getStartDate()),       toStr(taskVO.getStartDate()),
-	          toStr(before.getFinishDate()),      toStr(taskVO.getFinishDate()),
-	          toStr(before.getEstimatedTime()),   toStr(taskVO.getEstimatedTime()),
-	          toStr(before.getTaskProgress()),    toStr(taskVO.getTaskProgress()),
-	          before.getParentTaskId(),           taskVO.getParentTaskId()
+	    	  before.getTaskTitle(),              after.getTaskTitle(),
+	    	  before.getTaskDescribe(),           after.getTaskDescribe(),
+	          before.getTypeIdName(),             after.getTypeIdName(),
+	          before.getTaskStatus(),             after.getTaskStatus(),
+	          before.getTaskManager(),            after.getTaskManager(),
+	          before.getPriority(),               after.getPriority(),
+	          toStr(before.getStartDate()),       toStr(after.getStartDate()),
+	          toStr(before.getFinishDate()),      toStr(after.getFinishDate()),
+	          toStr(before.getEstimatedTime()),   toStr(after.getEstimatedTime()),
+	          toStr(before.getTaskProgress()),    toStr(after.getTaskProgress()),
+	          before.getParentTaskTitle(),        after.getParentTaskTitle()
 	    	);
 	    
 	    // 수정 완료 후 해당 일감의 상세조회 페이지로 리다이렉트
@@ -567,6 +580,7 @@ public class TaskController {
 	    taskHistoryService.insertHistory(
 	        tId, userCode, "DELETE",
 	        before.getTaskTitle(),              null,
+	        before.getTaskDescribe(),           null,
             before.getTypeIdName(),             null,
             before.getTaskStatus(),             null,
             before.getTaskManager(),            null,

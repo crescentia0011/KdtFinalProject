@@ -15,7 +15,7 @@
     <form id="wikiForm" method="post" th:action="@{/project/wiki/register}">
         <input type="hidden" name="projectId"  th:value="${projectId}">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <input type="hidden" id="contentInput" name="content">
+        <input type="hidden" id="contentInput"   name="content">
         <input type="hidden" id="relationsInput" name="relations">
 
         <!-- 제목 컨트롤 행 -->
@@ -26,10 +26,7 @@
             </span>
             <select name="parentPageId" class="wiki-register-parent-select">
                 <option value="">상위 없음</option>
-                <option th:each="wiki : ${wikiTree}"
-                        th:value="${wiki.wikiPageId}"
-                        th:text="${wiki.title}"
-                        th:selected="${wiki.wikiPageId == parentPageId}"></option>
+                <th:block th:replace="~{weple/wiki/detail :: selectTreeFragment(${wikiTree}, 0)}"></th:block>
             </select>
             <input type="text" name="title" id="titleInput"
                    class="wiki-modify-title-input"
@@ -42,24 +39,21 @@
             </div>
         </div>
 
-        <!-- 에디터 카드 (우측 패널 없음) -->
+        <!-- 에디터 카드 -->
         <div class="wiki-register-editor-card">
-            <!-- Toast UI Editor -->
             <div id="wikiEditor"></div>
 
             <!-- 관련 문서 영역 -->
             <div class="wiki-register-relation-area">
                 <div class="wiki-register-relation-label">🔗 관련 문서</div>
-
-                <!-- 선택된 태그 칩 + 검색 입력 인라인 -->
                 <div class="wiki-tag-chip-inline-wrap" id="tagInputArea">
-                    <div id="tagChipList" class="wiki-tag-chip-inline-list"></div>
+                    <div id="tagChipList" style="display:contents;"></div>
                     <input type="text" id="hashtagInput"
                            class="wiki-hashtag-inline-input"
                            placeholder="#일감 또는 #위키 제목으로 검색"
                            autocomplete="off">
                 </div>
-                <!-- 드롭다운 -->
+                <!-- ★ 드롭다운 relation-area 안에 위치 (fixed로 실제 렌더링) -->
                 <div id="hashtagDropdown" class="wiki-hashtag-dropdown" style="display:none;"></div>
             </div>
         </div>
@@ -76,11 +70,16 @@
 
         var selectedRelations = [];
         var wikiEditor;
+        var hashDebounce = null;
+        var inp = null;
+        var dd  = null;
 
+        /* ── DOMContentLoaded ── */
         document.addEventListener('DOMContentLoaded', function () {
             wikiEditor = new toastui.Editor({
                 el: document.getElementById('wikiEditor'),
-                height: '460px',
+                height: '100%',
+                minHeight: '520px',
                 initialEditType: 'markdown',
                 previewStyle: 'vertical',
                 language: 'ko-KR',
@@ -93,105 +92,143 @@
                     ['code', 'codeblock']
                 ]
             });
+
+            initHashtag();
         });
 
+        /* ── 등록 처리 ── */
         function submitWikiForm() {
             var title = document.getElementById('titleInput').value.trim();
             if (!title) { alert('문서 제목은 필수 입력 항목입니다.'); document.getElementById('titleInput').focus(); return; }
             var content = wikiEditor.getMarkdown();
             if (!content.trim()) { alert('내용을 입력하세요.'); return; }
             document.getElementById('contentInput').value = content;
-            document.getElementById('relationsInput').value = JSON.stringify(selectedRelations.filter(Boolean));
+            // null 제거 후 JSON 전송
+            document.getElementById('relationsInput').value =
+                JSON.stringify(selectedRelations.filter(Boolean));
             document.getElementById('wikiForm').submit();
         }
 
-        /* ── 해시태그 인라인 입력 ── */
-        var hashDebounce = null;
-        var inp = document.getElementById('hashtagInput');
-        var dd  = document.getElementById('hashtagDropdown');
-        var chipArea = document.getElementById('tagInputArea');
+        /* ── 해시태그 초기화 ── */
+        function initHashtag() {
+            inp = document.getElementById('hashtagInput');
+            dd  = document.getElementById('hashtagDropdown');
+            if (!inp || !dd) return;
 
-        inp.addEventListener('input', function () {
-            var val = this.value;
-            clearTimeout(hashDebounce);
-            // '#' 입력 후 키워드
-            var m = val.match(/#([\w가-힣ㄱ-ㅎa-zA-Z0-9\-_]+)$/);
-            if (!m || m[1].length < 1) { closeDD(); return; }
-            hashDebounce = setTimeout(function () { fetchHashtag(m[1]); }, 250);
-        });
+            inp.addEventListener('input', function () {
+                clearTimeout(hashDebounce);
+                var val = this.value;
+                var m = val.match(/#([\uAC00-\uD7A3\u3131-\u318E\w\-_]+)$/);
+                if (!m || m[1].length < 1) { closeDD(); return; }
+                hashDebounce = setTimeout(function() { fetchHashtag(m[1]); }, 250);
+            });
 
-        inp.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closeDD();
-        });
+            inp.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeDD();
+            });
+        }
 
-        document.addEventListener('click', function (e) {
+        document.addEventListener('click', function(e) {
             if (!e.target.closest('#tagInputArea') && !e.target.closest('#hashtagDropdown')) closeDD();
         });
 
-        // 드롭다운 위치: tagInputArea 기준
+        /* ── 드롭다운 위치 (뷰포트 하단 초과 시 위쪽으로) ── */
         function positionDD() {
-            var rect = chipArea.getBoundingClientRect();
-            dd.style.top  = (chipArea.offsetTop + chipArea.offsetHeight) + 'px';
-            dd.style.left = chipArea.offsetLeft + 'px';
-            dd.style.width = chipArea.offsetWidth + 'px';
+            if (!dd) return;
+            var area = document.getElementById('tagInputArea');
+            if (!area) return;
+            var rect       = area.getBoundingClientRect();
+            var vpHeight   = window.innerHeight;
+            var spaceBelow = vpHeight - rect.bottom - 8;
+            var spaceAbove = rect.top - 8;
+
+            dd.style.position  = 'fixed';
+            dd.style.left      = rect.left + 'px';
+            dd.style.width     = rect.width + 'px';
+            dd.style.overflowY = 'auto';
+
+            if (spaceBelow >= 120 || spaceBelow >= spaceAbove) {
+                dd.style.top       = (rect.bottom + 4) + 'px';
+                dd.style.bottom    = 'auto';
+                dd.style.maxHeight = Math.max(spaceBelow - 4, 80) + 'px';
+            } else {
+                dd.style.bottom    = (vpHeight - rect.top + 4) + 'px';
+                dd.style.top       = 'auto';
+                dd.style.maxHeight = Math.max(spaceAbove - 4, 80) + 'px';
+            }
         }
 
+
+
         function fetchHashtag(keyword) {
-            fetch('/project/wiki/hashtag/search?projectId=' + projectId + '&keyword=' + encodeURIComponent(keyword))
-                .then(function(r){ return r.json(); })
-                .then(function(list){ renderDD(list); });
+            fetch('/project/wiki/hashtag/search?projectId=' + projectId
+                    + '&keyword=' + encodeURIComponent(keyword))
+                .then(function(r) { return r.json(); })
+                .then(function(list) { renderDD(list); })
+                .catch(function() { closeDD(); });
         }
 
         function renderDD(list) {
+            if (!dd) return;
             dd.innerHTML = '';
-            var filtered = list.filter(function(item) {
+            // 이미 선택된 항목 제외
+            var filtered = (list || []).filter(function(item) {
                 var key = item.targetType + '|' + (item.targetTaskId || item.targetWikiId || '');
-                return !selectedRelations.some(function(r){ return r && (r.targetType+'|'+(r.targetTaskId||r.targetWikiId||'')) === key; });
+                return !selectedRelations.some(function(r) {
+                    return r && (r.targetType + '|' + (r.targetTaskId || r.targetWikiId || '')) === key;
+                });
             });
             if (!filtered.length) { closeDD(); return; }
             filtered.forEach(function(item) {
                 var div = document.createElement('div');
                 div.className = 'wiki-hashtag-item';
-                div.innerHTML = '<span class="wiki-relation-type-badge ' + (item.targetType==='TASK'?'badge-task':'badge-wiki') + '">'
-                    + (item.targetType==='TASK'?'일감':'위키') + '</span>'
+                div.innerHTML =
+                    '<span class="wiki-relation-type-badge '
+                    + (item.targetType === 'TASK' ? 'badge-task' : 'badge-wiki') + '">'
+                    + (item.targetType === 'TASK' ? '일감' : '위키') + '</span>'
                     + '<span class="wiki-hashtag-item-title">#' + item.targetTitle + '</span>';
-                div.addEventListener('click', function(){ selectItem(item); });
+                div.addEventListener('click', function() { selectItem(item); });
                 dd.appendChild(div);
             });
             positionDD();
             dd.style.display = 'block';
         }
 
-        function closeDD() { dd.style.display = 'none'; dd.innerHTML = ''; }
+        function closeDD() {
+            if (!dd) return;
+            dd.style.display = 'none';
+            dd.innerHTML = '';
+        }
 
         function selectItem(item) {
             var idx = selectedRelations.length;
             selectedRelations.push({
-                targetType: item.targetType, projectId: projectId,
-                targetTaskId: item.targetType==='TASK' ? item.targetTaskId : null,
-                targetWikiId: item.targetType==='WIKI' ? item.targetWikiId : null,
-                targetTitle: item.targetTitle, targetUrl: item.targetUrl
+                targetType:   item.targetType,
+                projectId:    projectId,
+                targetTaskId: item.targetType === 'TASK' ? item.targetTaskId : null,
+                targetWikiId: item.targetType === 'WIKI' ? item.targetWikiId : null,
+                targetTitle:  item.targetTitle,
+                targetUrl:    item.targetUrl
             });
             addChip(item, idx);
-            inp.value = '';
+            if (inp) inp.value = '';
             closeDD();
-            inp.focus();
+            if (inp) inp.focus();
         }
 
         function addChip(item, idx) {
             var chip = document.createElement('span');
-            chip.className = 'wiki-tag-chip ' + (item.targetType==='TASK'?'chip-task':'chip-wiki');
+            chip.className = 'wiki-tag-chip ' + (item.targetType === 'TASK' ? 'chip-task' : 'chip-wiki');
             chip.setAttribute('data-idx', idx);
             chip.innerHTML = '#' + item.targetTitle
-                + ' <button type="button" class="wiki-chip-remove" onclick="removeChip('+idx+')">✕</button>';
-            // 입력창 앞에 삽입
-            var list = document.getElementById('tagChipList');
-            list.appendChild(chip);
+                + ' <button type="button" class="wiki-chip-remove"'
+                + ' onclick="removeChip(' + idx + ')">✕</button>';
+            document.getElementById('tagChipList').appendChild(chip);
         }
 
         function removeChip(idx) {
             selectedRelations[idx] = null;
-            var chip = document.querySelector('.wiki-tag-chip[data-idx="'+idx+'"]');
+            var chip = document.querySelector('.wiki-tag-chip[data-idx="' + idx + '"]');
             if (chip) chip.remove();
         }
     </script>

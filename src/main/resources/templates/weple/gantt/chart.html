@@ -1,14 +1,108 @@
+
+
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+<html xmlns:th="http://www.thymeleaf.org/"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gantt Chart PMS</title>
+    
+    <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
+    <link href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css" rel="stylesheet">
+    
+    <script src="https://cdn.dhtmlx.com/gantt/edge/locale/locale_kr.js"></script>
+
+    <style>
+        html, body { height: 100%; padding: 0; margin: 0; overflow: hidden; font-family: 'Malgun Gothic', sans-serif; }
+        .gantt-container { width: 100%; height: calc(100vh - 50px); }
+        .header-bar { height: 50px; background: #34495e; color: white; display: flex; align-items: center; padding-left: 20px; font-weight: bold; }
+        
+        /* 마일스톤과 일반 일감의 가로 바 색상을 다르게 주고 싶을 때 커스텀 CSS */
+        .gantt_project { background-color: #2980b9 !important; border-color: #2471a3 !important; }
+        .gantt_project .gantt_task_progress { background-color: #1f618d !important; }
+    </style>
 </head>
 <body>
+<section>
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+    <div class="header-bar">
+        <span>프로젝트 간트차트 모니터링 (Project ID: <span th:text="${projectId}"></span>)</span>
+    </div>
 
+    <div id="gantt_here" class="gantt-container"></div>
+
+    <script th:inline="javascript">
+        // Thymeleaf에서 넘겨받은 projectId를 JavaScript 변수로 저장
+        const projectId = [[${projectId}]];
+
+        // 2. 기본 환경 설정
+        gantt.config.date_format = "%Y-%m-%d %H:%i:%s"; // 백엔드 Java(LocalDateTime) 포맷과 일치시킴
+        gantt.config.row_height = 30;
+        gantt.config.task_height = 20;
+        
+        // 하위 항목이 있으면 자동으로 부모 폴더가 열린 상태로 렌더링되도록 설정
+        gantt.config.open_tree_initially = true; 
+
+        // 3. 좌측 그리드(테이블) 컬럼 설정
+        gantt.config.columns = [
+            { 
+                name: "text", 
+                label: "작업 및 마일스톤명", 
+                tree: true, 
+                width: "*", 
+                min_width: 250,
+                // 눈속임용 버전(상위 마일스톤)과 하위 일감 구분을 위해 아이콘이나 텍스트를 커스텀할 수 있습니다.
+                template: function(obj) {
+                    if (obj.type === "project") {
+                        return `<strong style='color:#2c3e50;'>📁 ${obj.text}</strong>`;
+                    }
+                    return `📄 ${obj.text}`;
+                }
+            },
+            { 
+                name: "start_date", 
+                label: "시작일", 
+                align: "center", 
+                width: 90,
+                template: function(obj) {
+                    // 마일스톤(project 타입)은 시작일이 명확하지 않으므로 화면에서 공백 처리하거나 마감일만 노출 가능
+                    return obj.start_date ? gantt.date.date_to_str("%Y-%m-%d")(obj.start_date) : "-";
+                }
+            },
+            { 
+                name: "duration", 
+                label: "기간", 
+                align: "center", 
+                width: 50, 
+                template: function(obj) { return obj.duration + "일"; } 
+            },
+            {
+                name: "progress",
+                label: "진척도",
+                align: "center",
+                width: 60,
+                template: function(obj) {
+                    return Math.round(obj.progress * 100) + "%";
+                }
+            }
+        ];
+
+        // 4. 우측 차트 타임라인 스케일 설정 (년/월/일 표현 방식)
+        gantt.config.scales = [
+            { unit: "month", step: 1, format: "%Y년 %M" },
+            { unit: "day", step: 1, format: "%j일" }
+        ];
+
+        // 5. 간트차트 초기화 실행
+        gantt.init("gantt_here");
+
+       gantt.load('/api/project/gantt/data?projectId=' + projectId);
+    </script>
+</section>
 </body>
 </html>

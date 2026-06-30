@@ -20,8 +20,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CompanyLoginValidationFilter extends OncePerRequestFilter {
 
+    private static final String LOGIN_COMPANY_CODE_SESSION_KEY = "LOGIN_COMPANY_CODE";
+    private static final String COMPANY_CODE_REQUIRED_MESSAGE =
+            "회사 코드를 입력해주세요.";
     private static final String COMPANY_LOGIN_ERROR_MESSAGE =
-            "\uD68C\uC0AC \uB85C\uADF8\uC778 \uC8FC\uC18C\uC640 \uC0AC\uC6A9\uC790 \uD68C\uC0AC \uC815\uBCF4\uAC00 \uC77C\uCE58\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.";
+            "입력한 회사 코드와 사용자 회사 정보가 일치하지 않습니다.";
+    private static final String COMPANY_URL_TAMPERED_MESSAGE =
+            "접속한 회사 주소와 입력한 회사 코드가 일치하지 않습니다.";
 
     private final LoginMapper loginMapper;
 
@@ -34,11 +39,19 @@ public class CompanyLoginValidationFilter extends OncePerRequestFilter {
             return;
         }
 
+        String sessionCompanyCode = resolveSessionCompanyCode(request);
         String requestedCompanyCode = resolveRequestedCompanyCode(request);
         if (requestedCompanyCode == null || requestedCompanyCode.isBlank()) {
-            filterChain.doFilter(request, response);
+            redirectLoginError(request, response, sessionCompanyCode, null, COMPANY_CODE_REQUIRED_MESSAGE);
             return;
         }
+
+        /* 회사별 URL로 들어온 경우 화면값 조작 여부도 같이 확인함 */
+        if (sessionCompanyCode != null && !sessionCompanyCode.equalsIgnoreCase(requestedCompanyCode)) {
+            redirectLoginError(request, response, sessionCompanyCode, null, COMPANY_URL_TAMPERED_MESSAGE);
+            return;
+        }
+        String loginCompanyCode = sessionCompanyCode == null ? requestedCompanyCode : sessionCompanyCode;
 
         String loginId = request.getParameter("loginId");
         if (loginId == null || loginId.isBlank()) {
@@ -48,10 +61,9 @@ public class CompanyLoginValidationFilter extends OncePerRequestFilter {
 
         LoginUserVO loginUser = loginMapper.selectLoginUserByLoginId(loginId);
 
-        // Block before password authentication when URL company and user company differ.
-        if (loginUser != null && !requestedCompanyCode.equalsIgnoreCase(loginUser.getCompanyCode())) {
-            String message = URLEncoder.encode(COMPANY_LOGIN_ERROR_MESSAGE, StandardCharsets.UTF_8);
-            response.sendRedirect(request.getContextPath() + "/c/" + requestedCompanyCode + "/login?error=" + message);
+        /* 비밀번호 인증 전에 회사코드와 사용자 회사가 같은지 먼저 확인함 */
+        if (loginUser != null && !loginCompanyCode.equalsIgnoreCase(loginUser.getCompanyCode())) {
+            redirectLoginError(request, response, sessionCompanyCode, requestedCompanyCode, COMPANY_LOGIN_ERROR_MESSAGE);
             return;
         }
 
@@ -65,11 +77,34 @@ public class CompanyLoginValidationFilter extends OncePerRequestFilter {
 
     private String resolveRequestedCompanyCode(HttpServletRequest request) {
         String companyCode = request.getParameter("companyCode");
-        if (companyCode != null && !companyCode.isBlank()) {
-            return companyCode;
-        }
+        return companyCode == null ? null : companyCode.trim();
+    }
 
-        Object sessionCompanyCode = request.getSession().getAttribute("LOGIN_COMPANY_CODE");
-        return sessionCompanyCode instanceof String value ? value : null;
+    private String resolveSessionCompanyCode(HttpServletRequest request) {
+        Object companyCode = request.getSession().getAttribute(LOGIN_COMPANY_CODE_SESSION_KEY);
+        return companyCode instanceof String value && !value.isBlank() ? value.trim() : null;
+    }
+
+    private void redirectLoginError(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    String lockedCompanyCode,
+                                    String enteredCompanyCode,
+                                    String errorMessage) throws IOException {
+        String message = URLEncoder.encode(errorMessage, StandardCharsets.UTF_8);
+        String loginPath = lockedCompanyCode == null || lockedCompanyCode.isBlank()
+                ? "/login"
+                : "/c/" + encodePathSegment(lockedCompanyCode) + "/login";
+        String companyCodeQuery = enteredCompanyCode == null || enteredCompanyCode.isBlank()
+                ? ""
+                : "&companyCode=" + encodeQueryValue(enteredCompanyCode);
+        response.sendRedirect(request.getContextPath() + loginPath + "?error=" + message + companyCodeQuery);
+    }
+
+    private String encodePathSegment(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
+    }
+
+    private String encodeQueryValue(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }

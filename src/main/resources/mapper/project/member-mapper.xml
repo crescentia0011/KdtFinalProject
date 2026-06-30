@@ -1,3 +1,149 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="mapper.project.member-mapper"></mapper>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.project.mapper.ProjectMemberMapper">
+
+    <!-- ResultMap -->
+    <resultMap id="memberResultMap" type="com.weple.cloud.project.service.ProjectMemberVO">
+        <result column="member_id"     property="memberId"/>
+        <result column="project_id"    property="projectId"/>
+        <result column="user_code"     property="userCode"/>
+        <result column="user_name"     property="userName"/>
+        <result column="email"         property="email"/>
+        <result column="profile_image" property="profileImage"/>
+        <result column="role_id"       property="roleId"/>
+        <result column="role_name"     property="roleName"/>
+        <result column="row_num"       property="rowNum"/>
+    </resultMap>
+
+    <!-- 구성원 목록 조회 (프로젝트별) -->
+    <select id="selectMemberList" resultMap="memberResultMap">
+        SELECT
+            m.member_id,
+            m.project_id,
+            m.user_code,
+            u.user_name,
+            u.email,
+            u.profile_image,
+            r.role_id,
+            r.role_name,
+            ROW_NUMBER() OVER (ORDER BY m.member_id ASC) AS row_num
+        FROM members m
+        JOIN users u
+          ON m.user_code = u.user_code
+        LEFT JOIN member_roles mr
+          ON m.member_id = mr.member_id
+        LEFT JOIN roles r
+          ON mr.role_id = r.role_id
+        WHERE m.project_id = #{projectId}
+        ORDER BY m.member_id ASC
+    </select>
+
+    <!-- 구성원 추가용 사용자 검색
+         - 이미 해당 프로젝트에 소속된 사용자 제외
+         - 키워드 없으면 전체 조회 -->
+    <select id="searchUsersForAdd" resultMap="memberResultMap"
+            parameterType="com.weple.cloud.project.service.ProjectMemberSearchVO">
+        SELECT
+            u.user_code,
+            u.user_name,
+            u.email,
+            u.profile_image
+        FROM users u
+        WHERE u.status = 'a2'
+          AND u.user_code NOT IN (
+              SELECT m2.user_code
+              FROM members m2
+              WHERE m2.project_id = #{projectId}
+          )
+        <if test="keyword != null and keyword != ''">
+            AND u.user_name LIKE '%' || #{keyword} || '%'
+        </if>
+        ORDER BY u.user_name
+    </select>
+
+    <!-- 그룹 목록 조회 -->
+    <select id="selectGroupList" resultType="com.weple.cloud.project.service.ProjectMemberVO">
+        SELECT group_id   AS groupId,
+               group_name AS groupName
+        FROM groups
+        ORDER BY group_id ASC
+    </select>
+
+    <!-- 그룹 내 사용자 조회 (프로젝트 미소속 제외) -->
+    <select id="selectUsersByGroupId" resultType="com.weple.cloud.project.service.ProjectMemberVO">
+        SELECT u.user_code     AS userCode,
+               u.user_name     AS userName,
+               u.email         AS email,
+               u.profile_image AS profileImage,
+               CASE WHEN m.user_code IS NOT NULL THEN 1 ELSE 0 END AS isAlreadyMember
+        FROM users u
+        LEFT JOIN members m
+               ON u.user_code = m.user_code
+              AND m.project_id = #{projectId}
+        WHERE u.group_id = #{groupId}
+          AND u.status   = 'a2'
+        ORDER BY u.user_name ASC
+    </select>
+
+    <!-- 역할 목록 조회 -->
+    <select id="selectRoleList" resultType="com.weple.cloud.project.service.ProjectMemberRoleVO">
+        SELECT role_id, role_name
+        FROM roles
+        ORDER BY role_id
+    </select>
+
+    <!-- 구성원 추가 -->
+    <insert id="insertMember" parameterType="com.weple.cloud.project.service.ProjectMemberVO">
+        <selectKey keyProperty="memberId" resultType="Long" order="BEFORE">
+            SELECT member_id_seq.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO members (
+            member_id,
+            project_id,
+            user_code
+        ) VALUES (
+            #{memberId},
+            #{projectId},
+            #{userCode}
+        )
+    </insert>
+
+    <!-- 구성원 역할 추가 -->
+    <insert id="insertMemberRole">
+        INSERT INTO member_roles (member_id, role_id)
+        VALUES (#{memberId}, #{roleId})
+    </insert>
+
+    <!-- 구성원 삭제 -->
+    <delete id="deleteMember">
+        DELETE FROM members
+        WHERE member_id  = #{memberId}
+          AND project_id = #{projectId}
+    </delete>
+
+    <!-- 구성원 역할 삭제 (삭제 전 먼저 처리) -->
+    <delete id="deleteMemberRoles">
+        DELETE FROM member_roles
+        WHERE member_id = #{memberId}
+    </delete>
+
+    <!-- 단건 조회 -->
+    <select id="selectMemberById" resultMap="memberResultMap">
+        SELECT
+            m.member_id,
+            m.project_id,
+            m.user_code,
+            u.user_name,
+            u.email,
+            u.profile_image,
+            r.role_id,
+            r.role_name
+        FROM members m
+        JOIN users u ON m.user_code = u.user_code
+        LEFT JOIN member_roles mr ON m.member_id = mr.member_id
+        LEFT JOIN roles r ON mr.role_id = r.role_id
+        WHERE m.member_id = #{memberId}
+    </select>
+
+</mapper>

@@ -18,20 +18,20 @@
 }
 
 .approval-message-success {
-    border: 1px solid #a7e3c0;
-    background: #edf9f1;
-    color: #18733e;
+    border: 1px solid #BBF7D0;
+    background: #F0FDF4;
+    color: #22C55E;
 }
 
 .approval-message-error {
-    border: 1px solid #f4b8b8;
-    background: #fff1f1;
-    color: #b42318;
+    border: 1px solid #FECACA;
+    background: #FEF2F2;
+    color: #EF4444;
 }
 
 .approval-table-wrap {
     overflow-x: auto;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #DDD6FE;
     background: #ffffff;
 }
 
@@ -46,7 +46,7 @@
 .approval-table td {
     height: 58px;
     padding: 10px 12px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #DDD6FE;
     color: #374151;
     font-size: 13px;
     text-align: center;
@@ -56,7 +56,7 @@
 
 .approval-table th {
     height: 48px;
-    background: #fafafa;
+    background: #FAFAFC;
     color: #374151;
     font-size: 12px;
     font-weight: 700;
@@ -96,19 +96,19 @@
 }
 
 .approval-button-confirm {
-    background: #4d7df4;
+    background: #6D5EF7;
 }
 
 .approval-button-confirm:hover {
-    background: #3f6ee0;
+    background: #5B4FEA;
 }
 
 .approval-button-cancel {
-    background: #ff4f6b;
+    background: #EF4444;
 }
 
 .approval-button-cancel:hover {
-    background: #e73d59;
+    background: #DC2626;
 }
 
 .approval-empty {
@@ -144,7 +144,7 @@
 
 .page-btn.active {
     border-radius: 8px;
-    background: #4d84ff;
+    background: #6D5EF7;
     color: #ffffff;
     font-weight: 700;
 }
@@ -155,7 +155,7 @@
 }
 
 .page-btn:hover:not(.active):not(.disabled) {
-    color: #4d84ff;
+    color: #6D5EF7;
 }
 
 @media (max-width: 768px) {

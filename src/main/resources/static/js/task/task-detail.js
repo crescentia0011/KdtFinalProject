@@ -89,20 +89,40 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-function toggleReplyForm(parentId, targetUser) {
-	const formDiv = document.getElementById('reply-form-' + parentId);
-	const textarea = document.getElementById('reply-content-' + parentId);
+// 1. 답글 폼 열기 및 이동 (수정됨)
+function toggleReplyForm(rootId, targetUserName, btnElement) {
+    const formElement = document.getElementById('reply-form-' + rootId);
+    const replyTextArea = document.getElementById('reply-content-' + rootId);
 
-	if (formDiv.style.display === 'none') {
-		formDiv.style.display = 'block';
-		if (targetUser) {
-			textarea.value = '@' + targetUser + ' ';
-		}
-		textarea.focus();
-	} else {
-		formDiv.style.display = 'none';
-		textarea.value = '';
-	}
+    const replyWrapper = btnElement.closest('.reply-wrapper');
+    const rootCommentItem = btnElement.closest('.root-comment');
+
+    // 1. 입력창 이동 및 마진 정렬 위치 잡기
+    if (replyWrapper) {
+        // 대댓글의 답글 버튼을 누른 경우 -> 대댓글 묶음 박스 아래에 배치하고 대댓글과 라인(40px)을 맞춤
+        replyWrapper.after(formElement);
+        formElement.style.marginLeft = '40px'; 
+    } else if (rootCommentItem) {
+        // 원댓글의 답글 버튼을 누른 경우 -> 원댓글 아래에 배치하고 들여쓰기 없음
+        rootCommentItem.after(formElement);
+        formElement.style.marginLeft = '0px';  
+    }
+
+    // 2. 열기/닫기 토글 및 태그(@) 삽입 규칙 일치화
+    if (formElement.style.display === 'none' || formElement.getAttribute('data-target-user') !== targetUserName) {
+        formElement.style.display = 'block';
+        
+        if (targetUserName && targetUserName !== 'null' && targetUserName !== '') {
+            replyTextArea.value = `@${targetUserName} `;
+        } else {
+            replyTextArea.value = '';
+        }
+        
+        formElement.setAttribute('data-target-user', targetUserName);
+        replyTextArea.focus();
+    } else {
+        closeReplyForm(rootId);
+    }
 }
 
 
@@ -291,23 +311,37 @@ function getCsrfToken() {
 	        }
 	    }
 
-	    // 4. 대댓글 입력 폼 열기/닫기 토글 
-	    function toggleReplyForm(commentId, targetUserName) {
-	        const formElement = document.getElementById('reply-form-' + commentId);
-	        const replyTextArea = document.getElementById('reply-content-' + commentId);
-	        
-	        if (formElement.style.display === 'none') {
-	            formElement.style.display = 'block';
-	            if (targetUserName) replyTextArea.value = `@${targetUserName} `;
-	            replyTextArea.focus();
-	        } else {
-	            formElement.style.display = 'none';
-	            replyTextArea.value = '';
-	        }
-	    }
-		
-		
-		
+		//답글 취소
+		// 취소 버튼을 눌렀을 때 완전히 창을 닫는 함수
+		function closeReplyForm(rootId) {
+		    const formElement = document.getElementById('reply-form-' + rootId);
+		    const replyTextArea = document.getElementById('reply-content-' + rootId);
+		    
+		    if(formElement) {
+		        formElement.style.display = 'none';
+		        formElement.removeAttribute('data-target-user');
+		    }
+		    if(replyTextArea) {
+		        replyTextArea.value = '';
+		    }
+		}
+		// '@' 태그된 대댓글 들여쓰기 처리
+		function applyNestedReplyIndentation() {
+		    document.querySelectorAll('.reply-comment .comment-body').forEach(function(body) {
+		        if (body.innerText.trim().startsWith('@')) {
+		            const wrapper = body.closest('.reply-wrapper');
+		            if (wrapper) {
+		                wrapper.style.marginLeft = '40px'; // 들여쓰기 픽셀 조정 가능
+		            }
+		        }
+		    });
+		}
+
+		// 최초 화면 로드 시 실행
+		document.addEventListener("DOMContentLoaded", function() {
+		    applyNestedReplyIndentation();
+		    // ... 기존 코드 ...
+		});
 		
 
 	  

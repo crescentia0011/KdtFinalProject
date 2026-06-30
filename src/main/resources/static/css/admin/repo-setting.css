@@ -1,0 +1,178 @@
+.admin-repository-setting-page {
+    padding: 28px 30px 36px;
+    color: #384a66;
+}
+
+.admin-repository-setting-title {
+    margin: 0 0 22px;
+    color: #111827;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.admin-repository-setting-panel {
+    max-width: 900px;
+    padding: 24px 26px;
+    border: 1px solid #DDD6FE;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.admin-repository-setting-heading {
+    margin-bottom: 20px;
+}
+
+.admin-repository-setting-heading h2 {
+    margin: 0;
+    color: #111827;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.admin-repository-setting-heading p {
+    margin: 7px 0 0;
+    color: #8493a8;
+    font-size: 13px;
+}
+
+.admin-repository-save-button {
+    display: inline-flex;
+    min-width: 86px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 5px;
+    background: #6D5EF7;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.admin-repository-save-button:hover {
+    background: #5B4FEA;
+}
+
+.admin-repository-save-button:active {
+    background: #5747E6;
+}
+
+.admin-repository-setting-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 18px;
+    border-top: 1px solid #DDD6FE;
+}
+
+.admin-repository-rule-form {
+    display: grid;
+    gap: 16px;
+    max-width: 700px;
+}
+
+.admin-repository-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: fit-content;
+    cursor: pointer;
+}
+
+.admin-repository-toggle input {
+    width: 18px;
+    height: 18px;
+    margin: 2px 0 0;
+    accent-color: #6D5EF7;
+}
+
+.admin-repository-toggle strong {
+    display: block;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.admin-repository-toggle small {
+    display: block;
+    margin-top: 4px;
+    color: #8493a8;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.admin-repository-keyword-field {
+    display: grid;
+    gap: 7px;
+    margin-top: 4px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.admin-repository-keyword-field small {
+    color: #a0acbd;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-repository-keyword-field input {
+    width: min(430px, 100%);
+    height: 42px;
+    padding: 0 13px;
+    border: 1px solid #DDD6FE;
+    border-radius: 5px;
+    color: #384a66;
+    font-size: 13px;
+    outline: none;
+}
+
+.admin-repository-keyword-field input:focus {
+    border-color: #6D5EF7;
+    box-shadow: 0 0 0 3px rgba(109, 94, 247, .12);
+}
+
+.admin-repository-keyword-field.is-disabled {
+    opacity: .58;
+}
+
+.admin-repository-keyword-field.is-disabled input {
+    background: #F1EDFF;
+    color: #6b778c;
+    cursor: default;
+}
+
+.admin-repository-rule-feedback {
+    margin: 2px 0 0;
+    padding: 10px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-repository-rule-feedback.is-error {
+    border: 1px solid #FECACA;
+    background: #FEF2F2;
+    color: #EF4444;
+}
+
+.admin-repository-rule-feedback.is-success {
+    border: 1px solid #BBF7D0;
+    background: #F0FDF4;
+    color: #22C55E;
+}
+
+@media (max-width: 768px) {
+    .admin-repository-setting-page {
+        padding: 20px;
+    }
+
+    .admin-repository-save-button {
+        width: 100%;
+    }
+
+    .admin-repository-setting-actions {
+        justify-content: stretch;
+    }
+}

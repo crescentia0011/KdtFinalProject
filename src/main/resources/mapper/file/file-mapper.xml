@@ -16,7 +16,7 @@
         INSERT INTO files (
             file_id, task_id, logical_name, is_deleted, created_at
         ) VALUES (
-            #{fileId}, #{taskId}, #{fileName}, 'N', SYSDATE + 9 /24
+            #{fileId}, #{taskId}, #{fileName}, 'N', SYSDATE
         )
     </insert>
 
@@ -34,7 +34,7 @@
             #{filePath}, 
             #{fileSize}, 
             #{uploader}, 
-            SYSDATE + 9/24, 
+            SYSDATE, 
             #{savedName}
         )
     </insert>

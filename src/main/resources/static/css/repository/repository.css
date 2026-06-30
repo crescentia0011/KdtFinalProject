@@ -1,68 +1,71 @@
 .repository-page { padding: 28px 30px 36px; color: #384a66; }
-.repository-title { margin: 0; color: #2b4c7e; font-size: 24px; font-weight: 700; }
-.repository-form-title { margin: 0 0 20px; color: #2b4c7e; font-size: 20px; font-weight: 700; }
-.repository-setting-tabs { display: flex; gap: 2px; margin: 20px 0 28px; border-bottom: 1px solid #e6edf8; }
+.repository-title { margin: 0; color: #111827; font-size: 24px; font-weight: 700; }
+.repository-form-title { margin: 0 0 20px; color: #111827; font-size: 20px; font-weight: 700; }
+.repository-setting-tabs { display: flex; gap: 2px; margin: 20px 0 28px; border-bottom: 1px solid #DDD6FE; }
 .repository-setting-tabs a { padding: 9px 18px; color: #7b8aa3; font-size: 13px; font-weight: 600; text-decoration: none; }
-.repository-setting-tabs a.active { border-radius: 6px 6px 0 0; background: #5271ff; color: #fff; }
-.repository-form { max-width: 760px; padding: 24px; border: 1px solid #e6edf8; background: #fff; }
-.repository-message { max-width: 760px; margin: 0 0 14px; padding: 10px 12px; border-radius: 5px; font-size: 13px; }.repository-message-error { border: 1px solid #f4b8b8; background: #fff1f1; color: #b42318; }.repository-message-success { border: 1px solid #a7e3c0; background: #edf9f1; color: #18733e; }
+.repository-setting-tabs a.active { border-radius: 6px 6px 0 0; background: #6D5EF7; color: #fff; }
+.repository-form { max-width: 760px; padding: 24px; border: 1px solid #DDD6FE; background: #fff; }
+.repository-message { max-width: 760px; margin: 0 0 14px; padding: 10px 12px; border-radius: 5px; font-size: 13px; }.repository-message-error { border: 1px solid #FECACA; background: #FEF2F2; color: #EF4444; }.repository-message-success { border: 1px solid #BBF7D0; background: #F0FDF4; color: #22C55E; }
 .repository-form-row { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 16px; align-items: center; margin-bottom: 18px; }
 .repository-form label { color: #4a5568; font-size: 13px; font-weight: 700; }
-.repository-form input { width: 100%; height: 36px; padding: 0 11px; border: 1px solid #d8e1f0; border-radius: 5px; color: #384a66; font-size: 13px; outline: none; }
-.repository-form input:focus { border-color: #5271ff; box-shadow: 0 0 0 3px rgba(82, 113, 255, .12); }
+.repository-form input { width: 100%; height: 36px; padding: 0 11px; border: 1px solid #DDD6FE; border-radius: 5px; color: #384a66; font-size: 13px; outline: none; }
+.repository-form input:focus { border-color: #6D5EF7; box-shadow: 0 0 0 3px rgba(109, 94, 247, .12); }
 .repository-check { display: inline-flex; align-items: center; gap: 7px; margin: 0 0 28px 134px; cursor: pointer; }
-.repository-check input { width: 15px; height: 15px; margin: 0; accent-color: #5271ff; }
-.repository-form-actions { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #edf1f7; padding-top: 18px; }
+.repository-check input { width: 15px; height: 15px; margin: 0; accent-color: #6D5EF7; }
+.repository-form-actions { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #DDD6FE; padding-top: 18px; }
 .repository-button { display: inline-flex; height: 34px; align-items: center; justify-content: center; min-width: 64px; border: 0; border-radius: 5px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
-.repository-button-primary { background: #5271ff; color: #fff; }.repository-button-secondary { background: #eef2f8; color: #596b86; }
+.repository-button-primary { background: #6D5EF7; color: #fff; }.repository-button-secondary { background: #F1EDFF; color: #596b86; }
+.repository-button-primary:hover { background: #5B4FEA; }
+.repository-button-primary:active { background: #5747E6; }
+.repository-button-secondary:hover { background: #EFEAFF; color: #5B4FEA; }
 .repository-management-actions { display: flex; justify-content: flex-end; margin: 0 0 14px; }
 .repository-add-button { min-width: 112px; padding: 0 16px; }
 .repository-management-table td:last-child { width: 150px; }
 .repository-management-buttons { display: flex; gap: 6px; }
 .repository-management-buttons .repository-button { height: 30px; min-width: 52px; }
-.repository-button-danger { background: #ff5470; color: #fff; }
-.repository-form input[readonly] { border-color: #c5cedc; background: #e9edf3; color: #68758a; cursor: not-allowed; }
+.repository-button-danger { background: #EF4444; color: #fff; }
+.repository-form input[readonly] { border-color: #c5cedc; background: #F1EDFF; color: #68758a; cursor: not-allowed; }
 .repository-form input[readonly]:focus { border-color: #c5cedc; box-shadow: none; }
-.repository-delete-dialog { width: min(440px, calc(100vw - 32px)); padding: 0; border: 1px solid #dce5f2; border-radius: 6px; box-shadow: 0 18px 42px rgba(43, 76, 126, .24); color: #384a66; }
+.repository-delete-dialog { width: min(440px, calc(100vw - 32px)); padding: 0; border: 1px solid #DDD6FE; border-radius: 6px; box-shadow: 0 18px 42px rgba(17, 24, 39, .24); color: #384a66; }
 .repository-delete-dialog::backdrop { background: rgba(25, 39, 64, .42); }
-.repository-delete-dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #edf1f7; }
-.repository-delete-dialog h2 { margin: 0; color: #2b4c7e; font-size: 18px; }
+.repository-delete-dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #DDD6FE; }
+.repository-delete-dialog h2 { margin: 0; color: #111827; font-size: 18px; }
 .repository-dialog-close { width: 30px; height: 30px; border: 0; background: transparent; color: #6c7b91; font-size: 24px; line-height: 1; cursor: pointer; }
 .repository-delete-dialog > p { margin: 18px 20px 14px; color: #596b86; font-size: 13px; line-height: 1.6; }
 .repository-delete-dialog form { display: grid; gap: 9px; padding: 0 20px 20px; }
 .repository-delete-dialog label { display: grid; gap: 7px; color: #4a5568; font-size: 12px; font-weight: 600; }
-.repository-delete-dialog input { height: 36px; padding: 0 10px; border: 1px solid #d8e1f0; border-radius: 5px; color: #384a66; font-size: 13px; outline: 0; }
-.repository-delete-dialog input:focus { border-color: #5271ff; box-shadow: 0 0 0 3px rgba(82, 113, 255, .12); }
+.repository-delete-dialog input { height: 36px; padding: 0 10px; border: 1px solid #DDD6FE; border-radius: 5px; color: #384a66; font-size: 13px; outline: 0; }
+.repository-delete-dialog input:focus { border-color: #6D5EF7; box-shadow: 0 0 0 3px rgba(109, 94, 247, .12); }
 .repository-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 .repository-dialog-content-actions { padding: 0 20px 20px; }
 .repository-list-heading,.repository-detail-heading,.repository-diff-heading,.repository-commits-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
 .repository-list-heading p,.repository-diff-heading p { margin: 8px 0 0; color: #8493a8; font-size: 13px; }
-.repository-search { display: inline-flex; align-items: center; width: 230px; height: 34px; gap: 7px; padding: 0 10px; border: 1px solid #dce5f2; border-radius: 5px; color: #9ba8ba; }
+.repository-search { display: inline-flex; align-items: center; width: 230px; height: 34px; gap: 7px; padding: 0 10px; border: 1px solid #DDD6FE; border-radius: 5px; color: #9ba8ba; }
 .repository-search input { width: 100%; border: 0; outline: 0; color: #4a5568; font-size: 12px; }
-.repository-table-wrap { overflow-x: auto; border: 1px solid #e6edf8; background: #fff; }
+.repository-table-wrap { overflow-x: auto; border: 1px solid #DDD6FE; background: #fff; }
 .repository-table { width: 100%; min-width: 760px; border-collapse: collapse; }
-.repository-table th,.repository-table td { height: 50px; padding: 10px 18px; border-bottom: 1px solid #edf1f7; color: #4a5568; font-size: 12px; text-align: left; }
-.repository-empty { height: 100px !important; color: #8493a8 !important; text-align: center !important; }.repository-empty-detail { padding: 54px 0; text-align: center; }.repository-empty-detail p { color: #8493a8; font-size: 14px; }.repository-empty-detail a { color: #5271ff; font-size: 13px; font-weight: 600; text-decoration: none; }
-.repository-table th { height: 42px; background: #f8fafd; color: #596b86; font-size: 12px; font-weight: 700; }.repository-table tbody tr:last-child td { border-bottom: 0; }
-.repository-name { display: inline-flex; align-items: center; gap: 9px; color: #334155; font-weight: 700; text-decoration: none; }.repository-name i { color: #1f2937; font-size: 15px; }.repository-url { color: #5271ff; font-size: 12px; text-decoration: none; }.repository-url span { color: #64748b; }.repository-badge { padding: 3px 7px; border-radius: 4px; background: #ebf0ff; color: #5271ff; font-size: 11px; font-weight: 700; }
-.repository-commit-link { color: #4a5568; text-decoration: none; }.repository-commit-link:hover { color: #5271ff; text-decoration: underline; }.repository-commit-message { font-weight: 600; }.repository-commit-table tr.is-github-viewed td { color: #8793a5; background: #f8fafd; }.repository-commit-table tr.is-github-viewed .repository-commit-message::after { content: "상세 열람"; margin-left: 8px; color: #5271ff; font-size: 10px; font-weight: 700; text-decoration: none; }
+.repository-table th,.repository-table td { height: 50px; padding: 10px 18px; border-bottom: 1px solid #DDD6FE; color: #4a5568; font-size: 12px; text-align: left; }
+.repository-empty { height: 100px !important; color: #8493a8 !important; text-align: center !important; }.repository-empty-detail { padding: 54px 0; text-align: center; }.repository-empty-detail p { color: #8493a8; font-size: 14px; }.repository-empty-detail a { color: #6D5EF7; font-size: 13px; font-weight: 600; text-decoration: none; }
+.repository-table th { height: 42px; background: #FAFAFC; color: #596b86; font-size: 12px; font-weight: 700; }.repository-table tbody tr:last-child td { border-bottom: 0; }
+.repository-name { display: inline-flex; align-items: center; gap: 9px; color: #334155; font-weight: 700; text-decoration: none; }.repository-name i { color: #1f2937; font-size: 15px; }.repository-url { color: #6D5EF7; font-size: 12px; text-decoration: none; }.repository-url span { color: #64748b; }.repository-badge { padding: 3px 7px; border-radius: 4px; background: #F1EDFF; color: #6D5EF7; font-size: 11px; font-weight: 700; }
+.repository-commit-link { color: #4a5568; text-decoration: none; }.repository-commit-link:hover { color: #6D5EF7; text-decoration: underline; }.repository-commit-message { font-weight: 600; }.repository-commit-table tr.is-github-viewed td { color: #8793a5; background: #FAFAFC; }.repository-commit-table tr.is-github-viewed .repository-commit-message::after { content: "상세 열람"; margin-left: 8px; color: #6D5EF7; font-size: 10px; font-weight: 700; text-decoration: none; }
 .repository-task-link,
 .repository-task-missing,
 .repository-task-empty { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 4px; font-size: 11px; font-weight: 800; white-space: nowrap; }
-.repository-task-link { background: #edf2ff; color: #5271ff; text-decoration: none; }
-.repository-task-link:hover { background: #dfe7ff; text-decoration: underline; }
+.repository-task-link { background: #F1EDFF; color: #6D5EF7; text-decoration: none; }
+.repository-task-link:hover { background: #DDD6FE; text-decoration: underline; }
 .repository-task-link { max-width: 240px; gap: 6px; }
 .repository-task-link strong { flex: 0 0 auto; font-size: 11px; }
 .repository-task-link span { overflow: hidden; min-width: 0; color: #40516a; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-.repository-task-missing { background: #fff6df; color: #9a6b09; }
+.repository-task-missing { background: #FFFBEB; color: #F59E0B; }
 .repository-task-empty { padding: 0; color: #a0acbd; }
 .repository-github { display: inline-flex; align-items: center; gap: 6px; color: #1f2937; font-size: 13px; font-weight: 700; text-decoration: none; }.repository-github i { font-size: 23px; }
-.repository-toolbar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px; }.repository-toolbar label { display: inline-flex; align-items: center; gap: 6px; color: #8493a8; font-size: 12px; }.repository-toolbar select,.repository-toolbar input { height: 31px; border: 1px solid #d8e1f0; border-radius: 5px; color: #5271ff; font-size: 12px; }.repository-toolbar input { width: 150px; padding: 0 8px; }.repository-toolbar i { margin-left: -25px; color: #5271ff; }
-.repository-browser { display: grid; grid-template-columns: 270px minmax(0, 1fr); min-height: 300px; border: 1px solid #e6edf8; background: #fff; }.repository-tree { padding: 10px 0; border-right: 1px solid #e6edf8; }.repository-tree a,.repository-tree-folder { display: flex; width: 100%; align-items: center; gap: 8px; height: 32px; padding: 0 16px; color: #4a5568; font-size: 12px; text-align: left; text-decoration: none; }.repository-tree a:hover,.repository-tree a.active { background: #f0f4ff; color: #5271ff; }.repository-tree a i,.repository-tree-folder i { width: 12px; color: #8493a8; }.repository-code { overflow: auto; }.repository-code-title { padding: 10px 14px; border-bottom: 1px solid #edf1f7; color: #596b86; font-size: 12px; }.repository-code-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }.repository-file-diff-link { flex: 0 0 auto; color: #5271ff; font-size: 12px; font-weight: 700; text-decoration: none; }.repository-file-diff-hint { color: #9aa8ba; font-size: 11px; }.repository-code pre,.repository-diff-grid pre { margin: 0; padding: 16px; color: #48576d; font: 12px/1.65 Consolas, "Courier New", monospace; white-space: pre; }.repository-commits-heading { margin-top: 28px; margin-bottom: 12px; }.repository-commits-heading h2 { margin: 0; color: #2b4c7e; font-size: 17px; font-weight: 700; }.repository-commits-heading a,.repository-diff-heading > a { color: #5271ff; font-size: 12px; font-weight: 600; text-decoration: none; }.repository-commit-table td { white-space: nowrap; }
+.repository-toolbar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px; }.repository-toolbar label { display: inline-flex; align-items: center; gap: 6px; color: #8493a8; font-size: 12px; }.repository-toolbar select,.repository-toolbar input { height: 31px; border: 1px solid #DDD6FE; border-radius: 5px; color: #6D5EF7; font-size: 12px; }.repository-toolbar input { width: 150px; padding: 0 8px; }.repository-toolbar i { margin-left: -25px; color: #6D5EF7; }
+.repository-browser { display: grid; grid-template-columns: 270px minmax(0, 1fr); min-height: 300px; border: 1px solid #DDD6FE; background: #fff; }.repository-tree { padding: 10px 0; border-right: 1px solid #DDD6FE; }.repository-tree a,.repository-tree-folder { display: flex; width: 100%; align-items: center; gap: 8px; height: 32px; padding: 0 16px; color: #4a5568; font-size: 12px; text-align: left; text-decoration: none; }.repository-tree a:hover,.repository-tree a.active { background: #EFEAFF; color: #6D5EF7; }.repository-tree a i,.repository-tree-folder i { width: 12px; color: #8493a8; }.repository-code { overflow: auto; }.repository-code-title { padding: 10px 14px; border-bottom: 1px solid #DDD6FE; color: #596b86; font-size: 12px; }.repository-code-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }.repository-file-diff-link { flex: 0 0 auto; color: #6D5EF7; font-size: 12px; font-weight: 700; text-decoration: none; }.repository-file-diff-hint { color: #9aa8ba; font-size: 11px; }.repository-code pre,.repository-diff-grid pre { margin: 0; padding: 16px; color: #48576d; font: 12px/1.65 Consolas, "Courier New", monospace; white-space: pre; }.repository-commits-heading { margin-top: 28px; margin-bottom: 12px; }.repository-commits-heading h2 { margin: 0; color: #111827; font-size: 17px; font-weight: 700; }.repository-commits-heading a,.repository-diff-heading > a { color: #6D5EF7; font-size: 12px; font-weight: 600; text-decoration: none; }.repository-commit-table td { white-space: nowrap; }
 .repository-tree-search-empty { margin: 12px 16px; color: #8493a8; font-size: 12px; }.repository-commits-heading { scroll-margin-top: 16px; }
-.repository-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 18px 0 10px; }.repository-page-btn { display: flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; color: #5d6b87; background: transparent; font-size: 13px; font-weight: 500; text-decoration: none; }.repository-page-btn.active { border-radius: 8px; background: #4d84ff; color: #fff; font-weight: 700; }.repository-page-btn.disabled { opacity: .4; pointer-events: none; }.repository-page-btn:hover:not(.active):not(.disabled) { color: #4d84ff; }
-.repository-diff-meta { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; color: #64748b; font-size: 12px; }.repository-diff-meta > div { display: grid; gap: 3px; min-width: 0; }.repository-diff-meta strong { overflow: hidden; color: #334155; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }.repository-diff-meta small { color: #5271ff; font: 11px Consolas, "Courier New", monospace; }.repository-diff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }.repository-diff-grid section { overflow: hidden; border: 1px solid #dce5f2; border-radius: 6px; background: #fbfcfe; }.repository-diff-grid h2 { margin: 0; padding: 11px 14px; border-bottom: 1px solid #e6edf8; color: #4a5568; font-size: 13px; font-weight: 700; }.repository-diff-code { padding: 0 !important; }.repository-diff-line { display: grid; grid-template-columns: 42px 18px minmax(max-content, 1fr); min-height: 20px; padding: 0 12px; white-space: pre; }.repository-diff-line em { padding-right: 8px; color: #94a3b8; font-style: normal; text-align: right; user-select: none; }.repository-diff-line b { font-weight: 700; text-align: center; }.diff-add { background: #dff5e7; color: #257a55; }.diff-remove { background: #ffe4e6; color: #c2415c; }.diff-placeholder { background: #fbfcfe; color: transparent; }.repository-diff-disabled { color: #8493a8; font-size: 12px; }.repository-diff-empty { padding: 32px 0; color: #8493a8; font-size: 13px; text-align: center; }.repository-commit-detail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }.repository-commit-detail section { min-width: 0; padding: 16px; border: 1px solid #e6edf8; border-radius: 6px; background: #fbfcfe; }.repository-commit-detail span { display: block; margin-bottom: 8px; color: #8493a8; font-size: 12px; }.repository-commit-detail strong,.repository-commit-detail code { display: block; overflow: hidden; color: #334155; font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }.repository-commit-detail code { font-family: Consolas, "Courier New", monospace; }.repository-commit-placeholder { padding: 22px; border: 1px solid #e6edf8; border-radius: 6px; background: #fff; }.repository-commit-placeholder h2 { margin: 0 0 8px; color: #2b4c7e; font-size: 16px; }.repository-commit-placeholder p { margin: 0 0 14px; color: #64748b; font-size: 13px; line-height: 1.6; }.repository-commit-placeholder a { display: inline-flex; align-items: center; gap: 6px; color: #5271ff; font-size: 12px; font-weight: 700; text-decoration: none; }
-@media (max-width: 768px) { .repository-page { padding: 20px; }.repository-list-heading,.repository-detail-heading,.repository-diff-heading { align-items: flex-start; flex-direction: column; }.repository-search { width: 100%; }.repository-form-row { grid-template-columns: 1fr; gap: 7px; }.repository-check { margin-left: 0; }.repository-browser,.repository-diff-grid { grid-template-columns: 1fr; }.repository-tree { border-right: 0; border-bottom: 1px solid #e6edf8; }.repository-toolbar { justify-content: flex-start; flex-wrap: wrap; }.repository-diff-meta { align-items: flex-start; flex-direction: column; }.repository-diff-meta > div { width: 100%; }.repository-code-heading { align-items: flex-start; flex-direction: column; } }
+.repository-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 18px 0 10px; }.repository-page-btn { display: flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; color: #5d6b87; background: transparent; font-size: 13px; font-weight: 500; text-decoration: none; }.repository-page-btn.active { border-radius: 8px; background: #6D5EF7; color: #fff; font-weight: 700; }.repository-page-btn.disabled { opacity: .4; pointer-events: none; }.repository-page-btn:hover:not(.active):not(.disabled) { color: #6D5EF7; }
+.repository-diff-meta { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; color: #64748b; font-size: 12px; }.repository-diff-meta > div { display: grid; gap: 3px; min-width: 0; }.repository-diff-meta strong { overflow: hidden; color: #334155; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }.repository-diff-meta small { color: #6D5EF7; font: 11px Consolas, "Courier New", monospace; }.repository-diff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }.repository-diff-grid section { overflow: hidden; border: 1px solid #DDD6FE; border-radius: 6px; background: #FAFAFC; }.repository-diff-grid h2 { margin: 0; padding: 11px 14px; border-bottom: 1px solid #DDD6FE; color: #4a5568; font-size: 13px; font-weight: 700; }.repository-diff-code { padding: 0 !important; }.repository-diff-line { display: grid; grid-template-columns: 42px 18px minmax(max-content, 1fr); min-height: 20px; padding: 0 12px; white-space: pre; }.repository-diff-line em { padding-right: 8px; color: #94a3b8; font-style: normal; text-align: right; user-select: none; }.repository-diff-line b { font-weight: 700; text-align: center; }.diff-add { background: #F0FDF4; color: #22C55E; }.diff-remove { background: #FEF2F2; color: #EF4444; }.diff-placeholder { background: #FAFAFC; color: transparent; }.repository-diff-disabled { color: #8493a8; font-size: 12px; }.repository-diff-empty { padding: 32px 0; color: #8493a8; font-size: 13px; text-align: center; }.repository-commit-detail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }.repository-commit-detail section { min-width: 0; padding: 16px; border: 1px solid #DDD6FE; border-radius: 6px; background: #FAFAFC; }.repository-commit-detail span { display: block; margin-bottom: 8px; color: #8493a8; font-size: 12px; }.repository-commit-detail strong,.repository-commit-detail code { display: block; overflow: hidden; color: #334155; font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }.repository-commit-detail code { font-family: Consolas, "Courier New", monospace; }.repository-commit-placeholder { padding: 22px; border: 1px solid #DDD6FE; border-radius: 6px; background: #fff; }.repository-commit-placeholder h2 { margin: 0 0 8px; color: #111827; font-size: 16px; }.repository-commit-placeholder p { margin: 0 0 14px; color: #64748b; font-size: 13px; line-height: 1.6; }.repository-commit-placeholder a { display: inline-flex; align-items: center; gap: 6px; color: #6D5EF7; font-size: 12px; font-weight: 700; text-decoration: none; }
+@media (max-width: 768px) { .repository-page { padding: 20px; }.repository-list-heading,.repository-detail-heading,.repository-diff-heading { align-items: flex-start; flex-direction: column; }.repository-search { width: 100%; }.repository-form-row { grid-template-columns: 1fr; gap: 7px; }.repository-check { margin-left: 0; }.repository-browser,.repository-diff-grid { grid-template-columns: 1fr; }.repository-tree { border-right: 0; border-bottom: 1px solid #DDD6FE; }.repository-toolbar { justify-content: flex-start; flex-wrap: wrap; }.repository-diff-meta { align-items: flex-start; flex-direction: column; }.repository-diff-meta > div { width: 100%; }.repository-code-heading { align-items: flex-start; flex-direction: column; } }
 
 .repository-commit-page { display: grid; gap: 18px; }
 .repository-commit-page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
@@ -71,29 +74,29 @@
 .repository-commit-actions .repository-button { gap: 6px; padding: 0 14px; }
 .repository-commit-summary { display: grid; grid-template-columns: minmax(260px, 1.4fr) minmax(420px, 2fr); gap: 12px; }
 .repository-commit-message-block,
-.repository-commit-meta { margin: 0; padding: 16px; border: 1px solid #e6edf8; border-radius: 6px; background: #fff; }
+.repository-commit-meta { margin: 0; padding: 16px; border: 1px solid #DDD6FE; border-radius: 6px; background: #fff; }
 .repository-commit-message-block span { display: block; margin-bottom: 8px; color: #8493a8; font-size: 12px; font-weight: 700; }
-.repository-commit-message-block strong { display: block; color: #26384f; font-size: 15px; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
+.repository-commit-message-block strong { display: block; color: #111827; font-size: 15px; line-height: 1.5; word-break: keep-all; overflow-wrap: anywhere; }
 .repository-commit-meta { display: grid; grid-template-columns: 1.4fr 1.1fr .9fr; gap: 12px; }
 .repository-commit-meta div { min-width: 0; }
 .repository-commit-meta dt { margin-bottom: 7px; color: #8493a8; font-size: 12px; font-weight: 700; }
 .repository-commit-meta dd { margin: 0; overflow: hidden; color: #334155; font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-.repository-commit-meta div:first-child dd { color: #5271ff; font-family: Consolas, "Courier New", monospace; }
-.repository-commit-main { display: grid; grid-template-columns: minmax(280px, .95fr) minmax(0, 2fr); min-height: 420px; border: 1px solid #e6edf8; background: #fff; }
-.repository-commit-files { border-right: 1px solid #e6edf8; }
+.repository-commit-meta div:first-child dd { color: #6D5EF7; font-family: Consolas, "Courier New", monospace; }
+.repository-commit-main { display: grid; grid-template-columns: minmax(280px, .95fr) minmax(0, 2fr); min-height: 420px; border: 1px solid #DDD6FE; background: #fff; }
+.repository-commit-files { border-right: 1px solid #DDD6FE; }
 .repository-commit-files,
 .repository-commit-preview { min-width: 0; padding: 18px; }
 .repository-section-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-.repository-section-title h2 { margin: 0; color: #2b4c7e; font-size: 16px; font-weight: 700; }
-.repository-section-title span { flex: 0 0 auto; padding: 3px 7px; border-radius: 4px; background: #edf2ff; color: #5271ff; font-size: 11px; font-weight: 700; }
-.repository-commit-empty-state { display: grid; align-content: center; min-height: 250px; padding: 24px; border: 1px dashed #ccd8eb; border-radius: 6px; background: #fbfcfe; text-align: center; }
+.repository-section-title h2 { margin: 0; color: #111827; font-size: 16px; font-weight: 700; }
+.repository-section-title span { flex: 0 0 auto; padding: 3px 7px; border-radius: 4px; background: #F1EDFF; color: #6D5EF7; font-size: 11px; font-weight: 700; }
+.repository-commit-empty-state { display: grid; align-content: center; min-height: 250px; padding: 24px; border: 1px dashed #ccd8eb; border-radius: 6px; background: #FAFAFC; text-align: center; }
 .repository-commit-empty-state strong { color: #40516a; font-size: 14px; }
 .repository-commit-empty-state p { max-width: 460px; margin: 9px auto 0; color: #8493a8; font-size: 13px; line-height: 1.6; }
 
 @media (max-width: 1024px) {
     .repository-commit-summary,
     .repository-commit-main { grid-template-columns: 1fr; }
-    .repository-commit-files { border-right: 0; border-bottom: 1px solid #e6edf8; }
+    .repository-commit-files { border-right: 0; border-bottom: 1px solid #DDD6FE; }
 }
 
 @media (max-width: 768px) {
@@ -103,96 +106,96 @@
     .repository-commit-meta { grid-template-columns: 1fr; }
 }
 
-.repository-commit-statbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 11px 14px; border: 1px solid #e6edf8; border-radius: 6px; background: #fbfcfe; color: #64748b; font-size: 12px; }
+.repository-commit-statbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 11px 14px; border: 1px solid #DDD6FE; border-radius: 6px; background: #FAFAFC; color: #64748b; font-size: 12px; }
 .repository-commit-statbar strong { color: #334155; }
-.is-added { color: #228a5f !important; }
-.is-removed { color: #d0445f !important; }
+.is-added { color: #22C55E !important; }
+.is-removed { color: #EF4444 !important; }
 .repository-commit-file-list { display: grid; gap: 8px; }
-.repository-commit-file-link { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 10px; border: 1px solid #edf1f7; border-radius: 6px; color: #4a5568; text-decoration: none; }
-.repository-commit-file-link:hover { border-color: #cbd8ff; background: #f8faff; }
+.repository-commit-file-link { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 10px; border: 1px solid #DDD6FE; border-radius: 6px; color: #4a5568; text-decoration: none; }
+.repository-commit-file-link:hover { border-color: #DDD6FE; background: #FAFAFC; }
 .repository-commit-file-link strong { overflow: hidden; color: #334155; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .repository-commit-file-link small { grid-column: 2 / 4; overflow: hidden; color: #8493a8; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .repository-commit-file-link em { display: inline-flex; gap: 6px; font-style: normal; font-size: 11px; font-weight: 700; }
 .repository-commit-file-tree { display: grid; gap: 2px; }
 .repository-commit-tools { display: grid; gap: 8px; margin-bottom: 12px; }
-.repository-commit-search { display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 10px; border: 1px solid #dce5f2; border-radius: 5px; background: #fff; color: #9ba8ba; }
+.repository-commit-search { display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 10px; border: 1px solid #DDD6FE; border-radius: 5px; background: #fff; color: #9ba8ba; }
 .repository-commit-search input { width: 100%; border: 0; outline: 0; color: #4a5568; font-size: 12px; }
 .repository-commit-filters { display: flex; gap: 5px; flex-wrap: wrap; }
-.repository-commit-filters button { height: 28px; padding: 0 10px; border: 1px solid #dce5f2; border-radius: 5px; background: #fff; color: #64748b; font-size: 11px; font-weight: 700; cursor: pointer; }
-.repository-commit-filters button.active { border-color: #5271ff; background: #edf2ff; color: #5271ff; }
+.repository-commit-filters button { height: 28px; padding: 0 10px; border: 1px solid #DDD6FE; border-radius: 5px; background: #fff; color: #64748b; font-size: 11px; font-weight: 700; cursor: pointer; }
+.repository-commit-filters button.active { border-color: #6D5EF7; background: #F1EDFF; color: #6D5EF7; }
 .repository-commit-tree-folder,
 .repository-commit-tree-file { min-width: 0; padding-left: calc(10px + var(--tree-indent, 0px)); }
 .repository-commit-tree-folder[hidden],
 .repository-commit-tree-file[hidden],
 #commitFileEmpty[hidden] { display: none !important; }
 .repository-commit-tree-folder { display: flex; align-items: center; gap: 7px; height: 28px; border: 0; background: transparent; color: #7b8aa3; font-size: 12px; font-weight: 700; text-align: left; cursor: pointer; }
-.repository-commit-tree-folder:hover { color: #5271ff; }
+.repository-commit-tree-folder:hover { color: #6D5EF7; }
 .repository-commit-tree-folder i { width: 13px; color: #9aa8ba; }
 .repository-commit-tree-folder .repository-tree-toggle { width: 10px; color: #b4bfcd; transition: transform .15s ease; }
 .repository-commit-tree-folder[aria-expanded="false"] .repository-tree-toggle { transform: rotate(-90deg); }
 .repository-commit-tree-folder[aria-expanded="false"] .repository-tree-folder-icon::before { content: "\f07b"; }
 .repository-commit-tree-file { display: grid; grid-template-columns: 14px auto minmax(0, 1fr) auto; align-items: center; gap: 7px; min-height: 32px; padding-top: 4px; padding-right: 10px; padding-bottom: 4px; border-radius: 5px; color: #4a5568; text-decoration: none; }
 .repository-commit-tree-file:hover,
-.repository-commit-tree-file.is-selected { background: #f3f6ff; color: #5271ff; }
-.repository-commit-tree-file.is-selected { box-shadow: inset 3px 0 0 #5271ff; }
+.repository-commit-tree-file.is-selected { background: #F1EDFF; color: #6D5EF7; }
+.repository-commit-tree-file.is-selected { box-shadow: inset 3px 0 0 #6D5EF7; }
 .repository-commit-tree-file > i { width: 13px; color: #9aa8ba; }
 .repository-commit-tree-file strong { overflow: hidden; color: #334155; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .repository-commit-tree-file em { display: inline-flex; gap: 6px; font-style: normal; font-size: 11px; font-weight: 800; }
-.repository-file-status { display: inline-flex; align-items: center; justify-content: center; min-width: 42px; height: 22px; padding: 0 7px; border-radius: 4px; background: #edf2ff; color: #5271ff; font-size: 11px; font-weight: 800; }
-.repository-file-status.status-added { background: #e8f7ef; color: #228a5f; }
-.repository-file-status.status-removed { background: #fff0f2; color: #d0445f; }
-.repository-file-status.status-renamed { background: #fff6df; color: #9a6b09; }
-.repository-file-status.status-modified { background: #edf2ff; color: #5271ff; }
+.repository-file-status { display: inline-flex; align-items: center; justify-content: center; min-width: 42px; height: 22px; padding: 0 7px; border-radius: 4px; background: #F1EDFF; color: #6D5EF7; font-size: 11px; font-weight: 800; }
+.repository-file-status.status-added { background: #F0FDF4; color: #22C55E; }
+.repository-file-status.status-removed { background: #FEF2F2; color: #EF4444; }
+.repository-file-status.status-renamed { background: #FFFBEB; color: #F59E0B; }
+.repository-file-status.status-modified { background: #F1EDFF; color: #6D5EF7; }
 .repository-commit-diff-list { display: grid; gap: 14px; }
-.repository-commit-diff-file { overflow: hidden; border: 1px solid #e6edf8; border-radius: 6px; background: #fff; scroll-margin-top: 14px; }
-.repository-commit-diff-file.is-selected { border-color: #5271ff; box-shadow: 0 0 0 3px rgba(82, 113, 255, .1); }
-.repository-commit-diff-file header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 12px; border-bottom: 1px solid #edf1f7; background: #fbfcfe; }
+.repository-commit-diff-file { overflow: hidden; border: 1px solid #DDD6FE; border-radius: 6px; background: #fff; scroll-margin-top: 14px; }
+.repository-commit-diff-file.is-selected { border-color: #6D5EF7; box-shadow: 0 0 0 3px rgba(109, 94, 247, .1); }
+.repository-commit-diff-file header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 12px; border-bottom: 1px solid #DDD6FE; background: #FAFAFC; }
 .repository-commit-diff-file header > div { display: flex; min-width: 0; align-items: center; gap: 8px; }
 .repository-commit-diff-file header strong { overflow: hidden; color: #334155; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .repository-commit-diff-file header small { display: inline-flex; flex: 0 0 auto; gap: 8px; font-size: 11px; font-weight: 800; }
-.repository-commit-diff-file pre { overflow: auto; max-height: 520px; margin: 0; padding: 0; background: #fcfdff; }
+.repository-commit-diff-file pre { overflow: auto; max-height: 520px; margin: 0; padding: 0; background: #FAFAFC; }
 .repository-patch-line { display: block; min-width: max-content; padding: 0 14px; color: #526176; font: 12px/1.65 Consolas, "Courier New", monospace; white-space: pre; }
-.repository-patch-line.patch-header { background: #eef4ff; color: #5271ff; font-weight: 700; }
-.repository-patch-line.patch-added { background: #e9f8ef; color: #257a55; }
-.repository-patch-line.patch-removed { background: #fff0f2; color: #c2415c; }
+.repository-patch-line.patch-header { background: #F1EDFF; color: #6D5EF7; font-weight: 700; }
+.repository-patch-line.patch-added { background: #F0FDF4; color: #22C55E; }
+.repository-patch-line.patch-removed { background: #FEF2F2; color: #EF4444; }
 .repository-commit-empty-state.is-compact { min-height: 120px; margin: 14px; }
-.repository-commit-top { position: fixed; right: 28px; bottom: 28px; display: flex; width: 38px; height: 38px; align-items: center; justify-content: center; border: 1px solid #dce5f2; border-radius: 50%; background: #fff; color: #5271ff; box-shadow: 0 8px 24px rgba(43, 76, 126, .14); text-decoration: none; }
-.repository-commit-top:hover { background: #edf2ff; }
+.repository-commit-top { position: fixed; right: 28px; bottom: 28px; display: flex; width: 38px; height: 38px; align-items: center; justify-content: center; border: 1px solid #DDD6FE; border-radius: 50%; background: #fff; color: #6D5EF7; box-shadow: 0 8px 24px rgba(17, 24, 39, .14); text-decoration: none; }
+.repository-commit-top:hover { background: #F1EDFF; }
 
 .repository-detail-main { grid-template-columns: minmax(280px, .82fr) minmax(0, 2.18fr); min-height: 470px; }
 .repository-detail-tools { display: grid; gap: 8px; margin-bottom: 12px; }
-.repository-detail-select { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 8px; height: 34px; padding: 0 10px; border: 1px solid #dce5f2; border-radius: 5px; background: #fff; color: #8493a8; font-size: 12px; font-weight: 700; }
-.repository-detail-select select { width: 100%; height: 30px; border: 0; outline: 0; background: transparent; color: #5271ff; font-size: 12px; font-weight: 700; }
+.repository-detail-select { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 8px; height: 34px; padding: 0 10px; border: 1px solid #DDD6FE; border-radius: 5px; background: #fff; color: #8493a8; font-size: 12px; font-weight: 700; }
+.repository-detail-select select { width: 100%; height: 30px; border: 0; outline: 0; background: transparent; color: #6D5EF7; font-size: 12px; font-weight: 700; }
 .repository-detail-tree { display: grid; gap: 2px; padding: 0; border-right: 0; }
 .repository-detail-tree a,
 .repository-detail-tree .repository-tree-folder { min-width: 0; height: 32px; padding: 0 10px; border-radius: 5px; }
 .repository-detail-tree a span,
 .repository-detail-tree .repository-tree-folder span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.repository-detail-tree a.active { box-shadow: inset 3px 0 0 #5271ff; }
-.repository-detail-preview { background: #fcfdff; }
-.repository-detail-preview .repository-code { overflow: hidden; border: 1px solid #e6edf8; border-radius: 6px; background: #fff; }
-.repository-detail-preview .repository-code pre { overflow: auto; max-height: 560px; background: #fcfdff; }
-.repository-detail-preview .repository-code-title { background: #fbfcfe; }
+.repository-detail-tree a.active { box-shadow: inset 3px 0 0 #6D5EF7; }
+.repository-detail-preview { background: #FAFAFC; }
+.repository-detail-preview .repository-code { overflow: hidden; border: 1px solid #DDD6FE; border-radius: 6px; background: #fff; }
+.repository-detail-preview .repository-code pre { overflow: auto; max-height: 560px; background: #FAFAFC; }
+.repository-detail-preview .repository-code-title { background: #FAFAFC; }
 .repository-detail-preview .repository-file-diff-link { min-width: 104px; color: #596b86; }
 .repository-detail-page .repository-table-wrap { border-radius: 6px; }
 .repository-detail-page .repository-commits-heading { margin-top: 4px; margin-bottom: -4px; scroll-margin-top: 16px; }
-.repository-detail-page .repository-commits-heading span { background: #f3f6ff; }
-.repository-commit-filter-form { display: grid; grid-template-columns: repeat(2, minmax(150px, 180px)) minmax(240px, 1fr) auto auto; align-items: end; gap: 8px; padding: 14px; border: 1px solid #e6edf8; border-radius: 6px; background: #fbfcfe; }
+.repository-detail-page .repository-commits-heading span { background: #F1EDFF; }
+.repository-commit-filter-form { display: grid; grid-template-columns: repeat(2, minmax(150px, 180px)) minmax(240px, 1fr) auto auto; align-items: end; gap: 8px; padding: 14px; border: 1px solid #DDD6FE; border-radius: 6px; background: #FAFAFC; }
 .repository-commit-filter-form label { display: grid; gap: 6px; min-width: 0; color: #8493a8; font-size: 12px; font-weight: 700; }
-.repository-commit-filter-form input { width: 100%; height: 34px; padding: 0 10px; border: 1px solid #dce5f2; border-radius: 5px; background: #fff; color: #4a5568; font-size: 12px; outline: 0; }
-.repository-commit-filter-form input:focus { border-color: #5271ff; box-shadow: 0 0 0 3px rgba(82, 113, 255, .12); }
+.repository-commit-filter-form input { width: 100%; height: 34px; padding: 0 10px; border: 1px solid #DDD6FE; border-radius: 5px; background: #fff; color: #4a5568; font-size: 12px; outline: 0; }
+.repository-commit-filter-form input:focus { border-color: #6D5EF7; box-shadow: 0 0 0 3px rgba(109, 94, 247, .12); }
 .repository-commit-filter-presets { display: flex; gap: 5px; flex-wrap: wrap; }
-.repository-commit-filter-presets button { height: 34px; padding: 0 10px; border: 1px solid #dce5f2; border-radius: 5px; background: #fff; color: #64748b; font-size: 11px; font-weight: 700; cursor: pointer; }
-.repository-commit-filter-presets button:hover { border-color: #5271ff; color: #5271ff; }
+.repository-commit-filter-presets button { height: 34px; padding: 0 10px; border: 1px solid #DDD6FE; border-radius: 5px; background: #fff; color: #64748b; font-size: 11px; font-weight: 700; cursor: pointer; }
+.repository-commit-filter-presets button:hover { border-color: #6D5EF7; color: #6D5EF7; }
 .repository-commit-filter-form .repository-button { min-width: 62px; }
 
 .repository-diff-summary { grid-template-columns: minmax(260px, 1fr) minmax(420px, 1.6fr); }
 .repository-diff-summary .repository-commit-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.repository-diff-meta { padding: 12px 14px; border: 1px solid #e6edf8; border-radius: 6px; background: #fbfcfe; }
+.repository-diff-meta { padding: 12px 14px; border: 1px solid #DDD6FE; border-radius: 6px; background: #FAFAFC; }
 .repository-diff-grid section { background: #fff; }
-.repository-diff-section-title { margin: 0; padding: 11px 14px; border-bottom: 1px solid #e6edf8; background: #fbfcfe; }
-.repository-diff-section-title h2 { padding: 0; border-bottom: 0; color: #2b4c7e; font-size: 14px; }
-.repository-diff-grid pre { overflow: auto; max-height: 600px; background: #fcfdff; }
+.repository-diff-section-title { margin: 0; padding: 11px 14px; border-bottom: 1px solid #DDD6FE; background: #FAFAFC; }
+.repository-diff-section-title h2 { padding: 0; border-bottom: 0; color: #111827; font-size: 14px; }
+.repository-diff-grid pre { overflow: auto; max-height: 600px; background: #FAFAFC; }
 
 @media (max-width: 768px) {
     .repository-commit-file-link { grid-template-columns: auto minmax(0, 1fr); }

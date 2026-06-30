@@ -13,12 +13,13 @@
 <section>
 	<script th:src="@{/js/milestone/milestone-list.js}"></script>
 
-    <div class="milestone-page">
-        <div class="milestone-page-header">
-            <h1 class="milestone-page-title">마일스톤 관리</h1>
-            <a th:href="@{/project/milestone/version/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 버전 추가</a>
-            <a th:href="@{/project/milestone/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 마일스톤 추가</a>
-        </div>
+    <div class="milestone-page-header">
+	    <h1 class="milestone-page-title">로드맵</h1>
+	    <div class="header-action-group">
+	        <a th:href="@{/project/milestone/version/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 버전 추가</a>
+	        <a th:href="@{/project/milestone/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 마일스톤 추가</a>
+	    </div>
+	</div>
 
         <div class="milestone-container" th:each="milestone : ${milestones}">
             

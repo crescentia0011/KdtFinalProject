@@ -24,9 +24,9 @@
                th:if="${userError}"
                th:text="${userError}">입력값을 확인해주세요.</p>
             <p class="user-register-message success"
-               th:if="${userError == null and isCompanyOwner}">아이디, 이름, 이메일 주소, 연락처와 관리자 여부를 수정할 수 있습니다.</p>
+               th:if="${userError == null and isCompanyOwner}">아이디, 이름, 이메일 주소, 연락처, 소속 그룹과 관리자 여부를 수정할 수 있습니다.</p>
             <p class="user-register-message success"
-               th:if="${userError == null and !isCompanyOwner}">아이디, 이름, 이메일 주소, 연락처만 수정할 수 있습니다.</p>
+               th:if="${userError == null and !isCompanyOwner}">아이디, 이름, 이메일 주소, 연락처와 소속 그룹을 수정할 수 있습니다.</p>
 
             <form class="user-register-form" method="post"
                   th:action="@{/userList/{userCode}/edit(userCode=${userDetail.userCode})}">
@@ -58,6 +58,18 @@
                                name="phoneNumber"
                                th:value="${userForm != null ? userForm.phoneNumber : userDetail.phoneNumber}"
                                autocomplete="off">
+                    </label>
+                    <label class="user-form-field user-form-field-short">
+                        <span>소속 그룹</span>
+                        <select name="groupId">
+                            <option value="">소속 그룹 없음</option>
+                            <option th:each="group : ${groupList}"
+                                    th:value="${group.groupId}"
+                                    th:text="${group.groupName}"
+                                    th:selected="${userForm != null ? userForm.groupId == group.groupId : userDetail.groupId == group.groupId}">
+                                개발팀
+                            </option>
+                        </select>
                     </label>
                 </div>
 

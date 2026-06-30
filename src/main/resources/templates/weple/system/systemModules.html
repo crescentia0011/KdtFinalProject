@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head>
+    <meta charset="UTF-8">
+    <title>새 프로젝트에 추가할 모듈</title>
+    <link rel="stylesheet" href="/css/system/project-create.css">
+</head>
+<body>
+
+    <section class="project-page">
+        <div class="project-toolbar-top">
+            <h3 class="project-title">새 프로젝트에 포함될 모듈</h3>
+        </div>
+        <div class="project-card">
+            <form id="moduleSettingForm" method="post" th:action="@{/system/systemModules}">
+
+                <div class="form-group-row">
+                    <label class="form-label">새 프로젝트에 항상 포함할 모듈</label>
+                    <div class="module-box-container">
+                        <div class="module-flex-layout">
+                            <div class="module-item-wrapper"
+                                 th:each="module : ${moduleList}">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="enabledModules"
+									       th:value="${module.commonId}"
+									       th:checked="${enabledCodes != null and enabledCodes.contains(module.commonId)}">
+                                    <span class="custom-check-box"></span>
+                                    <span class="module-text" th:text="${module.defaultDescribe}">모듈명</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group-row">
+                    <label class="form-label">새 프로젝트에 추가할 일감 유형</label>
+                    <div class="module-box-container">
+                        <div class="module-flex-layout">
+                            <div class="module-item-wrapper"
+                                 th:each="type : ${taskTypeList}">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="enabledTaskTypes"
+                                           th:value="${type.typeId}">
+                                    <span class="custom-check-box"></span>
+                                    <span class="module-text" th:text="${type.typeName}">일감유형명</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pagination-wrap button-group-right">
+				    <button type="button" class="page-btn btn-cancel" id="cancelBtn">취소</button>
+				    <button type="submit" class="page-btn active btn-submit">저장</button>
+				</div>
+
+            </form>
+        </div>
+        <script th:inline="javascript">
+let isSubmitting = false;
+document.getElementById('moduleSettingForm').addEventListener('submit', function (e) {
+    if (isSubmitting) {
+        e.preventDefault();
+        return;
+    }
+    isSubmitting = true;
+    document.querySelector('.btn-submit').disabled = true;
+});
+
+// 취소 버튼: 토스트 띄우고 약간의 딜레이 후 이동
+document.getElementById('cancelBtn').addEventListener('click', function () {
+    showToast('취소되었습니다.', 'info');
+    setTimeout(function () {
+        history.back();
+    }, 600);
+});
+
+// 서버에서 내려준 결과 플래시 메시지 처리
+window.addEventListener('DOMContentLoaded', function () {
+    const toastType = /*[[${toastType}]]*/ null;
+    const toastMessage = /*[[${toastMessage}]]*/ null;
+    if (toastMessage) {
+        showToast(toastMessage, toastType);
+    }
+});
+</script>
+    </section>
+
+</body>
+</html>

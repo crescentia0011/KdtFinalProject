@@ -8,6 +8,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,12 +22,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.weple.cloud.auth.service.LoginUserDetails;
+import com.weple.cloud.auth.service.LoginUserVO;
 import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.repository.service.GithubCommitDetailInfo;
 import com.weple.cloud.repository.service.GithubCommitInfo;
+import com.weple.cloud.repository.service.GithubFileDiffInfo;
 import com.weple.cloud.repository.service.GithubRepositoryInfo;
 import com.weple.cloud.repository.service.GithubRepositoryReader;
-import com.weple.cloud.repository.service.GithubFileDiffInfo;
+import com.weple.cloud.repository.service.RepositoryManageSettingVO;
 import com.weple.cloud.repository.service.RepositoryService;
 import com.weple.cloud.repository.service.RepositoryVO;
 
@@ -38,6 +41,9 @@ import lombok.RequiredArgsConstructor;
 public class RepositoryController {
 
     private static final int DEFAULT_COMMIT_RANGE_DAYS = 30;
+    private static final String PERMISSION_REPOSITORY_VIEW = "k4_view";
+    private static final String PERMISSION_REPOSITORY_COMMIT = "k4_commit";
+    private static final String PERMISSION_REPOSITORY_MANAGE = "k4_manage";
     private static final ZoneId DISPLAY_TIME_ZONE = ZoneId.of("Asia/Seoul");
     private static final DateTimeFormatter COMMIT_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(DISPLAY_TIME_ZONE);
@@ -46,23 +52,33 @@ public class RepositoryController {
     private final GithubRepositoryReader githubRepositoryReader;
     private final ProjectService projectService;
 
-    // 설정 탭에서는 프로젝트에 등록된 저장소를 관리 목록으로 보여줌
+    /* 저장소 설정 탭에서 등록된 저장소 관리 목록 보여줌 */
     @GetMapping("/management")
     public String management(@AuthenticationPrincipal LoginUserDetails loginUser,
                              @RequestParam(defaultValue = "1") Long projectId,
                              Model model) {
         setRepositorySettingMenu(model, projectId);
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, projectId);
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_MANAGE)) {
+            return "weple/access-denide";
+        }
+        addRepositoryPermissionAttributes(model, permissionCodes);
         model.addAttribute("repositoryList",
                 repositoryService.findRepositories(loginUser.getLoginUser().getCompanyId(), projectId));
         return "weple/repository/management";
     }
 
-    // 저장소 추가 버튼에서만 진입하는 신규 등록 화면
+    /* 저장소 추가 버튼에서 진입하는 신규 등록 화면임 */
     @GetMapping("/management/new")
     public String newRepository(@AuthenticationPrincipal LoginUserDetails loginUser,
                                 @RequestParam(defaultValue = "1") Long projectId,
                                 Model model) {
         setRepositorySettingMenu(model, projectId);
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, projectId);
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_MANAGE)) {
+            return "weple/access-denide";
+        }
+        addRepositoryPermissionAttributes(model, permissionCodes);
         RepositoryVO repository = model.containsAttribute("repository")
                 ? (RepositoryVO) model.asMap().get("repository")
                 : new RepositoryVO();
@@ -72,7 +88,7 @@ public class RepositoryController {
         return "weple/repository/register";
     }
 
-    // 수정 화면에는 기존 값을 채우고, 다른 회사나 프로젝트의 저장소는 조회되지 않게 함
+    /* 저장소 수정 화면임, 기존 저장소값 채워서 보여줌 */
     @GetMapping("/management/edit")
     public String editRepository(@AuthenticationPrincipal LoginUserDetails loginUser,
                                  @RequestParam(defaultValue = "1") Long projectId,
@@ -80,6 +96,11 @@ public class RepositoryController {
                                  RedirectAttributes redirectAttributes,
                                  Model model) {
         setRepositorySettingMenu(model, projectId);
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, projectId);
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_MANAGE)) {
+            return "weple/access-denide";
+        }
+        addRepositoryPermissionAttributes(model, permissionCodes);
         RepositoryVO repository = repositoryService.findRepository(
                 loginUser.getLoginUser().getCompanyId(), projectId, repositoryId);
         if (repository == null) {
@@ -91,11 +112,15 @@ public class RepositoryController {
         return "weple/repository/register";
     }
 
-    // 로그인된 회사 ID를 사용해 신규 저장소를 등록
+    /* 로그인한 회사 기준으로 신규 저장소 등록함 */
     @PostMapping
     public String registerRepository(@AuthenticationPrincipal LoginUserDetails loginUser,
                                      RepositoryVO repository,
                                      RedirectAttributes redirectAttributes) {
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, repository.getProjectId());
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_MANAGE)) {
+            return "weple/access-denide";
+        }
         try {
             repository.setCompanyId(loginUser.getLoginUser().getCompanyId());
             repositoryService.registerRepository(repository);
@@ -112,11 +137,15 @@ public class RepositoryController {
         }
     }
 
-    // 수정 요청에도 로그인 회사 ID를 다시 설정해 요청값 조작을 막음
+    /* 저장소 수정 요청 처리함, 회사 ID는 로그인 정보로 다시 고정함 */
     @PostMapping("/update")
     public String updateRepository(@AuthenticationPrincipal LoginUserDetails loginUser,
                                    RepositoryVO repository,
                                    RedirectAttributes redirectAttributes) {
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, repository.getProjectId());
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_MANAGE)) {
+            return "weple/access-denide";
+        }
         try {
             repository.setCompanyId(loginUser.getLoginUser().getCompanyId());
             repositoryService.updateRepository(repository);
@@ -130,13 +159,17 @@ public class RepositoryController {
         }
     }
 
-    // 삭제 확인용 입력값은 서비스에서 실제 저장소명과 비교한 후 삭제
+    /* 삭제 확인 입력값과 실제 저장소명을 비교해서 삭제함 */
     @PostMapping("/delete")
     public String deleteRepository(@AuthenticationPrincipal LoginUserDetails loginUser,
                                    @RequestParam(defaultValue = "1") Long projectId,
                                    @RequestParam String repositoryId,
                                    @RequestParam String confirmationName,
                                    RedirectAttributes redirectAttributes) {
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, projectId);
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_MANAGE)) {
+            return "weple/access-denide";
+        }
         try {
             repositoryService.deleteRepository(loginUser.getLoginUser().getCompanyId(), projectId,
                     repositoryId, confirmationName);
@@ -147,18 +180,23 @@ public class RepositoryController {
         return "redirect:/repository/management?projectId=" + projectId;
     }
 
-    // 프로젝트 사용자는 등록된 저장소 목록을 조회할 수 있음
+    /* 프로젝트 사용자가 등록된 저장소 목록 조회함 */
     @GetMapping("/list")
     public String list(@AuthenticationPrincipal LoginUserDetails loginUser,
                        @RequestParam(defaultValue = "1") Long projectId,
                        Model model) {
         setProjectMenu(model, projectId);
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, projectId);
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_VIEW)) {
+            return "weple/access-denide";
+        }
+        addRepositoryPermissionAttributes(model, permissionCodes);
         model.addAttribute("repositoryList",
                 repositoryService.findRepositories(loginUser.getLoginUser().getCompanyId(), projectId));
         return "weple/repository/list";
     }
 
-    // GitHub API 실패 시에도 상세 화면의 기본 구조가 유지되도록 빈 데이터를 준비함
+    /* 저장소 상세 화면 구성함, 파일 조회와 커밋 조회 권한을 분리함 */
     @GetMapping("/detail")
     public String detail(@AuthenticationPrincipal LoginUserDetails loginUser,
                          @RequestParam(defaultValue = "1") Long projectId,
@@ -172,6 +210,12 @@ public class RepositoryController {
                          @RequestParam(required = false) String commitSearch,
                          Model model) {
         setProjectMenu(model, projectId);
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, projectId);
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_VIEW)) {
+            return "weple/access-denide";
+        }
+        addRepositoryPermissionAttributes(model, permissionCodes);
+        boolean canViewRepositoryCommit = hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_COMMIT);
         LocalDate defaultEndDate = LocalDate.now(DISPLAY_TIME_ZONE);
         LocalDate selectedStartDate = parseCommitDate(commitStartDate, defaultEndDate.minusDays(DEFAULT_COMMIT_RANGE_DAYS));
         LocalDate selectedEndDate = parseCommitDate(commitEndDate, defaultEndDate);
@@ -187,6 +231,9 @@ public class RepositoryController {
                 : repositoryService.findRepository(loginUser.getLoginUser().getCompanyId(), projectId, repositoryId);
         model.addAttribute("repository", repository);
         if (repository != null) {
+            /* 회사별 저장소 설정을 읽어 커밋 메시지 일감 연결 규칙에 사용함 */
+            RepositoryManageSettingVO repositorySetting =
+                    repositoryService.findRepositoryManageSetting(loginUser.getLoginUser().getCompanyId());
             GithubRepositoryInfo githubInfo = new GithubRepositoryInfo();
             githubInfo.setDefaultBranch("main");
             githubInfo.setSelectedBranch("main");
@@ -201,11 +248,21 @@ public class RepositoryController {
             try {
                 githubInfo = githubRepositoryReader.readRepository(
                         repository.getRepositoryUrl(), branch, directoryPath, filePath, commitPage,
-                        selectedStartDate, selectedEndDate);
+                        selectedStartDate, selectedEndDate, repositorySetting);
+                /* 저장된 커밋 로그가 있으면 저장 당시의 일감 연결값을 우선 적용함 */
+                repositoryService.applyStoredCommitLinks(repository.getRepositoryId(), githubInfo.getCommits());
                 markExistingTaskLinks(projectId, githubInfo.getCommits());
+                if (!canViewRepositoryCommit) {
+                    githubInfo.setCommits(List.of());
+                    githubInfo.setTotalCommitPages(1);
+                    githubInfo.setStartCommitPage(1);
+                    githubInfo.setEndCommitPage(1);
+                    githubInfo.setHasNextCommitPage(false);
+                }
             } catch (IllegalStateException ex) {
                 model.addAttribute("githubError", ex.getMessage());
             }
+            model.addAttribute("repositorySetting", repositorySetting);
             model.addAttribute("githubInfo", githubInfo);
         }
         model.addAttribute("commitStartDate", selectedStartDate);
@@ -214,7 +271,7 @@ public class RepositoryController {
         return "weple/repository/detail";
     }
 
-    // 커밋 메시지에서 인식한 TSK 코드가 현재 프로젝트에 존재하면 일감 상세 링크를 활성화합니다.
+    /* 커밋 메시지에서 인식한 일감 코드가 현재 프로젝트에 존재하면 제목까지 붙여줌 */
     private void markExistingTaskLinks(Long projectId, List<GithubCommitInfo> commits) {
         if (commits == null || commits.isEmpty()) {
             return;
@@ -233,7 +290,7 @@ public class RepositoryController {
         });
     }
 
-    // 커밋 기간 값이 비어 있거나 잘못 들어오면 기본 조회 기간으로 되돌립니다.
+    /* 커밋 기간값이 비었거나 잘못 들어오면 기본 기간으로 되돌림 */
     private LocalDate parseCommitDate(String date, LocalDate defaultDate) {
         if (date == null || date.isBlank()) {
             return defaultDate;
@@ -245,7 +302,7 @@ public class RepositoryController {
         }
     }
 
-    // 선택 파일의 최근 두 커밋을 GitHub에서 조회해 변경 비교 화면에 전달
+    /* 선택 파일의 최근 두 커밋을 비교해서 파일 변경 비교 화면에 전달함 */
     @GetMapping("/diff")
     public String diff(@AuthenticationPrincipal LoginUserDetails loginUser,
                        @RequestParam(defaultValue = "1") Long projectId,
@@ -254,6 +311,11 @@ public class RepositoryController {
                        @RequestParam String filePath,
                        Model model) {
         setProjectMenu(model, projectId);
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, projectId);
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_COMMIT)) {
+            return "weple/access-denide";
+        }
+        addRepositoryPermissionAttributes(model, permissionCodes);
         RepositoryVO repository = repositoryService.findRepository(
                 loginUser.getLoginUser().getCompanyId(), projectId, repositoryId);
         if (repository == null) {
@@ -273,7 +335,7 @@ public class RepositoryController {
         return "weple/repository/form";
     }
 
-    // 커밋 목록에서 선택한 커밋을 WEPLE 내부 상세 화면으로 먼저 연결
+    /* 커밋 목록에서 선택한 커밋을 WEPLE 내부 상세 화면으로 보여줌 */
     @GetMapping("/commit")
     public String commit(@AuthenticationPrincipal LoginUserDetails loginUser,
                          @RequestParam(defaultValue = "1") Long projectId,
@@ -286,6 +348,11 @@ public class RepositoryController {
                          @RequestParam(required = false) String commitUrl,
                          Model model) {
         setProjectMenu(model, projectId);
+        Set<String> permissionCodes = findRepositoryPermissionCodes(loginUser, projectId);
+        if (!hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_COMMIT)) {
+            return "weple/access-denide";
+        }
+        addRepositoryPermissionAttributes(model, permissionCodes);
         RepositoryVO repository = repositoryService.findRepository(
                 loginUser.getLoginUser().getCompanyId(), projectId, repositoryId);
         GithubCommitDetailInfo commitDetail = createFallbackCommitDetail(sha, message, authorEmail, committedAt, commitUrl);
@@ -303,7 +370,7 @@ public class RepositoryController {
         return "weple/repository/commit";
     }
 
-    // 커밋 상세 URL에 기존 ISO 날짜가 넘어와도 화면용 날짜로 다시 정리
+    /* GitHub 상세 조회 실패 시 화면 표시용 기본 커밋 상세값 만듦 */
     private GithubCommitDetailInfo createFallbackCommitDetail(String sha, String message, String authorEmail,
                                                               String committedAt, String commitUrl) {
         GithubCommitDetailInfo commitDetail = new GithubCommitDetailInfo();
@@ -319,6 +386,7 @@ public class RepositoryController {
         return commitDetail;
     }
 
+    /* ISO 날짜가 들어오면 화면용 한국 시간으로 변환함 */
     private String formatCommitDate(String committedAt) {
         if (committedAt == null || committedAt.isBlank() || "-".equals(committedAt)) {
             return "-";
@@ -331,7 +399,7 @@ public class RepositoryController {
         }
     }
 
-    // 프로젝트 공통 레이아웃에서 저장소 메뉴를 활성화
+    /* 프로젝트 공통 레이아웃에서 저장소 메뉴 활성화함 */
     private void setProjectMenu(Model model, Long projectId) {
         setProjectHeader(model, projectId);
         model.addAttribute("projectId", projectId);
@@ -339,7 +407,7 @@ public class RepositoryController {
         model.addAttribute("currentMenu", "repository");
     }
 
-    // 설정 안의 저장소 화면에서는 프로젝트 헤더의 설정 탭을 활성화
+    /* 설정 탭 안의 저장소 화면에서 프로젝트 설정 헤더와 저장소 탭 활성화함 */
     private void setRepositorySettingMenu(Model model, Long projectId) {
         setProjectHeader(model, projectId);
         model.addAttribute("projectId", projectId);
@@ -348,12 +416,42 @@ public class RepositoryController {
         model.addAttribute("settingMenu", "repository");
     }
 
-    // 프로젝트 공통 헤더가 프로젝트명을 표시할 수 있도록 현재 프로젝트 정보를 모델에 담음
+    /* 프로젝트 공통 헤더가 프로젝트명을 표시할 수 있게 프로젝트 정보 담음 */
     private void setProjectHeader(Model model, Long projectId) {
         model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
     }
 
-    // 등록 또는 수정 대상과 다른 주 저장소가 있을 때만 변경 확인 창을 표시
+    /* 화면 버튼 노출용 저장소 권한값 모델에 담음 */
+    private void addRepositoryPermissionAttributes(Model model, Set<String> permissionCodes) {
+        model.addAttribute("canViewRepository", hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_VIEW));
+        model.addAttribute("canViewRepositoryCommit", hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_COMMIT));
+        model.addAttribute("canManageRepository", hasRepositoryPermission(permissionCodes, PERMISSION_REPOSITORY_MANAGE));
+    }
+
+    /* 관리자면 전체 허용, 일반 사용자면 프로젝트별 권한 목록 조회함 */
+    private Set<String> findRepositoryPermissionCodes(LoginUserDetails loginUser, Long projectId) {
+        if (loginUser == null || loginUser.getLoginUser() == null) {
+            return Set.of();
+        }
+        LoginUserVO user = loginUser.getLoginUser();
+        if (isCompanyManager(user)) {
+            return Set.of(PERMISSION_REPOSITORY_VIEW, PERMISSION_REPOSITORY_COMMIT, PERMISSION_REPOSITORY_MANAGE);
+        }
+
+        return repositoryService.findProjectPermissionCodes(user.getUserCode(), projectId);
+    }
+
+    /* 조회된 권한 목록에 필요한 권한 코드가 있는지 확인함 */
+    private boolean hasRepositoryPermission(Set<String> permissionCodes, String permissionCode) {
+        return permissionCodes != null && permissionCodes.contains(permissionCode);
+    }
+
+    /* 회사 최고관리자 또는 부여받은 관리자 여부 확인함 */
+    private boolean isCompanyManager(LoginUserVO user) {
+        return Integer.valueOf(1).equals(user.getOwnerYn()) || Integer.valueOf(1).equals(user.getAdminYn());
+    }
+
+    /* 등록 또는 수정 대상과 다른 주 저장소가 있을 때 변경 확인창에 쓸 정보 담음 */
     private void addMainRepositoryInfo(Model model, Long companyId, Long projectId, String repositoryId) {
         RepositoryVO currentMainRepository = repositoryService.findMainRepository(companyId, projectId);
         boolean mainChangeRequired = currentMainRepository != null
@@ -361,5 +459,4 @@ public class RepositoryController {
         model.addAttribute("currentMainRepository", currentMainRepository);
         model.addAttribute("mainChangeRequired", mainChangeRequired);
     }
-
 }

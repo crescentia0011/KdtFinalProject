@@ -5,8 +5,8 @@
 <div th:fragment="navbarFragment" class="sub_menu_nav" th:if="${currentMenu != 'none' and sidebarMenu != 'system'}">
     <ul> 
     	<li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b1')}"
-		    th:classappend="${currentMenu == 'overview'} ? 'active' : ''">
-		    <a th:href="@{/project/overview(projectId=${projectId})}">개요</a>
+		    th:classappend="${currentMenu == 'outline'} ? 'active' : ''">
+		    <a th:href="@{/project/outline(projectId=${projectId})}">개요</a>
 		</li>
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b2')}"
         	th:classappend="${currentMenu == 'worklog'} ? 'active' : ''">
@@ -15,7 +15,7 @@
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b3')}"
             th:classappend="${currentMenu == 'milestone'} ? 'active' : ''">
-          <a th:href="@{/project/milestone(projectId=${projectId})}">마일스톤</a>
+            <a th:href="@{/project/milestone(projectId=${projectId})}">마일스톤</a>
         </li>
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b4')}"
@@ -28,8 +28,9 @@
         	<a th:href="@{/projectTimeList(projectId=${projectId})}">소요시간</a>
         </li>
         
-        <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b6')}">
-        	<a href="#">간트차트</a>
+        <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b6')}"
+        	th:classappend="${currentMenu == 'gantt'} ? 'active' : ''">
+            <a th:href="@{/project/gantt(projectId=${projectId})}">간트차트</a>
         </li>
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b12')}"

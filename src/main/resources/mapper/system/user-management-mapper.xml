@@ -79,6 +79,7 @@
                u.status AS status,
                TO_CHAR(u.create_date, 'YYYY-MM-DD HH24:MI') AS createdAt,
                TO_CHAR(u.last_login_time, 'YYYY-MM-DD HH24:MI') AS lastLoginTime,
+               u.group_id AS groupId,
                g.group_name AS groupName,
                NVL(u.owner_yn, 0) AS ownerYn,
                NVL(u.admin_yn, 0) AS adminYn,
@@ -160,6 +161,14 @@
           AND user_code != #{userCode}
     </select>
 
+    <!-- 사용자 수정 시 선택한 그룹이 같은 회사의 그룹인지 확인합니다. -->
+    <select id="countGroupByCompany" resultType="int">
+        SELECT COUNT(*)
+        FROM groups
+        WHERE company_id = #{companyId}
+          AND group_id = #{groupId}
+    </select>
+
     <!-- 관리자가 직접 생성한 계정은 가입승인 없이 같은 회사의 활성 사용자로 등록합니다. -->
     <insert id="insertUser" parameterType="com.weple.cloud.system.service.UserManagementCreateVO">
         <!-- 회원가입과 같은 usr-yyyymmdd-번호 규칙으로 신규 사용자 코드를 먼저 발급합니다. -->
@@ -238,6 +247,7 @@
             user_name = #{user.userName},
             email = #{user.email},
             phone_number = #{user.phoneNumber},
+            group_id = #{user.groupId,jdbcType=INTEGER},
             admin_yn = CASE
                            WHEN #{actorOwnerYn} = 1 THEN
                                CASE

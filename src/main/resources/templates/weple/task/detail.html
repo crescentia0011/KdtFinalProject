@@ -29,8 +29,8 @@
 						✏️ 수정</button>
 
 					<button class="btn btn-log"
-						    th:onclick="|location.href='@{/projectTimeList(projectId=${projectId}, taskId=*{taskId})}'|">⏱️
-						    소요시간 기록</button>
+						th:onclick="|location.href='@{/projectTimeList(projectId=${projectId}, taskId=*{taskId})}'|">⏱️
+						소요시간 기록</button>
 
 					<button type="button" class="btn btn-delete task-delete-trigger"
 						th:if="${isAdminOrOwner} or ${taskPerms.k3Delete != null}"
@@ -109,8 +109,8 @@
 					<div class="section-content">
 						<div class="file-item" th:each="file : *{fileList}">
 							<div class="file-info">
-								<span style="color: rgb(192, 192, 192)(192, 192, 192)(192, 192, 192)(127, 127, 127); font-weight: bold;">버전아이디:</span> <a
-									th:href="@{/project/download/{id}(id=${file.versionId})}"
+								<span style="color: rgb(127, 127, 127); font-weight: bold;">버전아이디:</span>
+								<a th:href="@{/project/download/{id}(id=${file.versionId})}"
 									class="file-link"
 									th:text="|${file.logicalName} - version ${file.versionNumber}|"></a>
 								<span class="file-size" th:text="${file.fileSize} + ' bytes'"></span>
@@ -164,41 +164,45 @@
 						style="display: block;">
 						<div class="history-list">
 
-							<div class="history-item"
-								th:each="history, stat : ${updateHistoryList}">
-								<div class="history-top">
-									<div>
-										<strong th:text="${history.userName}"></strong>님이 <span
-											th:text="${#temporals.format(history.actionAt, 'yyyy-MM-dd HH:mm')}">에
-										</span>변경함
-									</div>
-									<span class="history-index" th:text="'#' + ${stat.count}">#1</span>
-								</div>
+							<div class="history-item" th:each="history : ${updateHistoryList}" style="margin-bottom: 15px; padding: 10px; border-bottom: 1px dashed #ccc;">
+    
+    <div class="history-meta">
+        <strong th:text="${history.userName}">홍길동</strong>님이 
+        <span th:text="${#strings.substring(history.actionAt, 0, 16)}">2026-06-30 12:00</span>에
+    </div>
 
-								<div class="history-details">
-									<div class="history-detail-row"
-										th:each="detail : ${history.details}">
-										<!-- 하드코딩 , 받아오는값 맞춰서 바꿔야됨 2개밖에 모름 지금 -->
-										<strong
-											th:text="${
-                                				detail.fieldName == 'task_title' ? '제목' :
-                                				detail.fieldName == 'task_describe' ? '설명' :
-                                				detail.fieldName == 'task_status' ? '상태' :
-                                				detail.fieldName == 'priority' ? '우선순위' :
-                                				detail.fieldName == 'task_manager' ? '담당자' :
-                                				detail.fieldName == 'start_date' ? '시작일' :
-                                				detail.fieldName == 'finish_date' ? '완료일' :
-                                				detail.fieldName == 'estimated_time' ? '추정시간' :
-                                				detail.fieldName == 'task_progress' ? '진척도' :
-                                				detail.fieldName == 'milestone_id' ? '마일스톤' :
-                                				detail.fieldName == 'type_name' ? '일감유형' :
-                                				detail.fieldName
-                            			}">우선순위</strong>을(를)
-										<span th:text="${detail.oldValue}"></span>에서 <strong
-											th:text="${detail.newValue}"></strong>로 변경했습니다.
-									</div>
-								</div>
-							</div>
+    <div class="history-details" style="margin-top: 5px; pl: 10px;">
+        <div class="history-detail-row" th:each="detail : ${history.details}">
+            
+            <strong th:text="${
+                detail.fieldName == 'summary' ? '일감 내용' :
+                detail.fieldName == 'task_title' ? '제목' :
+                detail.fieldName == 'task_describe' ? '설명' :
+                detail.fieldName == 'task_status' ? '상태' :
+                detail.fieldName == 'priority' ? '우선순위' :
+                detail.fieldName == 'task_manager' ? '담당자' :
+                detail.fieldName == 'start_date' ? '시작일' :
+                detail.fieldName == 'finish_date' ? '완료일' :
+                detail.fieldName == 'estimated_time' ? '추정시간' :
+                detail.fieldName == 'task_progress' ? '진척도' :
+                detail.fieldName == 'milestone_id' ? '마일스톤' :
+                detail.fieldName == 'type_name' ? '일감유형' :
+                detail.fieldName
+            }"></strong>을(를)
+            
+            <th:block th:if="${history.actionType == 'UPDATE'}">
+                <span th:text="${detail.oldValue}"></span>에서 
+                <strong th:text="${detail.newValue}"></strong>(으)로 변경했습니다.
+            </th:block>
+            
+            <th:block th:if="${history.actionType == 'CREATE'}">
+                <strong th:text="${detail.newValue}"></strong>(으)로 설정하여 생성했습니다.
+            </th:block>
+
+        </div>
+    </div>
+    
+</div>
 
 							<div
 								th:if="${updateHistoryList == null or updateHistoryList.isEmpty()}"
@@ -227,150 +231,96 @@
 						</div>
 
 						<div class="comment-list" id="commentArea">
-							<th:block th:each="comment : ${taskComment}"
-								th:if="${comment.parentCommentId == null or comment.parentCommentId == 0}">
+	<th:block th:each="comment : ${taskComment}"
+		th:if="${comment.parentCommentId == null or comment.parentCommentId == 0}">
 
-								<!-- 원댓글 -->
-								<div class="comment-item root-comment"
-									th:style="${comment.userCode == null} ? 'opacity: 0.6;' : ''">
-									<div class="comment-header">
-										<div class="user-info">
-											<div class="profile-img"></div>
+		<div class="comment-item root-comment"
+			th:style="${comment.userCode == null} ? 'opacity: 0.6;' : ''">
+			<div class="comment-header">
+				<div class="user-info">
+					<img class="profile-img" th:src="${comment.profileImage}" alt="프로필 사진" />
+					<strong th:if="${comment.userCode != null}" th:text="|${comment.userName}(${comment.email})|"></strong>
+					<strong th:if="${comment.userCode == null}" style="color: #94a3b8; font-weight: normal;"></strong> 
+					<span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'yyyy.MM.dd HH:mm')}"></span>
+				</div>
+			</div>
 
-											<strong th:if="${comment.userCode != null}"
-												th:text="|${comment.userName}(${comment.email})|"></strong>
+			<div th:id="'comment-text-' + ${comment.commentId}" class="comment-body" th:text="${comment.taskComment}"
+				th:style="${comment.userCode == null} ? 'color: #94a3b8; font-style: italic;' : ''">
+			</div>
 
-											<strong th:if="${comment.userCode == null}"
-												style="color: #94a3b8; font-weight: normal;"></strong> <span
-												class="comment-date"
-												th:text="${#temporals.format(comment.createdAt, 'yyyy.MM.dd HH:mm')}"></span>
-										</div>
-									</div>
+			<div th:id="'edit-form-' + ${comment.commentId}" class="comment-input-box edit-input-form" style="display: none; margin-top: 10px;">
+				<textarea th:id="'edit-content-' + ${comment.commentId}" th:text="${comment.taskComment}"></textarea>
+				<div class="comment-submit-area">
+					<button type="button" class="btn-cancel" th:data-id="${comment.commentId}" onclick="toggleEditForm(this.getAttribute('data-id'))">취소</button>
+					<button type="button" th:data-id="${comment.commentId}" onclick="updateComment(this.getAttribute('data-id'))">수정 완료</button>
+				</div>
+			</div>
 
-									<div th:id="'comment-text-' + ${comment.commentId}"
-										class="comment-body" th:text="${comment.taskComment}"
-										th:style="${comment.userCode == null} ? 'color: #94a3b8; font-style: italic;' : ''">
-										원댓글 내용입니다.</div>
+			<div class="comment-actions" th:if="${comment.userCode != null} and (${isAdminOrOwner} or ${taskPerms?.k3Comment != null})">
+				<span class="reply-btn" th:data-id="${comment.commentId}" th:data-user="${comment.userName}"
+					onclick="toggleReplyForm(this.getAttribute('data-id'), this.getAttribute('data-user'), this)">답글</span>
 
-									<!-- 수정 폼 -->
-									<div th:id="'edit-form-' + ${comment.commentId}"
-										class="comment-input-box edit-input-form"
-										style="display: none; margin-top: 10px;">
-										<textarea th:id="'edit-content-' + ${comment.commentId}"
-											th:text="${comment.taskComment}"></textarea>
-										<div class="comment-submit-area">
-											<button type="button" class="btn-cancel"
-												th:data-id="${comment.commentId}"
-												onclick="toggleEditForm(this.getAttribute('data-id'))">취소</button>
-											<button type="button" th:data-id="${comment.commentId}"
-												onclick="updateComment(this.getAttribute('data-id'))">수정
-												완료</button>
-										</div>
-									</div>
+				<th:block th:if="${currentUserCode != null and currentUserCode == comment.userCode}">
+					<span class="edit-btn" th:data-id="${comment.commentId}" onclick="toggleEditForm(this.getAttribute('data-id'))" style="margin-left: 10px; cursor: pointer; color: #64748b;">수정</span>
+					<span class="delete-btn" th:data-id="${comment.commentId}" onclick="deleteComment(this.getAttribute('data-id'))" style="margin-left: 10px; cursor: pointer; color: #ef4444;">삭제</span>
+				</th:block>
+			</div>
+		</div>
 
-									<div class="comment-actions"
-										th:if="${comment.userCode != null} and (${isAdminOrOwner} or ${taskPerms?.k3Comment != null})">
+		<div th:id="'reply-form-' + ${comment.commentId}" class="comment-input-box reply-input-form" style="display: none; margin-left: 0px;">
+			<textarea th:id="'reply-content-' + ${comment.commentId}" placeholder="답글을 입력하세요..."></textarea>
+			<div class="comment-submit-area">
+				<button type="button" class="btn-cancel" th:data-id="${comment.commentId}" onclick="closeReplyForm(this.getAttribute('data-id'))">취소</button>
+				<button type="button" th:data-id="${comment.commentId}" onclick="submitComment(this.getAttribute('data-id'))">답글 등록</button>
+			</div>
+		</div>
 
-										<span class="reply-btn" th:data-id="${comment.commentId}"
-											onclick="toggleReplyForm(this.getAttribute('data-id'), null)">답글</span>
+		<th:block th:each="reply : ${taskComment}" th:if="${reply.parentCommentId == comment.commentId}">
+			<div class="reply-wrapper" style="margin-left: 40px !important; display: flex; align-items: flex-start;">
+				<div class="reply-icon" style="margin-right: 8px; color: #94a3b8; padding-top: 12px;">└</div>
 
-										<th:block
-											th:if="${currentUserCode != null and currentUserCode == comment.userCode}">
-											<span class="edit-btn" th:data-id="${comment.commentId}"
-												onclick="toggleEditForm(this.getAttribute('data-id'))"
-												style="margin-left: 10px; cursor: pointer; color: #64748b;">수정</span>
-											<span class="delete-btn" th:data-id="${comment.commentId}"
-												onclick="deleteComment(this.getAttribute('data-id'))"
-												style="margin-left: 10px; cursor: pointer; color: #ef4444;">삭제</span>
-										</th:block>
-									</div>
-								</div>
-
-								<!-- 답글 입력 폼 -->
-								<div th:id="'reply-form-' + ${comment.commentId}"
-									class="comment-input-box reply-input-form"
-									style="display: none;">
-									<textarea th:id="'reply-content-' + ${comment.commentId}"
-										placeholder="답글을 입력하세요..."></textarea>
-									<div class="comment-submit-area">
-										<button type="button" class="btn-cancel"
-											th:data-id="${comment.commentId}"
-											onclick="toggleReplyForm(this.getAttribute('data-id'), null)">취소</button>
-										<button type="button" th:data-id="${comment.commentId}"
-											onclick="submitComment(this.getAttribute('data-id'))">답글
-											등록</button>
-									</div>
-								</div>
-
-								<!-- 대댓글 -->
-								<th:block th:each="reply : ${taskComment}"
-									th:if="${reply.parentCommentId == comment.commentId}">
-									<div class="reply-wrapper">
-										<div class="reply-icon">└</div>
-
-										<div class="comment-item reply-comment"
-											th:style="${reply.userCode == null} ? 'opacity: 0.6;' : ''">
-											<div class="comment-header">
-												<div class="user-info">
-													<div class="profile-img"></div>
-
-													<strong th:if="${reply.userCode != null}"
-														th:text="|${reply.userName}(${reply.email})|"></strong> <strong
-														th:if="${reply.userCode == null}"
-														style="color: #94a3b8; font-weight: normal;"></strong> <span
-														class="comment-date"
-														th:text="${#temporals.format(reply.createdAt, 'yyyy.MM.dd HH:mm')}"></span>
-												</div>
-											</div>
-
-											<div th:id="'comment-text-' + ${reply.commentId}"
-												class="comment-body" th:text="${reply.taskComment}"
-												th:style="${reply.userCode == null} ? 'color: #94a3b8; font-style: italic;' : ''">
-												대댓글 내용입니다.</div>
-
-											<!-- 대댓글 수정 폼 -->
-											<div th:id="'edit-form-' + ${reply.commentId}"
-												class="comment-input-box edit-input-form"
-												style="display: none; margin-top: 10px;">
-												<textarea th:id="'edit-content-' + ${reply.commentId}"
-													th:text="${reply.taskComment}"></textarea>
-												<div class="comment-submit-area">
-													<button type="button" class="btn-cancel"
-														th:data-id="${reply.commentId}"
-														onclick="toggleEditForm(this.getAttribute('data-id'))">취소</button>
-													<button type="button" th:data-id="${reply.commentId}"
-														onclick="updateComment(this.getAttribute('data-id'))">수정
-														완료</button>
-												</div>
-											</div>
-
-											<div class="comment-actions"
-												th:if="${reply.userCode != null} and (${isAdminOrOwner} or ${taskPerms?.k3Comment != null})">
-
-												<span class="reply-btn" th:data-id="${comment.commentId}"
-													th:data-user="${reply.userName}"
-													onclick="toggleReplyForm(this.getAttribute('data-id'), this.getAttribute('data-user'))">답글</span>
-
-												<th:block
-													th:if="${currentUserCode != null and currentUserCode == reply.userCode}">
-													<span class="edit-btn" th:data-id="${reply.commentId}"
-														onclick="toggleEditForm(this.getAttribute('data-id'))"
-														style="margin-left: 10px; cursor: pointer; color: #64748b;">수정</span>
-													<span class="delete-btn" th:data-id="${reply.commentId}"
-														onclick="deleteComment(this.getAttribute('data-id'))"
-														style="margin-left: 10px; cursor: pointer; color: #ef4444;">삭제</span>
-												</th:block>
-											</div>
-										</div>
-									</div>
-								</th:block>
-
-							</th:block>
-
-							<div th:if="${taskComment == null or taskComment.isEmpty()}"
-								style="text-align: center; padding: 30px; color: #94a3b8;">
-								등록된 댓글이 없습니다.</div>
+				<div class="comment-item reply-comment" th:style="${reply.userCode == null} ? 'opacity: 0.6; flex: 1;' : 'flex: 1;'">
+					<div class="comment-header">
+						<div class="user-info">
+							<div class="profile-img"></div>
+							<strong th:if="${reply.userCode != null}" th:text="|${reply.userName}(${reply.email})|"></strong> 
+							<strong th:if="${reply.userCode == null}" style="color: #94a3b8; font-weight: normal;"></strong> 
+							<span class="comment-date" th:text="${#temporals.format(reply.createdAt, 'yyyy.MM.dd HH:mm')}"></span>
 						</div>
+					</div>
+
+					<div th:id="'comment-text-' + ${reply.commentId}" class="comment-body" th:text="${reply.taskComment}"
+						th:style="${reply.userCode == null} ? 'color: #94a3b8; font-style: italic;' : ''">
+					</div>
+
+					<div th:id="'edit-form-' + ${reply.commentId}" class="comment-input-box edit-input-form" style="display: none; margin-top: 10px;">
+						<textarea th:id="'edit-content-' + ${reply.commentId}" th:text="${reply.taskComment}"></textarea>
+						<div class="comment-submit-area">
+							<button type="button" class="btn-cancel" th:data-id="${reply.commentId}" onclick="toggleEditForm(this.getAttribute('data-id'))">취소</button>
+							<button type="button" th:data-id="${reply.commentId}" onclick="updateComment(this.getAttribute('data-id'))">수정 완료</button>
+						</div>
+					</div>
+
+					<div class="comment-actions" th:if="${reply.userCode != null} and (${isAdminOrOwner} or ${taskPerms?.k3Comment != null})">
+						<span class="reply-btn" th:data-id="${comment.commentId}" th:data-user="${reply.userName}"
+							onclick="toggleReplyForm(this.getAttribute('data-id'), this.getAttribute('data-user'), this)">답글</span>
+
+						<th:block th:if="${currentUserCode != null and currentUserCode == reply.userCode}">
+							<span class="edit-btn" th:data-id="${reply.commentId}" onclick="toggleEditForm(this.getAttribute('data-id'))" style="margin-left: 10px; cursor: pointer; color: #64748b;">수정</span>
+							<span class="delete-btn" th:data-id="${reply.commentId}" onclick="deleteComment(this.getAttribute('data-id'))" style="margin-left: 10px; cursor: pointer; color: #ef4444;">삭제</span>
+						</th:block>
+					</div>
+				</div>
+			</div>
+		</th:block>
+
+	</th:block>
+
+	<div th:if="${taskComment == null or taskComment.isEmpty()}" style="text-align: center; padding: 30px; color: #94a3b8;">
+		등록된 댓글이 없습니다.
+	</div>
+</div>
 					</div>
 
 
@@ -400,9 +350,6 @@
 			</div>
 
 			<div class="task-footer-actions">
-				<div class="export-box">
-					내보내기: <a href="#" class="export-link">PDF</a>
-				</div>
 			</div>
 
 		</div>

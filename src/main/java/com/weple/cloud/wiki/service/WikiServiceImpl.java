@@ -19,7 +19,7 @@ public class WikiServiceImpl implements WikiService {
 
     private final WikiMapper wikiMapper;
 
-    // 위키 기본
+    // ── 위키 기본 ───────────────────────────────────────────
 
     @Override
     public List<WikiPageVO> findWikiTree(Long projectId) {
@@ -44,14 +44,24 @@ public class WikiServiceImpl implements WikiService {
 
     /**
      * 위키 등록 + 연관문서 일괄 저장
+     * selectKey로 insertWiki 후 vo.getWikiPageId()에 생성된 ID 반환됨
      */
     @Override
     @Transactional
     public int insertWikiWithRelations(WikiPageVO vo, String relationsJson) {
-        int result = wikiMapper.insertWiki(vo);
+        int result = wikiMapper.insertWiki(vo);   // selectKey → vo.wikiPageId 자동 세팅
+
+        String pageId = vo.getWikiPageId();
+        if (pageId == null || pageId.isBlank()) {
+            // selectKey 미작동 시 직접 조회 (fallback)
+            // insertWiki 직후 마지막 삽입 행 조회는 DB 특성상 어려우므로 로그만 남김
+            return result;
+        }
+
         if (relationsJson == null || relationsJson.isBlank() || "[]".equals(relationsJson.trim())) {
             return result;
         }
+
         try {
             com.fasterxml.jackson.databind.ObjectMapper om = new com.fasterxml.jackson.databind.ObjectMapper();
             java.util.List<WikiRelationVO> list = om.readValue(
@@ -59,12 +69,13 @@ public class WikiServiceImpl implements WikiService {
                 om.getTypeFactory().constructCollectionType(java.util.List.class, WikiRelationVO.class)
             );
             for (WikiRelationVO rel : list) {
-                if (rel == null) continue; // removeChip으로 null 마킹된 항목 스킵
-                rel.setWikiPageId(vo.getWikiPageId());
+                if (rel == null) continue;
+                rel.setWikiPageId(pageId);
+                if (rel.getProjectId() == null) rel.setProjectId(vo.getProjectId());
                 wikiMapper.insertRelation(rel);
             }
         } catch (Exception e) {
-            // JSON 파싱 실패 시 관계 저장 생략 (위키 등록은 유지)
+            // JSON 파싱 실패 무시 (위키는 저장 완료)
         }
         return result;
     }
@@ -72,7 +83,7 @@ public class WikiServiceImpl implements WikiService {
     @Override
     @Transactional
     public int updateWiki(WikiPageVO vo) {
-        int result = wikiMapper.updateWiki(vo); // 프로시저: 백업 + 버전업 + 업데이트
+        int result = wikiMapper.updateWiki(vo);          // 프로시저: 백업 + 버전업 + 업데이트
         wikiMapper.unlockWiki(vo.getWikiPageId(), vo.getUserCode()); // 저장 후 잠금 해제
         return result;
     }
@@ -80,11 +91,12 @@ public class WikiServiceImpl implements WikiService {
     @Override
     @Transactional
     public int deleteWiki(String wikiPageId) {
-        wikiMapper.deleteRelationByWikiId(wikiPageId); // 연관문서 먼저 삭제
+        wikiMapper.deleteRelationByWikiId(wikiPageId);   // 연관문서 먼저 삭제
         return wikiMapper.deleteWiki(wikiPageId);
     }
 
-    // 변경 이력
+    // ── 변경 이력 ────────────────────────────────────────────
+
     @Override
     public List<WikiHistoryVO> findHistoryList(String wikiPageId) {
         return wikiMapper.selectHistoryList(wikiPageId);
@@ -95,7 +107,8 @@ public class WikiServiceImpl implements WikiService {
         return wikiMapper.selectHistoryByVersion(wikiPageId, wikiVersion);
     }
 
-    // 편집 잠금
+    // ── 편집 잠금 ────────────────────────────────────────────
+
     @Override
     @Transactional
     public boolean lockWiki(String wikiPageId, String userCode) {
@@ -113,7 +126,8 @@ public class WikiServiceImpl implements WikiService {
         return wikiMapper.selectLockInfo(wikiPageId);
     }
 
-    // 연관문서
+    // ── 연관문서 ─────────────────────────────────────────────
+
     @Override
     public List<WikiRelationVO> findRelationList(String wikiPageId) {
         return wikiMapper.selectRelationList(wikiPageId);
@@ -136,6 +150,11 @@ public class WikiServiceImpl implements WikiService {
      * type = "TASK" | "WIKI" | "" (전체)
      */
     @Override
+    public String getUserProfileImg(String userCode) {
+        return wikiMapper.selectUserProfileImg(userCode);
+    }
+
+    @Override
     public List<WikiRelationVO> searchByHashtag(Long projectId, String keyword, String type) {
         if (keyword == null || keyword.isBlank()) return Collections.emptyList();
 
@@ -149,7 +168,8 @@ public class WikiServiceImpl implements WikiService {
         return result;
     }
 
-    // 트리 변환 
+    // ── 트리 변환 ─────────────────────────────────────────────
+
     private List<WikiPageVO> buildTree(List<WikiPageVO> flatList) {
         Map<String, WikiPageVO> map   = new LinkedHashMap<>();
         List<WikiPageVO>        roots = new ArrayList<>();

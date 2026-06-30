@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head>
+    <meta charset="UTF-8">
+    <title>설정 - 구성원</title>
+    <link rel="stylesheet" href="/css/project/setting.css">
+    <link rel="stylesheet" href="/css/project/members.css">
+</head>
+<body>
+<section class="settings-page">
+
+    <div id="memberToastContainer" class="member-toast-container"></div>
+    <div th:replace="~{common/fragments/project-setting-tabs :: projectSettingTabs}"></div>
+
+        <!-- 테이블 헤더 영역: 삭제 버튼 우측 고정 -->
+        <div class="members-toolbar">
+		    <button type="button"
+		            id="deleteSelectedBtn"
+		            class="btn-delete-selected disabled"
+		            onclick="confirmDeleteSelected()">
+		        삭제
+		    </button>
+		</div>
+
+        <div class="members-table-wrap">
+		    <table class="members-table">
+		        <thead>
+		        <tr>
+		            <th class="col-check">
+		                <input type="checkbox"
+		                       id="checkAll"
+		                       class="mem-chk"
+		                       onchange="toggleCheckAll(this)">
+		            </th>
+		            <th class="col-no">NO</th>
+		            <th class="col-name">사용자 명</th>
+		            <th class="col-role">역할</th>
+		        </tr>
+		        </thead>
+		
+		        <tbody>
+		        <tr th:if="${#lists.isEmpty(memberList)}">
+		            <td colspan="4" class="members-empty">
+		                등록된 구성원이 없습니다.
+		            </td>
+		        </tr>
+		
+		        <tr th:each="m : ${memberList}">
+		            <td class="col-check">
+		                <input type="checkbox"
+		                       class="mem-chk mem-row-chk"
+		                       th:value="${m.memberId}"
+		                       th:attr="data-project-id=${projectId}"
+		                       onchange="onRowCheck()">
+		            </td>
+		
+		            <td class="col-no" th:text="${m.rowNum}"></td>
+		
+		            <td class="col-name">
+		                <div class="member-name-wrap">
+		                    <img th:src="${m.profileImage != null and !#strings.isEmpty(m.profileImage)
+		                                  ? m.profileImage
+		                                  : '/images/hamster.jpg'}"
+		                         class="member-avatar"
+		                         onerror="this.src='/images/hamster.jpg'">
+		
+		                    <span th:text="${m.userName}"></span>
+		                </div>
+		            </td>
+		
+		            <td class="col-role"
+		                th:text="${m.roleName != null ? m.roleName : '-'}">
+		            </td>
+		        </tr>
+		        </tbody>
+		    </table>
+		</div>
+
+        <!-- 구성원 추가 버튼: 우측 하단 -->
+        <div class="members-add-wrap">
+		    <button type="button"
+		            class="btn-add-member"
+		            onclick="openAddModal()">
+		        구성원 추가
+		    </button>
+		</div>
+
+    <!-- ══ 구성원 추가 모달 ══ -->
+    <div id="addMemberModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span class="modal-title">구성원 추가</span>
+                <button type="button" class="modal-close-btn" onclick="closeAddModal()">✕</button>
+            </div>
+            <div class="modal-body">
+
+                <!-- 탭: 사용자 / 그룹 -->
+                <div class="modal-tabs">
+                    <button type="button" class="modal-tab active" id="tabUser" onclick="switchTab('user')">사용자</button>
+                    <button type="button" class="modal-tab" id="tabGroup" onclick="switchTab('group')">그룹</button>
+                </div>
+
+                <!-- 사용자 탭 -->
+                <div id="panelUser">
+                    <div class="modal-label">사용자 선택</div>
+                    <div class="modal-search-box">
+                        <span>🔍</span>
+                        <input type="text" id="userSearchInput" class="modal-search-input"
+                               placeholder="사용자 검색" oninput="searchUsers(this.value)">
+                    </div>
+                    <div class="modal-chip-grid" id="userListWrap"></div>
+                </div>
+
+                <!-- 그룹 탭 -->
+                <div id="panelGroup" style="display:none;">
+                    <div class="modal-label">그룹 선택</div>
+                    <div class="modal-search-box">
+                        <span>🔍</span>
+                        <input type="text" id="groupSearchInput" class="modal-search-input"
+                               placeholder="그룹 검색" oninput="filterGroups(this.value)">
+                    </div>
+                    <div class="modal-chip-grid" id="groupListWrap">
+                        <label th:each="g : ${groupList}" class="chip-item chip-radio"
+                               th:attr="data-group-name=${g.groupName}">
+                            <input type="radio" name="selectedGroup" th:value="${g.groupId}"
+                                   onchange="loadGroupUsers(this.value)">
+                            <span th:text="${g.groupName}">기획팀</span>
+                        </label>
+                    </div>
+
+                    <div class="modal-label-row" style="margin-top:14px;">
+                        <span class="modal-label" style="margin-bottom:0;">그룹 내 사용자</span>
+                        <button type="button" class="btn-toggle-all" id="groupToggleAllBtn"
+                                onclick="toggleAllGroupUsers()">전체 선택</button>
+                    </div>
+                    <div class="modal-chip-grid" id="groupUserListWrap">
+                        <p class="modal-empty">그룹을 선택해주세요.</p>
+                    </div>
+                </div>
+
+                <!-- 역할 (공통) -->
+                <div class="modal-label" style="margin-top:16px;">역할</div>
+                <div class="modal-role-grid">
+                    <label th:each="role : ${roleList}" class="chip-item chip-radio chip-role">
+                        <input type="radio" name="selectedRole" th:value="${role.roleId}">
+                        <span th:text="${role.roleName}">팀장</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn btn-cancel" onclick="closeAddModal()">취소</button>
+                <button type="button" class="modal-btn btn-submit" onclick="submitAddMember()">등록</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 삭제 확인 모달 ══ -->
+    <div id="deleteConfirmModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-sm">
+            <div class="modal-header">
+                <span class="modal-title">구성원 삭제</span>
+                <button type="button" class="modal-close-btn" onclick="closeDeleteModal()">✕</button>
+            </div>
+            <div class="modal-body modal-body-center">
+                <p class="modal-confirm-msg">선택한 구성원을 삭제하시겠습니까?<br>
+                    <span style="font-size:12px;color:#adb5bd;">삭제 후 복구할 수 없습니다.</span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn btn-cancel" onclick="closeDeleteModal()">취소</button>
+                <button type="button" class="modal-btn btn-danger" onclick="executeDelete()">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var projectId  = /*[[${projectId}]]*/ 0;
+        var csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+        var csrfToken  = /*[[${_csrf.token}]]*/ '';
+        /*]]>*/
+
+        var searchTimer   = null;
+        var deleteTargets = [];
+        var currentTab    = 'user';
+
+        /* ══ 토스트 ══ */
+        function showToast(type, msg) {
+            var c = document.getElementById('memberToastContainer');
+            var el = document.createElement('div');
+            el.className = 'member-toast toast-' + type;
+            var ic = {success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
+            el.innerHTML = '<span>' + (ic[type]||'ℹ️') + '</span><span class="t-msg">' + msg + '</span>'
+                         + '<button onclick="rmToast(this.parentElement)">✕</button>';
+            c.appendChild(el);
+            setTimeout(function(){ rmToast(el); }, 3000);
+        }
+        function rmToast(el) {
+            if (!el || el.classList.contains('out')) return;
+            el.classList.add('out');
+            setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 200);
+        }
+
+        /* ══ 체크박스 ══ */
+        function toggleCheckAll(chk) {
+            document.querySelectorAll('.mem-row-chk').forEach(function(c){ c.checked = chk.checked; });
+            syncDeleteBtn();
+        }
+        function onRowCheck() {
+            var all = document.querySelectorAll('.mem-row-chk');
+            var chk = document.querySelectorAll('.mem-row-chk:checked');
+            document.getElementById('checkAll').checked = all.length > 0 && chk.length === all.length;
+            syncDeleteBtn();
+        }
+        function syncDeleteBtn() {
+            var cnt = document.querySelectorAll('.mem-row-chk:checked').length;
+            var btn = document.getElementById('deleteSelectedBtn');
+            btn.textContent = cnt > 0 ? '삭제 (' + cnt + ')' : '삭제';
+            btn.classList.toggle('disabled', cnt === 0);
+        }
+
+        /* ══ 선택 삭제 ══ */
+        function confirmDeleteSelected() {
+            var checks = document.querySelectorAll('.mem-row-chk:checked');
+            if (!checks.length) return;
+            deleteTargets = [];
+            checks.forEach(function(cb) {
+                deleteTargets.push({ memberId: cb.value, projectId: cb.getAttribute('data-project-id') || String(projectId) });
+            });
+            document.getElementById('deleteConfirmModal').style.display = 'flex';
+        }
+        function closeDeleteModal() {
+            document.getElementById('deleteConfirmModal').style.display = 'none';
+            deleteTargets = [];
+        }
+        function executeDelete() {
+            if (!deleteTargets.length) return;
+            var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            headers[csrfHeader] = csrfToken;
+            var chain = Promise.resolve();
+            deleteTargets.forEach(function(t) {
+                chain = chain.then(function() {
+                    var p = new URLSearchParams();
+                    p.append('memberId', t.memberId);
+                    p.append('projectId', t.projectId);
+                    return fetch('/project/settings/members/delete', { method:'POST', headers:headers, body:p.toString() })
+                        .then(function(r){ if (!r.ok) throw new Error(); });
+                });
+            });
+            chain.then(function() {
+                showToast('success', '삭제되었습니다.');
+                closeDeleteModal();
+                setTimeout(function(){ location.reload(); }, 800);
+            }).catch(function(){ showToast('error', '삭제 중 오류가 발생했습니다.'); });
+        }
+
+        /* ══ 추가 모달 ══ */
+        function openAddModal() {
+            document.getElementById('addMemberModal').style.display = 'flex';
+            document.getElementById('userSearchInput').value = '';
+            document.querySelectorAll('input[name="selectedRole"]').forEach(function(r){ r.checked = false; });
+            document.querySelectorAll('input[name="selectedGroup"]').forEach(function(r){ r.checked = false; });
+            document.getElementById('groupUserListWrap').innerHTML = '<p class="modal-empty">그룹을 선택해주세요.</p>';
+            switchTab('user');
+            searchUsers('');
+        }
+        function closeAddModal() { document.getElementById('addMemberModal').style.display = 'none'; }
+
+        /* ══ 탭 ══ */
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('panelUser').style.display  = tab === 'user'  ? '' : 'none';
+            document.getElementById('panelGroup').style.display = tab === 'group' ? '' : 'none';
+            document.getElementById('tabUser').classList.toggle('active',  tab === 'user');
+            document.getElementById('tabGroup').classList.toggle('active', tab === 'group');
+        }
+
+        /* ══ 사용자 검색 ══ */
+        function searchUsers(kw) {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(function() {
+                fetch('/project/settings/members/search?projectId=' + projectId + '&keyword=' + encodeURIComponent(kw))
+                    .then(function(r){ return r.json(); })
+                    .then(function(list){ renderChips(list, 'userListWrap', 'selectedUser', true); })
+                    .catch(function(){ renderChips([], 'userListWrap', 'selectedUser', true); });
+            }, 250);
+        }
+
+        /* ══ 그룹 검색 ══ */
+        function filterGroups(keyword) {
+            var kw = keyword.trim().toLowerCase();
+            document.querySelectorAll('#groupListWrap .chip-item').forEach(function(item) {
+                var name = (item.getAttribute('data-group-name') || '').toLowerCase();
+                item.style.display = (!kw || name.indexOf(kw) !== -1) ? '' : 'none';
+            });
+        }
+
+        /* ══ 그룹 내 사용자 ══ */
+        function loadGroupUsers(groupId) {
+            document.getElementById('groupUserListWrap').innerHTML = '<p class="modal-empty">불러오는 중...</p>';
+            document.getElementById('groupToggleAllBtn').textContent = '전체 선택';
+            fetch('/project/settings/members/group?groupId=' + groupId + '&projectId=' + projectId)
+                .then(function(r){ return r.json(); })
+                .then(function(list){ renderChips(list, 'groupUserListWrap', 'selectedGroupUser', true); })
+                .catch(function(){ renderChips([], 'groupUserListWrap', 'selectedGroupUser', true); });
+        }
+
+        /* ══ 그룹 내 사용자 전체 선택/해제 ══ */
+        function toggleAllGroupUsers() {
+            var checks = document.querySelectorAll('#groupUserListWrap input[name="selectedGroupUser"]:not(:disabled)');
+            if (!checks.length) return;
+            var allChecked = Array.prototype.every.call(checks, function(c){ return c.checked; });
+            checks.forEach(function(c){ c.checked = !allChecked; });
+            document.getElementById('groupToggleAllBtn').textContent = allChecked ? '전체 선택' : '전체 해제';
+        }
+
+        function renderChips(list, wrapId, name, showAvatar) {
+            var wrap = document.getElementById(wrapId);
+            if (!list || !list.length) { wrap.innerHTML = '<p class="modal-empty">검색 결과가 없습니다.</p>'; return; }
+            wrap.innerHTML = list.map(function(u) {
+                var img = showAvatar ? '<img src="' + (u.profileImage||'/images/hamster.jpg') + '" class="chip-avatar" onerror="this.src=\'/images/hamster.jpg\'">' : '';
+                var already = u.isAlreadyMember === true || u.isAlreadyMember === 1;
+                var checkedAttr = already ? 'checked disabled' : '';
+                var extraClass  = already ? ' chip-already' : '';
+                return '<label class="chip-item chip-check' + extraClass + '">'
+                    + '<input type="checkbox" name="' + name + '" value="' + u.userCode + '" ' + checkedAttr + '>'
+                    + img + '<span>' + u.userName + '</span></label>';
+            }).join('');
+        }
+
+        /* ══ 등록 ══ */
+        function submitAddMember() {
+            var roleInput = document.querySelector('input[name="selectedRole"]:checked');
+            if (!roleInput) { showToast('warning', '역할을 선택해주세요.'); return; }
+
+            var userCodes = [];
+            if (currentTab === 'user') {
+                document.querySelectorAll('#userListWrap input[name="selectedUser"]:checked:not(:disabled)')
+                    .forEach(function(cb){ userCodes.push(cb.value); });
+            } else {
+                document.querySelectorAll('#groupUserListWrap input[name="selectedGroupUser"]:checked:not(:disabled)')
+                    .forEach(function(cb){ userCodes.push(cb.value); });
+            }
+            if (!userCodes.length) { showToast('warning', '추가할 사용자를 선택해주세요.'); return; }
+
+            var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            headers[csrfHeader] = csrfToken;
+            var chain = Promise.resolve();
+            userCodes.forEach(function(code) {
+                chain = chain.then(function() {
+                    var p = new URLSearchParams();
+                    p.append('projectId', String(projectId));
+                    p.append('userCode', code);
+                    p.append('roleId', roleInput.value);
+                    return fetch('/project/settings/members/add', { method:'POST', headers:headers, body:p.toString() })
+                        .then(function(r){ if (!r.ok) throw new Error(); });
+                });
+            });
+            chain.then(function() {
+                showToast('success', '구성원이 추가되었습니다.');
+                closeAddModal();
+                setTimeout(function(){ location.reload(); }, 800);
+            }).catch(function(){ showToast('error', '구성원 추가 중 오류가 발생했습니다.'); });
+        }
+
+        /* ══ 외부 클릭 닫기 ══ */
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'addMemberModal')     closeAddModal();
+            if (e.target.id === 'deleteConfirmModal') closeDeleteModal();
+        });
+        /*]]>*/
+    </script>
+</section>
+</body>
+</html>

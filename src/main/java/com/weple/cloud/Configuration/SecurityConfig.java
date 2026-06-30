@@ -57,7 +57,7 @@ public class SecurityConfig {
                     "/assets/**"
                 ).permitAll()
 
-                // 가입승인 화면과 승인 처리는 기업 최고관리자 또는 관리자만 접근할 수 있습니다.
+                // 가입승인 화면과 승인 처리는 기업 최고관리자 또는 관리자만 접근할 수 있음
                 .requestMatchers("/approvalList", "/approvalList/**")
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
                 
@@ -65,12 +65,15 @@ public class SecurityConfig {
                 .requestMatchers("/system/taskType", "/system/taskType/**")
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
 
-                // 사용자 관리 목록과 활성·비활성 변경은 기업 최고관리자 또는 관리자만 처리할 수 있습니다.
+                // 사용자 관리 목록과 활성·비활성 변경은 기업 최고관리자 또는 관리자만 처리할 수 있음
                 .requestMatchers("/userList", "/userList/**")
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
 
-                // 저장소 등록 설정은 기업 최고관리자 또는 관리자만 사용할 수 있습니다.
+                // 저장소 등록 설정은 기업 최고관리자 또는 관리자만 사용할 수 있음
                 .requestMatchers("/repository/management", "/repository/management/**", "/repository", "/repository/update", "/repository/delete")
+                .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
+                // 관리 설정탭 접근은 기업 최고관리자 또는 관리자만 사용할 수 있음
+                .requestMatchers("/settingDetail")
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
 
                 // 그 외 요청은 로그인 필요

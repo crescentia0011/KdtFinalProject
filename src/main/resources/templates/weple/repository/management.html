@@ -11,7 +11,7 @@
         <p class="repository-message repository-message-success" th:if="${repositorySuccess}" th:text="${repositorySuccess}">저장소가 등록되었습니다.</p>
         <p class="repository-message repository-message-error" th:if="${repositoryError}" th:text="${repositoryError}">요청을 처리할 수 없습니다.</p>
 
-        <div class="repository-management-actions">
+        <div class="repository-management-actions" th:if="${canManageRepository}">
             <a class="repository-button repository-button-primary repository-add-button" th:href="@{/repository/management/new(projectId=${projectId})}">+ 저장소 추가</a>
         </div>
 
@@ -26,7 +26,7 @@
                         <td><span class="repository-badge" th:if="${repository.mainYn == &quot;Y&quot;}">주 저장소</span></td>
                         <td>GitHub</td>
                         <td><a class="repository-url" th:href="${repository.repositoryUrl}" target="_blank" rel="noopener" th:text="${repository.repositoryUrl}">https://github.com/KDTFinalProject/KdtFinalProject.git</a></td>
-                        <td>
+                        <td th:if="${canManageRepository}">
                             <div class="repository-management-buttons">
                                 <a class="repository-button repository-button-secondary" th:href="@{/repository/management/edit(projectId=${projectId}, repositoryId=${repository.repositoryId})}">수정</a>
                                 <!-- 공용 삭제 모달에 전달할 대상 정보만 data 속성으로 보관합니다. -->

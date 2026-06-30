@@ -3,22 +3,67 @@
 <mapper namespace="com.weple.cloud.file.mapper.FileMapper">
 	<!-- 프로젝트 내 파일관리 -->
 	<!-- 전체조회 -->
-	<select id="projectFileAll" resultType="ProjectFileVO">
+	<select id="projectFileAll" parameterType="String" resultType="ProjectFileVO">
 		SELECT f.file_id
 	           , f.logical_name
 	           , f.is_deleted
 	           , f.created_at
 	           , t.task_id
 	           , t.task_title
-	           , p.project_id
+	           , f.project_id
+	           , p.project_title
+	           , fv.version_id
+	           , fv.version_number
+	           , fv.file_size
+	           , fv.uploader
+	           , fv.uploaded_at
+	           , fv.hashtag
+	           , u.user_name
+	           , tk.type_name
+	    FROM files f
+	    LEFT JOIN task t ON f.task_id = t.task_id
+	    LEFT JOIN project p ON f.project_id = p.project_id
+	    LEFT JOIN (
+	        SELECT file_id
+	             , version_id
+	             , version_number
+	             , file_size
+	             , uploader
+	             , uploaded_at
+	             , hashtag
+	        FROM file_versions
+	        WHERE (file_id, version_number) IN (
+	            SELECT file_id, MAX(version_number)
+	            FROM file_versions
+	            GROUP BY file_id
+	        )
+	    ) fv ON f.file_id = fv.file_id
+	    LEFT JOIN users u ON fv.uploader = u.user_code
+	    LEFT JOIN task_types tk ON tk.type_id = t.type_id
+	    WHERE f.is_deleted = 'N'
+	      AND f.project_id = #{projectId}
+	    ORDER BY f.created_at DESC, TO_NUMBER(f.file_id) DESC
+	</select>
+	
+	<!-- 상세조회 -->
+	<select id="projectFileInfo" parameterType="String" resultType="ProjectFileVO">
+	    SELECT f.file_id
+	           , f.task_id
+	           , f.post_id
+	           , f.logical_name
+	           , f.is_deleted
+	           , f.created_at
+	           , t.task_title
 	           , p.project_title
 	           , fv.version_number
 	           , fv.file_size
 	           , fv.uploader
 	           , fv.uploaded_at
+	           , u.user_name
+	           , tk.type_name
 	    FROM files f
 	    LEFT JOIN task t ON f.task_id = t.task_id
-	    LEFT JOIN project p ON t.project_id = p.project_id
+	    LEFT JOIN project p ON f.project_id = p.project_id
 	    LEFT JOIN (
 	        SELECT file_id
 	             , version_number
@@ -32,34 +77,18 @@
 	            GROUP BY file_id
 	        )
 	    ) fv ON f.file_id = fv.file_id
-	    WHERE f.is_deleted = 'N'
-	    ORDER BY f.created_at DESC
-	</select>
-	
-	<!-- 상세조회 -->
-	<select id="projectFileInfo" parameterType="String" resultType="ProjectFileVO">
-		SELECT f.file_id
-       		   , f.task_id
-       		   , f.post_id
-       		   , f.logical_name
-       		   , f.is_deleted
-       		   , f.created_at
-		FROM files f
-		JOIN file_versions fs ON f.file_id = fs.file_id
-		WHERE f.file_id = #{fileId}
+	    LEFT JOIN users u ON fv.uploader = u.user_code
+	    LEFT JOIN task_types tk ON tk.type_id = t.type_id
+	    WHERE f.file_id = #{fileId}
 	</select>
 	
 	<!-- 등록 -->
 	<insert id="insertProjectFile" parameterType="ProjectFileVO">
-		<selectKey keyProperty="fileId"
-				   resultType="String"
-				   order="BEFORE">
-			SELECT 'FIL-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' || 
-               (SELECT NVL(MAX(TO_NUMBER(SUBSTR(file_id, 12))), 0) + 1
-                FROM files 
-                WHERE file_id LIKE 'FIL-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_%')
-        	FROM DUAL
-		</selectKey>
+	<selectKey keyProperty="fileId"
+	           resultType="String"
+	           order="BEFORE">
+	    SELECT TO_CHAR(NVL(MAX(file_id), 0) + 1) FROM files
+	</selectKey>
 		INSERT INTO files (
 							file_id
 							, task_id
@@ -67,14 +96,16 @@
 							, logical_name
 							, is_deleted
 							, created_at
+							, project_id
 						   )
 		VALUES(
 				#{fileId}
-				, #{fileId}
+				, #{taskId}
 				, #{postId}
 				, #{logicalName}
 				, #{isDeleted}
 				, #{createdAt}
+				, #{projectId}
 			  )
 	</insert>
 	
@@ -103,7 +134,11 @@
 	         	, fv.uploaded_at
 	         	, fv.saved_name
 	    FROM file_versions fv
+	    LEFT JOIN files f ON fv.file_id = f.file_id
+	    LEFT JOIN task t ON f.task_id = t.task_id
+	    LEFT JOIN task_types tk ON t.type_id = tk.type_id
 	    WHERE fv.file_id = #{fileId}
+	    	AND fv.saved_name IS NOT NULL
 	    ORDER BY fv.version_number
 	</select>
 	
@@ -126,11 +161,7 @@
 	    <selectKey keyProperty="versionId"
 	               resultType="String"
 	               order="BEFORE">
-	        SELECT 'VER-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' ||
-	               (SELECT NVL(MAX(TO_NUMBER(SUBSTR(version_id, 12))), 0) + 1
-	                FROM file_versions
-	                WHERE version_id LIKE 'VER-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_%')
-	        FROM DUAL
+	        SELECT TO_CHAR(NVL(MAX(version_id), 0) + 1) FROM file_versions
 	    </selectKey>
 	    INSERT INTO file_versions (
 	                                version_id
@@ -141,6 +172,7 @@
 	                              	, uploader
 	                              	, uploaded_at
 	                              	, saved_name
+	                              	, hashtag
 	                              )
 	    VALUES (
 	             #{versionId}
@@ -151,6 +183,7 @@
 	             , #{uploader}
 	           	 , #{uploadedAt}
 	           	 , #{savedName}
+	           	 , #{hashtag}
 	           )
 	</insert>
 	
@@ -159,4 +192,58 @@
 	    DELETE FROM file_versions
 	    WHERE version_id = #{versionId}
 	</delete>
+	
+	<!-- 파일 다운로드 -->
+	<select id="findVersionForDownload" parameterType="String" resultType="ProjectFileVersionsVO">
+	    SELECT fv.version_id
+	         , fv.file_id
+	         , fv.saved_name
+	         , fv.file_path
+	         , f.logical_name
+	    FROM file_versions fv
+	    LEFT JOIN files f ON fv.file_id = f.file_id
+	    WHERE fv.version_id = #{versionId}
+	</select>
+	
+	<!-- 다운로드 이력 등록 -->
+	<insert id="insertDownloadHistory" parameterType="DownloadHistoryVO">
+	    <selectKey keyProperty="historyId"
+	               resultType="String"
+	               order="BEFORE">
+	        SELECT TO_CHAR(NVL(MAX(history_id), 0) + 1) FROM file_download_history
+	    </selectKey>
+	    INSERT INTO file_download_history (
+	                                        history_id
+	                                      , version_id
+	                                      , downloader
+	                                      , downloaded_at
+	                                       )
+	    VALUES (
+	             #{historyId}
+	           , #{versionId}
+	           , #{downloader}
+	           , SYSDATE
+	           )
+	</insert>
+	
+	<!-- 다운로드 이력 전체 조회 (프로젝트별) -->
+	<select id="findDownloadHistory" parameterType="String" resultType="DownloadHistoryVO">
+	    SELECT h.history_id
+	         , h.version_id
+	         , h.downloader
+	         , u.user_name AS downloaderName
+	         , f.logical_name
+	         , t.task_id
+	         , t.task_title
+	         , fv.file_size
+	         , fv.version_number
+	         , h.downloaded_at
+	    FROM file_download_history h
+	    JOIN file_versions fv ON h.version_id = fv.version_id
+	    JOIN files f ON fv.file_id = f.file_id
+	    LEFT JOIN task t ON f.task_id = t.task_id
+	    LEFT JOIN users u ON h.downloader = u.user_code
+	    WHERE f.project_id = #{projectId}
+	    ORDER BY h.downloaded_at DESC, TO_NUMBER(h.history_id) DESC
+	</select>
 </mapper>

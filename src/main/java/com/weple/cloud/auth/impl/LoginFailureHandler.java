@@ -34,15 +34,21 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
 
         String companyCode = request.getParameter("companyCode");
-        if (companyCode == null || companyCode.isBlank()) {
-            Object sessionCompanyCode = request.getSession().getAttribute("LOGIN_COMPANY_CODE");
-            companyCode = sessionCompanyCode instanceof String value ? value : null;
-        }
-        String loginPath = companyCode == null || companyCode.isBlank()
+        Object sessionCompanyCode = request.getSession().getAttribute("LOGIN_COMPANY_CODE");
+        String lockedCompanyCode = sessionCompanyCode instanceof String value && !value.isBlank() ? value.trim() : null;
+        String enteredCompanyCode = companyCode == null ? null : companyCode.trim();
+        String loginPath = lockedCompanyCode == null
                 ? "/login"
-                : "/c/" + companyCode + "/login";
+                : "/c/" + encodePathSegment(lockedCompanyCode) + "/login";
+        String companyCodeQuery = lockedCompanyCode == null && enteredCompanyCode != null && !enteredCompanyCode.isBlank()
+                ? "&companyCode=" + URLEncoder.encode(enteredCompanyCode, StandardCharsets.UTF_8)
+                : "";
 
         // 로그인 화면으로 실패 메시지 전달
-        response.sendRedirect(request.getContextPath() + loginPath + "?error=" + encodedMessage);
+        response.sendRedirect(request.getContextPath() + loginPath + "?error=" + encodedMessage + companyCodeQuery);
+    }
+
+    private String encodePathSegment(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
     }
 }

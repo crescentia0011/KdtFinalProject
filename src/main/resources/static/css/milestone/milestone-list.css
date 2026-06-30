@@ -42,7 +42,12 @@
 		
 		/* 개별 마일스톤 대단위 섹션 */
 		.milestone-container {
-		    margin-bottom: 60px;
+		    background-color: #ffffff;      /* 명확한 흰색 배경 박스 */
+		    border: 1px solid #e5e7eb;      /* 연한 테두리 */
+		    border-radius: 16px;            /* 부드러운 라운드 코너 */
+		    padding: 28px 32px;             /* 내부 여백 확보 */
+		    margin-bottom: 35px;            /* 카드와 카드 사이 간격 */
+		    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); /* 은은한 그림자 */
 		}
 		
 		/* 마일스톤 타이틀 라인 */
@@ -51,6 +56,13 @@
 		    justify-content: space-between;
 		    align-items: center;
 		    margin-bottom: 15px;
+		}
+		
+		/* 상단 버튼들을 우측에 나란히 배치 */
+		.header-action-group {
+		    display: flex;
+		    gap: 20px; /* 버튼 사이의 간격 */
+		    align-items: center;
 		}
 		
 		.milestone-title-group {
@@ -196,10 +208,9 @@
 		
 		/* 라운드 코너 화이트 카드 컨테이너 */
 		.task-list-card {
-		    background-color: #ffffff;
+		    background-color: #f9fafb;      /* 배경을 연한 회색으로 변경하여 안쪽 구역임을 명시 */
 		    border: 1px solid #e5e7eb;
-		    border-radius: 15px;
-		    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+		    border-radius: 12px;
 		    overflow: hidden;
 		}
 		
@@ -207,13 +218,14 @@
 		.task-item-row {
 		    display: flex;
 		    align-items: center;
-		    padding: 18px 30px;
-		    border-bottom: 1px solid #f3f4f6;
+		    padding: 16px 24px;
+		    border-bottom: 1px solid #e5e7eb;
+		    background-color: #f9fafb;
 		    transition: background-color 0.15s ease;
 		}
 		
 		.task-item-row:hover {
-		    background-color: #f3f4f6;
+		    background-color: #f3f4f6;      /* 마우스 올렸을 때 구분이 잘 가도록 변경 */
 		}
 		
 		.task-item-row:last-child {

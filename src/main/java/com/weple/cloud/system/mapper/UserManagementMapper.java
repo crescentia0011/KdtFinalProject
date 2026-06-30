@@ -51,6 +51,10 @@ public interface UserManagementMapper {
     int countUserByEmailExcept(@Param("email") String email,
                                @Param("userCode") String userCode);
 
+    // 수정 화면에서 선택한 그룹이 같은 회사에 존재하는지 확인합니다.
+    int countGroupByCompany(@Param("companyId") Long companyId,
+                            @Param("groupId") Integer groupId);
+
     // 기업 관리자 화면에서 입력한 신규 사용자를 같은 회사의 활성 사용자로 등록합니다.
     int insertUser(UserManagementCreateVO user);
 

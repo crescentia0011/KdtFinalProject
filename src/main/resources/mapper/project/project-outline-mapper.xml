@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.outline.mapper.OutlineMapper">
+
+	<select id="selectProjectById" resultType="ProjectVO">
+	    SELECT 
+	        project_id         AS projectId,
+	        project_title      AS projectTitle,
+	        project_describe   AS projectDescribe,
+	        project_identifier AS projectIdentifier,
+	        created_at         AS createdAt,
+	        finish_date        AS finishDate,
+	        status             AS status
+	    FROM project
+	    WHERE project_id = #{projectId}
+	</select>
+
+
+	<select id="selectProjectMembersByGroup" resultType="ProjectGroupMemberDTO">
+    SELECT 
+        g.group_name AS groupName,
+        COUNT(m.member_id) AS memberCount,
+        LISTAGG(u.user_name, ', ') WITHIN GROUP (ORDER BY u.user_name) AS memberNames
+    FROM members m
+    JOIN users u ON m.user_code = u.user_code
+    LEFT JOIN groups g ON u.group_id = g.group_id
+    WHERE m.project_id = #{projectId}
+    GROUP BY g.group_name
+    ORDER BY g.group_name ASC
+</select>
+
+
+
+<select id="selectProjectProgressSummary" resultType="ProjectProgressDTO">
+    SELECT 
+        NVL(SUM(estimated_time), 0) AS totalEstimatedHours,
+        NVL(SUM(spent_hours_sum), 0) AS totalSpentHours,
+        CASE 
+            WHEN COUNT(*) > 0 
+            THEN ROUND((SUM(CASE WHEN task_status = 'e3' THEN 1 ELSE 0 END) / COUNT(*)) * 100)
+            ELSE 0 
+        END AS progressPercentage
+    FROM task
+    WHERE project_id = #{projectId}
+</select>
+
+
+<select id="selectTaskStatusStats" resultType="TaskGroupStatVO">
+        SELECT CASE task_status 
+                    WHEN 'e1' THEN '신규'
+                    WHEN 'e2' THEN '진행 중'
+                    WHEN 'e3' THEN '완료'
+                    WHEN 'e4' THEN '결함'
+                    ELSE '미지정'
+               END AS groupName,
+               COUNT(*) AS totalCount,
+               SUM(CASE WHEN task_status = 'e3' THEN 1 ELSE 0 END) AS closedCount
+        FROM task
+        WHERE project_id = #{projectId}
+        GROUP BY task_status
+    </select>
+
+    <select id="selectTaskPriorityStats" resultType="TaskGroupStatVO">
+        SELECT priority AS groupName,
+               COUNT(*) AS totalCount,
+               SUM(CASE WHEN task_status = 'e3' THEN 1 ELSE 0 END) AS closedCount
+        FROM task
+        WHERE project_id = #{projectId} AND priority IS NOT NULL
+        GROUP BY priority
+    </select>
+
+    <select id="selectTaskTypeStats" resultType="TaskGroupStatVO">
+        SELECT tp.type_name AS groupName,
+               COUNT(*) AS totalCount,
+               SUM(CASE WHEN t.task_status = 'e3' THEN 1 ELSE 0 END) AS closedCount
+        FROM task t
+        JOIN task_types tp ON t.type_id = tp.type_id
+        WHERE project_id = #{projectId}
+        GROUP BY tp.type_name, t.type_id
+    </select>
+
+    <select id="selectTaskManagerStats" resultType="TaskGroupStatVO">
+        SELECT NVL(u.user_name, '미지정') AS groupName,
+               COUNT(*) AS totalCount,
+               SUM(CASE WHEN t.task_status = 'e3' THEN 1 ELSE 0 END) AS closedCount
+        FROM task t
+        LEFT JOIN users u ON t.task_manager = u.user_code
+        WHERE t.project_id = #{projectId}
+        GROUP BY u.user_name
+    </select>
+
+
+</mapper>

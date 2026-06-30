@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.weple.cloud.testcase.mapper.TestCaseMapper">
-	
+	<!-- 테스크케이스 연결 일감 목록 -->
 	<select id="testCaseTaskList" resultType="TaskParentVO" ><!-- 일감등록 현재 선택된 프로젝트에 일감들의 목록 조회 -->
 		SELECT 
 			task_id AS taskId,
@@ -9,13 +9,13 @@
 		FROM task
 		WHERE project_id = #{pId}
 	</select>
-	
+	<!-- 테스크케이스 진행상황 목록 -->
 	<select id="coverageStatus" resultType="CoverdStatusVO">
 		SELECT common_id,default_describe
 		FROM common_code
 		WHERE common_code = '0D'
 	</select>
-	
+	<!-- 테스크케이스 담당자 목록 -->
 	<select id="testCaseMembers" resultType="TestCaseMemberVO"> <!-- 테스트케이스 현재 선택된 프로젝트 참여자 목록 조회 -->
 		SELECT 
 			u.user_code AS userCode,
@@ -25,7 +25,7 @@
 			INNER JOIN users u ON m.user_code = u.user_code
 		WHERE m.project_id = #{pId} 
 	</select>
-	
+	<!-- 테스크케이스 우선순위 선택 목록 -->
 	<select id="testCasePriorities" resultType="TestCasePriorityVO"><!-- 테스트 케이스 등록 등록된 우선순위 목록 -->
 		SELECT 
 			task_priority_id AS priorityId,
@@ -33,5 +33,101 @@
 		FROM task_priority
 		WHERE company_id  = #{cId}  AND using_yn = 'Y'
 	</select>
+	
+	<!-- 테스트 케이스 등록 -->
+	<insert id="insertTestCase" parameterType="TestCaseVO">
+    <selectKey keyProperty="testId" resultType="string" order="BEFORE">
+        SELECT 'TST-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' || 
+               (SELECT NVL(MAX(TO_NUMBER(SUBSTR(test_id, 12))), 0) + 1
+                FROM test_case 
+                WHERE test_id LIKE 'TST-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_%')
+        FROM DUAL
+    </selectKey>
+
+    INSERT INTO test_case (
+        test_id,
+        task_id,
+        milestone_version,
+        project_id,
+        user_code,
+        test_name,
+        created_at,
+        test_date,
+        priority,
+        test_yn,
+        test_manager,
+        test_content,
+        test_describe,
+        coverage_status
+    ) VALUES (
+        #{testId},
+        #{taskId},
+        (
+            SELECT m_parent.milestone_title
+            FROM task t
+            JOIN milestone m_child ON t.milestone_id = m_child.milestone_id
+            JOIN milestone m_parent ON m_child.parent_milestone_id = m_parent.milestone_id
+            WHERE t.task_id = #{taskId}
+        ),
+        #{projectId},
+        #{userCode},
+        #{testName},
+        SYSDATE,
+        #{testDate, jdbcType=DATE},
+        #{priority},
+        #{testYn},
+        #{testManager, jdbcType=VARCHAR},
+        #{testContent, jdbcType=VARCHAR},
+        #{testDescribe, jdbcType=VARCHAR},
+        #{coverageStatus, jdbcType=VARCHAR}
+    )
+</insert>
+<!-- 테스트케이스 총 갯수 -->
+<select id="getTestCaseCount" resultType="int">
+    SELECT COUNT(*)
+    FROM test_case tc
+    WHERE tc.project_id = #{pId}
+    <if test="searchKeyword != null and searchKeyword != ''">
+        AND tc.test_name LIKE '%' || #{searchKeyword} || '%'
+    </if>
+</select>
+
+<!-- 테스트케이스 검색조건 -->
+<select id="testCaseList" resultType="TestCaseVO">
+    SELECT * FROM (
+        SELECT rownum AS rnum, A.* FROM (
+            
+            SELECT 
+                tc.test_id            AS testId,
+                tc.task_id            AS taskId,
+                tc.milestone_version  AS milestoneVersion,
+                tc.project_id         AS projectId,
+                tc.user_code          AS userCode,
+                tc.test_name          AS testName,
+                tc.created_at         AS createdAt,
+                tc.test_date          AS testDate,
+                tc.priority           AS priority,
+                tc.test_yn            AS testYn,
+                tc.test_manager       AS testManager,
+                tc.test_content       AS testContent,
+                tc.test_describe      AS testDescribe,
+                tc.coverage_status    AS coverageStatus,
+                u.user_name           AS userName,    
+                t.task_title          AS taskTitle,   
+                NVL(m.user_name, '-') AS managerName 
+            FROM test_case tc
+            LEFT JOIN users u ON tc.user_code = u.user_code   
+            LEFT JOIN users m ON tc.test_manager = m.user_code 
+            LEFT JOIN task t ON tc.task_id = t.task_id
+            WHERE tc.project_id = #{pId}
+            <if test="searchKeyword != null and searchKeyword != ''">
+                AND tc.test_name LIKE '%' || #{searchKeyword} || '%'
+            </if>
+            ORDER BY tc.created_at DESC
+            
+        ) A WHERE rownum &lt;= #{offset} + #{pageSize}
+    ) WHERE rnum &gt; #{offset}
+</select>
+	
 
 </mapper>

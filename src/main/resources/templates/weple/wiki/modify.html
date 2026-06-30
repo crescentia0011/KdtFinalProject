@@ -10,6 +10,8 @@
 <body>
 <section class="wiki-page">
 
+    <h3 class="wiki-page-title">위키 문서 수정</h3>
+
     <!-- 편집 잠금 배너 -->
     <div class="wiki-modify-lock-banner">
         <span class="wiki-modify-lock-icon">🔒</span>
@@ -58,69 +60,77 @@
             <div class="wiki-modify-editor-card">
                 <div id="wikiEditor"></div>
 
-                <!-- 연관 문서 (에디터 하단) -->
+                <!-- 연관 문서 영역 -->
                 <div class="wiki-register-relation-area">
                     <div class="wiki-register-relation-label">🔗 연관 문서</div>
-                    <div class="wiki-tag-chip-inline-wrap" id="tagInputArea" style="position:relative;">
-                        <ul class="wiki-tag-chip-inline-list" id="existingRelations" style="display:contents;">
-                            <li th:each="rel : ${relationList}"
-                                th:attr="data-relation-id=${rel.wikiRelationId}"
-                                style="display:inline-flex; align-items:center; gap:5px;
-                                       height:26px; padding:0 10px; border-radius:20px; margin:2px;
-                                       font-size:12px; font-weight:600;"
-                                th:classappend="${rel.targetType == 'TASK'} ? 'chip-task-li' : 'chip-wiki-li'">
+                    <div class="wiki-tag-chip-inline-wrap" id="tagInputArea">
+                        <th:block th:if="${relationList != null}">
+                            <span th:each="rel : ${relationList}"
+                                  th:attr="data-relation-id=${rel.wikiRelationId}"
+                                  class="wiki-tag-chip"
+                                  th:classappend="${rel.targetType == 'TASK'} ? ' chip-task' : ' chip-wiki'">
                                 <span th:text="'#' + ${rel.targetTitle}"></span>
                                 <button type="button" class="wiki-chip-remove"
                                         th:attr="onclick='removeExistingRelation(\'' + ${rel.wikiRelationId} + '\', this)'">✕</button>
-                            </li>
-                        </ul>
-                        <div id="tagChipList" style="display:contents;"></div>
+                            </span>
+                        </th:block>
+                        <div id="newChipList" style="display:contents;"></div>
                         <input type="text" id="hashtagInput"
                                class="wiki-hashtag-inline-input"
                                placeholder="#일감 또는 #위키 제목"
                                autocomplete="off">
-                        <div id="hashtagDropdown" class="wiki-hashtag-dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:9999;"></div>
                     </div>
+                    <div id="hashtagDropdown" class="wiki-hashtag-dropdown" style="display:none;"></div>
                 </div>
             </div>
 
             <!-- 우측: 변경 이력 -->
             <div class="wiki-modify-right">
-                <div class="wiki-modify-history-box">
-                    <span class="wiki-modify-history-title">변경 이력</span>
-                    <div class="wiki-modify-history-body">
+                <div class="wiki-history-box" style="flex:1; display:flex; flex-direction:column;">
+                    <div class="wiki-box-title">변경 이력</div>
+                    <div class="wiki-history-body">
+                        <ul class="wiki-history-list">
 
-                        <!-- 현재 편집 중 -->
-                        <div class="wiki-history-card is-editing">
-                            <div class="whc-top">
-                                <span class="whc-version is-current"
-                                      th:text="'v' + ${wiki.currentVersion}">v1</span>
-                                <span class="whc-badge editing">편집중</span>
-                            </div>
-                            <span class="whc-desc">현재 문서를 수정하고 있습니다.</span>
-                            <div class="whc-meta">
-                                <span class="whc-user" th:text="${wiki.userName}"></span>
-                                <span th:text="${wiki.updateAt != null ? #temporals.format(wiki.updateAt,'yyyy-MM-dd HH:mm') : ''}"></span>
-                            </div>
+                            <!-- 현재 편집 중 -->
+                            <li class="wiki-history-item selected-version">
+                                <label class="history-radio-wrap">
+                                    <input type="radio" name="modifyHistoryVersion"
+                                           class="history-radio" value="latest" checked
+                                           onchange="highlightModifyItem(this);">
+                                </label>
+                                <span class="history-version history-version-latest"
+                                      th:text="'v' + ${wiki.currentVersion} + ' (편집중)'"></span>
+                                <span class="history-user" th:text="${wiki.userName}"></span>
+                                <span class="history-date"
+                                      th:text="${wiki.updateAt != null ? #temporals.format(wiki.updateAt,'yyyy-MM-dd HH:mm') : ''}"></span>
+                            </li>
+
+                            <!-- 이전 버전들: 클릭 이동 없음, 라디오+버튼으로만 이동 -->
+                            <th:block th:if="${historyList != null and !#lists.isEmpty(historyList)}">
+                                <li class="wiki-history-item"
+                                    th:each="h : ${historyList}"
+                                    th:id="'modifyItem-' + ${h.wikiVersion}">
+                                    <label class="history-radio-wrap">
+                                        <input type="radio" name="modifyHistoryVersion"
+                                               class="history-radio"
+                                               th:value="${h.wikiVersion}"
+                                               onchange="highlightModifyItem(this);">
+                                    </label>
+                                    <span class="history-version" th:text="'v' + ${h.wikiVersion}"></span>
+                                    <span class="history-user" th:text="${h.userName}"></span>
+                                    <span class="history-date"
+                                          th:text="${h.createdAt != null ? #temporals.format(h.createdAt,'yyyy-MM-dd HH:mm') : ''}"></span>
+                                </li>
+                            </th:block>
+
+                        </ul>
+
+                        <!-- 이 버전 보기 버튼으로만 이동 -->
+                        <div class="history-view-wrap">
+                            <button type="button" class="history-view-btn" onclick="goToSelectedVersion()">
+                                이 버전 보기
+                            </button>
                         </div>
-
-                        <!-- 이전 버전 목록 (클릭 → 조회) -->
-                        <th:block th:if="${historyList != null and !#lists.isEmpty(historyList)}">
-                            <div class="wiki-history-card wiki-history-card-link"
-                                 th:each="h : ${historyList}"
-                                 th:attr="onclick='viewVersion(\'' + ${wiki.wikiPageId} + '\',' + ${h.wikiVersion} + ')'">
-                                <div class="whc-top">
-                                    <span class="whc-version" th:text="'v' + ${h.wikiVersion}">v0</span>
-                                    <span class="whc-badge old">이전 버전</span>
-                                </div>
-                                <span class="whc-desc" th:text="${h.title != null ? h.title : ''}"></span>
-                                <div class="whc-meta">
-                                    <span class="whc-user" th:text="${h.userName}"></span>
-                                    <span th:text="${h.createdAt != null ? #temporals.format(h.createdAt,'yyyy-MM-dd HH:mm') : ''}"></span>
-                                </div>
-                            </div>
-                        </th:block>
-
                     </div>
                 </div>
             </div>
@@ -139,8 +149,10 @@
         var csrfToken      = /*[[${_csrf.token}]]*/ '';
         /*]]>*/
 
-        var selectedRelations = [];
         var wikiEditor;
+        var hashDebounce = null;
+        var inp = null;
+        var dd  = null;
 
         document.addEventListener('DOMContentLoaded', function () {
             wikiEditor = new toastui.Editor({
@@ -159,9 +171,9 @@
                     ['code', 'codeblock']
                 ]
             });
+            initHashtag();
         });
 
-        /* ── 저장 ── */
         function submitWikiForm() {
             var title = document.getElementById('titleInput').value.trim();
             if (!title) { alert('문서 제목은 필수 입력 항목입니다.'); return; }
@@ -171,104 +183,172 @@
             document.getElementById('wikiForm').submit();
         }
 
-        /* ── 취소 (잠금 해제) ── */
         function cancelEdit() {
             fetch('/project/wiki/unlock?wikiPageId=' + encodeURIComponent(wikiPageId), {
                 method: 'POST',
                 headers: { [csrfHeader]: csrfToken }
             }).finally(function () {
-                location.href = '/project/wiki?projectId=' + projectId + '&wikiPageId=' + encodeURIComponent(wikiPageId);
+                location.href = '/project/wiki?projectId=' + projectId
+                              + '&wikiPageId=' + encodeURIComponent(wikiPageId);
             });
         }
 
-        /* ── 브라우저 닫기 시 잠금 해제 ── */
         window.addEventListener('beforeunload', function () {
-            navigator.sendBeacon('/project/wiki/unlock?wikiPageId=' + encodeURIComponent(wikiPageId) + '&_csrf=' + encodeURIComponent(csrfToken));
+            navigator.sendBeacon(
+                '/project/wiki/unlock?wikiPageId=' + encodeURIComponent(wikiPageId)
+                + '&_csrf=' + encodeURIComponent(csrfToken)
+            );
         });
 
-        /* ── 이전 버전 조회 (새 탭으로 열기) ── */
-        function viewVersion(wikiPageId, version) {
-            window.open('/project/wiki/version?projectId=' + projectId
-                + '&wikiPageId=' + encodeURIComponent(wikiPageId)
-                + '&version=' + version, '_blank');
+        /* 이력 라디오 강조 */
+        function highlightModifyItem(radio) {
+            document.querySelectorAll('.wiki-history-item').forEach(function(li) {
+                li.classList.remove('selected-version');
+            });
+            if (radio) {
+                var li = radio.closest('.wiki-history-item');
+                if (li) li.classList.add('selected-version');
+            }
         }
 
-        /* ── 기존 연관문서 삭제 ── */
+        /* 이 버전 보기 버튼으로만 이동 */
+        function goToSelectedVersion() {
+            var selected = document.querySelector('input[name="modifyHistoryVersion"]:checked');
+            if (!selected || selected.value === 'latest') {
+                alert('이전 버전을 선택해주세요.');
+                return;
+            }
+            window.open(
+                '/project/wiki/version?projectId=' + projectId
+                + '&wikiPageId=' + encodeURIComponent(wikiPageId)
+                + '&version=' + selected.value,
+                '_blank'
+            );
+        }
+
         function removeExistingRelation(relationId, btn) {
             var headers = {};
             headers[csrfHeader] = csrfToken;
-            fetch('/project/wiki/relation/' + encodeURIComponent(relationId), { method: 'DELETE', headers: headers })
-                .then(function(r){ if (r.ok) btn.closest('li').remove(); });
+            fetch('/project/wiki/relation/' + encodeURIComponent(relationId), {
+                method: 'DELETE', headers: headers
+            }).then(function(r) {
+                if (r.ok) btn.closest('span').remove();
+            });
         }
 
-        /* ── 해시태그 자동완성 ── */
-        var hashDebounce = null;
-        var inp = document.getElementById('hashtagInput');
-        var dd  = document.getElementById('hashtagDropdown');
+        function initHashtag() {
+            inp = document.getElementById('hashtagInput');
+            dd  = document.getElementById('hashtagDropdown');
+            if (!inp || !dd) return;
 
-        inp.addEventListener('input', function () {
-            clearTimeout(hashDebounce);
-            var m = this.value.match(/#([\w가-힣ㄱ-ㅎa-zA-Z0-9\-_]+)$/);
-            if (!m || m[1].length < 1) { closeDD(); return; }
-            hashDebounce = setTimeout(function(){ fetchHashtag(m[1]); }, 250);
-        });
+            inp.addEventListener('input', function () {
+                clearTimeout(hashDebounce);
+                var m = this.value.match(/#([\uAC00-\uD7A3\u3131-\u318E\w\-_]+)$/);
+                if (!m || m[1].length < 1) { closeDD(); return; }
+                hashDebounce = setTimeout(function() { fetchHashtag(m[1]); }, 250);
+            });
 
-        inp.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDD(); });
+            inp.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeDD();
+            });
+        }
 
-        document.addEventListener('click', function(e){
+        document.addEventListener('click', function(e) {
             if (!e.target.closest('#tagInputArea') && !e.target.closest('#hashtagDropdown')) closeDD();
         });
 
+        function positionDD() {
+            if (!dd) return;
+            var area = document.getElementById('tagInputArea');
+            if (!area) return;
+            var rect       = area.getBoundingClientRect();
+            var vpHeight   = window.innerHeight;
+            var spaceBelow = vpHeight - rect.bottom - 8;
+            var spaceAbove = rect.top - 8;
+
+            dd.style.position  = 'fixed';
+            dd.style.left      = rect.left + 'px';
+            dd.style.width     = rect.width + 'px';
+            dd.style.overflowY = 'auto';
+
+            if (spaceBelow >= 120 || spaceBelow >= spaceAbove) {
+                dd.style.top       = (rect.bottom + 4) + 'px';
+                dd.style.bottom    = 'auto';
+                dd.style.maxHeight = Math.max(spaceBelow - 4, 80) + 'px';
+            } else {
+                dd.style.bottom    = (vpHeight - rect.top + 4) + 'px';
+                dd.style.top       = 'auto';
+                dd.style.maxHeight = Math.max(spaceAbove - 4, 80) + 'px';
+            }
+        }
+
+
+
         function fetchHashtag(keyword) {
-            fetch('/project/wiki/hashtag/search?projectId=' + projectId + '&keyword=' + encodeURIComponent(keyword))
-                .then(function(r){ return r.json(); })
-                .then(function(list){ renderDD(list); });
+            fetch('/project/wiki/hashtag/search?projectId=' + projectId
+                    + '&keyword=' + encodeURIComponent(keyword))
+                .then(function(r) { return r.json(); })
+                .then(function(list) { renderDD(list); })
+                .catch(function() { closeDD(); });
         }
 
         function renderDD(list) {
+            if (!dd) return;
             dd.innerHTML = '';
             if (!list || !list.length) { closeDD(); return; }
             list.forEach(function(item) {
                 var div = document.createElement('div');
                 div.className = 'wiki-hashtag-item';
-                div.innerHTML = '<span class="wiki-relation-type-badge ' + (item.targetType==='TASK'?'badge-task':'badge-wiki') + '">'
-                    + (item.targetType==='TASK'?'일감':'위키') + '</span>'
+                div.innerHTML =
+                    '<span class="wiki-relation-type-badge '
+                    + (item.targetType === 'TASK' ? 'badge-task' : 'badge-wiki') + '">'
+                    + (item.targetType === 'TASK' ? '일감' : '위키') + '</span>'
                     + '<span class="wiki-hashtag-item-title">#' + item.targetTitle + '</span>';
-                div.addEventListener('click', function(){ selectItem(item); });
+                div.addEventListener('click', function() { selectItem(item); });
                 dd.appendChild(div);
             });
+            positionDD();
             dd.style.display = 'block';
         }
 
-        function closeDD() { dd.style.display='none'; dd.innerHTML=''; }
+        function closeDD() {
+            if (!dd) return;
+            dd.style.display = 'none';
+            dd.innerHTML = '';
+        }
 
         function selectItem(item) {
-            // 서버에 관계 저장
-            var headers = { 'Content-Type': 'application/json' };
+            var params = new URLSearchParams();
+            params.append('wikiPageId', wikiPageId);
+            params.append('targetType', item.targetType);
+            params.append('projectId',  String(projectId));
+            if (item.targetType === 'TASK' && item.targetTaskId) params.append('targetTaskId', item.targetTaskId);
+            if (item.targetType === 'WIKI' && item.targetWikiId) params.append('targetWikiId', item.targetWikiId);
+
+            var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
             headers[csrfHeader] = csrfToken;
+
             fetch('/project/wiki/relation/add', {
-                method: 'POST', headers: headers,
-                body: JSON.stringify({
-                    wikiPageId: wikiPageId, targetType: item.targetType, projectId: projectId,
-                    targetTaskId: item.targetType==='TASK' ? item.targetTaskId : null,
-                    targetWikiId: item.targetType==='WIKI' ? item.targetWikiId : null
-                })
-            }).then(function(r){
-                if (r.ok) addChip(item);
-            });
-            inp.value = '';
+                method: 'POST', headers: headers, body: params.toString()
+            }).then(function(r) {
+                if (r.ok) { addChip(item); }
+                else { r.text().then(function(t) { alert('연관문서 등록 실패: ' + t); }); }
+            }).catch(function(e) { console.error('relation add error:', e); });
+
+            if (inp) inp.value = '';
             closeDD();
-            inp.focus();
+            if (inp) inp.focus();
         }
 
         function addChip(item) {
             var chip = document.createElement('span');
-            chip.className = 'wiki-tag-chip ' + (item.targetType==='TASK'?'chip-task':'chip-wiki');
-            chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:20px;margin:2px;font-size:12px;font-weight:600;';
+            chip.className = 'wiki-tag-chip ' + (item.targetType === 'TASK' ? 'chip-task' : 'chip-wiki');
             chip.innerHTML = '#' + item.targetTitle
-                + ' <button type="button" class="wiki-chip-remove" onclick="this.closest(\'span\').remove()">✕</button>';
-            document.getElementById('tagChipList').appendChild(chip);
+                + ' <button type="button" class="wiki-chip-remove"'
+                + " onclick=\"this.closest('span').remove()\">✕</button>";
+            document.getElementById('newChipList').appendChild(chip);
         }
+        /*]]>*/
     </script>
 
 </section>

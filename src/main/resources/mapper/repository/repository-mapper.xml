@@ -92,6 +92,80 @@
           </foreach>
     </select>
 
+    <!-- 이미 수집된 커밋은 저장 당시의 일감 연결값을 우선 사용함 -->
+    <!-- 프로젝트 구성원에게 선택한 저장소 권한 코드가 있는지 확인함 -->
+    <select id="selectProjectPermissionCodes" resultType="string">
+        SELECT DISTINCT rp.permission_code
+        FROM members m
+        JOIN member_roles mr
+          ON m.member_id = mr.member_id
+        JOIN role_permissions rp
+          ON mr.role_id = rp.role_id
+        WHERE m.user_code = #{userCode}
+          AND m.project_id = #{projectId}
+    </select>
+
+    <select id="selectCommitLogsByHashes" resultType="com.weple.cloud.repository.service.RepositoryCommitLogVO">
+        SELECT commit_id AS commitId,
+               repository_id AS repositoryId,
+               commit_hash AS commitHash,
+               commit_user AS commitUser,
+               commit_message AS commitMessage,
+               TO_CHAR(committed_at, 'YYYY-MM-DD HH24:MI') AS committedAt,
+               task_id AS taskId
+        FROM commit_logs
+        WHERE repository_id = #{repositoryId}
+          AND commit_hash IN
+          <foreach collection="commitHashes" item="commitHash" open="(" separator="," close=")">
+              #{commitHash}
+          </foreach>
+    </select>
+
+    <!-- 새로 조회된 커밋만 저장하고 기존 커밋의 task_id는 덮어쓰지 않음 -->
+    <insert id="mergeCommitLogIfAbsent"
+            parameterType="com.weple.cloud.repository.service.RepositoryCommitLogVO">
+        MERGE INTO commit_logs target
+        USING (
+            SELECT #{commitId} AS commit_id,
+                   #{repositoryId} AS repository_id,
+                   #{commitHash} AS commit_hash,
+                   #{commitUser} AS commit_user,
+                   #{commitMessage} AS commit_message,
+                   #{committedAt} AS committed_at_text,
+                   #{taskId} AS task_id
+            FROM dual
+        ) source
+        ON (
+            target.repository_id = source.repository_id
+            AND target.commit_hash = source.commit_hash
+        )
+        WHEN NOT MATCHED THEN
+            INSERT
+            (
+                commit_id,
+                repository_id,
+                commit_hash,
+                commit_user,
+                commit_message,
+                committed_at,
+                task_id
+            )
+            VALUES
+            (
+                source.commit_id,
+                source.repository_id,
+                source.commit_hash,
+                source.commit_user,
+                source.commit_message,
+                CASE
+                    WHEN source.committed_at_text IS NULL OR source.committed_at_text = '-'
+                    THEN SYSDATE
+                    ELSE TO_DATE(source.committed_at_text, 'YYYY-MM-DD HH24:MI')
+                END,
+                source.task_id
+            )
+    </insert>
+
     <!-- 새 주 저장소 등록 전에는 같은 프로젝트의 기존 주 저장소 표시를 해제합니다. -->
     <update id="clearMainRepository">
         UPDATE repository_setting
@@ -112,16 +186,85 @@
         INSERT INTO repository_manage_setting
         (
             repository_manage_id,
-            company_id
+            company_id,
+            commit_auto_yn,
+            commit_text_yn,
+            task_keyword
         )
         VALUES
         (
             #{repositoryManageId},
-            #{companyId}
+            #{companyId},
+            #{commitAutoYn},
+            #{commitTextYn},
+            #{taskKeyword}
         )
     </insert>
 
-    <!-- 기본 관리 설정이 연결된 프로젝트 저장소 정보를 저장합니다. -->
+    <!-- 회사별 저장소 커밋 연결 설정 1건 조회함 -->
+    <select id="selectRepositoryManageSetting"
+            resultType="com.weple.cloud.repository.service.RepositoryManageSettingVO">
+        SELECT repositoryManageId,
+               companyId,
+               commitAutoYn,
+               commitTextYn,
+               taskKeyword
+        FROM (
+            SELECT repository_manage_id AS repositoryManageId,
+                   company_id AS companyId,
+                   NVL(commit_auto_yn, 'Y') AS commitAutoYn,
+                   NVL(commit_text_yn, 'Y') AS commitTextYn,
+                   task_keyword AS taskKeyword
+            FROM repository_manage_setting
+            WHERE company_id = #{companyId}
+            ORDER BY repository_manage_id
+        )
+        WHERE ROWNUM = 1
+    </select>
+
+    <!-- 회사 설정 행이 존재하는지 확인함 -->
+    <select id="countRepositoryManageSettings" resultType="int">
+        SELECT COUNT(*)
+        FROM repository_manage_setting
+        WHERE company_id = #{companyId}
+    </select>
+
+    <!-- 설정 행이 없는 회사는 기본 설정을 새로 생성함 -->
+    <insert id="insertCompanyRepositoryManageSetting"
+            parameterType="com.weple.cloud.repository.service.RepositoryManageSettingVO">
+        <!-- 시퀀스로 설정 PK 발급함 -->
+        <selectKey keyProperty="repositoryManageId" resultType="long" order="BEFORE">
+            SELECT repository_manage_setting_seq.NEXTVAL
+            FROM dual
+        </selectKey>
+        INSERT INTO repository_manage_setting
+        (
+            repository_manage_id,
+            company_id,
+            commit_auto_yn,
+            commit_text_yn,
+            task_keyword
+        )
+        VALUES
+        (
+            #{repositoryManageId},
+            #{companyId},
+            #{commitAutoYn},
+            #{commitTextYn},
+            #{taskKeyword}
+        )
+    </insert>
+
+    <!-- 회사에 속한 저장소 설정값을 같은 기준으로 일괄 수정함 -->
+    <update id="updateRepositoryManageSettings"
+            parameterType="com.weple.cloud.repository.service.RepositoryManageSettingVO">
+        UPDATE repository_manage_setting
+        SET commit_auto_yn = #{commitAutoYn},
+            commit_text_yn = #{commitTextYn},
+            task_keyword = #{taskKeyword}
+        WHERE company_id = #{companyId}
+    </update>
+
     <insert id="insertRepository" parameterType="com.weple.cloud.repository.service.RepositoryVO">
         <!-- DB 시퀀스 기반의 내부 식별자를 발급해 동시에 등록해도 ID가 겹치지 않게 합니다. -->
         <selectKey keyProperty="repositoryId" resultType="string" order="BEFORE">

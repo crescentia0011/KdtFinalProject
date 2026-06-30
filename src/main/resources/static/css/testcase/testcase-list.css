@@ -1,284 +1,373 @@
 .testcase-section {
-            padding: 20px;
-            background-color: #f8f9fc; /* 전체 배경색과 맞추기 */
-            font-family: 'Noto Sans KR', sans-serif;
-            width: 100%;
-            box-sizing: border-box;
-        }
+	padding: 20px;
+	background-color: #f8f9fc; /* 전체 배경색과 맞추기 */
+	font-family: 'Noto Sans KR', sans-serif;
+	width: 100%;
+	box-sizing: border-box;
+}
 
-        .tc-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 15px;
-        }
+.tc-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+	margin-bottom: 15px;
+}
 
-        .tc-tabs {
-            display: flex;
-            border-bottom: 2px solid #e0e0e0;
-        }
+.tc-tabs {
+	display: flex;
+	border-bottom: 2px solid #e0e0e0;
+}
 
-        .tc-tab {
-            padding: 10px 20px;
-            font-weight: bold;
-            color: #666;
-            cursor: pointer;
-        }
+.tc-tab {
+	padding: 10px 20px;
+	font-weight: bold;
+	color: #666;
+	cursor: pointer;
+}
 
-        .tc-tab.active {
-            color: #4b7bec;
-            border-bottom: 3px solid #4b7bec;
-            margin-bottom: -2px; /* 선 겹치게 처리 */
-        }
+.tc-tab.active {
+	color: #4b7bec;
+	border-bottom: 3px solid #4b7bec;
+	margin-bottom: -2px; /* 선 겹치게 처리 */
+}
 
-        .tc-search input {
-            padding: 8px 15px 8px 35px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            outline: none;
-            width: 250px;
-            background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 12px center;
-        }
+.tc-search input {
+	padding: 8px 15px 8px 35px;
+	border: 1px solid #ddd;
+	border-radius: 20px;
+	outline: none;
+	width: 250px;
+	background: #fff
+		url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>')
+		no-repeat 12px center;
+}
 
-        .tc-table-container {
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
+.tc-table-container {
+	background-color: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	overflow: hidden;
+}
 
-        .tc-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-        }
+.tc-table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: center;
+}
 
-        .tc-table th {
-            background-color: #fff;
-            padding: 15px;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            border-bottom: 1px solid #f0f0f0;
-        }
+.tc-table th {
+	background-color: #fff;
+	padding: 15px;
+	font-weight: bold;
+	color: #333;
+	text-align: center;
+	border-bottom: 1px solid #f0f0f0;
+}
 
-        .tc-table td {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            color: #555;
-            vertical-align: middle;
-        }
+.tc-table td {
+	padding: 15px;
+	border-bottom: 1px solid #f0f0f0;
+	color: #555;
+	vertical-align: middle;
+}
 
-        .tc-table tbody tr:last-child td {
-            border-bottom: none;
-        }
+.tc-table tbody tr:last-child td {
+	border-bottom: none;
+}
 
-        /* 진행상황 뱃지 스타일 */
-        .status-badge {
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-            display: inline-block;
-            min-width: 80px;
-        }
+/* 진행상황 뱃지 스타일 */
+.status-badge {
+	padding: 5px 15px;
+	border-radius: 15px;
+	font-size: 12px;
+	font-weight: bold;
+	display: inline-block;
+	min-width: 80px;
+}
 
-        .status-designed { background-color: #e2e2e2; color: #666; }
-        .status-covered { background-color: #d1f2e6; color: #1b9978; }
-        .status-not-covered { background-color: #fce3e3; color: #c92a2a; }
-        .status-partial { background-color: #fdecd3; color: #d97706; }
+.status-designed {
+	background-color: #e2e2e2;
+	color: #666;
+}
 
-        .tc-footer {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-top: 20px;
-            gap: 15px;
-        }
+.status-covered {
+	background-color: #d1f2e6;
+	color: #1b9978;
+}
 
-        .btn-export {
-            background: none;
-            border: none;
-            color: #555;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-        }
+.status-not-covered {
+	background-color: #fce3e3;
+	color: #c92a2a;
+}
 
-        .btn-export i {
-            margin-right: 5px;
-        }
+.status-partial {
+	background-color: #fdecd3;
+	color: #d97706;
+}
 
-        .btn-register {
-            background-color: #4b7bec;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(75, 123, 236, 0.2);
-        }
+.tc-footer {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	margin-top: 20px;
+	gap: 15px;
+}
 
-        .btn-register:hover {
-            background-color: #3867d6;
-        }
-        .testcase-section {
-            padding: 20px;
-            background-color: #f8f9fc;
-            font-family: 'Noto Sans KR', sans-serif;
-            width: 100%;
-            box-sizing: border-box;
-        }
+.btn-export {
+	background: none;
+	border: none;
+	color: #555;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	font-weight: bold;
+}
 
-        .tc-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 15px;
-        }
+.btn-export i {
+	margin-right: 5px;
+}
 
-        .tc-tabs {
-            display: flex;
-            border-bottom: 2px solid #e0e0e0;
-        }
+.btn-register {
+	background-color: #4b7bec;
+	color: white;
+	border: none;
+	padding: 10px 30px;
+	border-radius: 5px;
+	font-weight: bold;
+	cursor: pointer;
+	box-shadow: 0 4px 6px rgba(75, 123, 236, 0.2);
+}
 
-        .tc-tab {
-            padding: 10px 20px;
-            font-weight: bold;
-            color: #666;
-            cursor: pointer;
-            user-select: none;
-        }
+.btn-register:hover {
+	background-color: #3867d6;
+}
 
-        .tc-tab.active {
-            color: #4b7bec;
-            border-bottom: 3px solid #4b7bec;
-            margin-bottom: -2px;
-        }
+.testcase-section {
+	padding: 20px;
+	background-color: #f8f9fc;
+	font-family: 'Noto Sans KR', sans-serif;
+	width: 100%;
+	box-sizing: border-box;
+}
 
-        /* 공통 테이블 스타일 */
-        .tc-table-container {
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
+.tc-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+	margin-bottom: 15px;
+}
 
-        .tc-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-        }
+.tc-tabs {
+	display: flex;
+	border-bottom: 2px solid #e0e0e0;
+}
 
-        .tc-table th {
-            background-color: #fff;
-            padding: 15px;
-            font-weight: bold;
-            color: #333;
-            border-bottom: 1px solid #f0f0f0;
-            vertical-align: middle;
-        }
+.tc-tab {
+	padding: 10px 20px;
+	font-weight: bold;
+	color: #666;
+	cursor: pointer;
+	user-select: none;
+}
 
-        .tc-table td {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            color: #555;
-            vertical-align: middle;
-        }
+.tc-tab.active {
+	color: #4b7bec;
+	border-bottom: 3px solid #4b7bec;
+	margin-bottom: -2px;
+}
 
-        .tc-table tbody tr:last-child td {
-            border-bottom: none;
-        }
+/* 공통 테이블 스타일 */
+.tc-table-container {
+	background-color: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	overflow: hidden;
+}
 
-        /* 상태 뱃지 스타일 (공통) */
-        .status-badge {
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-            display: inline-block;
-            min-width: 80px;
-        }
+.tc-table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: center;
+}
 
-        .status-designed { background-color: #e2e2e2; color: #666; }
-        .status-covered { background-color: #d1f2e6; color: #1b9978; }
-        .status-not-covered { background-color: #fce3e3; color: #c92a2a; }
-        .status-partial { background-color: #fdecd3; color: #d97706; }
+.tc-table th {
+	background-color: #fff;
+	padding: 15px;
+	font-weight: bold;
+	color: #333;
+	border-bottom: 1px solid #f0f0f0;
+	vertical-align: middle;
+}
 
-        /* [탭 1] 테스트 케이스 전용 스타일 */
-        .tc-search input {
-            padding: 8px 15px 8px 35px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            outline: none;
-            width: 250px;
-            background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 12px center;
-        }
+.tc-table td {
+	padding: 15px;
+	border-bottom: 1px solid #f0f0f0;
+	color: #555;
+	vertical-align: middle;
+}
 
-        .tc-footer {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-top: 20px;
-            gap: 15px;
-        }
+.tc-table tbody tr:last-child td {
+	border-bottom: none;
+}
 
-        .btn-export {
-            background: none;
-            border: none;
-            color: #555;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-        }
+/* 상태 뱃지 스타일 (공통) */
+.status-badge {
+	padding: 5px 15px;
+	border-radius: 15px;
+	font-size: 12px;
+	font-weight: bold;
+	display: inline-block;
+	min-width: 80px;
+}
 
-        .btn-register {
-            background-color: #4b7bec;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(75, 123, 236, 0.2);
-        }
+.status-designed {
+	background-color: #e2e2e2;
+	color: #666;
+}
 
-        /* [탭 2] 요구사항 커버리지 전용 스타일 */
-        .coverage-legend {
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            line-height: 1.8;
-            color: #555;
-        }
+.status-covered {
+	background-color: #d1f2e6;
+	color: #1b9978;
+}
 
-        .coverage-legend .legend-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-            display: block;
-        }
+.status-not-covered {
+	background-color: #fce3e3;
+	color: #c92a2a;
+}
 
-        .legend-color.covered { color: #1b9978; font-weight: bold; }
-        .legend-color.partial { color: #d97706; font-weight: bold; }
-        .legend-color.designed { color: #666; font-weight: bold; }
-        .legend-color.not-covered { color: #c92a2a; font-weight: bold; }
+.status-partial {
+	background-color: #fdecd3;
+	color: #d97706;
+}
 
-        .legend-divider {
-            margin: 0 10px;
-            color: #ddd;
-        }
+/* [탭 1] 테스트 케이스 전용 스타일 */
+.tc-search input {
+	padding: 8px 15px 8px 35px;
+	border: 1px solid #ddd;
+	border-radius: 20px;
+	outline: none;
+	width: 250px;
+	background: #fff
+		url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>')
+		no-repeat 12px center;
+}
 
-        /* 탭 전환을 위한 CSS */
-        .tab-content {
-            display: none; /* 기본적으로 숨김 */
-        }
-        .tab-content.active {
-            display: block; /* active 클래스가 있으면 보임 */
-        }
+.tc-footer {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	margin-top: 20px;
+	gap: 15px;
+}
+
+.btn-export {
+	background: none;
+	border: none;
+	color: #555;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	font-weight: bold;
+}
+
+.btn-register {
+	background-color: #4b7bec;
+	color: white;
+	border: none;
+	padding: 10px 30px;
+	border-radius: 5px;
+	font-weight: bold;
+	cursor: pointer;
+	box-shadow: 0 4px 6px rgba(75, 123, 236, 0.2);
+}
+
+/* [탭 2] 요구사항 커버리지 전용 스타일 */
+.coverage-legend {
+	background-color: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 15px 20px;
+	margin-bottom: 20px;
+	font-size: 13px;
+	line-height: 1.8;
+	color: #555;
+}
+
+.coverage-legend .legend-title {
+	font-weight: bold;
+	color: #333;
+	margin-bottom: 5px;
+	display: block;
+}
+
+.legend-color.covered {
+	color: #1b9978;
+	font-weight: bold;
+}
+
+.legend-color.partial {
+	color: #d97706;
+	font-weight: bold;
+}
+
+.legend-color.designed {
+	color: #666;
+	font-weight: bold;
+}
+
+.legend-color.not-covered {
+	color: #c92a2a;
+	font-weight: bold;
+}
+
+.legend-divider {
+	margin: 0 10px;
+	color: #ddd;
+}
+
+/* 탭 전환을 위한 CSS */
+.tab-content {
+	display: none; /* 기본적으로 숨김 */
+}
+
+.tab-content.active {
+	display: block; /* active 클래스가 있으면 보임 */
+}
+
+/*페이징 css*/
+
+.pagination-wrap {
+	display: flex;
+	justify-content: center; /* 가운데 정렬 */
+	gap: 6px;
+	margin-top: 20px; /* 테이블과의 간격 */
+	margin-bottom: 20px;
+}
+
+.page-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 32px;
+	height: 32px;
+	text-decoration: none !important;
+	color: #5d6b87;
+	border-radius: 6px;
+	font-size: 13px;
+}
+
+.page-btn.active {
+	background: #4d84ff;
+	color: #fff;
+	font-weight: 700;
+}
+
+.page-btn.disabled {
+	opacity: .3;
+	pointer-events: none;
+}
+
+.page-btn:hover:not(.active):not(.disabled) {
+	background: #eef4ff;
+	color: #4d84ff;
+}

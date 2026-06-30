@@ -1,13 +1,39 @@
 package com.weple.cloud.file;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
+
+import com.weple.cloud.auth.service.LoginUserDetails;
+import com.weple.cloud.auth.service.LoginUserVO;
+import com.weple.cloud.project.service.ProjectService;
+import com.weple.cloud.project.service.ProjectVO;
+import com.weple.cloud.task.service.TaskService;
+import com.weple.cloud.task.service.TaskVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,28 +43,38 @@ import lombok.RequiredArgsConstructor;
 public class ProjectFileController {
 	
 	private final ProjectFileService projectFileService;
+	private final ProjectService projectService;
 	
-	// -------------------------------파일관리------------------------------
+	// -------------------------------파일관리------------------------------		
 	// 전체조회
 	@GetMapping({"", "/projectFileList"})
 	public String projectFileList(@PathVariable String projectId, Model model) {
-        List<ProjectFileVO> list = projectFileService.findProjectFileAll();
-        System.out.println("조회된 파일 개수: " + (list == null ? "null" : list.size()));
-        if (!list.isEmpty()) {
-            System.out.println("첫 번째 파일명: " + list.get(0).getLogicalName());
-            System.out.println("첫 번째 파일ID: " + list.get(0).getFileId());
-        }
-        model.addAttribute("projectFileList", list);
-        model.addAttribute("projectId", projectId);
-        model.addAttribute("currentMenu", "file");
-        return "weple/file/list";
-    }
-		
+	    List<ProjectFileVO> list = projectFileService.findProjectFileAll(projectId);
+	    ProjectVO project = projectService.findById(projectId);
+	    model.addAttribute("projectFileList", list);
+	    model.addAttribute("projectId", projectId);
+	    model.addAttribute("project", project);
+	    model.addAttribute("currentMenu", "file");
+	    model.addAttribute("sidebarMenu", "project");
+	    return "weple/file/list";
+	}
+	
 	// 상세조회
 	@GetMapping("/projectFileInfo")
 	public String projectFileInfo(@PathVariable String projectId, String fileId, Model model) {
 		ProjectFileVO projectFileInfoVO = projectFileService.findProjectFileInfo(fileId);
+		List<ProjectFileVersionsVO> versionList = projectFileService.findProjectFileVersionAll(fileId);
+	    
+	    System.out.println(">>>>>> fileId: " + fileId);              // fileId가 제대로 오는지
+	    System.out.println(">>>>>> 버전 사이즈: " + versionList.size()); // 0이면 DB/매퍼 문제
+		ProjectVO project = projectService.findById(projectId);
 		model.addAttribute("projectFileInfo", projectFileInfoVO);
+		model.addAttribute("projectFileVersionList", versionList);
+		model.addAttribute("projectId", projectId);
+		model.addAttribute("project", project);
+		
+		model.addAttribute("currentMenu", "file");
+		model.addAttribute("sidebarMenu", "project");
 		return "weple/file/detail";
 	}
 		
@@ -57,12 +93,12 @@ public class ProjectFileController {
 	// 삭제
 	@GetMapping("/deleteProjectFile")
 	public String deleteProjectFile(@PathVariable String projectId, String fileId) {
-		long result = projectFileService.removeProjectFile(fileId);
+		projectFileService.removeProjectFileVersionByFileId(fileId);
+		projectFileService.removeProjectFile(fileId);
 		return "redirect:/project/" + projectId + "/file";
 	}
 	
 	// -------------------------------파일 버전------------------------------
-  	// 전체조회
     @GetMapping("/projectFileVersionList")
     public String projectFileVersionList(String fileId, Model model) {
     	List<ProjectFileVersionsVO> list = projectFileService.findProjectFileVersionAll(fileId);
@@ -96,4 +132,144 @@ public class ProjectFileController {
     	long result = projectFileService.removeProjectFileVersion(versionId);
     	return "redirect:projectFileVersionList?versionId=" + versionId;
     }
+    
+    // 파일 업로드
+    @PostMapping("/projectFileUpload")
+    public String projectFileUpload(@PathVariable String projectId,
+                                     @RequestParam("file") MultipartFile file,
+                                     @RequestParam(value = "taskId", required = false) String taskId,
+                                     @RequestParam(value = "tag", required = false) String tag,
+                                     @AuthenticationPrincipal LoginUserDetails loginUser) {
+
+        String uploadDir = "C:/weple_uploads/tasks/";
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        String originalName = file.getOriginalFilename();
+        String savedName = UUID.randomUUID().toString() + "_" + originalName;
+        File dest = new File(uploadDir + savedName);
+
+        try {
+            file.transferTo(dest);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "redirect:/project/" + projectId + "/file?error=upload_failed";
+        }
+
+        LoginUserVO user = loginUser.getLoginUser();
+        String uploaderCode = user.getUserCode();
+        System.out.println(">>>> uploaderCode: " + uploaderCode); // 추가
+
+        ProjectFileVO fileVO = new ProjectFileVO();
+        fileVO.setTaskId(taskId);
+        fileVO.setLogicalName(originalName);
+        fileVO.setIsDeleted("N");
+        fileVO.setCreatedAt(new Date());
+        fileVO.setProjectId(Long.valueOf(projectId));
+
+        String fileId = projectFileService.addProjectFile(fileVO);
+
+        if ("-1".equals(fileId)) {
+            return "redirect:/project/" + projectId + "/file?error=insert_failed";
+        }
+
+        ProjectFileVersionsVO versionVO = new ProjectFileVersionsVO();
+        versionVO.setFileId(fileId);
+        versionVO.setVersionNumber(1);
+        versionVO.setSavedName(savedName);
+        versionVO.setFilePath(uploadDir + savedName);
+        versionVO.setFileSize(file.getSize());
+        versionVO.setUploader(uploaderCode);
+        versionVO.setUploadedAt(new Date());
+        versionVO.setHashtag(tag); // ★ 추가
+
+        projectFileService.addProjectFileVersion(versionVO);
+
+        return "redirect:/project/" + projectId + "/file/projectFileInfo?fileId=" + fileId;
+    }
+    
+    
+    private final TaskService taskService;
+    // 일감 검색용
+    @GetMapping("/taskSearchList")
+    @ResponseBody
+    public List<Map<String, Object>> taskSearchList(@PathVariable String projectId) {
+        Map<String, Object> filterParams = new HashMap<>();
+        filterParams.put("projectId", Long.valueOf(projectId));
+        filterParams.put("tManager", null);
+        filterParams.put("searchKeyword", null);
+        filterParams.put("typeIds", null);
+        filterParams.put("statusIds", null);
+        filterParams.put("priorityNames", null);
+        filterParams.put("memberIds", null);
+        filterParams.put("progress", null);
+        filterParams.put("regDate", null);
+        filterParams.put("dueDate", null);
+        filterParams.put("offset", 0);
+        filterParams.put("limit", 1000); // 충분히 크게
+
+        List<TaskVO> tasks = taskService.findAllWithFilters(filterParams);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (TaskVO t : tasks) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("taskId", t.getTaskId());
+            m.put("taskTitle", t.getTaskTitle());
+            result.add(m);
+        }
+        return result;
+    }
+    
+    // 다운로드
+    @GetMapping("/projectFileDownload/{versionId}")
+    public ResponseEntity<Resource> projectFileDownload(@PathVariable String projectId,
+                                                         @PathVariable String versionId,
+                                                         @AuthenticationPrincipal LoginUserDetails loginUser) {
+        ProjectFileVersionsVO versionInfo = projectFileService.findVersionForDownload(versionId);
+
+        if (versionInfo == null || versionInfo.getSavedName() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            String uploadDir = "C:/weple_uploads/tasks/";
+            Path filePath = Paths.get(uploadDir, versionInfo.getSavedName());
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // ★ 다운로드 이력 기록
+            String downloaderCode = loginUser.getLoginUser().getUserCode();
+            projectFileService.recordDownloadHistory(versionId, downloaderCode);
+
+            String encodedFileName = UriUtils.encode(versionInfo.getLogicalName(), StandardCharsets.UTF_8);
+            String contentDisposition = "attachment; filename=\"" + encodedFileName + "\"";
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                    .header(HttpHeaders.CONTENT_TYPE, "application/octet-stream")
+                    .body(resource);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // 다운로드 이력 화면 (기존 메서드 수정)
+    @GetMapping("/downloader")
+    public String downloader(@PathVariable String projectId, Model model) {
+        ProjectVO project = projectService.findById(projectId);
+        model.addAttribute("projectId", projectId);
+        model.addAttribute("project", project);
+        model.addAttribute("currentMenu", "file");
+        model.addAttribute("sidebarMenu", "project");
+        model.addAttribute("downloadHistoryList", projectFileService.findDownloadHistory(projectId));
+        return "weple/file/downloader";
+    }
+    
 }

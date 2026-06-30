@@ -1,10 +1,11 @@
 :root {
-    --weple-primary: #5271FF;
-    --weple-primary-dark: #3D5BE8;
-    --weple-ink: #25314D;
+    --weple-primary: #6D5EF7;
+    --weple-primary-dark: #5B4FEA;
+    --weple-primary-active: #5747E6;
+    --weple-ink: #111827;
     --weple-muted: #7A869F;
-    --weple-border: #DDE6F6;
-    --weple-visual-bg: #DCE7FF;
+    --weple-border: #DDD6FE;
+    --weple-visual-bg: #F1EDFF;
 }
 
 * {
@@ -42,7 +43,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: #2F3A55;
+    color: #111827;
     font-size: 22px;
     font-weight: 700;
     letter-spacing: 0;
@@ -95,7 +96,7 @@ body {
 
 .login-title {
     margin: 0;
-    color: #2E3548;
+    color: #111827;
     font-size: 32px;
     font-weight: 600;
     line-height: 1.2;
@@ -122,15 +123,15 @@ body {
 }
 
 .login-message-error {
-    color: #C24141;
-    border: 1px solid #F4C7C7;
-    background: #FFF1F1;
+    color: #EF4444;
+    border: 1px solid #FECACA;
+    background: #FEF2F2;
 }
 
 .login-message-success {
-    color: #257A55;
-    border: 1px solid #BFEAD5;
-    background: #EFFBF5;
+    color: #22C55E;
+    border: 1px solid #BBF7D0;
+    background: #F0FDF4;
 }
 
 .login-field {
@@ -165,12 +166,12 @@ body {
 
 .login-input:focus {
     border-color: var(--weple-primary);
-    box-shadow: 0 0 0 4px rgba(82, 113, 255, 0.12);
+    box-shadow: 0 0 0 4px rgba(109, 94, 247, 0.12);
 }
 
 .join-valid-message {
     margin: 4px 0 0;
-    color: #1AA85D;
+    color: #22C55E;
     font-size: 11px;
     font-weight: 600;
     line-height: 1.3;
@@ -217,16 +218,21 @@ body {
     font-weight: 700;
     border: 0;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--weple-primary), #6C8DFF);
-    box-shadow: 0 10px 24px rgba(82, 113, 255, 0.22);
+    background: linear-gradient(135deg, var(--weple-primary), #7C70F8);
+    box-shadow: 0 10px 24px rgba(109, 94, 247, 0.22);
     cursor: pointer;
     transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
 .login-button:hover {
-    background: linear-gradient(135deg, var(--weple-primary-dark), #5D80FF);
-    box-shadow: 0 12px 26px rgba(82, 113, 255, 0.28);
+    background: linear-gradient(135deg, var(--weple-primary-dark), #6D5EF7);
+    box-shadow: 0 12px 26px rgba(109, 94, 247, 0.28);
     transform: translateY(-1px);
+}
+
+.login-button:active {
+    background: var(--weple-primary-active);
+    transform: translateY(0);
 }
 
 .login-links {
@@ -260,7 +266,7 @@ body {
     padding: 64px;
     background:
         radial-gradient(circle at 82% 25%, rgba(255, 255, 255, 0.58), transparent 26%),
-        linear-gradient(135deg, #E6EEFF 0%, var(--weple-visual-bg) 54%, #D3E1FF 100%);
+        linear-gradient(135deg, #FAFAFC 0%, var(--weple-visual-bg) 54%, #EFEAFF 100%);
     overflow: hidden;
 }
 
@@ -268,7 +274,7 @@ body {
 .login-visual-panel::after {
     content: "";
     position: absolute;
-    border: 1px solid rgba(82, 113, 255, 0.14);
+    border: 1px solid rgba(109, 94, 247, 0.14);
     border-radius: 999px;
 }
 
@@ -292,7 +298,7 @@ body {
     width: min(86%, 440px);
     max-height: 72vh;
     object-fit: contain;
-    filter: drop-shadow(0 24px 40px rgba(76, 98, 160, 0.16));
+    filter: drop-shadow(0 24px 40px rgba(17, 24, 39, 0.16));
 }
 
 @media (max-width: 900px) {

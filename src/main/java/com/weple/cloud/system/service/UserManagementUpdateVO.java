@@ -15,6 +15,7 @@ public class UserManagementUpdateVO {
     private String userName;
     private String email;
     private String phoneNumber;
+    private Integer groupId;
 
     // 기업 최고관리자가 사용자 수정 시 관리자 여부를 함께 변경할 때 사용합니다.
     private Integer adminYn;

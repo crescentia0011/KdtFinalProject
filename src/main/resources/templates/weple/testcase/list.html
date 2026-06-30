@@ -3,152 +3,104 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 테스트 관리</title>
-    <link rel="stylesheet" th:href="@{/css/testcase/testcase-list.css}">
+<title>WEPLE - 테스트 관리</title>
+<link rel="stylesheet" th:href="@{/css/testcase/testcase-list.css}">
 </head>
 <body>
 
-    <section class="testcase-section">
-        <div class="tc-header">
-            <div class="tc-tabs">
-                <div class="tc-tab active" onclick="switchTab('tab-testcase', this)">테스트 케이스</div>
-                <div class="tc-tab" onclick="switchTab('tab-coverage', this)">요구사항 커버리지</div>
-            </div>
-            
-            <div class="tc-search" id="search-box">
-                <input type="text" placeholder="테스트 케이스 검색">
-            </div>
-        </div>
+	<section class="testcase-section">
+		<form id="searchForm"
+			th:action="${currentTab == 'coverage'} ? @{/project/coverage} : @{/project/testcase}"
+			method="get">
+			<input type="hidden" name="projectId" th:value="${projectId}" /> <input
+				type="hidden" id="pageInput" name="page" th:value="${currentPage}" />
 
-        <div id="tab-testcase" class="tab-content active">
-            <div class="tc-table-container">
-                <table class="tc-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>테스트 케이스</th>
-                            <th>작성자</th>
-                            <th>진행상황</th>
-                            <th>작성일자</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>TEST-260610_01</td>
-                            <td>타이틀 정수 입력</td>
-                            <td>서종원</td>
-                            <td><span class="status-badge status-designed">Designed</span></td>
-                            <td>2026/06/29</td>
-                        </tr>
-                        <tr>
-                            <td>TEST-260610_01</td>
-                            <td>새로고침 반복</td>
-                            <td>김용훈</td>
-                            <td><span class="status-badge status-covered">Covered</span></td>
-                            <td>2026/06/28</td>
-                        </tr>
-                        <tr>
-                            <td>TEST-260610_01</td>
-                            <td>비로그인 접근</td>
-                            <td>김영미</td>
-                            <td><span class="status-badge status-not-covered">Not Covered</span></td>
-                            <td>2026/06/13</td>
-                        </tr>
-                        <tr>
-                            <td>TEST-260610_01</td>
-                            <td>하위일감 테스트</td>
-                            <td>박연우</td>
-                            <td><span class="status-badge status-covered">Covered</span></td>
-                            <td>2026/06/10</td>
-                        </tr>
-                        <tr>
-                            <td>TEST-260610_01</td>
-                            <td>이미지등록 테스트</td>
-                            <td>송범석</td>
-                            <td><span class="status-badge status-partial">Partical</span></td>
-                            <td>2026/06/02</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+			<div class="tc-header">
+				<div class="tc-tabs">
+					<div class="tc-tab"
+						th:classappend="${currentTab == 'testcase'} ? 'active'"
+						th:onclick="|location.href='@{/project/testcase(projectId=${projectId})}'|">테스트
+						케이스</div>
 
-            <div class="tc-footer">
-                <button class="btn-register" type="button"
-                    th:onclick="|location.href='@{/project/testcase/insert(projectId=${projectId})}'|">등록</button>
-            </div>
-        </div>
+					<div class="tc-tab"
+						th:classappend="${currentTab == 'coverage'} ? 'active'"
+						th:onclick="|location.href='@{/project/coverage(projectId=${projectId})}'|">요구사항
+						커버리지</div>
+				</div>
 
-        <div id="tab-coverage" class="tab-content" style="display: none;">
-            <div class="coverage-legend">
-                <span class="legend-title">커버리지 범례</span>
-                <span class="legend-color covered">Covered</span> 실행 대상 모두 통과, 미완료 결함 없음 
-                <span class="legend-divider">|</span> 
-                <span class="legend-color partial">Partial</span> 일부만 통과 또는 일부만 실행 <br>
-                <span class="legend-color designed">Designed</span> 테스트 케이스는 있으나 아직 실행 안함 
-                <span class="legend-divider">|</span> 
-                <span class="legend-color not-covered">Not Covered</span> fail/block 또는 미완료 결함 존재
-            </div>
+				<div class="tc-search" id="search-box"
+					th:if="${currentTab == 'testcase'}">
+					<input type="text" name="searchKeyword" th:value="${searchKeyword}"
+						placeholder="테스트 케이스 검색">
+				</div>
+			</div>
+		</form>
 
-            <div class="tc-table-container">
-                <table class="tc-table">
-                    <thead>
-                        <tr>
-                            <th>요구사항</th>
-                            <th>버전</th>
-                            <th>테스트 케이스</th>
-                            <th>커버리지</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>로그인 기능</td>
-                            <td>1.0.0 version update</td>
-                            <td>비로그인시 접근</td>
-                            <td><span class="status-badge status-not-covered">Not Covered</span></td>
-                        </tr>
-                        <tr>
-                            <td>이미지 등록</td>
-                            <td>1.0.0 version update</td>
-                            <td>이미지 등록 테스트</td>
-                            <td><span class="status-badge status-partial">Partial</span></td>
-                        </tr>
-                        <tr>
-                            <td>하위 일감 등록 기능</td>
-                            <td>1.0.1 version update</td>
-                            <td>하위 일감 등록 테스트</td>
-                            <td><span class="status-badge status-covered">Covered</span></td>
-                        </tr>
-                        <tr>
-                            <td>댓글 기능</td>
-                            <td>1.0.1 version update</td>
-                            <td>댓글 권한 테스트</td>
-                            <td><span class="status-badge status-covered">Covered</span></td>
-                        </tr>
-                        <tr>
-                            <td>알림 기능</td>
-                            <td>1.0.2 version update</td>
-                            <td>알림 기능 테스트</td>
-                            <td><span class="status-badge status-designed">Designed</span></td>
-                        </tr>
-                        <tr>
-                            <td>권한 별 페이지 접근 처리</td>
-                            <td>1.0.1 version update</td>
-                            <td>사용자 관리페이지 접근 테스트</td>
-                            <td><span class="status-badge status-not-covered">Not Covered</span></td>
-                        </tr>
-                        <tr>
-                            <td>회원가입 기능</td>
-                            <td>1.0.0 version update</td>
-                            <td>회원가입 기능 테스트</td>
-                            <td><span class="status-badge status-covered">Covered</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+		<div id="tab-testcase" class="tab-content active"
+			th:if="${currentTab == 'testcase'}">
+			<div class="tc-table-container">
+				<table class="tc-table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>테스트 케이스</th>
+							<th>작성자</th>
+							<th>담당자</th>
+							<th>진행상황</th>
+							<th>작성일자</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:if="${#lists.isEmpty(testCaseList)}">
+							<td colspan="6" style="text-align: center;">등록된 테스트 케이스가
+								없습니다.</td>
+						</tr>
+						<tr th:unless="${#lists.isEmpty(testCaseList)}"
+							th:each="tc : ${testCaseList}">
+							<td th:text="${tc.testId}"></td>
+							<td th:text="${tc.testName}"></td>
+							<td th:text="${tc.userName}"></td>
+							<td th:text="${tc.managerName}"></td>
+							<td><span class="status-badge"
+								th:classappend="${#strings.toLowerCase(tc.coverageStatus) == 'partial' ? 'status-partial' : 
+                                                       #strings.toLowerCase(tc.coverageStatus) == 'covered' ? 'status-covered' : 
+                                                       #strings.toLowerCase(tc.coverageStatus) == 'designed' ? 'status-designed' : 'status-not-covered'}"
+								th:text="${tc.coverageStatus}"></span></td>
+							<td th:text="${#dates.format(tc.createdAt, 'yyyy/MM/dd')}"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 
-        <script th:src="@{/js/testcase/testcase.js}"></script>
-    </section>
+			<div class="tc-footer">
+				<button class="btn-register" type="button"
+					th:onclick="|location.href='@{/project/testcase/insert(projectId=${projectId})}'|">등록</button>
+			</div>
+
+			<div class="pagination-wrap"
+				th:if="${totalPages != null and totalPages > 0}">
+				<a href="javascript:void(0);"
+					th:onclick="${currentPage > 1} ? '|goPage(${currentPage - 1})|' : ''"
+					th:classappend="${currentPage <= 1} ? 'disabled'" class="page-btn">&lt;
+					이전</a>
+				<th:block th:each="i : ${#numbers.sequence(startPage, endPage)}">
+					<a href="javascript:void(0);" th:onclick="|goPage(${i})|"
+						th:text="${i}" th:classappend="${i == currentPage} ? 'active'"
+						class="page-btn">1</a>
+				</th:block>
+				<a href="javascript:void(0);"
+					th:onclick="${currentPage < totalPages} ? '|goPage(${currentPage + 1})|' : ''"
+					th:classappend="${currentPage >= totalPages} ? 'disabled'"
+					class="page-btn">다음 &gt;</a>
+			</div>
+		</div>
+
+		<th:block th:if="${currentTab == 'coverage'}">
+			<div th:replace="~{weple/testcase/coverage :: coverageTab}"></div>
+		</th:block>
+
+		<script th:src="@{/js/testcase/testcase.js}"></script>
+	</section>
 
 </body>
 </html>

@@ -110,6 +110,9 @@ public class UserManagementServiceImpl implements UserManagementService {
         if (userManagementMapper.countUserByEmailExcept(user.getEmail(), user.getUserCode()) > 0) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
+        if (user.getGroupId() != null && userManagementMapper.countGroupByCompany(companyId, user.getGroupId()) == 0) {
+            throw new IllegalArgumentException("선택한 그룹을 찾을 수 없습니다.");
+        }
 
         if (userManagementMapper.updateUserBasicInfo(companyId, actorOwnerYn, user) != 1) {
             throw new IllegalStateException("사용자 정보를 수정할 수 없습니다.");

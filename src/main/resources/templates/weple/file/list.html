@@ -9,7 +9,7 @@
 <body>
 	<section>
 
-		<div class="file-wrap">
+		<div class="file-wrap" th:data-project-id="${projectId}">
 
 			<!-- 상단 타이틀 + 버튼 -->
 			<div class="file-toolbar">
@@ -22,12 +22,11 @@
 				</div>
 			</div>
 
-			<!-- 검색 영역 (project-total 방식, 보라색 테마) -->
+			<!-- 검색 영역 -->
 			<div class="search-box">
 				<div class="search-title">▼ 검색조건</div>
 				<div class="search-top">
 					<div id="search-container">
-						<!-- 파일명이 메인 -->
 						<div class="search-item" id="fileName-filter">
 							<label>파일명</label> <input type="text" name="fileName"
 								placeholder="파일명을 입력하세요."
@@ -35,16 +34,23 @@
 						</div>
 					</div>
 					<div class="search-right-area">
-						<button class="page-btn active" onclick="toggleFilterMenu()">검색조건
-							추가 ▼</button>
-						<div id="filter-menu" class="filter-dropdown"
-							style="display: none;">
-							<label><input type="checkbox" value="2"
-								onchange="toggleFilter(this, 2)"> 연결 일감</label><br> <label><input
-								type="checkbox" value="5" onchange="toggleFilter(this, 5)">
-								업로드 사용자</label><br> <label><input type="checkbox" value="6"
-								onchange="toggleFilter(this, 6)"> 업로드일</label>
-						</div>
+					    <button class="page-btn active" onclick="toggleFilterMenu()">검색조건
+					        추가 ▼</button>
+					    <div id="filter-menu" class="filter-dropdown"
+					        style="display: none;">
+					        <label><input type="checkbox" value="2"
+					            onchange="toggleFilter(this, 2)"> 연결 일감</label><br>
+					        <label><input type="checkbox" value="3"
+					            onchange="toggleFilter(this, 3)"> 일감 유형</label><br>
+					        <label><input type="checkbox" value="5"
+					            onchange="toggleFilter(this, 5)"> 업로드 사용자</label><br>
+					        <label><input type="checkbox" value="6"
+					            onchange="toggleFilter(this, 6)"> 업로드일</label><br>
+					        <label><input type="checkbox" value="7"
+					            onchange="toggleFilter(this, 7)"> 파일 버전</label>
+					        <label><input type="checkbox" value="2-hashtag"
+        						onchange="toggleFilter(this, '2-hashtag')"> 해시태그</label>
+					    </div>
 					</div>
 				</div>
 				<div class="search-bottom">
@@ -88,24 +94,24 @@
 							<td
 								th:text="${file.projectTitle != null} ? ${file.projectTitle} : '-'">-</td>
 							<td><span th:if="${file.taskId != null}"
-								class="task-badge-linked"
-								th:text="${file.taskTitle != null} ? ${file.taskTitle} : ${file.taskId}"></span>
-								<span th:if="${file.taskId == null}" class="task-badge-none">-</span>
-							</td>
-							<td>-</td>
+									    class="task-badge-linked"
+									    th:text="${(file.hashtag != null and !#strings.isEmpty(file.hashtag)) ? '[' + file.hashtag + '] ' + (file.taskTitle != null ? file.taskTitle : file.taskId) : (file.taskTitle != null ? file.taskTitle : file.taskId)}"></span>
+									    <span th:if="${file.taskId == null}" class="task-badge-none">-</span>
+									</td>
+							<td th:text="${file.typeName != null} ? ${file.typeName} : '-'">-</td>
 							<td
 								th:text="${file.fileSize != null and file.fileSize != 0} ? ${file.fileSize} + ' B' : '-'">-</td>
-							<td th:text="${file.uploader != null} ? ${file.uploader} : '-'">-</td>
+							<td th:text="${file.uploader != null} ? ${file.userName} : '-'">-</td>
 							<td
 								th:text="${file.uploadedAt != null} ? ${#dates.format(file.uploadedAt, 'yyyy-MM-dd')} : (${file.createdAt != null} ? ${#dates.format(file.createdAt, 'yyyy-MM-dd')} : '-')">-</td>
 							<td><span class="version-badge"
 								th:text="${file.versionNumber != null and file.versionNumber != 0} ? 'v' + ${file.versionNumber} + '.0' : 'v1.0'">v1.0</span>
 							</td>
 							<td class="td-center">
-								<button class="icon-btn" title="다운로드"
-									th:data-file-id="${file.fileId}"
-									onclick="downloadFile(this.dataset.fileId)">⬇</button>
-							</td>
+    <button class="icon-btn" title="다운로드"
+        th:data-version-id="${file.versionId}"
+        onclick="downloadFile(this.dataset.versionId)">⬇</button>
+</td>
 							<td class="td-center">
 								<button class="icon-btn icon-btn-del" title="삭제"
 									th:data-file-id="${file.fileId}"
@@ -127,41 +133,43 @@
 
 		<!-- 파일 업로드 모달 -->
 		<div id="uploadModal" class="modal-backdrop" style="display: none;">
-			<div class="modal-box">
-				<div class="modal-header">
-					<span class="modal-title">파일 등록</span>
-					<button class="modal-close" onclick="closeUploadModal()">✕</button>
-				</div>
-				<div class="drop-zone" id="dropZone"
-					onclick="document.getElementById('fileInput').click()">
-					<span class="drop-icon">☁</span>
-					<p class="drop-text">파일 선택 또는 드래그</p>
-					<p class="drop-sub" id="selectedFileName"></p>
-				</div>
-				<input type="file" id="fileInput" style="display: none;"
-					onchange="onFileSelected(this)">
-				<div class="modal-form-group">
-					<label class="modal-label">프로젝트 (선택)</label> <input type="text"
-						class="form-input-text" value="현재 프로젝트" readonly>
-				</div>
-				<div class="modal-form-group">
-					<label class="modal-label">연결 일감 (선택)</label> <select
-						class="form-input-text">
-						<option value="">선택 안함</option>
-					</select>
-				</div>
-				<div class="modal-form-group">
-					<label class="modal-label">태그 입력 <span class="req">*</span></label>
-					<input type="text" id="fileTagInput" class="form-input-text"
-						placeholder="#디자인 #피그마">
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="page-btn btn-cancel"
-						onclick="closeUploadModal()">취소</button>
-					<button type="button" class="page-btn active"
-						onclick="submitUpload()">등록</button>
-				</div>
-			</div>
+		    <div class="modal-box">
+		        <div class="modal-header">
+		            <span class="modal-title">파일 등록</span>
+		            <button class="modal-close" onclick="closeUploadModal()">✕</button>
+		        </div>
+		        <div class="drop-zone" id="dropZone"
+		            onclick="document.getElementById('fileInput').click()">
+		            <span class="drop-icon">☁</span>
+		            <p class="drop-text">파일 선택 또는 드래그</p>
+		            <p class="drop-sub" id="selectedFileName"></p>
+		        </div>
+		        <input type="file" id="fileInput" style="display: none;"
+		            onchange="onFileSelected(this)">
+		        <div class="modal-form-group">
+		            <label class="modal-label">프로젝트</label>
+		            <input type="text" class="form-input-text" th:value="${project.projectTitle}" readonly>
+		        </div>
+		        <div class="modal-form-group" style="position: relative;">
+		            <label class="modal-label">연결 일감 (선택)</label>
+		            <input type="text" id="taskSearchInput" class="form-input-text"
+		                placeholder="일감명을 입력하세요 (초성 검색 가능)" autocomplete="off">
+		            <input type="hidden" id="taskIdHidden">
+		            <div id="taskAutocompleteList"
+		                style="display:none; position:absolute; left:24px; right:24px; top:68px; background:#fff; border:1px solid var(--weple-purple-border); border-radius:8px; max-height:180px; overflow-y:auto; z-index:10000; box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+		        </div>
+		        <div class="modal-form-group">
+		            <label class="modal-label">태그 입력 <span class="req">*</span></label>
+		            <input type="text" id="fileTagInput" class="form-input-text"
+		                placeholder="#디자인 #피그마">
+		        </div>
+		        <div class="modal-footer">
+		            <button type="button" class="page-btn btn-cancel"
+		                onclick="closeUploadModal()">취소</button>
+		            <button type="button" class="page-btn active" id="uploadSubmitBtn"
+		                onclick="submitUpload()">등록</button>
+		        </div>
+		    </div>
 		</div>
 
 		<!-- 삭제 확인 모달 -->
@@ -244,6 +252,19 @@ function updatePagination(pageCount) {
   }
 }
 
+function goDownloadHistory() {
+	  const projectId = getProjectId();
+	  location.href = '/project/' + projectId + '/file/downloader';
+	}
+function downloadFile(versionId) {
+	  if (!versionId || versionId === 'null') {
+	    showToast('다운로드할 파일 정보가 없습니다.', 'error');
+	    return;
+	  }
+	  const projectId = getProjectId();
+	  window.location.href = '/project/' + projectId + '/file/projectFileDownload/' + versionId;
+	}
+
 // 검색 필터 토글
 function toggleFilterMenu() {
   const menu = document.getElementById('filter-menu');
@@ -251,20 +272,20 @@ function toggleFilterMenu() {
 }
 
 function toggleFilter(checkbox, colIndex) {
-  const container = document.getElementById('search-container');
-  if (checkbox.checked) {
-    const div = document.createElement('div');
-    div.className = 'search-item';
-    div.id = 'filter-col-' + colIndex;
-    const label = checkbox.nextSibling.textContent.trim();
-    const inputType = (colIndex === 6) ? 'date' : 'text';
-    div.innerHTML = `<label>${label}</label><input type="${inputType}" data-col="${colIndex}" placeholder="검색어 입력" onkeydown="if(event.key==='Enter') applySearch()">`;
-    container.appendChild(div);
-  } else {
-    const el = document.getElementById('filter-col-' + colIndex);
-    if (el) el.remove();
-  }
-}
+	  const container = document.getElementById('search-container');
+	  if (checkbox.checked) {
+	    const div = document.createElement('div');
+	    div.className = 'search-item';
+	    div.id = 'filter-col-' + colIndex;
+	    const label = checkbox.nextSibling.textContent.trim();
+	    const inputType = (colIndex === 6) ? 'date' : 'text';
+	    div.innerHTML = `<label>${label}</label><input type="${inputType}" data-col="${colIndex}" placeholder="검색어 입력" onkeydown="if(event.key==='Enter') applySearch()">`;
+	    container.appendChild(div);
+	  } else {
+	    const el = document.getElementById('filter-col-' + colIndex);
+	    if (el) el.remove();
+	  }
+	}
 
 document.addEventListener('click', (event) => {
   const menu = document.getElementById('filter-menu');
@@ -282,14 +303,10 @@ function applySearch() {
 
   filteredRows = allRows.filter(row => {
     let isMatch = true;
-
-    // 파일명 메인 검색 (0번 컬럼)
     if (fileNameKw) {
       const cellVal = row.cells[0] ? row.cells[0].innerText.toLowerCase() : '';
       if (!cellVal.includes(fileNameKw)) isMatch = false;
     }
-
-    // 추가 조건 검색
     extraInputs.forEach(input => {
       if (!input.value) return;
       const colIndex = parseInt(input.getAttribute('data-col'));
@@ -297,7 +314,6 @@ function applySearch() {
       if (input.type === 'date') cellVal = cellVal.replace(/\//g, '-');
       if (!cellVal.includes(input.value.toLowerCase())) isMatch = false;
     });
-
     return isMatch;
   });
   currentPage = 1;
@@ -309,16 +325,6 @@ function resetSearch() {
   filteredRows = allRows.slice();
   currentPage = 1;
   showPage(1);
-}
-
-// 다운로드 이력
-function goDownloadHistory() {
-  const projectId = getProjectId();
-  location.href = '/project/' + projectId + '/file/downloader';
-}
-
-function downloadFile(fileId) {
-  showToast('다운로드는 서버 연동 후 사용 가능합니다.', 'error');
 }
 
 // 삭제
@@ -350,6 +356,8 @@ function confirmDelete() {
 }
 
 function getProjectId() {
+  const wrap = document.querySelector('.file-wrap');
+  if (wrap && wrap.dataset.projectId) return wrap.dataset.projectId;
   const match = location.pathname.match(/\/project\/([^\/]+)\/file/);
   return match ? match[1] : '';
 }
@@ -358,6 +366,10 @@ function getProjectId() {
 function openUploadModal() {
   document.getElementById('selectedFileName').textContent = '';
   document.getElementById('fileTagInput').value = '';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('taskSearchInput').value = '';
+  document.getElementById('taskIdHidden').value = '';
+  document.getElementById('taskAutocompleteList').style.display = 'none';
   document.getElementById('uploadModal').style.display = 'flex';
 }
 function closeUploadModal() {
@@ -374,11 +386,57 @@ function onFileSelected(input) {
     }
   }
 }
+
+// 실제 업로드 처리
 function submitUpload() {
-  if (!document.getElementById('fileInput').files[0]) { showToast('업로드할 파일을 선택해 주세요.', 'error'); return; }
-  if (!document.getElementById('fileTagInput').value.trim()) { showToast('태그를 입력해 주세요.', 'error'); return; }
-  showToast('등록은 서버 연동 후 사용 가능합니다.', 'error');
-  closeUploadModal();
+  const fileInput = document.getElementById('fileInput');
+  const tagInput = document.getElementById('fileTagInput');
+  const taskIdHidden = document.getElementById('taskIdHidden');
+
+  if (!fileInput.files[0]) { showToast('업로드할 파일을 선택해 주세요.', 'error'); return; }
+  if (!tagInput.value.trim()) { showToast('태그를 입력해 주세요.', 'error'); return; }
+
+  const projectId = getProjectId();
+  const formData = new FormData();
+  formData.append('file', fileInput.files[0]);
+  formData.append('tag', tagInput.value.trim());
+  if (taskIdHidden && taskIdHidden.value) {
+    formData.append('taskId', taskIdHidden.value);
+  }
+
+  const submitBtn = document.getElementById('uploadSubmitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '업로드 중...';
+
+  // ★ CSRF 토큰 가져오기
+  const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+  const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+  const headers = {};
+  if (csrfToken && csrfHeader) {
+    headers[csrfHeader] = csrfToken;
+  }
+
+  fetch('/project/' + projectId + '/file/projectFileUpload', {
+    method: 'POST',
+    headers: headers,
+    body: formData
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('업로드 실패');
+      return res.text();
+    })
+    .then(() => {
+      showToast('파일이 등록되었습니다.', 'success');
+      closeUploadModal();
+      setTimeout(() => location.reload(), 800);
+    })
+    .catch(() => {
+      showToast('파일 업로드 중 오류가 발생했습니다.', 'error');
+    })
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '등록';
+    });
 }
 
 // 드래그앤드롭
@@ -388,6 +446,88 @@ const dropZone = document.getElementById('dropZone');
 dropZone.addEventListener('drop', e => {
   const files = e.dataTransfer.files;
   if (files && files[0]) { document.getElementById('fileInput').files = files; onFileSelected(document.getElementById('fileInput')); }
+});
+
+//초성 추출
+const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+function getChosung(str) {
+  let result = '';
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i) - 44032;
+    if (code >= 0 && code <= 11171) {
+      result += CHO[Math.floor(code / 588)];
+    } else {
+      result += str[i];
+    }
+  }
+  return result;
+}
+
+let allTasks = [];
+
+function loadTaskList() {
+  const projectId = getProjectId();
+  fetch('/project/' + projectId + '/file/taskSearchList')
+    .then(res => res.json())
+    .then(data => { allTasks = data; })
+    .catch(() => { allTasks = []; });
+}
+
+function setupTaskAutocomplete() {
+  const input = document.getElementById('taskSearchInput');
+  const hidden = document.getElementById('taskIdHidden');
+  const list = document.getElementById('taskAutocompleteList');
+
+  input.addEventListener('input', () => {
+    const kw = input.value.trim();
+    hidden.value = '';
+    if (!kw) { list.style.display = 'none'; return; }
+
+    const kwLower = kw.toLowerCase();
+    const kwChosung = getChosung(kw);
+
+    const matched = allTasks.filter(t => {
+      const title = t.taskTitle || '';
+      const titleLower = title.toLowerCase();
+      const titleChosung = getChosung(title);
+      return titleLower.includes(kwLower) || titleChosung.includes(kwChosung);
+    });
+
+    if (matched.length === 0) {
+      list.innerHTML = '<div style="padding:10px; color:#94a3b8; font-size:13px;">검색 결과가 없습니다.</div>';
+      list.style.display = 'block';
+      return;
+    }
+
+    list.innerHTML = matched.map(t =>
+      `<div class="task-autocomplete-item" data-task-id="${t.taskId}" data-task-title="${t.taskTitle}"
+            style="padding:10px 14px; cursor:pointer; font-size:13px; border-bottom:1px solid #f1f1f1;">
+        ${t.taskTitle}
+      </div>`
+    ).join('');
+    list.style.display = 'block';
+
+    list.querySelectorAll('.task-autocomplete-item').forEach(item => {
+      item.addEventListener('mouseenter', () => item.style.background = '#F5F3FF');
+      item.addEventListener('mouseleave', () => item.style.background = '#fff');
+      item.addEventListener('click', () => {
+        input.value = item.dataset.taskTitle;
+        hidden.value = item.dataset.taskId;
+        list.style.display = 'none';
+      });
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!input.contains(e.target) && !list.contains(e.target)) {
+      list.style.display = 'none';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadTaskList();
+  setupTaskAutocomplete();
 });
 </script>
 
@@ -406,12 +546,11 @@ dropZone.addEventListener('drop', e => {
 }
 
 .file-wrap {
-	max-width: 1200px;
-	margin: 24px auto;
-	padding: 0 20px;
+	width: 95%;
+    margin: 24px auto;
+    padding: 0;
 }
 
-/* 툴바 */
 .file-toolbar {
 	display: flex;
 	justify-content: space-between;
@@ -432,7 +571,6 @@ dropZone.addEventListener('drop', e => {
 	gap: 10px;
 }
 
-/* 검색 박스 */
 .search-box {
 	border: 1px solid var(--weple-purple-border);
 	border-radius: 10px;
@@ -461,7 +599,7 @@ dropZone.addEventListener('drop', e => {
 #search-container {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-	gap: 16px;
+	gap: 16px 24px;
 	flex: 1;
 }
 
@@ -488,11 +626,12 @@ dropZone.addEventListener('drop', e => {
 }
 
 .search-item label {
-	width: 72px;
+	width: 90px;
 	font-weight: 600;
 	font-size: 13px;
 	color: var(--weple-text);
 	flex-shrink: 0;
+	white-space: nowrap;
 }
 
 .search-item input[type="text"], .search-item input[type="date"] {
@@ -558,7 +697,6 @@ dropZone.addEventListener('drop', e => {
 	gap: 8px;
 }
 
-/* 버튼 */
 .page-btn {
 	padding: 7px 16px;
 	border: 1px solid var(--weple-purple-border);
@@ -591,7 +729,6 @@ dropZone.addEventListener('drop', e => {
 	color: var(--weple-text-muted);
 }
 
-/* 테이블 */
 .table-container {
 	border-radius: 10px;
 	overflow: hidden;
@@ -685,7 +822,6 @@ dropZone.addEventListener('drop', e => {
 	padding: 40px;
 }
 
-/* 페이징 */
 .file-bottom-area {
 	margin-top: 20px;
 	display: flex;
@@ -714,7 +850,6 @@ dropZone.addEventListener('drop', e => {
 	color: var(--weple-purple-dark);
 }
 
-/* 모달 */
 .modal-backdrop {
 	position: fixed;
 	inset: 0;

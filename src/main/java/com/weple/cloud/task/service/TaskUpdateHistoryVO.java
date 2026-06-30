@@ -16,6 +16,7 @@ public class TaskUpdateHistoryVO {
 	private Long historyId;
 	private String userName;
 	private LocalDateTime actionAt;
+	private String actionType;
 	private String fieldName;
 	private String oldValue;
 	private String newValue;

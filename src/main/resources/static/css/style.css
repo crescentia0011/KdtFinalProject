@@ -5,8 +5,8 @@
    ========================================================================== */
 
 /* 1. 불릿 기호 제거 초기화 */
-.nav.side-menu li, 
-.sub_menu_nav ul li, 
+.nav.side-menu li,
+.sub_menu_nav ul li,
 .nav.navbar-nav li {
     list-style-type: none !important;
 }
@@ -22,7 +22,7 @@ body.nav-md .container.body .left_col,
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
-    
+
     position: fixed !important;    /* 🔥 사이드바를 화면 좌측에 완전 고정하여 자림 방지 */
     height: 100vh !important;
     top: 0 !important;
@@ -34,24 +34,24 @@ body.nav-md .container.body .left_col,
 .left_col .navbar.nav_title,
 .nav_title {
     background: #ffffff !important;
-    border-bottom: 1px solid #DDD6FE !important; 
-    border-right: 1px solid #DDD6FE !important;  
+    border-bottom: 1px solid #DDD6FE !important;
+    border-right: 1px solid #DDD6FE !important;
     text-align: left !important;
-    
+
     /* 🔥 상단 내부 여백을 조절하여 WEPLE 문구를 박스 세로 정중앙으로 배치 */
     padding: 10px 0 0 24px !important;
     margin: 0 !important;
-    width: 230px !important; 
-    
-    position: absolute !important;   
+    width: 230px !important;
+
+    position: absolute !important;
     top: 0 !important;
     left: 0 !important;
-    
+
     /* 🔥 하단 가로선이 우측 영역과 수평을 이루도록 높이 조절 및 내부 정렬 라인 매칭 */
-    height: 81px !important;         
-    line-height: 60px !important;    
-    
-    z-index: 1001 !important;        
+    height: 81px !important;
+    line-height: 60px !important;
+
+    z-index: 1001 !important;
     box-sizing: border-box !important;
     display: block !important;
 }
@@ -62,18 +62,18 @@ body.nav-md .container.body .left_col,
 }
 
 .site_title span {
-    color: #8B7CF8 !important;
+    color: #6D5EF7 !important;
     font-weight: bold !important;
     font-size: 22px !important;
     letter-spacing: -0.5px;
-    display: inline-block !important; 
+    display: inline-block !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
 
 /* 🔥 늘어난 로고 영역 전체 높이에 맞춰 사이드 메뉴 시작 지점 하향 조정 */
 .nav.side-menu {
-    margin-top: 81px !important; 
+    margin-top: 81px !important;
 }
 
 .nav.side-menu > li {
@@ -101,7 +101,7 @@ body.nav-md .container.body .left_col,
     width: 20px !important;
     margin-right: 10px !important;
     display: inline-block !important;
-    color: #726F8F !important;
+    color: #6366A3 !important;
     text-align: left !important;
 }
 
@@ -113,7 +113,7 @@ body.nav-md .container.body .left_col,
 }
 
 .nav.side-menu > li > a:hover {
-    background: #F3F1FF !important; 
+    background: #EFEAFF !important; 
     color: #6F5EF5 !important;    
     border-radius: 8px !important;
 }
@@ -122,18 +122,18 @@ body.nav-md .container.body .left_col,
 .nav.side-menu > li.active > a,
 body.nav-sm .nav.side-menu > li.active-sm > a,
 body.nav-sm .nav.side-menu > li.active > a {
-    background: #F5F3FF !important;
-    color: #8B7CF8 !important;
+    background: #F1EDFF !important;
+    color: #6D5EF7 !important;
     font-weight: 500 !important;
     border-radius: 8px !important;
     border-right: none !important;
-    border-left: 3px solid #8B7CF8 !important;
+    border-left: 3px solid #6D5EF7 !important;
     padding-left: 13px !important;
     display: block !important;
 }
 .nav.side-menu > li.active > a i,
 body.nav-sm .nav.side-menu > li.active-sm > a i {
-    color: #8B7CF8 !important;
+    color: #6D5EF7 !important;
 }
 
 .nav.side-menu > li.active {
@@ -146,8 +146,8 @@ body.nav-md .container.body .right_col,
 body.nav-sm .container.body .right_col {
     background: #FAFAFC !important;
     min-height: 100vh;
-    margin-left: 230px !important;       
-    width: calc(100% - 230px) !important; 
+    margin-left: 230px !important;
+    width: calc(100% - 230px) !important;
     position: relative !important;
     float: right !important;
 }
@@ -172,7 +172,7 @@ body.nav-sm .container.body .right_col {
 .header-title-left {
     font-size: 20px !important;
     font-weight: bold !important;
-    color: #544A7D !important;
+    color: #433D74 !important;
     margin: 0 !important;
     line-height: 60px !important;
 }
@@ -187,7 +187,7 @@ body.nav-sm .container.body .right_col {
 .header-profile-right .user-name {
     font-size: 14px !important;
     font-weight: 600 !important;
-    color: #5F5A78 !important;
+    color: #4B5563 !important;
 }
 
 .header-profile-right img {
@@ -195,14 +195,14 @@ body.nav-sm .container.body .right_col {
     height: 34px !important;
     border-radius: 50% !important;
     object-fit: cover;
-    border: 2px solid #7868F2 !important;
+    border: 2px solid #5B4FEA !important;
 }
 
 /* 5. [중단 서브 메뉴바] - 창 축소 시 글자 찌그러짐 및 강제 줄바꿈 방지 수정 */
 .sub_menu_nav {
     background: #ffffff !important;
-    border-bottom: 1px solid #EEEAFE !important;
-    box-shadow: 0 2px 4px rgba(141, 174, 255, 0.02) !important;
+    border-bottom: 1px solid #DDD6FE !important;
+    box-shadow: 0 2px 4px rgba(109, 94, 247, 0.02) !important;
     width: 100% !important;
     overflow-x: auto !important; /* 창이 너무 작아지면 메뉴바 내부에 가로 스크롤 생성 */
 }
@@ -225,7 +225,7 @@ body.nav-sm .container.body .right_col {
 
 .sub_menu_nav ul li a {
     text-decoration: none !important;
-    color: #8A86A8 !important;
+    color: #6B7280 !important;
     font-size: 14px !important;
     font-weight: 600 !important;
     padding: 11px 2px !important;
@@ -239,17 +239,17 @@ body.nav-sm .container.body .right_col {
 .sub_menu_nav ul li.active a,
 .sub_menu_nav ul li a.active,
 .sub_menu_nav ul li a:hover {
-    color: #7868F2 !important;
-    border-bottom: 2px solid #7868F2 !important;
+    color: #5B4FEA !important;
+    border-bottom: 2px solid #5B4FEA !important;
 }
 
 /* 6. [메인 캔버스 영역] */
 .main_white_canvas_container {
-    background: #ffffff !important; 
+    background: #ffffff !important;
     margin: 32px 24px !important;
     padding: 40px !important;
     border-radius: 14px !important;
-    box-shadow: 0 8px 24px rgba(141, 174, 255, 0.08) !important;
+    box-shadow: 0 8px 24px rgba(109, 94, 247, 0.08) !important;
     min-height: calc(100vh - 160px) !important;
 }
 
@@ -258,12 +258,12 @@ body.nav-sm .container.body .right_col {
    ★ 컴포넌트 디테일 보정 (보라색 포인트 톤 다운 & 테이블 선 정리)
    ========================================================================= */
 
-.badge-purple, 
+.badge-purple,
 .pagination .active a,
 .table td .project-label,
 .table td span[class*="label-"] {
-    background-color: #F5F3FF !important;
-    color: #8B7CF8 !important;
+    background-color: #F1EDFF !important;
+    color: #6D5EF7 !important;
     border-radius: 6px !important; 
     padding: 4px 10px !important;
     font-weight: 600 !important;
@@ -271,27 +271,27 @@ body.nav-sm .container.body .right_col {
 }
 
 .pagination li a {
-    color: #726F8F !important;
+    color: #6366A3 !important;
     border-radius: 6px !important;
     padding: 4px 10px !important;
     border: 1px solid #DDD6FE !important;
 }
 
-.table-responsive, 
+.table-responsive,
 .table-container {
-    border-radius: 10px !important; 
-    overflow: hidden !important;   
+    border-radius: 10px !important;
+    overflow: hidden !important;
     border: 1px solid #DDD6FE !important;
 }
 
 .table th {
-    background-color: #FCFBFF !important;
+    background-color: #FAFAFC !important;
     color: #4A5568 !important;
     border-bottom: 1px solid #DDD6FE !important;
 }
 
 .table td {
-    border-bottom: 1px solid #F5F3FF !important;
+    border-bottom: 1px solid #F1EDFF !important;
     color: #4A5568 !important;
 }
 
@@ -301,14 +301,14 @@ body.nav-sm .container.body .right_col {
    ========================================================================== */
 
 #nprogress .bar {
-    background: #7868F2 !important;
+    background: #5B4FEA !important;
 }
 #nprogress .peg {
-    box-shadow: 0 0 10px #7868F2, 0 0 5px #7868F2 !important;
+    box-shadow: 0 0 10px #5B4FEA, 0 0 5px #5B4FEA !important;
 }
 #nprogress .spinner-icon {
-    border-top-color: #7868F2 !important;
-    border-left-color: #7868F2 !important;
+    border-top-color: #5B4FEA !important;
+    border-left-color: #5B4FEA !important;
 }
 
 .top_nav .dropdown-menu,
@@ -338,5 +338,3 @@ body .main_container,
 .main_container {
     background: #FAFAFC !important;
 }
-
-

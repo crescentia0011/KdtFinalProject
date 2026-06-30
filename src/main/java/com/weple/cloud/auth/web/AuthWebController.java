@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.weple.cloud.auth.service.SignupRequestVO;
@@ -21,7 +22,11 @@ public class AuthWebController {
 
     // 로그인 화면 이동
     @GetMapping("/login")
-    public String loginPage() {
+    public String loginPage(@RequestParam(required = false) String companyCode, Model model, HttpSession session) {
+        session.removeAttribute("LOGIN_COMPANY_CODE");
+        model.addAttribute("companyCode", companyCode);
+        model.addAttribute("companyCodeLocked", false);
+        model.addAttribute("companyCodeRequired", true);
         return "weple/auth/login";
     }
 
@@ -30,6 +35,8 @@ public class AuthWebController {
     public String companyLoginPage(@PathVariable String companyCode, Model model, HttpSession session) {
         session.setAttribute("LOGIN_COMPANY_CODE", companyCode);
         model.addAttribute("companyCode", companyCode);
+        model.addAttribute("companyCodeLocked", true);
+        model.addAttribute("companyCodeRequired", true);
         return "weple/auth/login";
     }
 

@@ -13,5 +13,11 @@ public interface TestCaseService {
 	public List<TestCasePriorityVO>findTestCasePriorities(Long cId);
 
 	public List<TaskParentVO> findTestCaseTaskList(Long pId);
+	
+	public int insetTestCaseService(TestCaseVO TestCaseVO);
+	
+	public int getTestCaseCount(long pId, String searchKeyword);
+
+	public List<TestCaseVO> findTestCaseList(long pId, String searchKeyword, int offset, int pageSize);
 
 }

@@ -43,7 +43,7 @@
                         <td th:text="${(currentPage - 1) * 10 + stat.count}"></td>
                         <td>
                             <a class="project-link"
-                               th:href="@{/project/worklog(projectId=${project.projectId})}"
+                               th:href="@{/project/outline(projectId=${project.projectId})}"
                                th:text="${project.projectTitle}">
                             </a>
                         </td>

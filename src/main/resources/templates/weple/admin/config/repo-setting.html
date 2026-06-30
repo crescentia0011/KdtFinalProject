@@ -1,14 +1,160 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+    <title>WEPLE - 저장소 설정</title>
 </head>
 <body>
+<section>
+    <link rel="stylesheet" th:href="@{/css/admin/repo-setting.css}">
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+    <div class="admin-repository-setting-page">
+        <h1 class="admin-repository-setting-title">설정</h1>
 
+        <section class="admin-repository-setting-panel" aria-labelledby="repositoryRuleTitle">
+            <form id="repositoryRuleForm"
+                  class="admin-repository-rule-form"
+                  method="post"
+                  th:action="@{/settingDetail}"
+                  novalidate>
+                <input type="hidden"
+                       th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+
+                <div class="admin-repository-setting-heading">
+                    <div>
+                        <h2 id="repositoryRuleTitle">저장소</h2>
+                        <p>커밋 메시지에서 일감 참조 키워드를 읽어 일감 연결 기준으로 사용합니다.</p>
+                    </div>
+                </div>
+
+                <p class="admin-repository-rule-feedback is-success"
+                   th:if="${settingSuccess != null}"
+                   th:text="${settingSuccess}"></p>
+                <p class="admin-repository-rule-feedback is-error"
+                   th:if="${settingError != null}"
+                   th:text="${settingError}"></p>
+
+                <label class="admin-repository-toggle">
+                    <input type="checkbox"
+                           name="commitAutoYn"
+                           value="Y"
+                           th:checked="${repositorySetting.commitAutoYn == 'Y'}">
+                    <span>
+                        <strong>커밋을 자동으로 가져오기</strong>
+                        <small>등록된 저장소의 커밋 내역을 자동 수집 대상으로 봅니다.</small>
+                    </span>
+                </label>
+
+                <label class="admin-repository-toggle">
+                    <input id="repositoryTextFormatYn"
+                           type="checkbox"
+                           name="commitTextYn"
+                           value="Y"
+                           th:checked="${repositorySetting.commitTextYn == 'Y'}">
+                    <span>
+                        <strong>커밋 메시지에 텍스트 형식 적용</strong>
+                        <small>참조 키워드 뒤에 일감 코드가 있는 커밋만 일감 연결 대상으로 봅니다.</small>
+                    </span>
+                </label>
+
+                <label class="admin-repository-keyword-field" for="repositoryReferenceKeywords">
+                    <span>일감 참조에 사용할 키워드</span>
+                    <small>쉼표로 여러 값을 입력할 수 있습니다. 예: refs, fixes, related</small>
+                    <input id="repositoryReferenceKeywords"
+                           type="text"
+                           name="taskKeyword"
+                           th:value="${repositorySetting.taskKeyword}"
+                           placeholder="refs,fixes,related"
+                           autocomplete="off">
+                </label>
+
+                <p class="admin-repository-rule-feedback" data-repository-rule-feedback hidden></p>
+
+                <div class="admin-repository-setting-actions">
+                    <button class="admin-repository-save-button" type="submit">저장</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        (function () {
+            var form = document.getElementById('repositoryRuleForm');
+            var textFormat = document.getElementById('repositoryTextFormatYn');
+            var keywords = document.getElementById('repositoryReferenceKeywords');
+            var feedback = document.querySelector('[data-repository-rule-feedback]');
+            var initialFormValue = '';
+            var isSubmitting = false;
+
+            // 쉼표 입력값을 실제 키워드 목록으로 정리함
+            function normalizeKeywords(value) {
+                return value.split(',')
+                    .map(function (keyword) { return keyword.trim(); })
+                    .filter(Boolean);
+            }
+
+            // 텍스트 형식 사용 여부에 따라 키워드 입력 상태 표시함
+            function syncKeywordState() {
+                var enabled = textFormat.checked;
+                keywords.readOnly = !enabled;
+                keywords.required = enabled;
+                keywords.closest('.admin-repository-keyword-field').classList.toggle('is-disabled', !enabled);
+                feedback.hidden = true;
+            }
+
+            // 현재 입력값을 문자열로 만들어 변경 여부 비교에 사용함
+            function serializeForm() {
+                return [
+                    textFormat.checked ? 'Y' : 'N',
+                    document.querySelector('[name="commitAutoYn"]').checked ? 'Y' : 'N',
+                    keywords.value
+                ].join('|');
+            }
+
+            // 저장하지 않은 변경사항 존재 여부 확인함
+            function hasUnsavedChanges() {
+                return serializeForm() !== initialFormValue;
+            }
+
+            // 내부 링크 이동 전에 저장 여부를 한 번 더 확인함
+            function confirmLeaveIfChanged(event) {
+                var link = event.target.closest('a[href]');
+                if (!link || link.target === '_blank' || link.hasAttribute('download')) {
+                    return;
+                }
+                if (hasUnsavedChanges()
+                        && !window.confirm('저장하지 않은 설정이 있습니다. 저장하지 않고 이동하시겠습니까?')) {
+                    event.preventDefault();
+                }
+            }
+
+            textFormat.addEventListener('change', syncKeywordState);
+            form.addEventListener('submit', function (event) {
+                // 텍스트 형식 적용 시 참조 키워드 최소 1개 필요함
+                if (textFormat.checked && normalizeKeywords(keywords.value).length === 0) {
+                    event.preventDefault();
+                    feedback.textContent = '텍스트 형식을 적용하려면 참조 키워드를 최소 1개 입력해주세요.';
+                    feedback.className = 'admin-repository-rule-feedback is-error';
+                    feedback.hidden = false;
+                    keywords.focus();
+                    return;
+                }
+                isSubmitting = true;
+            });
+            window.addEventListener('beforeunload', function (event) {
+                if (!isSubmitting && hasUnsavedChanges()) {
+                    event.preventDefault();
+                    event.returnValue = '';
+                }
+            });
+            document.addEventListener('click', confirmLeaveIfChanged);
+
+            syncKeywordState();
+            initialFormValue = serializeForm();
+        })();
+    </script>
+</section>
 </body>
 </html>

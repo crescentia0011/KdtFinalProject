@@ -53,24 +53,57 @@
 	
 
 	<script th:inline="javascript">
-		document.addEventListener("DOMContentLoaded", function() {
+	    document.addEventListener("DOMContentLoaded", function() {
 	        const projectId = /*[[${projectId}]]*/ null;
 	        
-	        // 타임리프로부터 프로젝트 시작일, 종료일 주입 (포맷: YYYY-MM-DD)
-	        const projectStart = /*[[${projectStart}]]*/ null;
-	        const projectFinish = /*[[${projectFinish}]]*/ null;
+	        // 1. 데이터 가져오기
+	        let rawStart = /*[[${projectStart}]]*/ null;
+	        let rawFinish = /*[[${projectFinish}]]*/ null;
 	        
+	        // 2. HTML date 포맷(YYYY-MM-DD)으로 변환하는 헬퍼 함수
+	        function formatDate(rawDate) {
+	            if (!rawDate) return null;
+	            try {
+	                // 만약 자바 내장 객체나 ISO 문자열 형태로 넘어와도 10글자(YYYY-MM-DD)만 컷
+	                const d = new Date(rawDate);
+	                if (isNaN(d.getTime())) {
+	                    // Date 객체 변환 실패 시 문자열 패턴 매칭 시도
+	                    const match = rawDate.match(/\d{4}-\d{2}-\d{2}/);
+	                    return match ? match[0] : null;
+	                }
+	                return d.toISOString().split('T')[0];
+	            } catch (e) {
+	                console.error("날짜 파싱 에러:", e);
+	                return null;
+	            }
+	        }
+	
+	        const projectStart = formatDate(rawStart);
+	        const projectFinish = formatDate(rawFinish);
+	        
+	        console.log("포맷팅된 시작일:", projectStart);
+	        console.log("포맷팅된 종료일:", projectFinish);
+	
 	        const dateInput = document.getElementById('finishDateInput');
 	        
 	        if (dateInput) {
-	            // 최소 날짜 제한 (프로젝트 시작일)
-	            if (projectStart) {
-	                dateInput.min = projectStart;
-	            }
-	            // 최대 날짜 제한 (프로젝트 종료일)
-	            if (projectFinish) {
-	                dateInput.max = projectFinish;
-	            }
+	            // 최소/최대 날짜 반영
+	            if (projectStart) dateInput.min = projectStart;
+	            if (projectFinish) dateInput.max = projectFinish;
+	            
+	            // 3. 키보드로 타이핑해서 뚫는 꼼수 원천 차단 (Validation 추가)
+	            dateInput.addEventListener('change', function() {
+	                const val = this.value;
+	                if (!val) return;
+	                
+	                if (projectStart && val < projectStart) {
+	                    alert("프로젝트 시작일(" + projectStart + ") 이전 날짜는 선택할 수 없습니다.");
+	                    this.value = projectStart;
+	                } else if (projectFinish && val > projectFinish) {
+	                    alert("프로젝트 종료일(" + projectFinish + ") 이후 날짜는 선택할 수 없습니다.");
+	                    this.value = projectFinish;
+	                }
+	            });
 	        }
 	    });
 	</script>

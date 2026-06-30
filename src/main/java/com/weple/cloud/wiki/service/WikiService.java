@@ -28,6 +28,9 @@ public interface WikiService {
     int                  addRelation(WikiRelationVO vo);
     int                  removeRelation(String wikiRelationId);
 
+    // 유저 프로필 이미지 조회
+    String               getUserProfileImg(String userCode);
+
     // 해시태그 자동완성 검색
     List<WikiRelationVO> searchByHashtag(Long projectId, String keyword, String type);
 }

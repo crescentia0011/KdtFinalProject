@@ -13,7 +13,7 @@
 .user-management-panel {
     min-height: 620px;
     padding: 44px 20px 28px;
-    border: 1px solid #e1e7f0;
+    border: 1px solid #DDD6FE;
     border-radius: 8px;
     background: #ffffff;
 }
@@ -30,15 +30,15 @@
 }
 
 .user-management-message-success {
-    border: 1px solid #a7e3c0;
-    background: #edf9f1;
-    color: #18733e;
+    border: 1px solid #BBF7D0;
+    background: #F0FDF4;
+    color: #22C55E;
 }
 
 .user-management-message-error {
-    border: 1px solid #f4b8b8;
-    background: #fff1f1;
-    color: #b42318;
+    border: 1px solid #FECACA;
+    background: #FEF2F2;
+    color: #EF4444;
 }
 
 .user-management-toolbar {
@@ -56,7 +56,7 @@
     align-items: center;
     gap: 8px;
     padding: 0 10px;
-    border: 1px solid #d7e0ee;
+    border: 1px solid #DDD6FE;
     border-radius: 5px;
     color: #9aa8ba;
 }
@@ -83,14 +83,14 @@
     align-items: center;
     gap: 7px;
     padding: 7px 10px;
-    color: #2675bb;
+    color: #6D5EF7;
     font-size: 12px;
     font-weight: 700;
     text-decoration: none;
 }
 
 .user-table-wrap {
-    border-top: 1px solid #dfe5ee;
+    border-top: 1px solid #DDD6FE;
 }
 
 .user-table {
@@ -103,7 +103,7 @@
 .user-table td {
     height: 44px;
     padding: 8px 14px;
-    border-bottom: 1px solid #e5eaf1;
+    border-bottom: 1px solid #DDD6FE;
     color: #4b5563;
     font-size: 12px;
     text-align: left;
@@ -135,7 +135,7 @@
 }
 
 .user-table a {
-    color: #2675bb;
+    color: #6D5EF7;
     font-weight: 600;
     text-decoration: none;
 }
@@ -196,7 +196,7 @@
 }
 
 .user-status-switch input:checked + span {
-    background: #3f76f6;
+    background: #6D5EF7;
 }
 
 .user-status-switch input:checked + span::after {
@@ -226,7 +226,7 @@
     display: block;
     min-width: 86px;
     transform: translateY(-50%);
-    color: #4d7df4;
+    color: #6D5EF7;
     font-size: 11px;
     font-weight: 600;
     text-align: left;
@@ -234,7 +234,7 @@
 }
 
 .user-row-updated td {
-    background: #eef5ff;
+    background: #F1EDFF;
     transition: background-color .25s ease;
 }
 
@@ -245,9 +245,9 @@
     min-width: 42px;
     height: 28px;
     padding: 0 10px;
-    border: 1px solid #d7e0ee;
+    border: 1px solid #DDD6FE;
     border-radius: 5px;
-    color: #2675bb;
+    color: #6D5EF7;
     font-size: 12px;
     font-weight: 700;
     text-decoration: none;
@@ -255,7 +255,7 @@
 
 .user-edit-button:hover {
     border-color: #b8c7dd;
-    background: #f8fbff;
+    background: #FAFAFC;
 }
 
 .user-pagination {
@@ -273,7 +273,7 @@
     min-width: 28px;
     height: 30px;
     padding: 0 5px;
-    color: #4d7df4;
+    color: #6D5EF7;
     font-size: 12px;
     font-weight: 500;
     text-decoration: none;
@@ -282,7 +282,7 @@
 .user-page-button.active {
     min-width: 30px;
     border-radius: 8px;
-    background: #4d7df4;
+    background: #6D5EF7;
     color: #ffffff;
 }
 
@@ -292,7 +292,7 @@
 }
 
 .user-page-button:hover:not(.active):not(.disabled) {
-    color: #2563eb;
+    color: #5B4FEA;
 }
 
 .user-register-panel {
@@ -307,7 +307,7 @@
     align-items: center;
     gap: 7px;
     margin: 0 0 18px;
-    color: #1592c9;
+    color: #6D5EF7;
     font-size: 15px;
     font-weight: 700;
 }
@@ -323,15 +323,15 @@
 }
 
 .user-register-message.success {
-    border: 1px solid #bfdbfe;
-    background: #eff6ff;
-    color: #2563eb;
+    border: 1px solid #DDD6FE;
+    background: #F1EDFF;
+    color: #5B4FEA;
 }
 
 .user-register-message.error {
-    border: 1px solid #fecaca;
-    background: #fef2f2;
-    color: #dc2626;
+    border: 1px solid #FECACA;
+    background: #FEF2F2;
+    color: #EF4444;
 }
 
 .user-form-fields {
@@ -350,23 +350,30 @@
 }
 
 .user-form-field em {
-    color: #ef4444;
+    color: #EF4444;
     font-style: normal;
 }
 
-.user-form-field input {
+.user-form-field input,
+.user-form-field select {
     width: 100%;
     height: 34px;
     padding: 0 12px;
-    border: 1px solid #d7e0ee;
+    border: 1px solid #DDD6FE;
     border-radius: 5px;
     color: #374151;
     font-size: 12px;
     outline: none;
 }
 
-.user-form-field input:focus {
-    border-color: #4d7df4;
+.user-form-field select {
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.user-form-field input:focus,
+.user-form-field select:focus {
+    border-color: #6D5EF7;
     box-shadow: 0 0 0 2px rgba(77, 125, 244, .12);
 }
 
@@ -389,12 +396,12 @@
 .user-admin-check input {
     width: 14px;
     height: 14px;
-    accent-color: #3f76f6;
+    accent-color: #6D5EF7;
 }
 
 .user-notice-box {
     padding: 18px 18px 14px;
-    border: 1px solid #d7e0ee;
+    border: 1px solid #DDD6FE;
     background: #ffffff;
 }
 
@@ -435,7 +442,7 @@
 }
 
 .user-notice-options input {
-    accent-color: #3f76f6;
+    accent-color: #6D5EF7;
 }
 
 .user-notice-options span {
@@ -478,16 +485,26 @@
 }
 
 .user-cancel-button {
-    border: 1px solid #d7e0ee;
+    border: 1px solid #DDD6FE;
     background: #ffffff;
     color: #4b5563;
 }
 
 .user-submit-button {
-    border: 1px solid #168fd0;
-    background: #168fd0;
+    border: 1px solid #6D5EF7;
+    background: #6D5EF7;
     color: #ffffff;
     cursor: pointer;
+}
+
+.user-submit-button:hover {
+    border-color: #5B4FEA;
+    background: #5B4FEA;
+}
+
+.user-submit-button:active {
+    border-color: #5747E6;
+    background: #5747E6;
 }
 
 .user-submit-button-disabled,
@@ -500,7 +517,7 @@
 
 .user-form-field input[readonly] {
     border-color: #cbd5e1;
-    background: #eef2f7;
+    background: #F1EDFF;
     color: #6b7280;
     cursor: not-allowed;
 }
@@ -526,7 +543,7 @@
 
 .user-detail-card,
 .user-detail-section {
-    border: 1px solid #e1e7f0;
+    border: 1px solid #DDD6FE;
     border-radius: 8px;
     background: #ffffff;
 }
@@ -550,8 +567,8 @@
     justify-content: center;
     overflow: hidden;
     border-radius: 50%;
-    background: #eaf2fb;
-    color: #35516d;
+    background: #F1EDFF;
+    color: #6D5EF7;
     font-size: 34px;
 }
 
@@ -584,7 +601,7 @@
     min-height: 66px;
     padding: 14px 16px;
     border-radius: 6px;
-    background: #f8fafc;
+    background: #FAFAFC;
 }
 
 .user-detail-info-box-wide {
@@ -606,11 +623,11 @@
 }
 
 .user-detail-status-active {
-    color: #16a34a !important;
+    color: #22C55E !important;
 }
 
 .user-detail-status-inactive {
-    color: #dc2626 !important;
+    color: #EF4444 !important;
 }
 
 .user-detail-section {
@@ -634,8 +651,8 @@
     min-height: 34px;
     padding: 8px 14px;
     border-radius: 4px;
-    background: #fbfcfe;
-    color: #16a34a;
+    background: #FAFAFC;
+    color: #22C55E;
     font-size: 13px;
     font-weight: 700;
 }
@@ -652,7 +669,7 @@
 }
 
 .user-project-title {
-    color: #16a34a;
+    color: #22C55E;
 }
 
 .user-project-role-label {

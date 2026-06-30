@@ -12,11 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.weple.cloud.file.FileDownloadDTO;
 import com.weple.cloud.file.FileInfoVO;
 import com.weple.cloud.file.FileVO;
-import com.weple.cloud.file.FileDownloadDTO;
 import com.weple.cloud.file.mapper.FileMapper;
 import com.weple.cloud.milestone.mapper.MilestoneMapper;
+import com.weple.cloud.notification.service.AlarmType;
+import com.weple.cloud.notification.service.NotificationService;
 import com.weple.cloud.task.mapper.TaskMapper;
 import com.weple.cloud.task.service.TaskCommentVO;
 import com.weple.cloud.task.service.TaskHistoryDTO;
@@ -42,6 +44,7 @@ public class TaskServiceImpl implements TaskService {
 	private final FileMapper fileMapper;
 	private final TaskMapper taskMapper;
 	private final MilestoneMapper milestoneMapper;
+	private final NotificationService notificationService;
 	
 	@Value("${file.upload.task-dir}")
     private String uploadDir;
@@ -90,7 +93,18 @@ public class TaskServiceImpl implements TaskService {
         // 일감 DB 등록
         int result = taskMapper.insertTask(taskVO);
         String currentTaskId = taskVO.getTaskId();
-
+        
+        //알림-은지
+        if (result > 0 && taskVO.getTaskManager() != null && !taskVO.getTaskManager().isBlank()) {
+            notificationService.create(
+                taskVO.getTaskManager(),
+                AlarmType.TAG_TASK_ASSIGN,
+                "새로운 일감 [" + taskVO.getTaskTitle() + "]이 본인에게 배정되었습니다.",
+                AlarmType.TARGET_TASK,
+                taskVO.getTaskId()
+            );
+        }
+        
         // 파일 체크
         if (files == null || files.isEmpty()) {
             return result;
@@ -300,6 +314,7 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public List<TaskHistoryDTO> taskUpdateHistory(String tId) {
 	    List<TaskUpdateHistoryVO> list = taskMapper.taskUpdateHistory(tId);
+	    System.out.println("서비스쪽 : " +list);
 
 	    Map<Long, TaskHistoryDTO> hisMap = new LinkedHashMap<>();
 
@@ -310,6 +325,7 @@ public class TaskServiceImpl implements TaskService {
 	        if (historyDTO == null) {
 	            historyDTO = new TaskHistoryDTO();
 	            historyDTO.setHistoryId(value.getHistoryId());
+	            historyDTO.setActionType(value.getActionType());
 	            historyDTO.setUserName(value.getUserName());
 	            historyDTO.setActionAt(value.getActionAt());
 	            historyDTO.setDetails(new ArrayList<>());

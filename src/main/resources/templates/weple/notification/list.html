@@ -1,14 +1,102 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
-<head>
-    <title>WEPLE - 공통 관리</title>
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org/"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+<head>
+    <meta charset="UTF-8">
+    <title>WEPLE - 알림</title>
+    <link rel="stylesheet" th:href="@{/css/notification/notification.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
+</head>
+
+<body>
+<section class="alarm-page" th:attr="data-status=${status}">
+
+    <div class="alarm-toolbar-top">
+        <h3 class="alarm-page-title">
+            알림
+            <span class="alarm-total-count" id="alarmTotalCount" th:text="${totalCount} + '건'">0건</span>
+        </h3>
+        <button type="button" id="readAllBtn" class="btn-alarm btn-alarm-readall">모두 읽음</button>
+    </div>
+
+    <div class="alarm-card-wrap">
+
+        <div class="alarm-filter-tabs">
+            <a th:href="@{/notification/list(status='all')}"
+               class="alarm-filter-tab" th:classappend="${status == 'all'} ? 'active'">전체</a>
+            <a th:href="@{/notification/list(status='read')}"
+               class="alarm-filter-tab" th:classappend="${status == 'read'} ? 'active'">읽음</a>
+            <a th:href="@{/notification/list(status='unread')}"
+               class="alarm-filter-tab" th:classappend="${status == 'unread'} ? 'active'">읽지 않음</a>
+        </div>
+
+        <div th:if="${alarmList == null or alarmList.isEmpty()}" class="alarm-empty-message">
+            조회된 알림이 없습니다.
+        </div>
+
+        <div class="alarm-list" th:if="${alarmList != null and !alarmList.isEmpty()}">
+
+            <div class="alarm-row" th:each="alarm : ${alarmList}"
+                 th:classappend="${alarm.checkYn == 'N'} ? 'alarm-row-unread'"
+                 th:attr="data-alarm-id=${alarm.alarmId}, data-go-url=@{/notification/{id}/go(id=${alarm.alarmId})}">
+
+                <div class="alarm-row-main">
+                    <span class="alarm-tag"
+                          th:classappend="
+                              ${alarm.alarmTag == '일감 배정'} ? 'tag-assign' :
+                              (${alarm.alarmTag == '상태 변경'} ? 'tag-status' :
+                              (${alarm.alarmTag == '댓글 등록'} ? 'tag-comment' :
+                              (${alarm.alarmTag == '첨부파일 등록'} ? 'tag-file' :
+                              (${alarm.alarmTag == '프로젝트 초대'} ? 'tag-invite' : 'tag-default'))))"
+                          th:text="${alarm.alarmTag}">알림 유형</span>
+
+                    <div class="alarm-row-texts">
+                        <div class="alarm-content" th:utext="${alarm.alarmContent}">알림 내용</div>
+                        <div class="alarm-context" th:text="${alarm.contextTitle}">프로젝트명</div>
+                    </div>
+                </div>
+
+                <div class="alarm-row-side">
+                    <span class="alarm-time" th:text="${alarm.relativeTime}">5분 전</span>
+                    <span class="alarm-status-label" th:text="${alarm.checkYn == 'N'} ? '읽지 않음' : '읽음'">읽음</span>
+                    <label class="alarm-toggle">
+                        <input type="checkbox" class="alarm-toggle-input"
+                               th:checked="${alarm.checkYn == 'N'}"
+                               th:attr="data-alarm-id=${alarm.alarmId}">
+                        <span class="alarm-toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 페이징 -->
+        <div class="alarm-pagination-wrap" th:if="${totalPages > 1}">
+            <a th:href="${currentPage > 1} ? @{/notification/list(page=${currentPage - 1}, status=${status})} : '#'"
+               th:classappend="${currentPage <= 1} ? 'disabled'"
+               class="alarm-page-btn">&lt; 이전</a>
+
+            <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a th:href="@{/notification/list(page=${i}, status=${status})}"
+                   th:text="${i}"
+                   th:classappend="${i == currentPage} ? 'active'"
+                   class="alarm-page-btn">1</a>
+            </th:block>
+
+            <a th:href="${currentPage < totalPages} ? @{/notification/list(page=${currentPage + 1}, status=${status})} : '#'"
+               th:classappend="${currentPage >= totalPages} ? 'disabled'"
+               class="alarm-page-btn">다음 &gt;</a>
+        </div>
+
+    </div>
+
+    <script th:src="@{/js/notification/notification-list.js}"></script>
+
+</section>
 
 </body>
 </html>

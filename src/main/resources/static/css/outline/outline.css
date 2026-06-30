@@ -1,0 +1,412 @@
+@charset "UTF-8";
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.outline-page {
+    padding: 35px 38px 43px;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+/* 페이지 최상단 헤더 */
+.outline-page-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.outline-page-title {
+    margin: 0;
+    color: #1f2937;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+/* 상단 상태 배지 */
+.outline-badge {
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.badge-new {
+    background-color: #ffeef0;
+    color: #ff4f6b;
+}
+
+.badge-process {
+    background-color: #e8f0fe;
+    color: #1a73e8;
+}
+
+.badge-success {
+    background-color: #e6f4ea;
+    color: #137333;
+}
+
+/* 컨테이너 및 헤더 */
+.outline-container {
+    margin-bottom: 40px;
+}
+
+/* [개선] 슬림하고 깔끔해진 진척도 컨테이너 */
+.outline-progress-container {
+    background-color: #ffffff;
+    border: 1px solid #eaecf0;
+    border-radius: 12px;
+    padding: 22px 26px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.01);
+    margin-bottom: 25px;
+}
+
+.outline-progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.outline-progress-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #344054;
+}
+
+.outline-progress-percent {
+    font-size: 22px;
+    font-weight: 700;
+    color: #4d7df4;
+}
+
+.outline-progress-bar-wrap {
+    width: 100%;
+    height: 10px;
+    background-color: #f2f4f7;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.outline-progress-bar {
+    height: 100%;
+    background-color: #4d7df4;
+    border-radius: 6px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 대시보드 통합 레이아웃 (좌우 배치) */
+.outline-dashboard-wrapper {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 35px;
+    align-items: stretch;
+}
+
+.dashboard-card-title {
+    font-size: 1.5rem;
+    color: #344054;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+}
+
+/* [왼쪽] 통합형 시간 추적 카드 */
+.time-card-combined {
+    flex: 1;
+    max-width: 400px;
+    background-color: #ffffff;
+    border: 1px solid #eaecf0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.time-info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 12px;
+}
+
+.info-estimated { border-left: 5px solid #36b37e; }
+.info-spent { border-left: 5px solid #0052cc; }
+
+.time-label {
+    font-size: 1.4rem;
+    color: #667085;
+    font-weight: 500;
+}
+
+.time-value {
+    font-size: 1.4rem;
+    color: #1d2939;
+    font-weight: 700;
+}
+
+.time-card-divider {
+    height: 1px;
+    background-color: #f2f4f7;
+    margin: 18px 0;
+}
+
+/* [오른쪽] 드롭다운 통계 카드 */
+.stat-dropdown-container {
+    flex: 2;
+    background: #ffffff;
+    border: 1px solid #eaecf0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f2f4f7;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
+}
+
+.stat-dropdown-header .dashboard-card-title {
+    margin: 0;
+}
+
+.stat-select-box {
+    padding: 6px 12px;
+    font-size: 1.4rem;
+    color: #344054;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    background-color: #ffffff;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+}
+
+.stat-select-box:focus {
+    border-color: #4d7df4;
+}
+
+.stat-toggle-content {
+    display: none;
+}
+
+.stat-toggle-content.active {
+    display: block;
+}
+
+.stat-list-box {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.stat-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-item-row.hidden-stat-row {
+    display: none !important;
+}
+
+.stat-more-btn-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px dashed #eaecf0;
+}
+
+.stat-more-btn {
+    background: none;
+    border: none;
+    color: #4d7df4;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-more-btn:hover {
+    text-decoration: underline;
+    color: #1a73e8;
+}
+
+.stat-name {
+    color: #475467;
+    font-size: 1.3rem;
+    font-weight: 500;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-mini-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.stat-mini-bar-wrap {
+    width: 100px;
+    height: 8px;
+    background-color: #f2f4f7;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.stat-mini-bar {
+    height: 100%;
+    background-color: #12b76a;
+    border-radius: 5px;
+}
+
+.stat-count-text {
+    font-family: monospace;
+    font-size: 1.3rem;
+    color: #667085;
+    font-weight: 600;
+    min-width: 50px;
+    text-align: right;
+}
+
+.stat-empty-text {
+    font-size: 0.95rem;
+    color: #98a2b3;
+    text-align: center;
+    padding: 25px 0;
+}
+
+/* 하단 구성원 섹션 */
+.project-members-section {
+    margin-top: 40px;
+}
+
+.members-header {
+    margin-bottom: 16px;
+}
+
+/* 총원 표시 배지를 위한 정렬 래퍼 */
+.members-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.members-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+/* [추가] 총인원 직관적 스코어 배지 */
+.members-total-badge {
+    background-color: #4d7df4;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    line-height: 1;
+}
+
+.member-list-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+}
+
+.member-item-header-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 30px;
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+    color: #374151;
+    font-size: 15px;
+}
+
+.member-item-row {
+    display: flex;
+    align-items: center;
+    padding: 18px 30px;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.15s ease;
+}
+
+.member-item-row:hover {
+    background-color: #f9fafb;
+}
+
+.member-item-row:last-child {
+    border-bottom: none;
+}
+
+.member-col {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    color: #4b5563;
+}
+
+.col-group-name { width: 20%; font-weight: 600; }
+.col-count { width: 15%; color: #4b5563; font-weight: 500;}
+.col-names { width: 65%; color: #111827; line-height: 1.5; }
+
+.group-tag {
+    background-color: #f0f4ff;
+    color: #4d7df4;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.member-empty-row {
+    font-size: 15px;
+    color: #98a2b3;
+    text-align: center;
+    padding: 40px 0;
+}
+
+/* 반응형 모드 설정 */
+@media (max-width: 1024px) {
+    .outline-dashboard-wrapper {
+        flex-direction: column;
+    }
+    .time-card-combined {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .member-list-card {
+        overflow-x: auto;
+    }
+    .member-item-row, .member-item-header-row {
+        min-width: 700px;
+    }
+}

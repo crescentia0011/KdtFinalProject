@@ -16,28 +16,30 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 	@Override
 	public void insertHistory(
 			String taskId,
-			String changedBy,
-			String actionType,
-			String oldTitle,
-			String newTitle,
-			String oldTypeName,
+            String changedBy,
+            String actionType,
+            String oldTitle,         
+            String newTitle,
+            String oldTaskDescribe,  
+            String newTaskDescribe, 
+            String oldTypeName,      
             String newTypeName,
-			String oldStatus,
-			String newStatus,
-			String oldManager,
-			String newManager,
-			String oldPriority,
-			String newPriority,
-			String oldStartDate,
-			String newStartDate,
-			String oldFinishDate,
-			String newFinishDate,
-			String oldEstimatedTime,
-			String newEstimatedTime,
-	        String oldProgress,
-	        String newProgress,
-	        String oldParentTask,
-	        String newParentTask
+            String oldStatus,        
+            String newStatus,
+            String oldManager,       
+            String newManager,
+            String oldPriority,      
+            String newPriority,
+            String oldStartDate,     
+            String newStartDate,
+            String oldFinishDate,    
+            String newFinishDate,
+            String oldEstimatedTime, 
+            String newEstimatedTime,
+            String oldProgress,      
+            String newProgress,
+            String oldParentTask,    
+            String newParentTask
 			) {
 		
 		// task_history 1건 생성
@@ -49,6 +51,7 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 	    StringBuilder newSummary = new StringBuilder();
 
 	    appendIfChanged(oldSummary, newSummary, "제목",     oldTitle,         newTitle);
+	    appendIfChanged(oldSummary, newSummary, "설명",     oldTaskDescribe,  newTaskDescribe);
 	    appendIfChanged(oldSummary, newSummary, "유형",     oldTypeName,      newTypeName);
 	    appendIfChanged(oldSummary, newSummary, "상태",     oldStatus,        newStatus);
 	    appendIfChanged(oldSummary, newSummary, "담당자",   oldManager,       newManager);
@@ -61,14 +64,29 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 
 	    // 변경사항이 있을 때만 detail 1건 저장
 	    if (oldSummary.length() > 0 || newSummary.length() > 0) {
+	    	
+	    	String finalOldValue = oldSummary.toString();
+	        String finalNewValue = newSummary.toString();
+
+	        // 💡 오라클 VARCHAR2(255) 칼럼 제한(255자)을 넘지 않도록 안전하게 250자로 커팅
+	        if (finalOldValue.length() > 250) {
+	            finalOldValue = finalOldValue.substring(0, 247) + "...";
+	        }
+	        if (finalNewValue.length() > 250) {
+	            finalNewValue = finalNewValue.substring(0, 247) + "...";
+	        }
+
+	        // 💡 안전하게 가공된 문자열을 파라미터로 전달
 	        taskHistoryMapper.insertTaskHistoryDetail(
 	            historyId,
 	            "summary",
-	            oldSummary.toString(),
-	            newSummary.toString()
+	            finalOldValue,
+	            finalNewValue
 	        );
 	    }
 	}
+	
+	
 
 	// 변경된 필드만 요약 문자열에 추가
 	private void appendIfChanged(StringBuilder oldSb, StringBuilder newSb,
@@ -82,4 +100,6 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 	        newSb.append(label).append(":").append(n);
 	    }
 }
+	
+	
 }

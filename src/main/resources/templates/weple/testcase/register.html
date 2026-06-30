@@ -9,7 +9,7 @@
 <body>
 
     <section class="tc-form-section">
-    <form th:action="@{/project/testcase/register}" method="post">
+    <form th:action="@{/project/testcase/register(projectId=${projectId})}" method="post">
         <div class="tc-form-container">
             <div class="form-group">
                 <label>테스트 케이스 제목 입력 <span class="required">*</span></label>
@@ -63,7 +63,7 @@
                     <select class="form-control" name="priority" required>
                         <option value="" disabled selected hidden>우선순위 선택</option>
                         <option th:each="priority : ${priorityList}"
-                                th:value="${priority.priorityId}"
+                                th:value="${priority.priorityName}"
                                 th:text="${priority.priorityName}"></option>
                     </select>
                 </div>

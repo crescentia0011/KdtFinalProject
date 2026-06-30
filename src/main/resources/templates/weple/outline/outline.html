@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head>
+    <title>WEPLE - 프로젝트 개요</title>
+    <link rel="stylesheet" th:href="@{/css/outline/outline.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<section>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        
+        // =======================================================
+        // 1. 드롭다운 셀렉트 박스 전환 제어 및 펼침 리셋 로직
+        // =======================================================
+        const selectEl = document.getElementById("statSectionSelect");
+        
+        if (selectEl) {
+            selectEl.addEventListener("change", function () {
+                const selectedValue = this.value;
+                
+                document.querySelectorAll(".stat-toggle-content").forEach(function (content) {
+                    content.classList.remove("active");
+                    
+                    const openBtn = content.querySelector(".stat-more-btn");
+                    if (openBtn && openBtn.textContent.includes("접기")) {
+                        openBtn.click(); 
+                    }
+                });
+                
+                const targetContent = document.getElementById("stat-" + selectedValue);
+                if (targetContent) {
+                    targetContent.classList.add("active");
+                }
+            });
+        }
+    
+        // =======================================================
+        // 2. 무한 확장 대응: 5개 초과 시 '더보기' 버튼 동적 생성 로직
+        // =======================================================
+        document.querySelectorAll(".stat-toggle-content").forEach(function (content) {
+            const rows = content.querySelectorAll(".stat-item-row");
+            
+            if (rows.length > 5) {
+                for (let i = 5; i < rows.length; i++) {
+                    rows[i].classList.add("hidden-stat-row");
+                }
+    
+                const btnWrap = document.createElement("div");
+                btnWrap.className = "stat-more-btn-wrap";
+                
+                const btn = document.createElement("button");
+                btn.className = "stat-more-btn";
+                btn.type = "button";
+                
+                const isManagerTab = (content.id === "stat-manager");
+                const hiddenCount = rows.length - 5;
+                btn.textContent = isManagerTab ? `담당자 더보기 ▽ (${hiddenCount}명 더보기)` : `더보기 ▽ (${hiddenCount}개 더보기)`;
+    
+                btnWrap.appendChild(btn);
+                content.appendChild(btnWrap);
+    
+                btn.addEventListener("click", function () {
+                    const isCollapsed = rows[5].classList.contains("hidden-stat-row");
+                    
+                    for (let i = 5; i < rows.length; i++) {
+                        if (isCollapsed) {
+                            rows[i].classList.remove("hidden-stat-row");
+                        } else {
+                            rows[i].classList.add("hidden-stat-row");
+                        }
+                    }
+    
+                    if (isCollapsed) {
+                        btn.textContent = "접기 △";
+                    } else {
+                        btn.textContent = isManagerTab ? `담당자 더보기 ▽ (${hiddenCount}명 더보기)` : `더보기 ▽ (${hiddenCount}개 더보기)`;
+                    }
+                });
+            }
+        });
+    });
+    </script>
+
+    <div class="outline-page-header">
+    <h1 class="outline-page-title" th:text="${project != null ? project.projectTitle : '프로젝트 개요'}">프로젝트명</h1>
+    <span class="outline-badge" 
+          th:if="${project != null}"
+          th:classappend="${project.status == 'j1' ? 'badge-new' : (project.status == 'j2' ? 'badge-process' : (project.status == 'j3' ? 'badge-success' : ''))}"
+          th:text="${project.status == 'j1' ? '신규' : (project.status == 'j2' ? '진행 중' : (project.status == 'j3' ? '완료' : '미지정'))}">
+        상태
+    </span>
+</div>
+
+<div class="outline-container">
+    <div class="project-meta-sub" style="margin-bottom: 20px; color: #666; font-size: 14px;" th:if="${project != null}">
+        <span th:text="${#dates.format(project.createdAt, 'yyyy.MM.dd')} + ' ~ ' + ${project.finishDate != null ? #dates.format(project.finishDate, 'yyyy.MM.dd') : '미정'}">2026.01.01 ~ 2026.12.31</span>
+    </div>
+
+    <div class="outline-progress-container">
+        <div class="outline-progress-info">
+            <span class="outline-progress-label" 
+                  th:text="${project != null && project.projectDescribe != null ? project.projectDescribe : '🚀 프로젝트 종합 진척도'}">
+                  프로젝트 설명 문구
+            </span>
+            <span class="outline-progress-percent" th:text="${progressData.progressPercentage} + '%'">0%</span>
+        </div>
+                <div class="outline-progress-bar-wrap">
+                    <div class="outline-progress-bar" th:style="'width: ' + ${progressData.progressPercentage} + '%;'"></div>
+                </div>
+            </div>
+
+            <div class="outline-dashboard-wrapper">
+    
+                <div class="time-card-combined">
+                    <h4 class="dashboard-card-title">⏱️ 시간 추적 통계</h4>
+                    <div class="time-info-row info-estimated">
+                        <span class="time-label">⏳ 총 추정 시간</span>
+                        <span class="time-value" th:text="${progressData.totalEstimatedHours} + ' 시간'">0 시간</span>
+                    </div>
+                    <div class="time-card-divider"></div>
+                    <div class="time-info-row info-spent">
+                        <span class="time-label">⏱️ 총 소요 시간</span>
+                        <span class="time-value" th:text="${progressData.totalSpentHours} + ' 시간'">0 시간</span>
+                    </div>
+                </div>
+			
+                <div class="stat-dropdown-container">
+                    <div class="stat-dropdown-header">
+                        <h4 class="dashboard-card-title">📊 조건별 일감 진척</h4>
+                        <select id="statSectionSelect" class="stat-select-box">
+                            <option value="status">📌 상태별 일감 완료</option>
+                            <option value="priority">🔥 우선순위별 일감 완료</option>
+                            <option value="type">🏷️ 유형별 일감 완료</option>
+                            <option value="manager">👤 담당자별 일감 완료</option>
+                        </select>
+                    </div>
+			
+                    <div id="stat-status" class="stat-toggle-content active">
+                        <div class="stat-list-box">
+                            <div class="stat-item-row" th:each="stat : ${progressData.statusStats}">
+                                <span class="stat-name" th:text="${stat.groupName}">진행 중</span>
+                                <div class="stat-mini-progress">
+                                    <div class="stat-mini-bar-wrap">
+                                        <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+                                    </div>
+                                    <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">0/0</span>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(progressData.statusStats)}" class="stat-empty-text">통계 데이터가 없습니다.</div>
+                        </div>
+                    </div>
+			
+                    <div id="stat-priority" class="stat-toggle-content">
+                        <div class="stat-list-box">
+                            <div class="stat-item-row" th:each="stat : ${progressData.priorityStats}">
+                                <span class="stat-name" th:text="${stat.groupName}">높음</span>
+                                <div class="stat-mini-progress">
+                                    <div class="stat-mini-bar-wrap">
+                                        <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+                                    </div>
+                                    <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">0/0</span>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(progressData.priorityStats)}" class="stat-empty-text">통계 데이터가 없습니다.</div>
+                        </div>
+                    </div>
+			
+                    <div id="stat-type" class="stat-toggle-content">
+                        <div class="stat-list-box">
+                            <div class="stat-item-row" th:each="stat : ${progressData.typeStats}">
+                                <span class="stat-name" th:text="${stat.groupName}">기능 구현</span>
+                                <div class="stat-mini-progress">
+                                    <div class="stat-mini-bar-wrap">
+                                        <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+                                    </div>
+                                    <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">0/0</span>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(progressData.typeStats)}" class="stat-empty-text">통계 데이터가 없습니다.</div>
+                        </div>
+                    </div>
+			
+                    <div id="stat-manager" class="stat-toggle-content">
+                        <div class="stat-list-box">
+                            <div class="stat-item-row" th:each="stat : ${progressData.managerStats}">
+                                <span class="stat-name" th:text="${stat.groupName}">홍길동</span>
+                                <div class="stat-mini-progress">
+                                    <div class="stat-mini-bar-wrap">
+                                        <div class="stat-mini-bar" th:style="'width: ' + ${stat.progressPercentage} + '%'"></div>
+                                    </div>
+                                    <span class="stat-count-text" th:text="${stat.closedCount} + '/' + ${stat.totalCount}">0/0</span>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(progressData.managerStats)}" class="stat-empty-text">통계 데이터가 없습니다.</div>
+                        </div>
+                    </div>
+			
+                </div>
+            </div>
+
+            <div class="project-members-section">
+                <div class="members-header">
+                    <div class="members-title-wrap">
+                        <h3 class="members-title">👥 프로젝트 참여 명단</h3>
+                        <span class="members-total-badge" 
+                              th:if="${not #lists.isEmpty(groupMembers)}"
+                              th:text="'총 ' + ${#aggregates.sum(groupMembers.![memberCount])} + '명'">총 0명</span>
+                    </div>
+                </div>
+                
+                <div class="member-list-card">
+                    <div class="member-item-header-row">
+                        <div class="member-col col-group-name">그룹/부서명</div>
+                        <div class="member-col col-count">참여 인원수</div>
+                        <div class="member-col col-names">참여 멤버 이름</div>
+                    </div>
+
+                    <div class="member-item-row" th:each="member : ${groupMembers}">
+                        <div class="member-col col-group-name">
+                            <span class="group-tag" th:text="${member.groupName != null ? member.groupName : '부서 미지정'}">부서명</span>
+                        </div>
+                        <div class="member-col col-count" th:text="${member.memberCount} + '명'">0명</div>
+                        <div class="member-col col-names" th:text="${member.memberNames != null ? member.memberNames : '참여 인원 없음'}">멤버들 이름</div>
+                    </div>
+
+                    <div class="member-empty-row" th:if="${#lists.isEmpty(groupMembers)}">
+                        현재 프로젝트에 등록된 참여 멤버가 존재하지 않습니다.
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</section>
+</body>
+</html>

@@ -6,7 +6,7 @@
     <h1 class="repository-title">설정</h1>
     <nav class="repository-setting-tabs" aria-label="프로젝트 설정 메뉴">
         <a th:classappend="${settingMenu == 'project'} ? 'active' : ''" th:href="@{/project/{projectId}/setting(projectId=${projectId})}">프로젝트</a>
-        <a th:classappend="${settingMenu == 'member'} ? 'active' : ''" href="#">구성원</a>
+        <a th:classappend="${settingMenu == 'member'} ? 'active' : ''" th:href="@{/project/settings/members(projectId=${projectId})}">구성원</a>
         <a th:classappend="${settingMenu == 'repository'} ? 'active' : ''" th:href="@{/repository/management(projectId=${projectId})}">저장소</a>
         <a th:classappend="${settingMenu == 'timeTracking'} ? 'active' : ''" href="#">시간추적</a>
     </nav>

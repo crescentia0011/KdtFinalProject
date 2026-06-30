@@ -1,3 +1,153 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="mapper.notification.notification-mapper"></mapper>
+<mapper namespace="com.weple.cloud.notification.mapper.NotificationMapper">
+
+	<!--
+		target_type / target_id 기반 이동경로, 컨텍스트(프로젝트명) 산출용 공통 JOIN + 표현식.
+		현재 발생하는 알림은 일감 배정/상태 변경/댓글 등록/첨부파일 등록 → TASK,
+		프로젝트 초대 및 참여자 등록 → PROJECT 두 가지 target_type만 사용.
+	-->
+	<sql id="alarmJoins">
+		LEFT JOIN task t
+			   ON a.target_type ='TASK' AND a.target_id = t.task_id
+		LEFT JOIN project p1
+			   ON t.project_id = p1.project_id
+		LEFT JOIN project p2
+			   ON a.target_type = 'PROJECT' AND a.target_id = TO_CHAR(p2.project_id)
+	</sql>
+
+	<sql id="alarmSelectColumns">
+		a.alarm_id,
+		a.user_code,
+		a.alarm_tag,
+		a.alarm_content,
+		a.check_yn,
+		a.alarm_date,
+		a.target_type,
+		a.target_id,
+		a.alarm_chk,
+		COALESCE(p1.project_title, p2.project_title) AS contextTitle,
+		CASE
+			WHEN a.target_type = 'TASK'
+				THEN '/project/task/detail/' || a.target_id || '?projectId=' || t.project_id
+			WHEN a.target_type = 'PROJECT'
+				THEN '/project/overview?projectId=' || a.target_id
+			ELSE '/notification/list'
+		END AS redirectUrl
+	</sql>
+
+	<!--
+		알림 1건 생성.
+		alarm_id 는 시퀀스(alarm_id_seq) 사용.
+		check_yn은 항상 'N'(읽지 않음)으로 시작.
+	-->
+	<insert id="insertAlarm" parameterType="AlarmVO">
+		<selectKey keyProperty="alarmId" resultType="long" order="BEFORE">
+			SELECT ALARM_ID_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO alarm (
+			alarm_id,
+			user_code,
+			alarm_tag,
+			alarm_content,
+			check_yn,
+			alarm_date,
+			target_type,
+			target_id
+		) VALUES (
+			#{alarmId},
+			#{userCode},
+			#{alarmTag},
+			#{alarmContent},
+			'N',
+			SYSDATE,
+			#{targetType},
+			#{targetId}
+		)
+	</insert>
+
+	<!-- 알림 목록 페이지 -->
+	<select id="findAlarmList" resultType="AlarmVO">
+		SELECT * FROM (
+			SELECT inner_q.*, ROWNUM rnum FROM (
+				SELECT
+					<include refid="alarmSelectColumns" />
+				FROM alarm a
+					<include refid="alarmJoins" />
+				WHERE a.user_code = #{userCode}
+					<if test="status == 'read'">AND a.check_yn = 'Y'</if>
+					<if test="status == 'unread'">AND a.check_yn = 'N'</if>
+				ORDER BY a.alarm_date DESC
+			) inner_q
+			WHERE ROWNUM <![CDATA[ <= ]]> (#{offset} + #{pageSize})
+		)
+		WHERE rnum <![CDATA[ > ]]> #{offset}
+	</select>
+
+	<select id="countAlarmList" resultType="int">
+		SELECT COUNT(*)
+		FROM alarm a
+		WHERE a.user_code = #{userCode}
+			<if test="status == 'read'">AND a.check_yn = 'Y'</if>
+			<if test="status == 'unread'">AND a.check_yn = 'N'</if>
+	</select>
+
+	<!-- 헤더 드롭다운 - 최근 알림 N건 -->
+	<select id="findRecentAlarmList" resultType="AlarmVO">
+		SELECT * FROM (
+			SELECT
+				<include refid="alarmSelectColumns" />
+			FROM alarm a
+				<include refid="alarmJoins" />
+			WHERE a.user_code = #{userCode}
+			ORDER BY a.alarm_date DESC
+		)
+		WHERE ROWNUM <![CDATA[ <= ]]> #{limit}
+	</select>
+
+	<!-- 읽지 않은 알림 개수 -->
+	<select id="countUnread" resultType="int">
+		SELECT COUNT(*)
+		FROM alarm
+		WHERE user_code = #{userCode} AND check_yn = 'N'
+	</select>
+
+	<!-- 단건 조회 (소유자 검증 포함) -->
+	<select id="findById" resultType="AlarmVO">
+		SELECT
+			<include refid="alarmSelectColumns" />
+		FROM alarm a
+			<include refid="alarmJoins" />
+		WHERE a.alarm_id = #{alarmId}
+			AND a.user_code = #{userCode}
+	</select>
+
+	<!-- 읽음/읽지 않음 토글 -->
+	<update id="toggleCheckYn">
+		UPDATE alarm
+		   SET check_yn = CASE WHEN check_yn = 'Y' THEN 'N' ELSE 'Y' END,
+		       alarm_chk = CASE WHEN check_yn = 'Y' THEN NULL ELSE SYSDATE + 9/24 END
+		 WHERE alarm_id = #{alarmId}
+		   AND user_code = #{userCode}
+	</update>
+
+	<!-- 알림 클릭(이동) 시 읽음 처리. 이미 읽음 상태면 0건 업데이트 -->
+	<update id="markRead">
+		UPDATE alarm
+		   SET check_yn = 'Y',
+		       alarm_chk = SYSDATE
+		 WHERE alarm_id = #{alarmId}
+		   AND user_code = #{userCode}
+		   AND check_yn = 'N'
+	</update>
+
+	<!-- 모두 읽음 처리 -->
+	<update id="updateAllRead">
+		UPDATE alarm
+		   SET check_yn = 'Y',
+		       alarm_chk = SYSDATE
+		 WHERE user_code = #{userCode}
+		   AND check_yn = 'N'
+	</update>
+
+</mapper>

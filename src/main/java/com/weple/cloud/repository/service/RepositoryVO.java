@@ -34,5 +34,10 @@ public class RepositoryVO {
     private boolean mainChangeConfirmed;
 
     // 저장소 등록 일시
+    // 저장소 관리 설정 행을 만들 때 함께 저장할 커밋 연결 기본 설정값
+    private String commitAutoYn;
+    private String commitTextYn;
+    private String taskKeyword;
+
     private Date createdAt;
 }

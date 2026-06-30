@@ -99,7 +99,7 @@
         #{taskProgress},
         (SELECT MAX(task_id) FROM task WHERE task_title = #{parentTaskTitle, jdbcType=VARCHAR}),
         0, 
-        SYSDATE + 9/24, 
+        SYSDATE, 
         #{milestoneId}, 
         #{projectId}, 
         #{userCode},
@@ -113,8 +113,10 @@
     <id property="taskId" column="taskId"/>
     <result property="taskTitle" column="taskTitle"/>
     <result property="taskDescribe" column="taskDescribe"/>
-    <result property="taskStatus" column="taskStatus"/> <result property="priority" column="priority"/>
-    <result property="taskManager" column="taskManager"/> <result property="startDate" column="startDate"/>
+    <result property="taskStatus" column="taskStatus"/> 
+    <result property="priority" column="priority"/>
+    <result property="taskManager" column="taskManager"/> 
+    <result property="startDate" column="startDate"/>
     <result property="finishDate" column="finishDate"/>
     <result property="estimatedTime" column="estimatedTime"/>
     <result property="taskProgress" column="taskProgress"/>
@@ -347,7 +349,7 @@
            estimated_time = #{estimatedTime},
            task_progress = #{taskProgress},
            milestone_id = #{milestoneId, jdbcType=VARCHAR},
-           updated_at = SYSDATE + 9/24,
+           updated_at = SYSDATE,
            parent_task_id = #{parentTaskId, jdbcType=VARCHAR}
      WHERE task_id = #{taskId}
 </update>
@@ -414,7 +416,7 @@ END;
         #{parentCommentId}, 
         #{taskComment}, 
         #{userCode},
-        SYSDATE + 9/24
+        SYSDATE
     )
 </insert>
 
@@ -439,6 +441,7 @@ END;
 <select id = "taskUpdateHistory">
 	SELECT 
 		th.history_id AS historyId,
+		th.action_type AS actionType,
     	u.user_name AS userName,
    	 	action_at AS actionAt,
     	field_name AS fieldName,
@@ -449,7 +452,7 @@ END;
         	ON th.history_id = thd.history_id
     	JOIN users u
         	ON th.changed_by = u.user_code
-	WHERE th.task_id = #{tId} AND th.action_type = 'UPDATE'
+	WHERE th.task_id = #{tId}
 </select>
 <!-- 소요시간 목록 조회 -->
 <select id="taskSpentTime">
@@ -719,9 +722,13 @@ END;
 </select>
 <!-- 검색에 대한 일감전체 갯수 -->
 <select id="countAllWithFilters" resultType="int" parameterType="map">
-        SELECT COUNT(*)
-        FROM TASK      
-     <include refid="taskSearchConditions" />
+    SELECT COUNT(*)
+    FROM task t
+    INNER JOIN project p ON t.project_id = p.project_id
+    INNER JOIN task_types tt ON t.type_id = tt.type_id
+    INNER JOIN common_code cc ON t.task_status = cc.common_id
+    LEFT JOIN users u ON t.task_manager = u.user_code
+    <include refid="internalTaskConditions" />
 </select>
    
 <!-- 관리자의 페이징 10개씩  -->
