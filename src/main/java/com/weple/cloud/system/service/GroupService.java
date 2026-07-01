@@ -6,7 +6,7 @@ import java.util.Map;
 public interface GroupService {
 	// -------------------------------그룹 종류------------------------------
 	// 전체조회
-	public List<SystemGroupVO> findGroupAll(String keyword);
+	public List<SystemGroupVO> findGroupAll(Long companyId, String keyword);
 
 	// 등록
 	public int addGroup(SystemGroupVO systemGroupVO);

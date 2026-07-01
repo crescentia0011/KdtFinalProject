@@ -15,8 +15,9 @@
 		FROM groups g
 		
 		<where>
-        	<if test="_parameter != null and _parameter != ''">
-            	g.group_name LIKE '%' || #{_parameter} || '%'
+			g.company_id = #{companyId}
+        	<if test="keyword != null and keyword != ''">
+            	AND g.group_name LIKE '%' || #{keyword} || '%'
         	</if>
    		 </where>
    		 

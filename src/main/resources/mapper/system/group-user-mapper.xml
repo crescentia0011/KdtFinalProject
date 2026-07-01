@@ -3,7 +3,7 @@
 <mapper namespace="com.weple.cloud.system.mapper.GroupUserMapper">
 	<!--/* 그룹 내 사용자 */ -->
 	<!--/* 전체조회 */ -->
-	<select id="selectGroupUserAll" resultType="SystemGroupUserVO">
+	<select id="selectGroupUserAll" parameterType="long" resultType="SystemGroupUserVO">
 		SELECT u.user_code
 			   , u.company_id
 		       , u.login_id
@@ -33,6 +33,7 @@
 		OR (
 			NVL(u.admin_yn, 0) = 0 AND r.role_id = 2)
 		   )
+		WHERE u.company_id = #{companyId}
 		ORDER
 		BY u.user_code ASC
 	</select>

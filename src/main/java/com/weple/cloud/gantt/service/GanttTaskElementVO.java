@@ -19,4 +19,5 @@ public class GanttTaskElementVO {
     private double progress;     // 진척도 (0.0 ~ 1.0)
     private String parent;       // 부모의 고유 ID (예: "M_5" 또는 "M_10")
     private String type;         // 차트 UI 모양 결정 ("project", "milestone", "task" 중 선택)
+    private String deadline;
 }

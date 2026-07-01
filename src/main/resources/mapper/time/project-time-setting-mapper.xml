@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.time.mapper.ProjectTimeSettingMapper">
+
+    <!-- 회사에서 사용중(using_yn = 'Y')인 작업분류 목록 -->
+    <select id="findUsingWorkClassifications" parameterType="Long" resultType="CodeValueVO">
+        SELECT task_classification_id AS taskClassificationId
+             , work_name              AS workName
+             , using_yn               AS usingYn
+        FROM work_classification
+        WHERE company_id = #{companyId}
+          AND using_yn = 'Y'
+        ORDER BY order_no
+    </select>
+
+    <!-- 프로젝트가 이미 사용 선택해둔 작업분류 ID 목록 -->
+    <select id="findSelectedClassificationIds" parameterType="Long" resultType="String">
+        SELECT task_classification_id
+        FROM project_time_classification
+        WHERE project_id = #{projectId}
+    </select>
+
+    <delete id="deleteSelectionByProject" parameterType="Long">
+        DELETE FROM project_time_classification
+        WHERE project_id = #{projectId}
+    </delete>
+
+    <insert id="insertSelection">
+        <selectKey resultType="Long" keyProperty="projectTimeId" order="BEFORE">
+            SELECT NVL(MAX(project_time_id), 0) + 1 FROM project_time_classification
+        </selectKey>
+        INSERT INTO project_time_classification (project_time_id, project_id, task_classification_id)
+        VALUES (#{projectTimeId}, #{projectId}, #{taskClassificationId})
+    </insert>
+
+</mapper>

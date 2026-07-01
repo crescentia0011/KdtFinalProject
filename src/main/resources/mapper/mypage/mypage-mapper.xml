@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.mypage.mapper.MyPageMapper">
+
+    <!-- 조회: 계정 정보 + 알림 설정 현재값. user-management-mapper.xml selectUserDetail과 동일한 조인/CASE 패턴 -->
+    <select id="selectMyPage" parameterType="string" resultType="com.weple.cloud.mypage.service.MyPageVO">
+        SELECT u.user_code AS userCode,
+               u.login_id AS loginId,
+               u.user_name AS userName,
+               u.email AS email,
+               g.group_name AS groupName,
+               CASE
+                   WHEN NVL(u.owner_yn, 0) = 1 THEN '최고관리자'
+                   WHEN NVL(u.admin_yn, 0) = 1 THEN '관리자'
+                   ELSE '일반 사용자'
+               END AS roleName,
+               u.profile_image AS profileImage,
+               NVL(u.web_notification_yn, 'N') AS webNotificationYn,
+               NVL(u.email_notification_yn, 'N') AS emailNotificationYn,
+               NVL(u.notification_area, 'all') AS notificationArea
+        FROM users u
+        LEFT JOIN groups g
+          ON u.group_id = g.group_id
+        WHERE u.user_code = #{userCode}
+    </select>
+
+    <!-- 등록 버튼: 알림 3항목만 저장 (계정 기본정보는 이 화면에서 수정하지 않음) -->
+    <update id="updateNotificationSetting" parameterType="com.weple.cloud.mypage.service.MyPageNotificationUpdateVO">
+        UPDATE users
+        SET web_notification_yn = #{webNotificationYn},
+            email_notification_yn = #{emailNotificationYn},
+            notification_area = #{notificationArea}
+        WHERE user_code = #{userCode}
+    </update>
+
+    <!-- 조회: 프로필 사진 관리 화면 상단 정보 -->
+    <select id="selectMyPageProfile" parameterType="string" resultType="com.weple.cloud.mypage.service.MyPageProfileVO">
+        SELECT u.user_code AS userCode,
+               u.user_name AS userName,
+               g.group_name AS groupName,
+               CASE
+                   WHEN NVL(u.owner_yn, 0) = 1 THEN '최고관리자'
+                   WHEN NVL(u.admin_yn, 0) = 1 THEN '관리자'
+                   ELSE '일반 사용자'
+               END AS roleName,
+               u.email AS email,
+               u.profile_image AS profileImage
+        FROM users u
+        LEFT JOIN groups g
+          ON u.group_id = g.group_id
+        WHERE u.user_code = #{userCode}
+    </select>
+
+    <!-- 등록(적용) - 사진 변경 반영 -->
+    <update id="updateProfileImage">
+        UPDATE users
+        SET profile_image = #{profileImage}
+        WHERE user_code = #{userCode}
+    </update>
+
+    <!-- 등록(적용) - 삭제 시 기본 프로필 이미지로 변경(NULL 처리, 화면에서 기본 아이콘 표시) -->
+    <update id="deleteProfileImage" parameterType="string">
+        UPDATE users
+        SET profile_image = NULL
+        WHERE user_code = #{userCode}
+    </update>
+
+</mapper>

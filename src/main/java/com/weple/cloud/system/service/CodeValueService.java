@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface CodeValueService {
 	// -------------------------------코드값------------------------------
 	// 전체조회
-	public List<CodeValueVO> findCodeValueAll();
+	public List<CodeValueVO> findCodeValueAll(long companyId);
 	
 	// 상세조회
 	public CodeValueVO findCodeValueInfo(CodeValueVO codeValueVO, String type);

@@ -86,7 +86,7 @@
 							th:data-file-name="${file.logicalName}"
 							th:data-task-title="${file.taskTitle}"
 							th:data-uploader="${file.uploader}"
-							th:data-uploaded-at="${file.uploadedAt != null} ? ${#dates.format(file.uploadedAt, 'yyyy-MM-dd')} : (${file.createdAt != null} ? ${#dates.format(file.createdAt, 'yyyy-MM-dd')} : '')"
+							th:data-uploaded-at="${file.uploadedAt != null} ? ${#dates.format(file.uploadedAt, 'yyyy-MM-dd HH:mm')} : (${file.createdAt != null} ? ${#dates.format(file.createdAt, 'yyyy-MM-dd HH:mm')} : '')"
 							th:data-task-id="${file.taskId}">
 							<td><a class="file-name-link"
 								th:href="@{/project/{pid}/file/projectFileInfo(pid=${projectId}, fileId=${file.fileId})}"
@@ -103,7 +103,7 @@
 								th:text="${file.fileSize != null and file.fileSize != 0} ? ${file.fileSize} + ' B' : '-'">-</td>
 							<td th:text="${file.uploader != null} ? ${file.userName} : '-'">-</td>
 							<td
-								th:text="${file.uploadedAt != null} ? ${#dates.format(file.uploadedAt, 'yyyy-MM-dd')} : (${file.createdAt != null} ? ${#dates.format(file.createdAt, 'yyyy-MM-dd')} : '-')">-</td>
+    th:text="${file.uploadedAt != null} ? ${#dates.format(file.uploadedAt, 'yyyy-MM-dd HH:mm')} : (${file.createdAt != null} ? ${#dates.format(file.createdAt, 'yyyy-MM-dd HH:mm')} : '-')">-</td>
 							<td><span class="version-badge"
 								th:text="${file.versionNumber != null and file.versionNumber != 0} ? 'v' + ${file.versionNumber} + '.0' : 'v1.0'">v1.0</span>
 							</td>

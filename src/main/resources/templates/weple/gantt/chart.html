@@ -10,6 +10,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/gantt/chart.css}">
     <title>Gantt Chart PMS</title>
     
     <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
@@ -17,15 +18,7 @@
     
     <script src="https://cdn.dhtmlx.com/gantt/edge/locale/locale_kr.js"></script>
 
-    <style>
-        html, body { height: 100%; padding: 0; margin: 0; overflow: hidden; font-family: 'Malgun Gothic', sans-serif; }
-        .gantt-container { width: 100%; height: calc(100vh - 50px); }
-        .header-bar { height: 50px; background: #34495e; color: white; display: flex; align-items: center; padding-left: 20px; font-weight: bold; }
-        
-        /* 마일스톤과 일반 일감의 가로 바 색상을 다르게 주고 싶을 때 커스텀 CSS */
-        .gantt_project { background-color: #2980b9 !important; border-color: #2471a3 !important; }
-        .gantt_project .gantt_task_progress { background-color: #1f618d !important; }
-    </style>
+   
 </head>
 <body>
 <section>
@@ -45,9 +38,13 @@
         gantt.config.row_height = 30;
         gantt.config.task_height = 20;
         
+     	// dhtmlxGantt 자체 내장 모달창(Lightbox)이 뜨지 않도록 설정
+        gantt.config.details_on_dblclick = false; // 더블클릭 시 모달 방지
+        gantt.config.lightbox.sections = [];     // 혹시 모를 팝업 바인딩 제거
+        
         // 하위 항목이 있으면 자동으로 부모 폴더가 열린 상태로 렌더링되도록 설정
         gantt.config.open_tree_initially = true; 
-
+        
         // 3. 좌측 그리드(테이블) 컬럼 설정
         gantt.config.columns = [
             { 
@@ -56,12 +53,16 @@
                 tree: true, 
                 width: "*", 
                 min_width: 250,
-                // 눈속임용 버전(상위 마일스톤)과 하위 일감 구분을 위해 아이콘이나 텍스트를 커스텀할 수 있습니다.
                 template: function(obj) {
-                    if (obj.type === "project") {
-                        return `<strong style='color:#2c3e50;'>📁 ${obj.text}</strong>`;
+                    // 💡 [수정] ID가 "M_"로 시작하면서 부모가 없으면 '버전(📦)', 부모가 있으면 '마일스톤(📌)'으로 분기
+                    if (typeof obj.id === "string" && obj.id.startsWith("M_")) {
+                        if (!obj.parent || obj.parent == 0) {
+                            return "<strong style='color:#1a365d;'>📦 " + obj.text + "</strong>"; // 버전
+                        } else {
+                            return "<span style='color:#2c3e50; font-weight:500;'>📌 " + obj.text + "</span>"; // 하위 마일스톤
+                        }
                     }
-                    return `📄 ${obj.text}`;
+                    return "<span style='color:#555;'>📄 " + obj.text + "</span>"; // 일감
                 }
             },
             { 
@@ -92,14 +93,63 @@
             }
         ];
 
-        // 4. 우측 차트 타임라인 스케일 설정 (년/월/일 표현 방식)
+     	// [수정] 4. 우측 차트 타임라인 스케일 설정 (년/월/주 표현 방식으로 압축)
         gantt.config.scales = [
             { unit: "month", step: 1, format: "%Y년 %M" },
-            { unit: "day", step: 1, format: "%j일" }
+            { unit: "week", step: 1, format: "%W주" } // '일' 대신 '주' 단위로 변경하여 가로폭을 크게 압축!
         ];
-
-        // 5. 간트차트 초기화 실행
+     
+     	// [추가] 한 칸(Column)의 최소 너비를 좁혀서 더 많은 레이아웃이 한눈에 보이게 설정 (기본값은 보통 50~60)
+        gantt.config.min_column_width = 40;
+     	
+     	// 💡 [추가] 데이터 종류별로 타임라인 바에 다른 CSS 클래스명을 부여합니다.
+        gantt.templates.task_class = function(start, end, task) {
+            if (typeof task.id === "string" && task.id.startsWith("M_")) {
+                if (!task.parent || task.parent == 0) {
+                    return "version-bar";     // 버전 (최상위 마일스톤)
+                } else {
+                    return "milestone-bar";   // 마일스톤 (하위 마일스톤)
+                }
+            }
+            return "task-bar";                // 일감 (Task)
+        };
+     	
+     	// 5. 간트차트 초기화 실행
         gantt.init("gantt_here");
+        
+        gantt.attachEvent("onTaskClick", function(id, e) {
+
+            if (!e.target.closest(".gantt_tree_content")) {
+                return true; 
+            }
+    	
+            // gantt 내부에서 파싱된 원본 로우 객체를 가져옴 (부모 존재 여부 파악용)
+            const taskObj = gantt.getTask(id);
+            let detailUrl = "";
+    	
+            // 💡 [수정] 경로 및 분기 처리 명확화
+            if (typeof id === "string" && id.startsWith("M_")) {
+                const realMilestoneId = id.substring(2); 
+                
+                if (!taskObj.parent || taskObj.parent == 0) {
+                    // 상위 마일스톤(=버전) 클릭 시 요구하신 경로로 이동
+                    detailUrl = `/project/milestone?projectId=${projectId}`;
+                } else {
+                    // 하위 마일스톤 클릭 시 기존 상세조회 경로로 이동
+                    detailUrl = `/project/milestone/detail?projectId=${projectId}&milestoneId=${realMilestoneId}`;
+                }
+            } else if (typeof id === "string" && id.startsWith("T_")) {
+                const realTaskId = id.substring(2); 
+                detailUrl = `/project/task/detail/${realTaskId}?projectId=${projectId}`;
+            } else {
+                detailUrl = `/project/task/detail/${id}?projectId=${projectId}`;
+            }
+    	
+            window.location.href = detailUrl;
+            return true; 
+        });
+
+        
 
        gantt.load('/api/project/gantt/data?projectId=' + projectId);
     </script>

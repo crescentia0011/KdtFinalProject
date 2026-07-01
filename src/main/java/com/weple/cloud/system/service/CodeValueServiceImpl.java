@@ -21,8 +21,8 @@ public class CodeValueServiceImpl implements CodeValueService {
 	// -------------------------------코드값------------------------------
 	// 전체조회
 	@Override
-	public List<CodeValueVO> findCodeValueAll() {
-		return codeValueMapper.selectCodeValueAll();
+	public List<CodeValueVO> findCodeValueAll(long companyId) {
+		return codeValueMapper.selectCodeValueAll(companyId);
 	}
 
 	// 상세조회

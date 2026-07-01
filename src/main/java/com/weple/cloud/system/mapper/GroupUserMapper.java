@@ -7,7 +7,7 @@ import com.weple.cloud.system.service.SystemGroupUserVO;
 public interface GroupUserMapper {
 	// ---------------------------- 그룹 내 사용자 --------------------------
 	// 전체조회
-	public List<SystemGroupUserVO> selectGroupUserAll();
+	public List<SystemGroupUserVO> selectGroupUserAll(long companyId);
 
 	// 등록
 	public int insertGroupUser(SystemGroupUserVO systemGroupUserVO);

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head>
+    <meta charset="UTF-8">
+    <title>설정 - 시간추적</title>
+    <link rel="stylesheet" href="/css/project/setting.css">
+</head>
+<body>
+<section class="settings-page">
+
+    <div th:replace="~{common/fragments/project-setting-tabs :: projectSettingTabs}"></div>
+
+    <form id="timeSettingForm" method="post" th:action="@{/project/settings/time}">
+        <input type="hidden" name="projectId" th:value="${projectId}">
+
+        <div class="time-setting-toolbar">
+            <button type="button" id="resetSelectionBtn" class="btn-time-reset">초기화</button>
+            <a class="btn-time-manage" th:href="@{/codeValueList}">관리</a>
+        </div>
+
+        <div class="time-setting-table-wrap">
+            <table class="time-setting-table">
+                <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>사용중</th>
+                    <th>사용 선택</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(classificationList)}">
+                    <td colspan="3" class="time-setting-empty">
+                        사용중인 작업분류가 없습니다. '관리' 버튼에서 코드값을 등록해주세요.
+                    </td>
+                </tr>
+                <tr th:each="item : ${classificationList}">
+                    <td th:text="${item.workName}"></td>
+                    <td><span class="time-check-icon">✓</span></td>
+                    <td>
+                        <input type="checkbox"
+                               class="time-selection-chk"
+                               name="enabledClassifications"
+                               th:value="${item.taskClassificationId}"
+                               th:checked="${selectedIds != null and selectedIds.contains(item.taskClassificationId)}">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-btn-area">
+            <button type="submit" class="btn-save">저장</button>
+        </div>
+    </form>
+
+    <script th:inline="javascript">
+        // 토스트 (이 프로젝트는 공통 전역 함수가 없어서 페이지마다 직접 정의함)
+        function showToast(msg, type) {
+            var old = document.getElementById('_toastWrap');
+            if (old) old.remove();
+            var wrap = document.createElement('div');
+            wrap.id = '_toastWrap';
+            wrap.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;';
+            var box = document.createElement('div');
+            box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
+            box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
+            box.textContent = msg;
+            wrap.appendChild(box);
+            document.body.appendChild(wrap);
+            setTimeout(function () {
+                wrap.style.transition = 'opacity 0.4s';
+                wrap.style.opacity = '0';
+                setTimeout(function () { wrap.remove(); }, 400);
+            }, 2500);
+        }
+
+        // 초기화: 서버로 보내지 않고 화면의 체크박스만 전부 해제함
+        document.getElementById('resetSelectionBtn').addEventListener('click', function () {
+            document.querySelectorAll('.time-selection-chk').forEach(function (chk) {
+                chk.checked = false;
+            });
+        });
+
+        // 저장 전 검증: 최소 1개는 선택되어 있어야 함 (서버에서도 동일하게 재검증함)
+        document.getElementById('timeSettingForm').addEventListener('submit', function (e) {
+            const anyChecked = document.querySelectorAll('.time-selection-chk:checked').length > 0;
+            if (!anyChecked) {
+                e.preventDefault();
+                showToast('작업분류를 최소 1개 이상 선택해주세요.', 'error');
+            }
+        });
+
+        // 저장 결과 플래시 메시지 처리
+        window.addEventListener('DOMContentLoaded', function () {
+            const toastType = /*[[${toastType}]]*/ null;
+            const toastMessage = /*[[${toastMessage}]]*/ null;
+            if (toastMessage) {
+                showToast(toastMessage, toastType || 'success');
+            }
+        });
+    </script>
+<style>
+/* ═══════════════════════════════════
+   설정 > 시간추적 탭
+═══════════════════════════════════ */
+.time-setting-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.btn-time-reset,
+.btn-time-manage {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s;
+}
+
+.btn-time-reset {
+    background: #f3f4f6;
+    color: #4b525a;
+    border: 1.5px solid #dfe3e8;
+}
+.btn-time-reset:hover { background: #e9ecef; }
+
+.btn-time-manage {
+    background: #F1EDFF;
+    color: #6D5EF7;
+    border: 1.5px solid #DDD6FE;
+}
+.btn-time-manage:hover { background: #EEEAFE; }
+
+.btn-save {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    background: #6D5EF7;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.btn-save:hover {
+    background: #5B4FEA;
+}
+
+.time-setting-table-wrap {
+    border: 1px solid #DDD6FE;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.time-setting-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.time-setting-table thead {
+    background: #f6f8fc;
+}
+
+.time-setting-table th,
+.time-setting-table td {
+    padding: 14px 18px;
+    vertical-align: middle;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.time-setting-table th:first-child,
+.time-setting-table td:first-child {
+    text-align: left;
+}
+
+.time-setting-table tr {
+    border-bottom: 1px solid #edf1fa;
+}
+
+.time-setting-table td {
+    height: 56px;
+}
+
+.time-setting-empty {
+    padding: 40px 0;
+    text-align: center;
+    color: #9ca3af;
+}
+
+.time-check-icon {
+    color: #22c55e;
+    font-size: 15px;
+    font-weight: bold;
+}
+</style>
+</section>
+</body>
+</html>

@@ -19,7 +19,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     NVL(d_type.new_value, tt.type_name)  AS typeName,
                     cc.default_describe AS taskStatus,
                     th.action_type,
-                    th.action_at + INTERVAL '9' HOUR AS actionAt
+                    th.action_at HOUR AS actionAt
                 FROM task_history th
                 INNER JOIN task t
                 		ON th.task_id = t.task_id
@@ -42,10 +42,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                         AND u.user_code = #{userCode}
                     </if>
                     <if test="startDate != null and startDate != ''">
-                        AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD') - INTERVAL '9' HOUR
+                        AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD')
                     </if>
                     <if test="endDate != null and endDate != ''">
-                        AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY - INTERVAL '9' HOUR
+                        AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY
                     </if>
                     <if test="typeNames != null and typeNames.size() > 0">
                         AND NVL(d_type.new_value, tt.type_name) IN
@@ -79,10 +79,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 AND u.user_code = #{userCode}
             </if>
             <if test="startDate != null and startDate != ''">
-                AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD') - INTERVAL '9' HOUR
+                AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD')
             </if>
             <if test="endDate != null and endDate != ''">
-                AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY - INTERVAL '9' HOUR
+                AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY
             </if>
             <if test="typeNames != null and typeNames.size() > 0">
                 AND NVL(d_type.new_value, tt.type_name) IN
@@ -121,7 +121,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<!-- 날짜 목록 조회 (날짜 단위 페이징용) -->
     <select id="selectDistinctDates" resultType="string">
-        SELECT DISTINCT TO_CHAR(th.action_at + INTERVAL '9' HOUR, 'YYYY-MM-DD') AS action_date
+        SELECT DISTINCT TO_CHAR(th.action_at, 'YYYY-MM-DD') AS action_date
         FROM task_history th
         INNER JOIN task t ON th.task_id = t.task_id
         LEFT JOIN users u ON th.changed_by = u.user_code
@@ -135,10 +135,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 AND u.user_code = #{userCode}
             </if>
             <if test="startDate != null and startDate != ''">
-                AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD') - INTERVAL '9' HOUR
+                AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD')
             </if>
             <if test="endDate != null and endDate != ''">
-                AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY - INTERVAL '9' HOUR
+                AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY
             </if>
             <if test="typeNames != null and typeNames.size() > 0">
                 AND NVL(d_type.new_value, tt.type_name) IN
@@ -159,7 +159,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             NVL(d_type.new_value, tt.type_name) AS typeName,
             cc.default_describe AS taskStatus,
             th.action_type,
-            th.action_at + INTERVAL '9' HOUR AS actionAt
+            th.action_at AS actionAt
         FROM task_history th
         INNER JOIN task t ON th.task_id = t.task_id
         INNER JOIN users u ON th.changed_by = u.user_code
@@ -174,7 +174,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     ON t.task_status = cc.common_id
                    AND cc.common_code = '0E'
         <where>
-            TO_CHAR(th.action_at + INTERVAL '9' HOUR, 'YYYY-MM-DD') = #{targetDate}
+            TO_CHAR(th.action_at, 'YYYY-MM-DD') = #{targetDate}
             AND t.project_id = TO_NUMBER(#{projectId})
             <if test="userCode != null and userCode != ''">
                 AND u.user_code = #{userCode}

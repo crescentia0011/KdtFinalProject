@@ -1,13 +1,11 @@
 package com.weple.cloud.task.service.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.weple.cloud.file.FileDownloadDTO;
 import com.weple.cloud.file.FileInfoVO;
 import com.weple.cloud.file.FileVO;
+import com.weple.cloud.file.S3Service;
 import com.weple.cloud.file.mapper.FileMapper;
 import com.weple.cloud.milestone.mapper.MilestoneMapper;
 import com.weple.cloud.notification.service.AlarmType;
@@ -46,9 +45,7 @@ public class TaskServiceImpl implements TaskService {
 	private final TaskMapper taskMapper;
 	private final MilestoneMapper milestoneMapper;
 	private final NotificationService notificationService;
-	
-	@Value("${file.upload.task-dir}")
-    private String uploadDir;
+	private final S3Service s3Service;
 	
 	//내부 일감 전체 조회
 	@Override
@@ -110,24 +107,15 @@ public class TaskServiceImpl implements TaskService {
         if (files == null || files.isEmpty()) {
             return result;
         }
-        
-        // 경로 properties에 저장해뒀음 배포때 aws 경로로 바꿔야됨
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-            dir.mkdirs(); // aws에서의 권한 필요
-        }
 
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
 
             String originalFileName = file.getOriginalFilename();
             String savedName = UUID.randomUUID().toString() + "_" + originalFileName;
-            
-            String filePath = uploadDir + savedName; 
-            long fileSize = file.getSize();
 
-            File dest = new File(filePath);
-            file.transferTo(dest);
+            s3Service.uploadFile(file, savedName);   // 로컬 저장 대신 S3로 업로드
+            long fileSize = file.getSize();
 
             Long fileId = fileMapper.findFileId(currentTaskId, originalFileName);
 
@@ -141,10 +129,10 @@ public class TaskServiceImpl implements TaskService {
 
             FileInfoVO fileInfoVO = new FileInfoVO();
             fileInfoVO.setFileId(fileId);
-            fileInfoVO.setFilePath(filePath);
+            fileInfoVO.setFilePath(null);            // 더 이상 로컬 경로 안 씀
             fileInfoVO.setFileSize(fileSize);
             fileInfoVO.setUploader(taskVO.getUserCode()); 
-            fileInfoVO.setSavedName(savedName);
+            fileInfoVO.setSavedName(savedName);        // S3 키
             
             fileMapper.insertFileInfo(fileInfoVO);
         }
@@ -185,19 +173,16 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public void updateTask(TaskVO taskVO, List<MultipartFile> files, List<Long> deletedFileIds) throws Exception {
 	    
-	    // [추가] 기존 첨부파일 삭제 처리 (물리 파일 삭제 및 DB 상태 변경)
+	    // [추가] 기존 첨부파일 삭제 처리 (S3 파일 삭제 및 DB 상태 변경)
 	    if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
 	        for (Long fileId : deletedFileIds) {
-	            // 1. 물리적 파일 삭제를 위해 해당 file_id의 모든 버전 정보(경로) 조회
+	            // 1. S3에 저장된 실제 파일 삭제를 위해 해당 file_id의 모든 버전 정보(savedName) 조회
 	            List<FileInfoVO> fileVersions = fileMapper.findFileInfoByFileId(fileId);
 	            
 	            if (fileVersions != null) {
 	                for (FileInfoVO fileInfo : fileVersions) {
-	                    if (fileInfo.getFilePath() != null) {
-	                        File physicalFile = new File(fileInfo.getFilePath());
-	                        if (physicalFile.exists()) {
-	                            physicalFile.delete(); // 폴더 내의 파일 삭제
-	                        }
+	                    if (fileInfo.getSavedName() != null) {
+	                        s3Service.deleteFile(fileInfo.getSavedName());
 	                    }
 	                }
 	            }
@@ -218,13 +203,8 @@ public class TaskServiceImpl implements TaskService {
 	        syncMilestoneStatus(taskVO.getMilestoneId());
 	    }
 	    
-	    // 추가된 파일이 존재할 경우 업로드 및 버전 관리 진행 (기존 코드 유지)
+	    // 추가된 파일이 존재할 경우 업로드 및 버전 관리 진행
 	    if (files != null && !files.isEmpty()) {
-	        File dir = new File(uploadDir);
-	        if (!dir.exists()) {
-	            dir.mkdirs();
-	        }
-
 	        for (MultipartFile file : files) {
 	            if (!file.isEmpty()) {
 	                String originalFilename = file.getOriginalFilename(); 
@@ -251,18 +231,17 @@ public class TaskServiceImpl implements TaskService {
 	                    targetFileId = fileVO.getFileId(); 
 	                }
 	                
-	                // 물리 파일 저장
+	                // 파일 저장 (S3)
 	                String savedName = UUID.randomUUID().toString() + "_" + originalFilename;
-	                String filePath = uploadDir + savedName; 
-	                file.transferTo(new File(filePath));
+	                s3Service.uploadFile(file, savedName);
 	                
 	                // 파일 버전(상세) 정보 등록
 	                FileInfoVO fileInfoVO = new FileInfoVO();
 	                fileInfoVO.setFileId(targetFileId);
-	                fileInfoVO.setFilePath(filePath);
+	                fileInfoVO.setFilePath(null);            // 더 이상 로컬 경로 안 씀
 	                fileInfoVO.setFileSize(file.getSize());
 	                fileInfoVO.setUploader(taskVO.getUserCode()); 
-	                fileInfoVO.setSavedName(savedName);
+	                fileInfoVO.setSavedName(savedName);        // S3 키
 	                
 	                // 여기서 (기존 MAX 버전 + 1) 로직이 타면서 자연스럽게 다음 버전으로 Insert 됩니다.
 	                fileMapper.insertFileInfo(fileInfoVO); 

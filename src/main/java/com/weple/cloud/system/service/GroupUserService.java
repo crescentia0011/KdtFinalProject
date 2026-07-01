@@ -6,7 +6,7 @@ import java.util.Map;
 public interface GroupUserService {
 	// ---------------------------- 그룹 내 사용자 --------------------------
 	// 전체조회
-	public List<SystemGroupUserVO> findGroupUserAll();
+	public List<SystemGroupUserVO> findGroupUserAll(long companyId);
 
 	// 등록
 	public int addGroupUser(SystemGroupUserVO systemGroupUserVO);

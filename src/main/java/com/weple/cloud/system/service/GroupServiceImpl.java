@@ -19,16 +19,14 @@ public class GroupServiceImpl implements GroupService {
 	// -------------------------------그룹 종류------------------------------
 	// 그룹 전체조회
 	@Override
-	public List<SystemGroupVO> findGroupAll(String keyword) {
-		return groupMapper.selectGroupAll(keyword);
+	public List<SystemGroupVO> findGroupAll(Long companyId, String keyword) {
+		return groupMapper.selectGroupAll(companyId, keyword);
 	}
 
 	// 그룹 등록
 	@Override
 	public int addGroup(SystemGroupVO systemGroupVO) {
-		// 임시 테스트용 회사 ID
-		systemGroupVO.setCompanyId(1);
-
+		// companyId는 컨트롤러에서 로그인 사용자 기준으로 이미 세팅해서 넘어옴
 		int result = groupMapper.insertGroup(systemGroupVO);
 		return result == 1 ? systemGroupVO.getGroupId() : -1;
 	}

@@ -78,10 +78,10 @@
                             <div class="wiki-author-wrap">
                                 <!-- 프로필 이미지: 기본 hamster.jpg, JS로 실제 프로필 교체 -->
                                 <img id="wikiAuthorImg"
-                                     src="/images/hamster.jpg"
+                                     src="/images/default-profile.svg"
                                      class="wiki-author-img" alt=""
                                      th:attr="data-user-code=${selectedWiki.userCode}"
-                                     onerror="this.src='/images/hamster.jpg'">
+                                     onerror="this.src='/images/default-profile.svg'">
                                 <span class="wiki-author-name"
                                       th:text="${selectedWiki.userName != null ? selectedWiki.userName : ''}"></span>
                                 <span class="wiki-author-email"

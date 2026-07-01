@@ -1,0 +1,90 @@
+@charset "UTF-8";
+
+/* html, body 전체를 완전히 막아버리는 overflow: hidden은 제거하거나 주석 처리 합니다. */
+html, body { 
+    height: 100%; 
+    padding: 0; 
+    margin: 0; 
+    font-family: 'Malgun Gothic', sans-serif; 
+}
+
+.header-bar { 
+    height: 50px; 
+    background: #34495e; 
+    color: white; 
+    display: flex; 
+    align-items: center; 
+    padding-left: 20px; 
+    font-weight: bold; 
+}
+
+/* [가장 중요] 무료 버전은 바 내부의 글자 상자까지 가두리를 다 풀어줘야 깃발이 보입니다! */
+
+
+/* 1. 간트차트 대형 박스 및 바 레이어의 모든 잘림(hidden) 방지 */
+.gantt_task_line,
+.gantt_project,
+.gantt_task_content { 
+    overflow: visible !important; 
+}
+
+
+
+/* [핵심 수정] 공통 레이아웃의 헤더/푸터 높이만큼을 여유 있게 더 빼줍니다. */
+.gantt-container { 
+    width: 100%; 
+    /* 기존 -50px에서, 공통 레이아웃 높이를 고려해 -120px~150px 정도로 넉넉히 줄여줍니다. */
+    height: calc(100vh - 130px); 
+    
+    /* 혹시 컨테이너가 깨지는 것을 방지하기 위해 안전장치 추가 */
+    position: relative;
+}
+
+
+/* ==========================================
+   간트차트 타임라인 바 색상 커스텀
+   ========================================== */
+
+/* 1. 버전 바 스타일 (신뢰감을 주는 짙은 네이비) */
+.gantt_task_line.version-bar {
+    background-color: #1a365d !important;
+    border: 1px solid #0f2340 !important;
+}
+/* 버전 내부 진척도 색상 */
+.gantt_task_line.version-bar .gantt_task_progress {
+    background-color: #3182ce !important;
+    opacity: 0.6;
+}
+
+/* 2. 마일스톤 바 스타일 (차분하고 묵직한 차콜/슬레이트) */
+.gantt_task_line.milestone-bar {
+    background-color: #4a5568 !important;
+    border: 1px solid #2d3748 !important;
+}
+/* 마일스톤 내부 진척도 색상 */
+.gantt_task_line.milestone-bar .gantt_task_progress {
+    background-color: #718096 !important;
+    opacity: 0.6;
+}
+
+/* 3. 일반 일감 바 스타일 (화사한 스카이 블루) */
+.gantt_task_line.task-bar {
+    background-color: #3182ce !important;
+    border: 1px solid #2b6cb0 !important;
+}
+/* 일감 내부 진척도 색상 */
+.gantt_task_line.task-bar .gantt_task_progress {
+    background-color: #63b3ed !important;
+    opacity: 0.8;
+}
+
+/*
+html, body { height: 100%; padding: 0; margin: 0; overflow: hidden; font-family: 'Malgun Gothic', sans-serif; }
+        .gantt-container { width: 100%; height: calc(100vh - 50px); }
+        .header-bar { height: 50px; background: #34495e; color: white; display: flex; align-items: center; padding-left: 20px; font-weight: bold; }
+        
+       
+        .gantt_project { background-color: #2980b9 !important; border-color: #2471a3 !important; }
+        .gantt_project .gantt_task_progress { background-color: #1f618d !important; }
+        
+*/

@@ -104,7 +104,7 @@
 				, #{postId}
 				, #{logicalName}
 				, #{isDeleted}
-				, #{createdAt}
+				, SYSDATE
 				, #{projectId}
 			  )
 	</insert>
@@ -181,7 +181,7 @@
 	           	 , #{filePath}
 	           	 , #{fileSize}
 	             , #{uploader}
-	           	 , #{uploadedAt}
+	           	 , SYSDATE
 	           	 , #{savedName}
 	           	 , #{hashtag}
 	           )

@@ -32,6 +32,25 @@
 	    FROM task_types
 	    WHERE company_id = #{companyId}
 	</select>
-	
+
+	<!-- 회사가 새 프로젝트에 기본 포함하기로 저장해둔 일감유형 ID 목록 -->
+	<select id="findEnabledTaskTypeIds" parameterType="Long" resultType="String">
+	    SELECT type_id
+	    FROM project_manage_setting
+	    WHERE company_id = #{companyId}
+	</select>
+
+	<delete id="deleteTaskTypesByCompany" parameterType="Long">
+	    DELETE FROM project_manage_setting
+	    WHERE company_id = #{companyId}
+	</delete>
+
+	<insert id="insertTaskType">
+	    <selectKey resultType="Long" keyProperty="projectManageId" order="BEFORE">
+	        SELECT NVL(MAX(project_manage_id), 0) + 1 FROM project_manage_setting
+	    </selectKey>
+	    INSERT INTO project_manage_setting (project_manage_id, company_id, type_id)
+	    VALUES (#{projectManageId}, #{companyId}, #{typeName})
+	</insert>
 	
 </mapper>

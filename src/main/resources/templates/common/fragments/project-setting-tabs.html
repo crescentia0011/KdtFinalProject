@@ -8,7 +8,7 @@
         <a th:classappend="${settingMenu == 'project'} ? 'active' : ''" th:href="@{/project/{projectId}/setting(projectId=${projectId})}">프로젝트</a>
         <a th:classappend="${settingMenu == 'member'} ? 'active' : ''" th:href="@{/project/settings/members(projectId=${projectId})}">구성원</a>
         <a th:classappend="${settingMenu == 'repository'} ? 'active' : ''" th:href="@{/repository/management(projectId=${projectId})}">저장소</a>
-        <a th:classappend="${settingMenu == 'timeTracking'} ? 'active' : ''" href="#">시간추적</a>
+        <a th:classappend="${settingMenu == 'timeTracking'} ? 'active' : ''" th:href="@{/project/settings/time(projectId=${projectId})}">시간추적</a>
     </nav>
 </div>
 </body>

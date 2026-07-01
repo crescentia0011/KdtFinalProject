@@ -10,6 +10,7 @@
 <body>
 
     <section class="project-page">
+        <div th:replace="~{common/fragments/adminSetting :: adminSettingTabsFragment}"></div>
         <div class="project-toolbar-top">
             <h3 class="project-title">새 프로젝트에 포함될 모듈</h3>
         </div>
@@ -42,7 +43,7 @@
                                  th:each="type : ${taskTypeList}">
                                 <label class="checkbox-inline">
                                     <input type="checkbox" name="enabledTaskTypes"
-                                           th:value="${type.typeId}">
+       									   th:value="${type.typeId}">
                                     <span class="custom-check-box"></span>
                                     <span class="module-text" th:text="${type.typeName}">일감유형명</span>
                                 </label>

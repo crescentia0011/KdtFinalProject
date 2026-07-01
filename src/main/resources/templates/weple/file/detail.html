@@ -78,17 +78,14 @@
 				                  #strings.endsWith(projectFileInfo.logicalName, '.jpeg') or
 				                  #strings.endsWith(projectFileInfo.logicalName, '.gif') or
 				                  #strings.endsWith(projectFileInfo.logicalName, '.webp'))}">
-				        <img th:src="@{/uploads/{path}(path=${projectFileVersionList[0].savedName})}"
-						     th:alt="${projectFileInfo.logicalName}" class="preview-img"
-						     onerror="this.parentElement.innerHTML='<p class=\'preview-unavail\'>이미지를 불러올 수 없습니다.</p>'">
+				        <img th:src="${'https://weple-cloud-files.s3.ap-northeast-2.amazonaws.com/' + projectFileVersionList[0].savedName}">
 				    </div>
 				
 				    <!-- PDF 미리보기 -->
 				    <div th:if="${!#lists.isEmpty(projectFileVersionList) and
 				                 projectFileInfo.logicalName != null and
 				                 #strings.endsWith(projectFileInfo.logicalName, '.pdf')}">
-				        <iframe th:src="@{/uploads/{path}(path=${projectFileVersionList[0].savedName})}"
-        						class="preview-pdf" title="PDF 미리보기"></iframe>
+				        <iframe th:src="${'https://weple-cloud-files.s3.ap-northeast-2.amazonaws.com/' + projectFileVersionList[0].savedName}"></iframe>
 				    </div>
 				
 				    <!-- 텍스트 미리보기 -->
@@ -100,7 +97,7 @@
 				        <script th:inline="javascript">
 				            const filePath = /*[[${projectFileVersionList[0].savedName}]]*/ '';
 				            if (filePath) {
-				                fetch('/uploads/' + filePath)
+				            	fetch('https://weple-cloud-files.s3.ap-northeast-2.amazonaws.com/' + filePath)
 				                    .then(r => r.text())
 				                    .then(t => document.getElementById('previewText').textContent = t)
 				                    .catch(() => document.getElementById('previewText').textContent = '파일을 불러올 수 없습니다.');
@@ -354,24 +351,24 @@ function downloadFile(versionId) {
 }
 
 .preview-box {
-	border: 1px solid var(--weple-purple-border);
-	border-radius: 8px;
-	min-height: 180px;
-	background: var(--weple-bg);
-	overflow: hidden;
-	margin-bottom: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+    border: 1px solid var(--weple-purple-border);
+    border-radius: 8px;
+    background: var(--weple-bg);
+    overflow: hidden;
+    height: 360px;        /* 고정 높이 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .preview-img {
-	max-width: 100%;
-	max-height: 400px;
-	object-fit: contain;
-	display: block;
-	margin: 0 auto;
-	padding: 12px;
+    max-width: 100%;
+    max-height: 360px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
 }
 
 .preview-pdf {

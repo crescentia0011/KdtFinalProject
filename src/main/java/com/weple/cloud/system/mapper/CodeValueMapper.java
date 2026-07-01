@@ -10,7 +10,7 @@ import com.weple.cloud.system.service.CodeValueVO;
 public interface CodeValueMapper {
 	// -------------------------------코드값------------------------------
 	// 전체조회
-	public List<CodeValueVO> selectCodeValueAll();
+	public List<CodeValueVO> selectCodeValueAll(long companyId);
 	
 	// 상세조회
 	public CodeValueVO selectCodeValueInfo(Map<String, Object> map);

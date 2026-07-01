@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<!-- 관리 > 설정 화면에서 공통으로 사용하는 제목과 하위 탭(프로젝트/저장소)입니다. -->
+	<div th:fragment="adminSettingTabsFragment" class="admin-setting-heading">
+		<h1 class="admin-setting-title">설정</h1>
+		<nav class="admin-setting-tabs" aria-label="관리 설정 메뉴">
+			<a th:classappend="${settingTab == 'project'} ? 'active' : ''"
+				th:href="@{/system/systemModules}">프로젝트</a>
+			<a th:classappend="${settingTab == 'repository'} ? 'active' : ''"
+				th:href="@{/settingDetail}">저장소</a>
+		</nav>
+		<style>
+			.admin-setting-heading { margin-bottom: 20px; }
+			.admin-setting-title { margin: 0; color: #111827; font-size: 24px; font-weight: 800; }
+			.admin-setting-tabs { display: flex; gap: 2px; margin: 20px 0 0; border-bottom: 1px solid #e6edf8; }
+			.admin-setting-tabs a { padding: 9px 18px; color: #7b8aa3; font-size: 13px; font-weight: 600; text-decoration: none; }
+			.admin-setting-tabs a.active { border-radius: 6px 6px 0 0; background: #5271ff; color: #fff; }
+		</style>
+	</div>
+</body>
+</html>

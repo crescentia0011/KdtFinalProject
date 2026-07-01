@@ -19,8 +19,8 @@ public class GroupUserServiceImpl implements GroupUserService{
 	// -------------------------------그룹 내 사용자------------------------------
 	// 그룹 내 사용자 전체조회
 	@Override
-	public List<SystemGroupUserVO> findGroupUserAll() {
-		return groupuserMapper.selectGroupUserAll();
+	public List<SystemGroupUserVO> findGroupUserAll(long companyId) {
+		return groupuserMapper.selectGroupUserAll(companyId);
 	}
 
 	// 그룹 내 사용자 등록

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.weple.cloud.system.mapper.CodeValueMapper">
 	<!-- 코드값 전체 조회 -->
-	<select id="selectCodeValueAll" resultType="CodeValueVO">
+	<select id="selectCodeValueAll" resultType="CodeValueVO" parameterType="long">
 		SELECT  w.task_classification_id AS taskClassificationId
         		, NULL AS taskPriorityId
        		 	, w.work_name AS workName
@@ -12,6 +12,7 @@
        		 	, w.order_no AS orderNo
     	FROM work_classification w
     	JOIN companies c ON c.company_id = w.company_id
+    	WHERE w.company_id = #{companyId}
     	
     	UNION ALL
     
@@ -24,6 +25,7 @@
         		, t.order_no AS orderNo
     	FROM task_priority t
     	JOIN companies c ON c.company_id = t.company_id
+    	WHERE t.company_id = #{companyId}
     	ORDER BY orderNo ASC NULLS LAST
 	</select>
 
@@ -211,16 +213,4 @@
 	        </otherwise>
 	    </choose>
 	</insert>
-	
-	<select id="findCodeValueAll" resultType="com.weple.cloud.system.service.CodeValueVO">
-	    SELECT task_classification_id AS taskClassificationId
-       		 	, w.work_name AS workName
-        		, NULL AS priorityName
-       		 	, default_yn AS defaultYn
-       		 	, using_yn AS usingYn
-       		 	, order_no AS orderNo
-	    FROM work_classification
-	    WHERE company_id = 1
-	    ORDER BY ORDER_NO ASC
-    </select>
 </mapper>

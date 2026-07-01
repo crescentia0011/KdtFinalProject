@@ -43,7 +43,7 @@ public class NotificationController {
 
         List<AlarmVO> alarmList = notificationService.findAlarmList(userCode, status, offset, pageSize);
         int totalCount = notificationService.countAlarmList(userCode, status);
-        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+        int totalPages = Math.max(1, (int) Math.ceil((double) totalCount / pageSize));
         int unreadCount = notificationService.countUnread(userCode);
 
         model.addAttribute("alarmList", alarmList);
@@ -59,7 +59,7 @@ public class NotificationController {
         return "weple/notification/list";
     }
 
-    // 헤더 드롭다운 - 최근 알림 N건 (fragment)
+    // 헤더 드롭다운 - 최근 알림 N건 (fragment) - getCommentFragment와 동일한 패턴
     @GetMapping("/notification/popover")
     public String popover(@AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
         String userCode = loginUser.getLoginUser().getUserCode();
@@ -73,7 +73,7 @@ public class NotificationController {
         return "weple/notification/popover :: #popoverBody";
     }
 
-    // 실시간 알림 팝업(토스트) 감지용 - 가장 최근 알림 1건 + 읽지 않은 개수
+    // 실시간 알림 팝업(토스트) 감지용 - 가장 최근 알림 1건 + 읽지 않은 개수 (폴링)
     @GetMapping("/notification/latest")
     @ResponseBody
     public ResponseEntity<?> latest(@AuthenticationPrincipal LoginUserDetails loginUser) {
@@ -82,7 +82,7 @@ public class NotificationController {
         List<AlarmVO> latest = notificationService.findRecentAlarmList(userCode, 1);
         int unreadCount = notificationService.countUnread(userCode);
 
-        // 알림이 없을 수 있어(latest == null) HashMap 사용
+        // 알림이 없을 수 있어(latest == null) HashMap 사용 - Map.of()는 null value를 허용하지 않음
         Map<String, Object> body = new HashMap<>();
         body.put("latest", latest.isEmpty() ? null : latest.get(0));
         body.put("unreadCount", unreadCount);

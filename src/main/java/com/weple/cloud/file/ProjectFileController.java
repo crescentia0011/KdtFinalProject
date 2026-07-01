@@ -1,19 +1,15 @@
 package com.weple.cloud.file;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,6 +32,8 @@ import com.weple.cloud.task.service.TaskService;
 import com.weple.cloud.task.service.TaskVO;
 
 import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 @Controller
 @RequiredArgsConstructor
@@ -44,6 +42,7 @@ public class ProjectFileController {
 	
 	private final ProjectFileService projectFileService;
 	private final ProjectService projectService;
+	private final S3Service s3Service;
 	
 	// -------------------------------파일관리------------------------------		
 	// 전체조회
@@ -141,18 +140,11 @@ public class ProjectFileController {
                                      @RequestParam(value = "tag", required = false) String tag,
                                      @AuthenticationPrincipal LoginUserDetails loginUser) {
 
-        String uploadDir = "C:/weple_uploads/tasks/";
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
         String originalName = file.getOriginalFilename();
         String savedName = UUID.randomUUID().toString() + "_" + originalName;
-        File dest = new File(uploadDir + savedName);
 
         try {
-            file.transferTo(dest);
+            s3Service.uploadFile(file, savedName);   // 로컬 File/transferTo 대신 S3로 업로드
         } catch (IOException e) {
             e.printStackTrace();
             return "redirect:/project/" + projectId + "/file?error=upload_failed";
@@ -160,14 +152,13 @@ public class ProjectFileController {
 
         LoginUserVO user = loginUser.getLoginUser();
         String uploaderCode = user.getUserCode();
-        System.out.println(">>>> uploaderCode: " + uploaderCode); // 추가
 
         ProjectFileVO fileVO = new ProjectFileVO();
         fileVO.setTaskId(taskId);
         fileVO.setLogicalName(originalName);
         fileVO.setIsDeleted("N");
-        fileVO.setCreatedAt(new Date());
         fileVO.setProjectId(Long.valueOf(projectId));
+        // createdAt은 매퍼에서 SYSDATE로 채우니 안 넣어도 됨
 
         String fileId = projectFileService.addProjectFile(fileVO);
 
@@ -178,12 +169,12 @@ public class ProjectFileController {
         ProjectFileVersionsVO versionVO = new ProjectFileVersionsVO();
         versionVO.setFileId(fileId);
         versionVO.setVersionNumber(1);
-        versionVO.setSavedName(savedName);
-        versionVO.setFilePath(uploadDir + savedName);
+        versionVO.setSavedName(savedName);       // S3 키 그대로 저장 (로컬 경로 X)
+        versionVO.setFilePath(null);             // 더 이상 로컬 경로 안 씀, null로 두거나 컬럼 자체를 비워도 됨
         versionVO.setFileSize(file.getSize());
         versionVO.setUploader(uploaderCode);
-        versionVO.setUploadedAt(new Date());
-        versionVO.setHashtag(tag); // ★ 추가
+        versionVO.setHashtag(tag);
+        // uploadedAt도 매퍼에서 SYSDATE로 채움
 
         projectFileService.addProjectFileVersion(versionVO);
 
@@ -234,15 +225,9 @@ public class ProjectFileController {
         }
 
         try {
-            String uploadDir = "C:/weple_uploads/tasks/";
-            Path filePath = Paths.get(uploadDir, versionInfo.getSavedName());
-            Resource resource = new UrlResource(filePath.toUri());
+            ResponseInputStream<GetObjectResponse> s3Object = s3Service.downloadFile(versionInfo.getSavedName());
+            Resource resource = new InputStreamResource(s3Object);
 
-            if (!resource.exists() || !resource.isReadable()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            // ★ 다운로드 이력 기록
             String downloaderCode = loginUser.getLoginUser().getUserCode();
             projectFileService.recordDownloadHistory(versionId, downloaderCode);
 

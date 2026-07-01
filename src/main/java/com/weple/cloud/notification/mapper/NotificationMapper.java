@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.weple.cloud.notification.service.AlarmVO;
+import com.weple.cloud.notification.service.NotificationPreferenceVO;
 
 @Mapper
 public interface NotificationMapper {
@@ -17,7 +18,12 @@ public interface NotificationMapper {
      * INSERT 전에 selectKey로 미리 발급되서 alarmVO.alarmId 에 세팅
      */
     public int insertAlarm(AlarmVO alarmVO);
-
+    
+    // 알림 생성 전 수신자의 알림 수신 범위/이메일 연동 설정을 조회
+    public NotificationPreferenceVO selectNotificationPreference(
+    		@Param("userCode") String userCode
+    		);
+    
     // 알림 목록 - status: all/read/unread
     public List<AlarmVO> findAlarmList(
             @Param("userCode") String userCode,

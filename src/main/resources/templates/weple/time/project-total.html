@@ -19,18 +19,18 @@
 
 			<!-- 일감 필터 안내 -->
 			<div th:if="${filterTaskId != null}"
-				style="margin-bottom: 12px; padding: 10px 16px; background: #e8f4fd; border-left: 4px solid #1976d2; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-				<span style="font-size: 14px; color: #1976d2; font-weight: 600;">
+				style="margin-bottom: 12px; padding: 10px 16px; background: #F1EDFF; border-left: 4px solid #6D5EF7; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+				<span style="font-size: 14px; color: #6D5EF7; font-weight: 600;">
 					일감 <strong th:text="${filterTaskId}"></strong> 의 소요시간 목록
 				</span> <a th:href="@{/projectTimeList(projectId=${projectId})}"
-					style="font-size: 13px; color: #1976d2; text-decoration: underline; cursor: pointer;">전체
+					style="font-size: 13px; color: #6D5EF7; text-decoration: underline; cursor: pointer;">전체
 					보기</a>
 			</div>
 
 			<!-- 검색 영역 -->
 			<div class="search-box">
 				<div class="search-title"
-					style="margin-bottom: 10px; font-weight: bold; color: #1976d2; display: flex; align-items: center;">▼
+					style="margin-bottom: 10px; font-weight: bold; color: #6D5EF7; display: flex; align-items: center;">▼
 					검색조건</div>
 				<div class="search-top">
 					<div class="search-left" id="search-container">
@@ -392,13 +392,13 @@
 }
 
 .btn-primary {
-	background: #1976d2;
+	background: #6D5EF7;
 	color: #fff;
-	border: 1px solid #1976d2;
+	border: 1px solid #6D5EF7;
 }
 
 .btn-primary:hover {
-	background: #1565c0;
+	background: #5B4FEA;
 }
 
 .btn-light {
@@ -468,7 +468,7 @@
 }
 
 .data-table tbody tr:hover {
-	background: #f8fbff;
+	background: #F1EDFF;
 }
 
 .data-table th:nth-child(1) {
@@ -574,7 +574,7 @@
 }
 
 .summary-area strong {
-	color: #1976d2;
+	color: #6D5EF7;
 	margin-left: 5px;
 }
 
@@ -614,7 +614,7 @@
 }
 
 .paging a.active {
-	background: #1976d2;
+	background: #6D5EF7;
 	color: #fff;
 	font-weight: bold;
 }
@@ -628,7 +628,7 @@
 .csv-btn {
 	border: none;
 	background: none;
-	color: #1976d2;
+	color: #6D5EF7;
 	cursor: pointer;
 	font-weight: 600;
 }

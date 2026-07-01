@@ -9,7 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/admin/repo-setting.css}">
 
     <div class="admin-repository-setting-page">
-        <h1 class="admin-repository-setting-title">설정</h1>
+        <div th:replace="~{common/fragments/adminSetting :: adminSettingTabsFragment}"></div>
 
         <section class="admin-repository-setting-panel" aria-labelledby="repositoryRuleTitle">
             <form id="repositoryRuleForm"

@@ -33,6 +33,7 @@ public class AdminSettingController {
         model.addAttribute("sidebarMenu", "system");
         model.addAttribute("currentMenu", "setting");
         model.addAttribute("menu", "setting");
+        model.addAttribute("settingTab", "repository");
         return "weple/admin/config/repo-setting";
     }
 
