@@ -98,12 +98,16 @@
 	text-align: center;
 }
 .progress {
-	height: 6px;
-	background-color: #f1f5f9;
-	border-radius: 10px;
-	overflow: hidden;
-	margin-bottom: 4px;
-	box-shadow: none;
+    height: 6px;
+    background-color: #F1EDFF;
+    border: 1px solid #000;   /* 얇은 검은 테두리 */
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 4px;
+    box-shadow: none;
+}
+.progress-bar {
+    background-color: #5747E6; /* 채워진 부분 */
 }
 
 /* ==========================================================================
@@ -279,7 +283,96 @@
     background-color: #fef2f2;
 }
 
+.btn-create-task {
+    background-color: #5B4FEA;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease,
+                box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(91, 79, 234, 0.25);
+}
 
+.btn-create-task:hover {
+    background-color: #4B3FE0;
+    box-shadow: 0 4px 12px rgba(91, 79, 234, 0.35);
+}
+
+.btn-create-task:active {
+    transform: scale(0.98);
+}
+
+.btn-create-task:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(91, 79, 234, 0.25);
+}
+
+.btn-pill-light,
+.btn-pill-primary {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-pill-light {
+    background: #fff;
+    color: #5B4FEA;
+    border: 1px solid #5B4FEA;
+}
+
+.btn-pill-light:hover {
+    background: #F5F3FF;
+}
+
+.btn-pill-primary {
+    background: #5B4FEA;
+    color: #fff;
+    border: 1px solid #5B4FEA;
+}
+
+.btn-pill-primary:hover {
+    background: #4B3FE0;
+    border-color: #4B3FE0;
+}
+div.choices .choices__list--multiple .choices__item,
+div.choices .choices__list--multiple .choices__item.is-highlighted {
+    background-color: #5B4FEA !important;
+    border: 1px solid #5B4FEA !important;
+    color: #ffffff !important;
+    padding-right: 24px !important; /* X 버튼이 들어갈 오른쪽 공간 확보 */
+    position: relative;
+}
+
+/* 2. 기존 검은색 X 아이콘을 완전히 지우고, 흰색 커스텀 X 아이콘으로 대체 */
+div.choices .choices__list--multiple .choices__item .choices__button {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E") !important;
+    background-size: 12px !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    border-left: none !important;
+    display: inline-block !important;
+    width: 16px !important;
+    height: 16px !important;
+    position: absolute !important;
+    right: 4px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    margin: 0 !important;
+    opacity: 0.7 !important;
+}
+
+/* 3. X 버튼에 마우스 올렸을 때 선명하게 */
+div.choices .choices__list--multiple .choices__item .choices__button:hover {
+    opacity: 1 !important;
+    background-color: transparent !important; /* 배경이 덧칠해져서 X가 가려지는 것 방지 */
+}
 /* =======================================
    페이징(Pagination) 스타일
 ======================================= */
@@ -304,7 +397,7 @@
 }
 
 .page-btn.active {
-    background: #4d84ff;
+    background: #5747E6;
     color: #fff;
     font-weight: 700;
 }
@@ -316,5 +409,5 @@
 
 .page-btn:hover:not(.active):not(.disabled) {
     background: #eef4ff;
-    color: #4d84ff;
+    color: #5747E6;
 }

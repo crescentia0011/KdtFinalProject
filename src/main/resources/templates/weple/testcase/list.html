@@ -3,7 +3,7 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-<title>WEPLE - 테스트 관리</title>
+<title>WEPLE</title>
 <link rel="stylesheet" th:href="@{/css/testcase/testcase-list.css}">
 </head>
 <body>
@@ -51,24 +51,30 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:if="${#lists.isEmpty(testCaseList)}">
-							<td colspan="6" style="text-align: center;">등록된 테스트 케이스가
-								없습니다.</td>
-						</tr>
-						<tr th:unless="${#lists.isEmpty(testCaseList)}"
-							th:each="tc : ${testCaseList}">
-							<td th:text="${tc.testId}"></td>
-							<td th:text="${tc.testName}"></td>
-							<td th:text="${tc.userName}"></td>
-							<td th:text="${tc.managerName}"></td>
-							<td><span class="status-badge"
-								th:classappend="${#strings.toLowerCase(tc.coverageStatus) == 'partial' ? 'status-partial' : 
-                                                       #strings.toLowerCase(tc.coverageStatus) == 'covered' ? 'status-covered' : 
-                                                       #strings.toLowerCase(tc.coverageStatus) == 'designed' ? 'status-designed' : 'status-not-covered'}"
-								th:text="${tc.coverageStatus}"></span></td>
-							<td th:text="${#dates.format(tc.createdAt, 'yyyy/MM/dd')}"></td>
-						</tr>
-					</tbody>
+    <tr th:if="${#lists.isEmpty(testCaseList)}">
+        <td colspan="6" style="text-align: center;">등록된 테스트 케이스가 없습니다.</td>
+    </tr>
+<tr th:unless="${#lists.isEmpty(testCaseList)}"
+    th:each="tc : ${testCaseList}"
+    th:data-project-id="${projectId}"
+    th:data-test-id="${tc.testId}"
+    onclick="goDetail(this)"
+    style="cursor: pointer;">
+        
+        <td th:text="${tc.testId}"></td>
+        <td th:text="${tc.testName}"></td>
+        <td th:text="${tc.userName}"></td>
+        <td th:text="${tc.managerName}"></td>
+        <td>
+            <span class="status-badge"
+                  th:classappend="${#strings.toLowerCase(tc.coverageStatus) == 'partial' ? 'status-partial' : 
+                                   #strings.toLowerCase(tc.coverageStatus) == 'covered' ? 'status-covered' : 
+                                   #strings.toLowerCase(tc.coverageStatus) == 'designed' ? 'status-designed' : 'status-not-covered'}"
+                  th:text="${tc.coverageStatus}"></span>
+        </td>
+        <td th:text="${#dates.format(tc.createdAt, 'yyyy/MM/dd')}"></td>
+    </tr>
+</tbody>
 				</table>
 			</div>
 

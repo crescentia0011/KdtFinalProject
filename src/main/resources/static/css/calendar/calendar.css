@@ -1,0 +1,122 @@
+.custom-calendar-header {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px; /* 여백을 조금 줄임 */
+  font-family: sans-serif;
+  flex-wrap: wrap;
+}
+
+
+
+#calendar-center-title {
+  text-align: center;         /* 가로 정중앙 정렬 */
+  font-size: 24px;            /* 글자 크기 확대 */
+  font-weight: 700;           /* 굵게 */
+  color: #1f2937;             /* 진한 회색/검은색 계열 */
+  margin: 20px 0;             /* 위아래 적절한 여백 */
+  font-family: sans-serif;
+}
+
+/* 개별 박스 공통 스타일 */
+.header-box {
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: #fff;
+}
+
+/* 박스 상단 타이틀 */
+.box-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #374151;
+}
+
+/* 버튼 및 네비게이션 그룹 */
+.button-group, .nav-group, .filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 기본 버튼 스타일 */
+button {
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: #f3f4f6;
+}
+
+/* 보기 방식 활성화 버튼 */
+.view-btn.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+  font-weight: bold;
+}
+
+/* 오늘 버튼 */
+.today-btn {
+  color: #3b82f6;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+/* 날짜 표시 텍스트 */
+.current-date-display {
+  font-size: 15px;
+  font-weight: bold;
+  min-width: 90px;
+  text-align: center;
+}
+
+/* 일정 유형 필터 아이템 */
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.filter-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* 뱃지(Pill) 스타일 */
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 뱃지 색상 */
+.badge-purple { background-color: #e9d5ff; color: #7e22ce; }
+.badge-orange { background-color: #ffedd5; color: #ea580c; }
+.badge-blue   { background-color: #dbeafe; color: #2563eb; }
+.badge-pink   { background-color: #fce7f3; color: #db2777; }
+
+
+
+
+/* 버튼 디자인 */
+button { cursor: pointer; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 12px; font-size: 14px; color: #374151; transition: all 0.2s; }
+button:hover { background: #f3f4f6; }
+.view-btn.active { background-color: #3b82f6; color: white; border-color: #3b82f6; font-weight: bold; }
+.today-btn { color: #3b82f6; font-weight: bold; margin-left: 4px; }

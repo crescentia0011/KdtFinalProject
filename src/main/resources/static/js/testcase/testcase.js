@@ -109,3 +109,62 @@ function goPage(pageNumber) {
 	            document.getElementById('pageInput').value = pageNumber;
 	            document.getElementById('searchForm').submit();
 	        }
+			
+// 상세조회 페이지 연결			
+function goDetail(element) {
+    // element.dataset을 통해 html의 data-* 속성에 접근합니다.
+    var projectId = element.dataset.projectId;
+    var testId = element.dataset.testId;
+    
+    location.href = '/project/testcase/detail?projectId=' + projectId + '&testId=' + testId;
+}	
+
+
+
+function openTcDeleteModal(btn) {
+    // 버튼에 심어둔 data-* 값 가져오기
+    const testId = btn.getAttribute('data-test-id');
+    const testName = btn.getAttribute('data-test-name');
+    const projectId = btn.getAttribute('data-project-id');
+
+    const dialog = document.getElementById('tcDeleteDialog');
+    
+    // 만약 HTML에서 모달 코드를 못 찾으면 경고창 띄우기 (먹통 방지)
+    if (!dialog) {
+        alert('모달 창 코드를 찾을 수 없습니다. HTML 하단에 <dialog> 태그가 있는지 확인해주세요.');
+        return;
+    }
+
+    // 텍스트 가이드 및 폼 세팅
+    document.getElementById('tcDeleteName').textContent = testName;
+    document.getElementById('tcDeletePrompt').textContent = '삭제하려면 [' + testName + '] 을(를) 정확히 입력하세요.';
+    
+    const confirmInput = document.getElementById('tcDeleteConfirmationName');
+    const submitBtn = document.getElementById('tcDeleteSubmitBtn');
+    
+    confirmInput.value = '';
+    submitBtn.disabled = true;
+
+    // Action 주소 세팅
+    document.getElementById('tcDeleteForm').action = `/project/testcase/delete/${testId}?projectId=${projectId}`;
+
+    // 실시간 글자 비교
+    confirmInput.oninput = function() {
+        if (this.value.trim() === testName.trim()) {
+            submitBtn.disabled = false;
+        } else {
+            submitBtn.disabled = true;
+        }
+    };
+
+    // 모달 띄우기!
+    dialog.showModal();
+}
+
+// 2. 모달 닫기 함수
+function closeTcDeleteModal() {
+    const dialog = document.getElementById('tcDeleteDialog');
+    if (dialog) {
+        dialog.close();
+    }
+}

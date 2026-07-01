@@ -47,7 +47,7 @@
 }
 
 .form-control:focus {
-	border-color: #4b7bec;
+	border-color: #5B4FEA;
 }
 
 textarea.form-control {
@@ -94,7 +94,7 @@ textarea.form-control {
 }
 
 .btn-register {
-	background-color: #4b7bec;
+	background-color: #5B4FEA;
 	color: white;
 	border: none;
 	padding: 10px 40px;
@@ -116,5 +116,5 @@ select.form-control {
 }
 
 .btn-register:hover {
-	background-color: #3867d6;
+	background-color: #5B4FEA;
 }

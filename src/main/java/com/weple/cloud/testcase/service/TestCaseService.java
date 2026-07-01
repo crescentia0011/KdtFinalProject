@@ -19,5 +19,11 @@ public interface TestCaseService {
 	public int getTestCaseCount(long pId, String searchKeyword);
 
 	public List<TestCaseVO> findTestCaseList(long pId, String searchKeyword, int offset, int pageSize);
+	
+	
+	public TestCaseVO findTestCaseDetail(long pId , String tsId);
 
+	public void updateTestCaseService(TestCaseVO testCaseVO);
+	
+	public void deleteTestCaseService(String testId, Long projectId);
 }

@@ -15,14 +15,6 @@ function openTab(evt, tabName) {
 
 		tabButtons[i].classList.remove("active");
 
-		tabButtons[i].style.background = "#f5f5f5";
-
-		tabButtons[i].style.color = "#666";
-
-		tabButtons[i].style.border = "1px solid #e0e0e0";
-
-		tabButtons[i].style.borderBottom = "none";
-
 	}
 
 
@@ -33,9 +25,7 @@ function openTab(evt, tabName) {
 
 	// 4. 클릭된 버튼에 활성화(Active) CSS 적용
 	evt.currentTarget.classList.add("active");
-	evt.currentTarget.style.background = "#1a73e8";
-	evt.currentTarget.style.color = "#fff";
-	evt.currentTarget.style.border = "none";
+
 
 }
 
@@ -84,7 +74,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			taskDeleteDialog.close();
 			});
 		});
-    // (아래쪽에 dialog 닫기 버튼 이벤트 처리 코드 등이 이어서 존재할 것입니다)
+    
 });
 
 

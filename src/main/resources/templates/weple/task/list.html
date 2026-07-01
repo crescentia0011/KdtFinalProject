@@ -22,8 +22,7 @@
 			<button th:if="${isAdminOrOwner or taskPerms.k3Add != null}"
 				type="button"
 				th:onclick="|location.href='@{/project/task/insert(projectId=${param.projectId})}'|"
-				class="btn btn-sm text-primary fw-bold"
-				style="background: none; border: none; color: #3b82f6; font-weight: bold;">
+				class="btn-create-task">
 				+ 새 일감만들기</button>
 		</div>
 
@@ -84,7 +83,8 @@
 						<select id="memberChoices" name="memberIds" multiple>
 							<option th:each="member : ${memberList}"
 								th:value="${member.userCode}"
-								th:text="|${member.userName} (${member.email})|"></option>
+								th:text="|${member.userName} (${member.email})|"
+								th:selected="${param.memberIds != null and #arrays.contains(param.memberIds, member.userCode)}"></option>
 						</select>
 					</div>
 				</div>
@@ -145,7 +145,7 @@
 					<div style="margin: 0 auto; margin-left: 47%;"></div>
 					<div style="display: flex; gap: 8px;">
 						<button type="button" class="btn-pill-light"
-							th:onclick="|location.href='@{/project/task(projectId=${param.projectId})}'|">🔄
+							th:onclick="|location.href='@{/project/task(projectId=${param.projectId})}'|">
 							지우기</button>
 						<button type="submit" class="btn-pill-primary"
 							onclick="document.getElementById('pageInput').value=1;">적용</button>
@@ -178,7 +178,7 @@
 						style="cursor: pointer;">
 						<td th:text="${status.count}">1</td>
 						<td><a href="#"
-							style="text-decoration: none; color: #3b82f6; font-weight: 500;"
+							style="text-decoration: none; color: #5B4FEA; font-weight: 500;"
 							th:text="${task.projectTitle}">프로젝트명</a></td>
 						<td th:text="${task.typeName}">기획</td>
 						<td th:text="${task.defaultDescribe}">신규</td>

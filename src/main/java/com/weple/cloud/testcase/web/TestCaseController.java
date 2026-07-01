@@ -4,19 +4,20 @@ package com.weple.cloud.testcase.web;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.weple.cloud.auth.service.LoginUserDetails;
+import com.weple.cloud.project.service.ProjectService;
+import com.weple.cloud.task.service.TaskMemberVO;
 import com.weple.cloud.task.service.TaskParentVO;
+import com.weple.cloud.task.service.TaskService;
 import com.weple.cloud.testcase.service.CoverdStatusVO;
 import com.weple.cloud.testcase.service.TestCaseMemberVO;
 import com.weple.cloud.testcase.service.TestCasePriorityVO;
@@ -30,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class TestCaseController {
 	
 	private final TestCaseService testCaseService;
+	private final TaskService taskService;
+	private final ProjectService projectService;
 
 	// 테스트케이스 리스트 목록
 	@GetMapping("/project/testcase")
@@ -40,6 +43,16 @@ public class TestCaseController {
 	                           @RequestParam(value = "searchKeyword", required = false) String searchKeyword) {
 	    
 	    if (loginUser == null || loginUser.getLoginUser() == null) {
+	        return "weple/access-denide";
+	    }
+	    String userCode = loginUser.getLoginUser().getUserCode();
+	    
+	    List<TaskMemberVO> projMemberList = taskService.findMember(pId);
+
+	    boolean isProjectMember = projMemberList.stream()
+	            .anyMatch(member -> userCode.equals(member.getUserCode()));
+
+	    if (!isProjectMember) {
 	        return "weple/access-denide";
 	    }
 	    
@@ -77,7 +90,8 @@ public class TestCaseController {
 	    // 기타 공통 데이터
 	    model.addAttribute("currentMenu", "testcase");
 	    model.addAttribute("projectId", pId); 
-	    model.addAttribute("currentTab", "testcase"); 
+	    model.addAttribute("currentTab", "testcase");
+	    model.addAttribute("project", projectService.findById(String.valueOf(pId)));
 
 	    return "weple/testcase/list";
 	}
@@ -92,6 +106,15 @@ public class TestCaseController {
     
     	
     	if (loginUser == null || loginUser.getLoginUser() == null) {
+	        return "weple/access-denide";
+	    }
+    	String userCode = loginUser.getLoginUser().getUserCode();
+    	List<TaskMemberVO> projMemberList = taskService.findMember(pId);
+
+	    boolean isProjectMember = projMemberList.stream()
+	            .anyMatch(member -> userCode.equals(member.getUserCode()));
+
+	    if (!isProjectMember) {
 	        return "weple/access-denide";
 	    }
     	
@@ -128,6 +151,7 @@ public class TestCaseController {
         model.addAttribute("currentMenu", "testcase"); 
         model.addAttribute("projectId", pId);
         model.addAttribute("currentTab", "coverage");
+        model.addAttribute("project", projectService.findById(String.valueOf(pId)));
         return "weple/testcase/list";
     }
     
@@ -139,7 +163,17 @@ public class TestCaseController {
 		if (loginUser == null || loginUser.getLoginUser() == null) {
 			return "weple/access-denide";
 		}
-	    String userCode = loginUser.getLoginUser().getUserCode();
+		String userCode = loginUser.getLoginUser().getUserCode();
+		List<TaskMemberVO> projMemberList = taskService.findMember(pId);
+
+		
+	    boolean isProjectMember = projMemberList.stream()
+	            .anyMatch(member -> userCode.equals(member.getUserCode()));
+
+	    if (!isProjectMember) {
+	        return "weple/access-denide";
+	    }
+		
 	    Long companyId = loginUser.getLoginUser().getCompanyId();
     	
 	    List<TestCaseMemberVO> memberList = testCaseService.findTestCaseMembers(pId);
@@ -154,6 +188,7 @@ public class TestCaseController {
     	model.addAttribute("statusList",statusList);
     	model.addAttribute("taskList",taskList);
     	model.addAttribute("priorityList",priorityList);
+    	model.addAttribute("project", projectService.findById(String.valueOf(pId)));
     	
     	return "weple/testcase/register";
     }
@@ -199,13 +234,154 @@ public class TestCaseController {
         vo.setProjectId(pId); 
 
         // 서비스 호출 (insert 실행)
-        int result = testCaseService.insetTestCaseService(vo);
+        testCaseService.insetTestCaseService(vo);
 
         // 등록 완료 후 목록 페이지로 리다이렉트 (경로는 상황에 맞게 수정하세요)
         return "redirect:/project/testcase?projectId=" + pId; 
     }
 	
+    @GetMapping("/project/testcase/detail")
+    public String testCaseDetail(@RequestParam("projectId") Long projectId,
+            					@RequestParam("testId") String testId, 
+            					Model model,
+            					@RequestParam("projectId") Long pId,
+            					@AuthenticationPrincipal LoginUserDetails loginUser) {
+    	
+    	if (loginUser == null || loginUser.getLoginUser() == null) {
+            return "weple/access-denide";
+        }
+    	String userCode = loginUser.getLoginUser().getUserCode();
+    	
+    	List<TaskMemberVO> projMemberList = taskService.findMember(projectId);
+
+	    boolean isProjectMember = projMemberList.stream()
+	            .anyMatch(member -> userCode.equals(member.getUserCode()));
+
+	    if (!isProjectMember) {
+	        return "weple/access-denide";
+	    }
+    	    
+    	
+    	TestCaseVO testCaseDetail = testCaseService.findTestCaseDetail(projectId, testId);
+    	System.out.println("여기 " +testCaseDetail);
+    	System.out.println("여기 " +userCode);
+    	model.addAttribute("loginUserCode",userCode);
+    	model.addAttribute("testCaseDetail",testCaseDetail);
+    	model.addAttribute("projectId", projectId);
+        model.addAttribute("testId", testId);
+        model.addAttribute("currentMenu", "testcase");
+        model.addAttribute("project", projectService.findById(String.valueOf(pId)));
+    	
+    	return "weple/testcase/detail";
+    }
 	
+    @GetMapping("/project/testcase/update")
+    public String updateTestCaseForm(@RequestParam("projectId") Long pId,
+                                     @RequestParam("testId") String testId,
+                                     Model model,
+                                     @AuthenticationPrincipal LoginUserDetails loginUser) {
+        
+        // 1. 로그인 및 인증 객체 체크
+        if (loginUser == null || loginUser.getLoginUser() == null) {
+            return "weple/access-denide";
+        }
+        String userCode = loginUser.getLoginUser().getUserCode();
+        
+        List<TaskMemberVO> projMemberList = taskService.findMember(pId);
+
+	    boolean isProjectMember = projMemberList.stream()
+	            .anyMatch(member -> userCode.equals(member.getUserCode()));
+
+	    if (!isProjectMember ) {
+	        return "weple/access-denide";
+	    }
+        
+        // 2. 실제 유저 정보에서 유저코드와 회사 ID 추출
+        
+        Long companyId = loginUser.getLoginUser().getCompanyId();
+        
+        // 3. [해결포인트] 실제 등록폼에서 사용하는 올바른 서비스 메서드로 교체
+        List<TestCaseMemberVO> memberList = testCaseService.findTestCaseMembers(pId);
+        List<CoverdStatusVO> statusList = testCaseService.findCoverageStatus();
+        List<TaskParentVO> taskList = testCaseService.findTestCaseTaskList(pId);
+        List<TestCasePriorityVO> priorityList = testCaseService.findTestCasePriorities(companyId);
+        
+        // 4. 보내주신 상세조회용 서비스 호출 (조인 쿼리 실행 부)
+        // 서비스 메서드 구조에 맞게 (pId, testId) 혹은 (testId) 형태로 호출하세요.
+        TestCaseVO testCaseDetail = testCaseService.findTestCaseDetail(pId, testId); 
+        
+        // 5. 화면(Thymeleaf)으로 모든 필요한 데이터 바인딩
+        model.addAttribute("testCaseDetail", testCaseDetail); // 수정할 타겟 데이터
+        
+        model.addAttribute("currentMenu", "testcase");
+        model.addAttribute("projectId", pId);
+        model.addAttribute("loginUserCode", userCode);
+        model.addAttribute("memberList", memberList);
+        model.addAttribute("statusList", statusList);
+        model.addAttribute("taskList", taskList);
+        model.addAttribute("priorityList", priorityList);
+        model.addAttribute("project", projectService.findById(String.valueOf(pId)));
+        
+        return "weple/testcase/update"; // update.html 화면 렌더링
+    }
+
+    @PostMapping("/project/testcase/update")
+    public String updateTestCase(
+            @RequestParam("projectId") Long pId,
+            @RequestParam("testId") String testId,
+            @RequestParam("taskId") String taskId,
+            @RequestParam("title") String title,
+            @RequestParam("status") String status,
+            @RequestParam(value = "testCaseManager", required = false) String testCaseManager,
+            @RequestParam("priority") String priority,
+            @RequestParam(value = "testDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date testDate,
+            @RequestParam("isTested") String isTested,
+            @RequestParam("testResult") String testResult,
+            @RequestParam(value = "description", required = false) String description,
+            // 기존 쿼리에 존재하는 milestone_version 유지를 위해 추가수집 (필요시)
+            @RequestParam(value = "milestoneVersion", required = false) String milestoneVersion 
+    ) {
+        TestCaseVO vo = new TestCaseVO();
+        
+        vo.setTestId(testId);
+        vo.setProjectId(pId);
+        vo.setTaskId(taskId);
+        vo.setTestName(title);
+        vo.setCoverageStatus(status);
+        vo.setTestManager(testCaseManager);
+        vo.setPriority(priority);
+        vo.setTestDate(testDate);
+        vo.setTestYn(isTested);
+        vo.setTestContent(testResult);
+        vo.setTestDescribe(description);
+        
+        // 상세조회 쿼리에 맞춰 milestone_version 값도 null이 되지 않도록 세팅
+        vo.setMilestoneVersion(milestoneVersion); 
+
+        // 서비스 실행 -> MyBatis Update 실행
+        testCaseService.updateTestCaseService(vo);
+
+        // 수정한 데이터를 실시간으로 반영한 상세페이지로 리다이렉트
+        return "redirect:/project/testcase/detail?projectId=" + pId + "&testId=" + testId;
+    }
 	
+    
+    @PostMapping("/project/testcase/delete/{testId}")
+    public String deleteTestCase(
+            @AuthenticationPrincipal LoginUserDetails loginUser,
+            @PathVariable("testId") String testId,
+            @RequestParam("projectId") Long projectId) {
+
+        // 1. 보안 체크
+        if (loginUser == null || loginUser.getLoginUser() == null) {
+            return "weple/access-denide";
+        }
+
+        // 2. 삭제 서비스 호출
+        testCaseService.deleteTestCaseService(testId, projectId);
+
+        // 3. 삭제 완료 후 프로젝트의 테스트케이스 목록 첫 페이지로 리다이렉트
+        return "redirect:/project/testcase?projectId=" + projectId;
+    }
 	
 }

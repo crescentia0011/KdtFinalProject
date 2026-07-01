@@ -39,7 +39,7 @@
 
 .upload-zone:hover {
 	background-color: #f1f5f9;
-	border-color: #3b82f6;
+	border-color: #5B4FEA;
 }
 
 .upload-icon {
@@ -54,8 +54,8 @@
 }
 
 .btn-insert-submit {
-	background-color: #0000ff !important;
-	border-color: #0000ff !important;
+	background-color: #5747E6 !important;
+	border-color: #5747E6 !important;
 	color: white !important;
 	font-weight: bold;
 	border-radius: 6px;

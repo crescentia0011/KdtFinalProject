@@ -26,8 +26,8 @@
 }
 
 .tc-tab.active {
-	color: #4b7bec;
-	border-bottom: 3px solid #4b7bec;
+	color: #5B4FEA;
+	border-bottom: 3px solid #5B4FEA;
 	margin-bottom: -2px; /* 선 겹치게 처리 */
 }
 
@@ -128,7 +128,7 @@
 }
 
 .btn-register {
-	background-color: #4b7bec;
+	background-color: #5B4FEA;
 	color: white;
 	border: none;
 	padding: 10px 30px;
@@ -139,7 +139,7 @@
 }
 
 .btn-register:hover {
-	background-color: #3867d6;
+	background-color: #5B4FEA;
 }
 
 .testcase-section {
@@ -171,8 +171,8 @@
 }
 
 .tc-tab.active {
-	color: #4b7bec;
-	border-bottom: 3px solid #4b7bec;
+	color: #5B4FEA;
+	border-bottom: 3px solid #5B4FEA;
 	margin-bottom: -2px;
 }
 
@@ -271,7 +271,7 @@
 }
 
 .btn-register {
-	background-color: #4b7bec;
+	background-color: #5B4FEA;
 	color: white;
 	border: none;
 	padding: 10px 30px;
@@ -357,7 +357,7 @@
 }
 
 .page-btn.active {
-	background: #4d84ff;
+	background: #5B4FEA;
 	color: #fff;
 	font-weight: 700;
 }
@@ -369,5 +369,25 @@
 
 .page-btn:hover:not(.active):not(.disabled) {
 	background: #eef4ff;
-	color: #4d84ff;
+	color: #5B4FEA;
+}
+
+
+.tc-table tbody tr {
+    cursor: pointer;
+    background-color: #ffffff;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease; 
+}
+
+
+.tc-table tbody tr:hover {
+
+    background-color: #f4f3ff !important; 
+    box-shadow: inset 4px 0 0 0 #5B4FEA; 
+}
+
+
+.tc-table tbody tr:hover td {
+    color: #1e293b;
+    font-weight: 500;
 }

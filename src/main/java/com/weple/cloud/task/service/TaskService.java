@@ -28,6 +28,8 @@ public interface TaskService {
 	
 	public List<TaskVO> findChildTask(String tId);
 	
+	public List<TaskTestCaseDTO> findTestCase(String tId , Long pId);
+	
 	public List<TaskVO> findAllList(Map<String, Object> allParams);
 	
 	public List<TaskProjectSelectVO> findMyProject(String uCode);

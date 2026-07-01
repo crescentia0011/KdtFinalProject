@@ -112,7 +112,7 @@
 								<span style="color: rgb(127, 127, 127); font-weight: bold;">버전아이디:</span>
 								<a th:href="@{/project/download/{id}(id=${file.versionId})}"
 									class="file-link"
-									th:text="|${file.logicalName} - version ${file.versionNumber}|"></a>
+									th:text="|${file.logicalName} - Version${file.versionNumber}|"></a>
 								<span class="file-size" th:text="${file.fileSize} + ' bytes'"></span>
 							</div>
 							<span class="file-date"
@@ -138,11 +138,31 @@
 
 							<span id="childTaskArrow">↳</span> <a id="childTaskName"
 								th:href="@{/project/task/detail/{id}(id=${sub.taskId}, projectId=${projectId})}"
-								th:text="${sub.taskTitle}"> 하위 일감 제목 </a>
+								th:text="${sub.taskTitle}"> </a>
 						</div>
 
 						<div id="noChildTask" th:if="${#lists.isEmpty(chlidTaskList)}">
 							등록된 하위 일감이 존재하지 않습니다.</div>
+					</div>
+				</div>
+				<div class="task-section subtasks-area">
+					<div class="section-title">
+						<span>테스트 케이스</span>
+					</div>
+
+					<div class="section-content">
+						<div th:each="sub : ${taskTestCaseList}"
+							style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+
+							<span id="childTaskArrow">↳</span> 
+ 							<a id="childTaskName"
+   								th:href="@{/project/testcase/detail(projectId=${projectId}, testId=${sub.testId})}"
+   								th:text="${sub.testName}">
+							</a>
+						</div>
+
+						<div id="noChildTask" th:if="${#lists.isEmpty(taskTestCaseList)}">
+							등록된 테스트케이스가 존재하지 않습니다.</div>
 					</div>
 				</div>
 
@@ -283,7 +303,7 @@
 				<div class="comment-item reply-comment" th:style="${reply.userCode == null} ? 'opacity: 0.6; flex: 1;' : 'flex: 1;'">
 					<div class="comment-header">
 						<div class="user-info">
-							<div class="profile-img"></div>
+							<img class="profile-img" th:src="${comment.profileImage}" alt="프로필 사진" />
 							<strong th:if="${reply.userCode != null}" th:text="|${reply.userName}(${reply.email})|"></strong> 
 							<strong th:if="${reply.userCode == null}" style="color: #94a3b8; font-weight: normal;"></strong> 
 							<span class="comment-date" th:text="${#temporals.format(reply.createdAt, 'yyyy.MM.dd HH:mm')}"></span>

@@ -57,8 +57,9 @@
         	<a href="#">칸반보드</a>
         </li>
         
-        <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b10')}">
-        	<a href="#">캘린더</a>
+        <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b10')}"
+        	th:classappend="${currentMenu == 'calendar'} ? 'active' : ''">
+        	<a th:href="@{/project/calendar(projectId=${projectId})}">캘린더</a>
         </li>
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b11')}"

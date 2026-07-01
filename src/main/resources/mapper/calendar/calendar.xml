@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weple.cloud.calendar.mapper.CalendarMapper">
+<select id="selectScheduleList" parameterType="map" resultType="map">
+    WITH CALENDAR_EVENTS AS (
+
+        -- 일감
+        SELECT
+            task_id AS "id",
+            task_title AS "title",
+            start_date AS "start_date",
+            finish_date AS "end_date",
+            'MY_TASK' AS "eventType"
+        FROM task
+        WHERE deleted_yn = 'N'
+
+        UNION ALL
+
+        -- 마일스톤
+        SELECT
+            'M_' || TO_CHAR(m.milestone_id) AS "id",
+            m.milestone_title AS "title",
+            NVL(MIN(t.start_date), m.finish_date) AS "start_date",
+            m.finish_date AS "end_date",
+            'MILESTONE' AS "eventType"
+        FROM milestone m
+        LEFT OUTER JOIN task t
+            ON m.milestone_id = t.milestone_id
+           AND t.deleted_yn = 'N'
+        WHERE m.milestone_status = 'g1'
+        GROUP BY
+            m.milestone_id,
+            m.milestone_title,
+            m.finish_date
+    )
+    SELECT
+        "id",
+        "title",
+        TO_CHAR("start_date", 'YYYY-MM-DD') AS "start",
+        CASE
+            WHEN "end_date" IS NOT NULL THEN TO_CHAR("end_date" + 1, 'YYYY-MM-DD')
+            ELSE NULL
+        END AS "end",
+        "eventType"
+    FROM CALENDAR_EVENTS
+    WHERE
+        "start_date" <![CDATA[<=]]> TO_DATE(#{end}, 'YYYY-MM-DD')
+        AND ("end_date" <![CDATA[>=]]> TO_DATE(#{start}, 'YYYY-MM-DD') OR "end_date" IS NULL)
+
+    <if test="filterList != null and filterList.size() > 0">
+        AND "eventType" IN
+        <foreach collection="filterList" item="type" open="(" close=")" separator=",">
+            #{type}
+        </foreach>
+    </if>
+</select>
+
+
+</mapper>

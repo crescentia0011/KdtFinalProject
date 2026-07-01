@@ -28,5 +28,11 @@ public interface TestCaseMapper {
 										@Param("searchKeyword") String searchKeyword, 
 										@Param("offset") int offset, 
 										@Param("pageSize") int pageSize);
+	
+	public TestCaseVO testCaseDetail(@Param("pId") long pId, @Param("tsId") String tsId);
+	
+	public int updateTestCase(TestCaseVO testCaseVO);
+	
+	public int deleteTestCase(@Param("testId") String testId, @Param("projectId") Long projectId);
 
 }

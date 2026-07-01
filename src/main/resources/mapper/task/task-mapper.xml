@@ -207,6 +207,14 @@
 	FROM task
 	WHERE parent_task_id = #{tId}
 </select>
+
+<!-- 일감 상세조회 테스트케이스 목록 -->
+<select id="taskTestCaseList" resultType="TaskTestCaseDTO">
+	SELECT tc.test_id , tc.test_name
+	FROM task t JOIN test_case tc ON t.task_id = tc.task_id
+	WHERE t.task_id = #{tId} AND t.project_id = #{pId}
+</select>
+
 <!-- 관리자 전체 일감 목록 + 검색조건 포함-->
 <select id="selectAllList" parameterType="map" resultType="TaskVO"> 
     SELECT

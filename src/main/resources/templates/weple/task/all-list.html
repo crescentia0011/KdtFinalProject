@@ -22,7 +22,7 @@
 			<button th:if="${isAdminOrOwner or taskPerms.k3Add != null}"
 				type="button" data-toggle="modal" data-target="#projectSelectModal"
 				class="btn btn-sm text-primary fw-bold"
-				style="background: none; border: none; color: #3b82f6; font-weight: bold;">
+				style="background: none; border: none; color: #5B4FEA; font-weight: bold;">
 				+ 새 일감만들기</button>
 		</div>
 
@@ -152,7 +152,7 @@
 					<div style="margin: 0 auto; margin-left: 47%;"></div>
 					<div style="display: flex; gap: 8px;">
 						<button type="button" class="btn-pill-light"
-							th:onclick="|location.href='@{/task/all-list}'|">🔄 지우기</button>
+							th:onclick="|location.href='@{/task/all-list}'|">지우기</button>
 						<button type="submit" class="btn-pill-primary"
 							onclick="document.getElementById('pageInput').value=1;">적용</button>
 					</div>

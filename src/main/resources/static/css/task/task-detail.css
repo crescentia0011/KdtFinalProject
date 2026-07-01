@@ -22,13 +22,9 @@
     gap: 10px;
 }
 
-.badge {
-    background-color: #e8f0fe;
-    color: #1a73e8;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 14px;
+.badge{
+    background:#F1EDFF;
+    color:#6D5EF7;
 }
 
 .task-id {
@@ -42,12 +38,16 @@
     gap: 8px;
 }
 
-.btn {
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    background: #fff;
-    border-radius: 4px;
-    cursor: pointer;
+.btn{
+    border:1px solid #DDD6FE;
+    background:#FFFFFF;
+    color:#374151;
+    transition:.2s;
+}
+.btn:hover{
+    background:#F1EDFF;
+    color:#5B4FEA;
+    border-color:#6D5EF7;
 }
 
 .btn-delete {
@@ -58,10 +58,10 @@
 
 /* 메인 콘텐츠 카드 */
 .task-main-card {
-    border: 1px solid #e0e0e0;
+    border:1px solid #DDD6FE;
     border-radius: 8px;
     padding: 24px;
-    background: #fff;
+    background:#FFFFFF;
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
@@ -90,7 +90,7 @@
 }
 
 .task-meta .author {
-    color: #1a73e8;
+    color:#6D5EF7;
     font-weight: 500;
 }
 
@@ -140,7 +140,7 @@
 }
 
 .info-row .value.link-style {
-    color: #1a73e8;
+    color:#6D5EF7;
 }
 
 .info-row .value.danger-style {
@@ -161,7 +161,7 @@
 }
 
 .progress-bar-bg {
-    background: #eee;
+    background:#F1EDFF;
     height: 8px;
     border-radius: 4px;
     flex: 1;
@@ -170,14 +170,14 @@
 }
 
 .progress-bar-fill {
-    background: #28a745;
+    background:#6D5EF7;
     height: 100%;
     width: 60%;
 }
 
 .progress-percent {
     font-size: 13px;
-    color: #28a745;
+    color:#6D5EF7;
     font-weight: bold;
 }
 
@@ -227,7 +227,7 @@
 }
 
 .btn-add {
-    color: #1a73e8;
+    color:#6D5EF7;
     text-decoration: none;
     font-size: 13px;
     font-weight: bold;
@@ -241,7 +241,7 @@
 }
 
 .file-link {
-    color: #1a73e8;
+    color:#6D5EF7;
     text-decoration: none;
 }
 
@@ -258,15 +258,15 @@
 .tabs-header {
     display: flex;
     gap: 4px;
-    border-bottom: 2px solid #1a73e8;
+    border-bottom:2px solid #6D5EF7;
     padding-left: 8px;
 }
 
 .tab-button {
     padding: 10px 16px;
-    background: #f5f5f5;
-    color: #666;
-    border: 1px solid #e0e0e0;
+     background:#FAFAFC;
+    color:#6B7280;
+    border:1px solid #DDD6FE;
     border-bottom: none;
     border-radius: 4px 4px 0 0;
     cursor: pointer;
@@ -274,9 +274,14 @@
     transition: 0.2s;
 }
 
+.tab-button:hover{
+    background:#F1EDFF;
+    color:#5B4FEA;
+}
+
 .tab-button.active {
-    background: #1a73e8;
-    color: #fff;
+   background:#6D5EF7;
+    color:#FFFFFF;
     border: none;
     font-weight: bold;
 }
@@ -319,11 +324,11 @@
 .history-details {
     color: #444;
     padding-left: 8px;
-    border-left: 3px solid #1a73e8;
+    border-left: 3px solid #5747E6;
 }
 
 .history-details strong {
-    color: #28a745;
+    color: #5747E6;
 }
 
 .history-details span {
@@ -333,7 +338,15 @@
 
 /* 탭 내부: 댓글 영역 */
 .comment-input-box {
+	border:1px solid #DDD6FE;
     margin-bottom: 20px;
+}
+.comment-input-box textarea:focus{
+    outline:none;
+}
+.comment-input-box:focus-within{
+    border-color:#6D5EF7;
+    box-shadow:0 0 0 3px rgba(109,94,247,.12);
 }
 
 .comment-input-box textarea {
@@ -348,6 +361,8 @@
 }
 
 .comment-submit-area {
+	
+    color:#FFFFFF;
     text-align: right;
     margin-top: 8px;
 }
@@ -371,7 +386,7 @@
 }
 
 .comment-item strong {
-    color: #1a73e8;
+    color: #5747E6;
 }
 
 .comment-item .comment-date {
@@ -419,7 +434,7 @@
 
 .time-table td.time-value {
     font-weight: bold;
-    color: #1a73e8;
+    color:#6D5EF7;
 }
 
 /* 최하단 내보내기 구역 */
@@ -439,7 +454,7 @@
 }
 
 .export-link {
-    color: #1a73e8;
+    color:#6D5EF7;
     text-decoration: none;
     font-weight: bold;
 }
@@ -450,12 +465,12 @@
 }
 
 #childTaskArrow{
-	color: #94a3b8;
+	color:#6D5EF7;
 	font-weight: bold;
 }
 
 #childTaskName{
-	color: #1a73e8;
+	color: #5B4FEA;
 	text-decoration: none;
 	font-weight: 500; 
 	font-size: 14px;
@@ -475,14 +490,14 @@
 .comment-input-box textarea { width: 100%; height: 60px; border: none; resize: none; outline: none; font-size: 14px; font-family: inherit; }
 .comment-submit-area { text-align: right; margin-top: 10px; }
 .comment-submit-area button { padding: 6px 14px; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 13px; color: #475569; }
-.comment-submit-area button:hover { background: #f8fafc; }
+.comment-submit-area button:hover { background:#5B4FEA;  border-color:#5B4FEA;}
 .comment-submit-area .btn-cancel { border: none; color: #94a3b8; margin-right: 5px; }
 
 /* 대댓글 폼 (들여쓰기) */
 .reply-input-form { margin-left: 40px; margin-top: -5px; background: #f8fafc; border-style: dashed; }
 
 /* 댓글 박스 */
-.comment-item { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+.comment-item { background:#FAFAFC; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
 .reply-comment { flex: 1; margin-bottom: 10px; background: #f1f5f9; } 
 
 /* 대댓글 └ 기호 래퍼 */
@@ -521,8 +536,8 @@
         text-align: center;
         min-width: 250px; 
     }
-    .toast-error { background-color: #e53e3e; }
-    .toast-success { background-color: #38a169; }
+    .toast-error {  background:#EF4444; background-color: #e53e3e; }
+    .toast-success { background:#22C55E; background-color: #38a169; }
 
     /* 💡 오른쪽 위에서 자연스럽게 내려오고 올라가도록 애니메이션 수정 */
     @keyframes toastFadeOut {
@@ -571,15 +586,41 @@
 
     /* 모달 버튼 디자인 */
     .modal-btn-cancel {
-        padding: 7px 16px; border: 1px solid #ced4da; background: #fff; 
+        padding: 7px 16px; border:1px solid #DDD6FE; background:#FFFFFF;
         border-radius: 5px; color: #495057; font-size: 13px; cursor: pointer; transition: 0.2s;
         min-width: 70px;
     }
-    .modal-btn-cancel:hover { background: #f8f9fa; }
+    .modal-btn-cancel:hover { background:#F1EDFF; }
     
     .modal-btn-delete {
-        padding: 7px 16px; border: 1px solid #e53e3e; background: #e53e3e; 
+        padding: 7px 16px; border: 1px solid #EF4444;  background:#EF4444; 
         border-radius: 5px; color: #fff; font-size: 13px; cursor: pointer; transition: 0.2s;
         min-width: 70px;
     }
-    .modal-btn-delete:hover { background: #c53030; border-color: #c53030; }
+    .modal-btn-delete:hover { background:#DC2626; border-color: #c53030; }
+    
+    /* --- 일감 삭제 모달: 삭제 확인 버튼 상태별 스타일 --- */
+
+/* 1. 비활성화 상태 (이름 일치하기 전 - 회색) */
+.repository-button-danger:disabled {
+    background: #cbd5e1 !important;
+    color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    cursor: not-allowed !important;
+    transition: all 0.2s ease;
+}
+
+/* 2. 활성화 상태 (이름 정확히 입력 후 - 빨간색) */
+.repository-button-danger:not(:disabled) {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border: 1px solid #ef4444 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease;
+}
+
+/* 3. 활성화 상태에서 마우스 올렸을 때 (살짝 더 어두운 빨간색) */
+.repository-button-danger:not(:disabled):hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+}

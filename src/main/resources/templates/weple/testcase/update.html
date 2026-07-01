@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head>
+    <title>WEPLE - 테스트케이스 수정</title>
+    <link rel="stylesheet" th:href="@{/css/testcase/testcase-insert.css}">
+</head>
+<body>
+
+<section class="tc-form-section">
+    <form th:action="@{/project/testcase/update(projectId=${projectId}, testId=${testCaseDetail.testId})}" method="post">
+        <div class="tc-form-container">
+            
+            <div class="form-group">
+                <label>테스트 케이스 제목 입력 <span class="required">*</span></label>
+                <input type="text" class="form-control" name="title" th:value="${testCaseDetail.testName}" placeholder="제목을 입력하세요" required>
+            </div>
+
+            <div class="form-row-5">
+                <div class="form-group" style="margin-bottom: 0; position: relative;">
+                    <label>일감 연결</label>
+                    <div class="input-group" style="display: flex; align-items: stretch; width: 100%;">
+                        <span class="input-group-addon" style="display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #ddd; border-right: none; border-radius: 5px 0 0 5px; padding: 0 12px; font-size: 14px;">🔍</span>
+                        
+                        <input type="text" id="taskSearch" class="form-control" th:value="${testCaseDetail.taskTitle}" placeholder="일감 검색" autocomplete="off"
+                               style="border-left: none; border-radius: 0 5px 5px 0 !important; flex: 1; margin: 0; box-shadow: none;">
+                        
+                        <input type="hidden" id="taskId" name="taskId" th:value="${testCaseDetail.taskId}">
+                    </div>
+                    <div id="task-autocomplete-list" class="list-group shadow" style="z-index: 10000; max-height: 200px; overflow-y: auto; display: none; position: absolute; left: 0; right: 0; top: 100%; border-radius: 0 0 4px 4px; background: #fff; border: 1px solid #ddd; border-top: none;"></div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>진행상황 <span class="required">*</span></label>
+                    <select class="form-control" name="status" required>
+                        <option value="" disabled hidden>진행상황 선택</option>
+                        <option th:each="code : ${statusList}"
+                                th:value="${code.defaultDescribe}"
+                                th:text="${code.defaultDescribe}"
+                                th:selected="${code.defaultDescribe == testCaseDetail.coverageStatus}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>담당자</label>
+                    <select class="form-control" name="testCaseManager">
+                    	<option value="">담당자 지정안함</option>
+                        <option th:value="${loginUserCode}" th:selected="${loginUserCode == testCaseDetail.testManager}">&lt;&lt; 내게 할당 &gt;&gt;</option>
+                        <option th:each="member : ${memberList}"
+                                th:value="${member.userCode}"
+                                th:text="|${member.userName} (${member.email})|"
+                                th:selected="${member.userCode == testCaseDetail.testManager}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>우선순위 <span class="required">*</span></label>
+                    <select class="form-control" name="priority" required>
+                        <option value="" disabled hidden>우선순위 선택</option>
+                        <option th:each="priority : ${priorityList}"
+                                th:value="${priority.priorityName}"
+                                th:text="${priority.priorityName}"
+                                th:selected="${priority.priorityName == testCaseDetail.priority}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>테스트 수행 날짜</label>
+                    <input type="date" class="form-control" name="testDate" 
+                           th:value="${testCaseDetail.testDate != null ? #dates.format(testCaseDetail.testDate, 'yyyy-MM-dd') : ''}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>테스트 여부 <span class="required">*</span></label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="isTested" value="Y" th:checked="${testCaseDetail.testYn == 'Y'}"> 예
+                    </label>
+                    <label>
+                        <input type="radio" name="isTested" value="N" th:checked="${testCaseDetail.testYn == 'N'}"> 아니오
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>테스트 사항 및 결과 <span class="required">*</span></label>
+                <textarea class="form-control" name="testResult" placeholder="내용을 입력하세요" required th:text="${testCaseDetail.testContent}"></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>설명</label>
+                <textarea class="form-control" name="description" placeholder="설명을 입력하세요" th:text="${testCaseDetail.testDescribe}"></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions" style="display: flex; gap: 10px;">
+            <button type="submit" class="btn-register" style="background-color: #5B4FEA;">수정 완료</button>
+            <button type="button" class="btn-register" style="background-color: #cbd5e1; color: #475569;" 
+                    th:onclick="|location.href='@{/project/testcase/detail(projectId=${projectId}, testId=${testCaseDetail.testId})}'|">취소</button>
+        </div>
+    </form>
+    
+    <script th:inline="javascript">
+        window.globalTaskList = /*[[${taskList}]]*/ [];
+    </script>
+    <script th:src="@{/js/testcase/testcase.js}"></script>
+</section>
+
+</body>
+</html>

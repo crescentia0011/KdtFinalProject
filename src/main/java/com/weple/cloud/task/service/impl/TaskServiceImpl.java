@@ -31,6 +31,7 @@ import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskService;
 import com.weple.cloud.task.service.TaskSpentTimeVO;
 import com.weple.cloud.task.service.TaskStatusVO;
+import com.weple.cloud.task.service.TaskTestCaseDTO;
 import com.weple.cloud.task.service.TaskTypeListVO;
 import com.weple.cloud.task.service.TaskUpdateHistoryVO;
 import com.weple.cloud.task.service.TaskVO;
@@ -380,4 +381,11 @@ public class TaskServiceImpl implements TaskService {
     public FileDownloadDTO getFileForDownload(Long versionId) {    	
         return fileMapper.selectFileForDownload(versionId);
     }
+	@Override
+	public List<TaskTestCaseDTO> findTestCase(String tId, Long pId) {
+		
+		return taskMapper.taskTestCaseList(tId, pId);
+	}
 }
+
+

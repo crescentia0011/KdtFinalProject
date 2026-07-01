@@ -1,14 +1,52 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
     <title>WEPLE - 공통 관리</title>
+    <link rel="stylesheet" th:href="@{/css/calendar/calendar.css}">
 </head>
 <body>
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+<section>
+    <input type="hidden" id="hiddenProjectId" th:value="${projectId}" />
+    
+    <div class="calendar-wrapper">
+      <div class="custom-calendar-header">
+      <div class="header-box">
+      <span class="box-title">보기 방식</span>
+      <div class="button-group">
+        <button class="view-btn active" data-view="dayGridMonth">월</button>
+        <button class="view-btn" data-view="timeGridWeek">주</button>
+        <button class="view-btn" data-view="timeGridDay">일</button>
+      </div>
+    </div>
+      <div class="header-box">
+  <span class="box-title">기간 이동</span>
+  <div class="nav-group">
+    <button class="nav-btn prev-btn">&lt;</button>
+    <button class="nav-btn next-btn">&gt;</button>
+    <button class="today-btn">오늘</button>
+  </div>
+</div>
+         <div class="header-box filter-box">
+          <span class="box-title">일정 유형 필터</span>
+          <div class="filter-group">
+            <label class="filter-item"><input type="checkbox" value="PROJECT_ALL" checked /><span class="badge badge-purple">● 프로젝트 전체</span></label>
+            <label class="filter-item"><input type="checkbox" value="MY_TASK" checked /><span class="badge badge-orange">● 내일감</span></label>
+            <label class="filter-item"><input type="checkbox" value="MILESTONE" checked /><span class="badge badge-blue">● 마일스톤</span></label>
+            <label class="filter-item"><input type="checkbox" value="PARENT_TASK" /><span class="badge badge-pink">● 상위 일감</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div id="calendar-center-title"></div>
+      <div id="calendar"></div>
+    </div>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
+    <script th:src="@{/js/calendar/calendar.js}"></script>
+</section>
 
 </body>
 </html>

@@ -14,6 +14,7 @@ import com.weple.cloud.task.service.TaskPriorityVO;
 import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskSpentTimeVO;
 import com.weple.cloud.task.service.TaskStatusVO;
+import com.weple.cloud.task.service.TaskTestCaseDTO;
 import com.weple.cloud.task.service.TaskTypeListVO;
 import com.weple.cloud.task.service.TaskUpdateHistoryVO;
 import com.weple.cloud.task.service.TaskVO;
@@ -41,6 +42,8 @@ public interface TaskMapper {
     
     public List<TaskVO>childTask(@Param("tId") String tId);
     
+    public List<TaskTestCaseDTO>taskTestCaseList(@Param("tId") String tId , @Param("pId") long pId);
+    
     public List<TaskProjectSelectVO> myAllTasks(@Param("uCode") String uCode);
     
     public int updateTask(TaskVO taskVO);
@@ -53,7 +56,7 @@ public interface TaskMapper {
     
     public int updateTaskComment(TaskCommentVO taskCommentVo);
     
-    public int deleteTaskComment(@Param("commentId") Long commentId , @Param("userCode") String userCode);
+    public int deleteTaskComment(@Param("commentId") long commentId , @Param("userCode") String userCode);
     
     public List<TaskUpdateHistoryVO> taskUpdateHistory(@Param("tId") String tId);
     
@@ -65,7 +68,7 @@ public interface TaskMapper {
     
     public List<TaskVO> findAllMyTasksWithFilters(Map<String,Object>allParams);
   
-  // 소요시간의 진척도 자동계산 프로시저 - 민지
+    // 소요시간의 진척도 자동계산 프로시저 - 민지
     public void updateHierarchicalProgress(@Param("taskId") String taskId);
     
     public List<TaskMemberVO> allMemberList();
