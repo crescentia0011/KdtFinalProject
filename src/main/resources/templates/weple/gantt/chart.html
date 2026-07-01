@@ -113,6 +113,22 @@
             }
             return "task-bar";                // 일감 (Task)
         };
+        
+     	// 💡 [수정] 모든 텍스트를 타임라인 바의 '좌측 바깥'에 배치합니다.
+        gantt.templates.leftside_text = function(start, end, task) {
+            if (typeof task.id === "string" && task.id.startsWith("M_")) {
+                if (!task.parent || task.parent == 0) {
+                    return "<strong style='color:#4a154b; margin-right:5px;'>📦 " + task.text + "</strong>"; // 버전
+                }
+                return "<span style='color:#c05621; font-weight:600; margin-right:5px;'>📌 " + task.text + "</span>"; // 마일스톤
+            }
+            return "<span style='color:#2d3748; font-size:12px; margin-right:5px;'>📄 " + task.text + "</span>"; // 일감
+        };
+
+        // 💡 [추가] 바 내부 텍스트는 좌측 글자와 겹치지 않도록 깨끗하게 비워줍니다.
+        gantt.templates.task_text = function(start, end, task) {
+            return "";
+        };
      	
      	// 5. 간트차트 초기화 실행
         gantt.init("gantt_here");
