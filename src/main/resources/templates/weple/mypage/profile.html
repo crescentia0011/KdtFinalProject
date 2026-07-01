@@ -1,14 +1,72 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+    <title>WEPLE - 프로필 사진 관리</title>
 </head>
 <body>
+<section>
+    <link rel="stylesheet" th:href="@{/css/mypage/mypage.css}">
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+    <div class="mypage-page">
+        <h1 class="mypage-title">마이페이지</h1>
 
+        <div class="mypage-message error" th:if="${profileError}" th:text="${profileError}"></div>
+
+        <!-- 화면설명 1~6 -->
+        <form class="mypage-panel" id="profileForm" method="post"
+              th:action="@{/mypage/profile/save}"
+              th:attr="data-cancel-url=@{/mypage}"
+              enctype="multipart/form-data">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <!-- 등록(적용) 버튼 클릭 전까지는 변경/삭제 여부만 들고 있는다 -->
+            <input type="hidden" id="profileRemoveFlag" name="removeFlag" value="N">
+
+            <h2 class="mypage-section-title">프로필 사진 변경</h2>
+
+            <div class="mypage-profile-row mypage-profile-row--photo">
+                <!-- 화면설명 2: 현재 적용 중인 프로필 사진 -->
+                <div class="mypage-avatar mypage-avatar-lg">
+				    <div class="mypage-avatar-circle"
+				         id="profilePreviewWrap"
+				         th:attr="data-original-image=${myPageProfile.profileImage}">
+				        <img th:src="${myPageProfile.profileImage != null and myPageProfile.profileImage != ''}
+				                ? ${myPageProfile.profileImage}
+				                : @{/images/default-profile.svg}"
+				             th:alt="${myPageProfile.userName + ' 프로필'}">
+				    </div>
+				</div>
+                <div class="mypage-profile-info">
+                    <span>
+                        <strong th:text="${myPageProfile.userName}">김위플</strong><span
+                            class="mypage-profile-role"
+                            th:text="(${myPageProfile.groupName != null and myPageProfile.groupName != ''} ? ${myPageProfile.groupName} : '소속 부서 없음')
+                                     + ' / ' + (${myPageProfile.roleName != null and myPageProfile.roleName != ''} ? ${myPageProfile.roleName} : '-')">개발부 / 주임연구원</span>
+                    </span>
+                    <p th:text="'이메일 계정 : ' + ${myPageProfile.email}">이메일 계정 : weple1234@weple.com</p>
+                </div>
+            </div>
+
+            <!-- 화면설명 3: 사진 변경 버튼을 클릭하기 전까지 파일 첨부 영역(input[type=file])은 노출하지 않는다 -->
+            <input type="file" id="profileFileInput" name="file" accept="image/jpeg,image/png,image/gif" style="display:none;">
+
+            <div class="mypage-photo-buttons">
+                <button type="button" id="profileChangeBtn" class="mypage-photo-change-button">사진변경</button>
+                <button type="button" id="profileDeleteBtn" class="mypage-photo-delete-button">삭제</button>
+            </div>
+
+            <p class="mypage-photo-hint">이미지 파일(jpg, jpeg, png, gif)만 등록할 수 있으며, 최대 5MB까지 첨부할 수 있습니다.</p>
+
+            <!-- 화면설명 4~6: 등록(적용) 시 최종 반영, 취소 시 저장하지 않고 마이페이지로 이동 -->
+            <div class="mypage-form-actions">
+                <a class="mypage-cancel-button" th:href="@{/mypage}">취소</a>
+                <button class="mypage-submit-button" type="submit">등록</button>
+            </div>
+        </form>
+    </div>
+
+    <script th:src="@{/js/mypage/mypage.js}"></script>
+</section>
 </body>
 </html>

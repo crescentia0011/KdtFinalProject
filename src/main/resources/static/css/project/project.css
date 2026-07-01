@@ -1,5 +1,5 @@
 .right_col{
-    background:#f5f6fa !important;
+    background:#FAFAFC !important;
 }
 
 .container-fluid{
@@ -16,7 +16,7 @@
     background:#ffffff;
     border-radius:24px;
     padding:30px;
-    border:1px solid #edf1f7;
+    border:1px solid #DDD6FE;
     box-shadow:0 2px 10px rgba(0,0,0,.03);
 }
 
@@ -24,7 +24,7 @@
     margin:0 0 24px;
     font-size:24px;
     font-weight:700;
-    color:#222;
+    color:#111827;
     letter-spacing:-0.5px;
 }
 
@@ -46,7 +46,7 @@
     display:flex;
     align-items:center;
     padding:0 14px;
-    border:1px solid #d9e1f2;
+    border:1px solid #DDD6FE;
     border-radius:12px;
     background:#fff;
 }
@@ -62,11 +62,11 @@
     outline:none;
     background:transparent;
     font-size:13px;
-    color:#495057;
+    color:#111827;
 }
 
 .project-search input::placeholder{
-    color:#adb5bd;
+    color:#9CA3AF;
 }
 
 .project-create-btn{
@@ -79,7 +79,7 @@
     margin-top:0;
     border:none;
     border-radius:10px;
-    background:#4d84ff;
+    background:#6D5EF7;
     color:#fff;
     font-size:13px;
     font-weight:600;
@@ -89,14 +89,14 @@
 }
 
 .project-create-btn:hover{
-    background:#3970eb;
+    background:#5B4FEA;
     color:#fff;
     text-decoration:none;
 }
 
 .project-table-wrap{
     margin-top:15px;
-    border:1px solid #e6ecf5;
+    border:1px solid #DDD6FE;
     border-radius:14px;
     overflow:hidden;
     background:#fff;
@@ -112,15 +112,15 @@
 }
 
 .project-table thead{
-    background:#f8faff;
+    background:#F1EDFF;
 }
 
 .project-table th{
     height:54px;
     font-size:13px;
     font-weight:700;
-    color:#5d6b87;
-    border-bottom:1px solid #e9edf5;
+    color:#6B7280;
+    border-bottom:1px solid #DDD6FE;
     text-align:center;
     white-space:nowrap;
 }
@@ -134,7 +134,7 @@
 .project-table td{
     height:64px;
     padding:0 15px;
-    border-top:1px solid #edf1f7;
+    border-top:1px solid #DDD6FE;
     color:#374151;
     font-size:13px;
     text-align:center;
@@ -149,17 +149,17 @@
 }
 
 .project-table tbody tr:hover{
-    background:#fafcff;
+    background:#FAFAFC;
 }
 
 .project-link{
-    color:#4d84ff;
+    color:#6D5EF7;
     text-decoration:none;
     font-weight:600;
 }
 
 .project-link:hover{
-    color:#2f6eff;
+    color:#5B4FEA;
     text-decoration:none;
 }
 
@@ -176,19 +176,19 @@
 
 /* 신규 - 파란색 */
 .status-new{
-    background:#eef4ff;
-    color:#4d84ff;
+    background:#F1EDFF;
+    color:#6D5EF7;
 }
 
 /* 진행 중 - 주황색 */
 .status-progress{
-    background:#fff8ec;
+    background:#FFF7ED;
     color:#f59e0b;
 }
 
 /* 완료 - 회색 */
 .status-done{
-    background:#f1f3f7;
+    background:#F3F4F6;
     color:#9ea7b8;
 }
 
@@ -199,7 +199,7 @@
 .empty-message{
     padding:60px !important;
     text-align:center !important;
-    color:#adb5bd;
+    color:#9CA3AF;
     font-size:14px;
 }
 
@@ -221,7 +221,7 @@
     text-decoration:none;
     font-size:13px;
     font-weight:500;
-    color:#5d6b87;
+    color:#6B7280;
     border:none;
     background:transparent;
     transition:all .2s ease;
@@ -231,7 +231,7 @@
     width:34px;
     height:34px;
     border-radius:8px;
-    background:#4d84ff;
+    background:#6D5EF7;
     color:#fff;
     font-weight:700;
 }
@@ -242,7 +242,7 @@
 }
 
 .page-btn:hover:not(.active):not(.disabled){
-    color:#4d84ff;
+    color:#6D5EF7;
     text-decoration:none;
 }
 

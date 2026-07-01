@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WEPLE - 칸반보드</title>
+    <link rel="stylesheet" th:href="@{/css/project/kanban.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
+</head>
+
+<body>
+<section class="kanban-page">
+
+    <input type="hidden" id="projectId" th:value="${projectId}">
+    <input type="hidden" id="currentUserCode" th:value="${currentUserCode}">
+
+    <div class="kanban-toolbar-top">
+        <h3 class="kanban-title">칸반보드</h3>
+        <div class="kanban-actions">
+            <button type="button" id="resetBtn" class="btn-kanban btn-kanban-reset">초기화</button>
+            <button type="button" id="saveBtn" class="btn-kanban btn-kanban-save" disabled>등록</button>
+        </div>
+    </div>
+
+    <div class="kanban-board" id="kanbanBoard">
+
+        <div class="kanban-column" th:each="status : ${statuses}">
+
+            <div class="kanban-column-header">
+                <span class="kanban-column-name" th:text="${status.defaultDescribe}">상태</span>
+                <span class="kanban-column-count"
+                      th:text="${kanbanList != null ? #lists.size(kanbanList.?[taskStatusId == status.commonId]) : 0}">0</span>
+            </div>
+
+            <div class="kanban-card-list"
+                 th:attr="data-status-id=${status.commonId}">
+
+                <th:block th:each="task : ${kanbanList}" th:if="${task.taskStatusId == status.commonId}">
+                    <div class="kanban-card"
+                         th:attr="data-task-id=${task.taskId},
+                                  data-status-id=${task.taskStatusId},
+                                  data-manager-id=${task.taskManagerId}">
+
+                        <div class="kanban-card-top">
+                            <span class="badge-priority"
+                                  th:classappend="${task.priority == 'High'} ? 'priority-high' :
+                                                  (${task.priority == 'Medium'} ? 'priority-medium' : 'priority-low')"
+                                  th:text="${task.priority}">Medium</span>
+                            <span class="badge-tag" th:text="${task.typeName}">유형</span>
+                        </div>
+
+                        <div class="kanban-card-title" th:text="${task.taskTitle}">일감 제목</div>
+
+                        <div class="kanban-card-footer">
+                            <span class="kanban-card-date"
+                                  th:text="${task.finishDate != null ? #temporals.format(task.finishDate, 'yyyy.MM.dd') : '-'}">2026.03.01</span>
+                            <span class="kanban-card-avatar"
+                                  th:text="${task.taskManager != null and !task.taskManager.isEmpty() ? task.taskManager.substring(0,1) : '?'}">담</span>
+                        </div>
+                    </div>
+                </th:block>
+
+                <div class="kanban-empty"
+                     th:if="${kanbanList == null or #lists.isEmpty(kanbanList.?[taskStatusId == status.commonId])}">
+                    일감이 없습니다.
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script th:src="@{/js/project/kanban.js}"></script>
+
+</body>
+</html>

@@ -1,0 +1,202 @@
+.right_col { background: #FAFAFC !important; }
+.container-fluid { padding: 0 !important; }
+
+.kanban-page {
+    padding: 15px;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* 상단 툴바 */
+.kanban-toolbar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.kanban-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.4px;
+}
+.kanban-actions { display: flex; gap: 10px; }
+
+.btn-kanban {
+    height: 38px;
+    padding: 0 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid #DDD6FE;
+    transition: background .15s, color .15s, border-color .15s;
+}
+.btn-kanban-reset {
+    background: #FFFFFF;
+    color: #111827;
+}
+.btn-kanban-reset:hover { background: #EFEAFF; color: #5B4FEA; border-color: #DDD6FE; }
+
+.btn-kanban-save {
+    background: #6D5EF7;
+    color: #FFFFFF;
+    border: none;
+}
+.btn-kanban-save:hover  { background: #5B4FEA; }
+.btn-kanban-save:active { background: #5747E6; }
+.btn-kanban-save:disabled {
+    background: #DDD6FE;
+    color: #FFFFFF;
+    cursor: not-allowed;
+}
+
+/* 보드 / 컬럼 */
+.kanban-board {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.kanban-column {
+    flex: 1 1 0;
+    min-width: 260px;
+    background: #FAFAFC;
+    border: 1px solid #DDD6FE;
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.kanban-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 2px;
+}
+.kanban-column-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+.kanban-column-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 11px;
+    background: #F1EDFF;
+    color: #6D5EF7;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.kanban-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 80px;
+}
+.kanban-card-list.drag-over {
+    background: #F1EDFF;
+    border-radius: 8px;
+    outline: 2px dashed #6D5EF7;
+}
+
+.kanban-empty {
+    text-align: center;
+    color: #9CA3AF;
+    font-size: 12px;
+    padding: 18px 0;
+}
+
+/* 카드 */
+.kanban-card {
+    background: #FFFFFF;
+    border: 1px solid #DDD6FE;
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: grab;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
+    transition: box-shadow .15s, transform .1s, opacity .15s;
+}
+.kanban-card:hover {
+    box-shadow: 0 4px 10px rgba(109, 94, 247, 0.12);
+}
+.kanban-card.dragging {
+    opacity: 0.5;
+}
+.kanban-card.kanban-card-changed {
+    border-color: #6D5EF7;
+    box-shadow: 0 0 0 1px #6D5EF7 inset;
+}
+
+.kanban-card-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.badge-priority,
+.badge-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    padding: 0 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge-tag {
+    background: #F1EDFF;
+    color: #6D5EF7;
+}
+
+.priority-high   { background: #FEF2F2; color: #EF4444; } /* Danger */
+.priority-medium { background: #FFFBEB; color: #F59E0B; } /* Warning */
+.priority-low     { background: #EFF6FF; color: #3B82F6; } /* Info */
+
+.kanban-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    word-break: break-all;
+}
+
+.kanban-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.kanban-card-date {
+    font-size: 11px;
+    color: #9CA3AF;
+    font-weight: 600;
+}
+.kanban-card-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #6D5EF7;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* 본인 담당자가 아닌 카드 (이동 제한 표시용) */
+.kanban-card.kanban-card-locked {
+    cursor: not-allowed;
+}

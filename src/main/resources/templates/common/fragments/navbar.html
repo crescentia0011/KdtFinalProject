@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head></head>
 <body>
-<div th:fragment="navbarFragment" class="sub_menu_nav" th:if="${currentMenu != 'none' and sidebarMenu != 'system'}">
+<div th:fragment="navbarFragment" class="sub_menu_nav" th:if="${currentMenu != 'none' and currentMenu != 'mypage' and sidebarMenu != 'system'}">
     <ul> 
     	<li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b1')}"
 		    th:classappend="${currentMenu == 'outline'} ? 'active' : ''">

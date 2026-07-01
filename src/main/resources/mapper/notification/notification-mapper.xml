@@ -5,41 +5,36 @@
 	<!--
 		target_type / target_id 기반 이동경로, 컨텍스트(프로젝트명) 산출용 공통 JOIN + 표현식.
 		현재 발생하는 알림은 일감 배정/상태 변경/댓글 등록/첨부파일 등록 → TASK,
-		프로젝트 초대 및 참여자 등록 → PROJECT 두 가지 target_type만 사용.
+		프로젝트 초대 및 참여자 등록 → PROJECT 두 가지 target_type만 사용한다.
 	-->
 	<sql id="alarmJoins">
-		LEFT JOIN task t
-			   ON a.target_type ='TASK' AND a.target_id = t.task_id
-		LEFT JOIN project p1
-			   ON t.project_id = p1.project_id
-		LEFT JOIN project p2
-			   ON a.target_type = 'PROJECT' AND a.target_id = TO_CHAR(p2.project_id)
+		LEFT JOIN task t ON a.target_type = 'TASK' AND a.target_id = t.task_id
+		LEFT JOIN project p1 ON t.project_id = p1.project_id
+		LEFT JOIN project p2 ON a.target_type = 'PROJECT' AND a.target_id = TO_CHAR(p2.project_id)
 	</sql>
 
 	<sql id="alarmSelectColumns">
-		a.alarm_id,
-		a.user_code,
-		a.alarm_tag,
-		a.alarm_content,
-		a.check_yn,
-		a.alarm_date,
-		a.target_type,
-		a.target_id,
-		a.alarm_chk,
+		a.alarm_id        AS alarmId,
+		a.user_code       AS userCode,
+		a.alarm_tag       AS alarmTag,
+		a.alarm_content   AS alarmContent,
+		a.check_yn        AS checkYn,
+		a.alarm_date      AS alarmDate,
+		a.target_type     AS targetType,
+		a.target_id       AS targetId,
+		a.alarm_chk       AS alarmChk,
 		COALESCE(p1.project_title, p2.project_title) AS contextTitle,
 		CASE
-			WHEN a.target_type = 'TASK'
-				THEN '/project/task/detail/' || a.target_id || '?projectId=' || t.project_id
-			WHEN a.target_type = 'PROJECT'
-				THEN '/project/overview?projectId=' || a.target_id
+			WHEN a.target_type = 'TASK'    THEN '/project/task/detail/' || a.target_id || '?projectId=' || t.project_id
+			WHEN a.target_type = 'PROJECT' THEN '/project/outline?projectId=' || a.target_id
 			ELSE '/notification/list'
 		END AS redirectUrl
 	</sql>
 
 	<!--
 		알림 1건 생성.
-		alarm_id 는 시퀀스(alarm_id_seq) 사용.
-		check_yn은 항상 'N'(읽지 않음)으로 시작.
+		alarm_id는 ALARM_ID_SEQ로 채번한다.
+		alarm_date는 등록 시각(KST)으로 자동 세팅, check_yn은 항상 'N'(읽지 않음)으로 시작한다.
 	-->
 	<insert id="insertAlarm" parameterType="AlarmVO">
 		<selectKey keyProperty="alarmId" resultType="long" order="BEFORE">
@@ -60,11 +55,21 @@
 			#{alarmTag},
 			#{alarmContent},
 			'N',
-			SYSDATE,
+			SYSDATE + 9/24,
 			#{targetType},
 			#{targetId}
 		)
 	</insert>
+
+	<!-- 알림 생성 전 수신자의 알림 수신 범위/이메일 연동 설정 조회 (신규 컬럼 없이 기존 USERS 컬럼만 사용) -->
+	<select id="selectNotificationPreference" resultType="com.weple.cloud.notification.service.NotificationPreferenceVO">
+		SELECT user_code AS userCode,
+		       email AS email,
+		       NVL(notification_area, 'all') AS notificationArea,
+		       NVL(email_notification_yn, 'N') AS emailNotificationYn
+		FROM users
+		WHERE user_code = #{userCode}
+	</select>
 
 	<!-- 알림 목록 페이지 -->
 	<select id="findAlarmList" resultType="AlarmVO">
@@ -125,7 +130,7 @@
 	<!-- 읽음/읽지 않음 토글 -->
 	<update id="toggleCheckYn">
 		UPDATE alarm
-		   SET check_yn = CASE WHEN check_yn = 'Y' THEN 'N' ELSE 'Y' END,
+		   SET check_yn  = CASE WHEN check_yn = 'Y' THEN 'N' ELSE 'Y' END,
 		       alarm_chk = CASE WHEN check_yn = 'Y' THEN NULL ELSE SYSDATE + 9/24 END
 		 WHERE alarm_id = #{alarmId}
 		   AND user_code = #{userCode}
@@ -135,7 +140,7 @@
 	<update id="markRead">
 		UPDATE alarm
 		   SET check_yn = 'Y',
-		       alarm_chk = SYSDATE
+		       alarm_chk = SYSDATE + 9/24
 		 WHERE alarm_id = #{alarmId}
 		   AND user_code = #{userCode}
 		   AND check_yn = 'N'
@@ -145,7 +150,7 @@
 	<update id="updateAllRead">
 		UPDATE alarm
 		   SET check_yn = 'Y',
-		       alarm_chk = SYSDATE
+		       alarm_chk = SYSDATE + 9/24
 		 WHERE user_code = #{userCode}
 		   AND check_yn = 'N'
 	</update>

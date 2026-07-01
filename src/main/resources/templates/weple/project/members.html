@@ -61,9 +61,9 @@
 		                <div class="member-name-wrap">
 		                    <img th:src="${m.profileImage != null and !#strings.isEmpty(m.profileImage)
 		                                  ? m.profileImage
-		                                  : '/images/hamster.jpg'}"
+		                                  : '/images/default-profile.svg'}"
 		                         class="member-avatar"
-		                         onerror="this.src='/images/hamster.jpg'">
+		                         onerror="this.src='/images/default-profile.svg'">
 		
 		                    <span th:text="${m.userName}"></span>
 		                </div>

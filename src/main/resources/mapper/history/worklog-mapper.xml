@@ -19,7 +19,7 @@
                     NVL(d_type.new_value, tt.type_name) AS typeName,
                     cc.default_describe AS defaultDescribe,
                     th.action_type,
-                    th.action_at + INTERVAL '9' HOUR AS actionAt
+                    th.action_at
                 FROM task_history th
                 INNER JOIN task t
                 	ON th.task_id = t.task_id 
@@ -46,10 +46,10 @@
                         AND u.user_code = #{userCode}
                     </if>
                     <if test="startDate != null and startDate != ''">
-                        AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD') - INTERVAL '9' HOUR
+                        AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD')
                     </if>
                     <if test="endDate != null and endDate != ''">
-                        AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY - INTERVAL '9' HOUR
+                        AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY
                     </if>
                     <if test="typeNames != null and typeNames.size() > 0">
                         AND NVL(d_type.new_value, tt.type_name) IN
@@ -88,10 +88,10 @@
                 AND u.user_code = #{userCode}
             </if>
             <if test="startDate != null and startDate != ''">
-                AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD') - INTERVAL '9' HOUR
+                AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD')
             </if>
             <if test="endDate != null and endDate != ''">
-                AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY - INTERVAL '9' HOUR
+                AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY
             </if>
             <if test="typeNames != null and typeNames.size() > 0">
                 AND NVL(d_type.new_value, tt.type_name) IN
@@ -132,7 +132,7 @@
     
     <!-- 조회 가능한 날짜 목록 (페이징용) -->
 	<select id="selectDistinctDates" resultType="string">
-	    SELECT DISTINCT TO_CHAR(th.action_at + INTERVAL '9' HOUR, 'YYYY-MM-DD') AS action_date
+	    SELECT DISTINCT TO_CHAR(th.action_at, 'YYYY-MM-DD') AS action_date
 	    FROM task_history th
 	    INNER JOIN task t
 	    		ON th.task_id = t.task_id
@@ -151,10 +151,10 @@
 	            AND u.user_code = #{userCode}
 	        </if>
 	        <if test="startDate != null and startDate != ''">
-	            AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD') - INTERVAL '9' HOUR
+	            AND th.action_at &gt;= TO_DATE(#{startDate}, 'YYYY.MM.DD')
 	        </if>
 	        <if test="endDate != null and endDate != ''">
-	            AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY - INTERVAL '9' HOUR
+	            AND th.action_at &lt; TO_DATE(#{endDate}, 'YYYY.MM.DD') + INTERVAL '1' DAY
 	        </if>
 	        <if test="typeNames != null and typeNames.size() > 0">
 	            AND NVL(d_type.new_value, tt.type_name) IN
@@ -178,7 +178,7 @@
 	        NVL(d_type.new_value, tt.type_name) AS typeName,
 	        cc.default_describe AS defaultDescribe,
 	        th.action_type,
-	        th.action_at + INTERVAL '9' HOUR AS actionAt
+	        th.action_at AS actionAt
 	    FROM task_history th
 	    INNER JOIN task t
 	    		ON th.task_id = t.task_id
@@ -198,7 +198,7 @@
 	                ON t.task_status = cc.common_id
 	               AND cc.common_code = '0E'
 	    <where>
-	        TO_CHAR(th.action_at + INTERVAL '9' HOUR, 'YYYY-MM-DD') = #{targetDate}
+	        TO_CHAR(th.action_at, 'YYYY-MM-DD') = #{targetDate}
 	        <if test="projectId != null and projectId != ''">
 	            AND t.project_id = TO_NUMBER(#{projectId})
 	        </if>

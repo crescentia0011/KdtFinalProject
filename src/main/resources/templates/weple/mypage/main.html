@@ -1,14 +1,115 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+    <title>WEPLE - 마이페이지</title>
 </head>
 <body>
+<section>
+    <link rel="stylesheet" th:href="@{/css/mypage/mypage.css}">
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+    <div class="mypage-page">
+        <h1 class="mypage-title">마이페이지</h1>
 
+        <div class="mypage-message success" th:if="${mypageSuccess}" th:text="${mypageSuccess}"></div>
+        <div class="mypage-message error" th:if="${mypageError}" th:text="${mypageError}"></div>
+
+        <!-- 화면설명 2~3: 기본 계정 정보 -->
+        <div class="mypage-panel">
+            <h2 class="mypage-section-title">기본 계정 정보</h2>
+
+            <div class="mypage-profile-row">
+                <div class="mypage-avatar">
+                    <div class="mypage-avatar-circle">
+					    <img th:src="${myPage.profileImage != null and myPage.profileImage != ''}
+					            ? ${myPage.profileImage}
+					            : @{/images/default-profile.svg}"
+					         th:alt="${myPage.userName + ' 프로필'}">
+					</div>
+
+                    <!-- 화면설명 3: 카메라 아이콘 클릭 시 프로필 사진 변경 화면(Dv-045)으로 이동 -->
+                    <a class="mypage-avatar-camera" th:href="@{/mypage/profile}" title="프로필 사진 변경">
+                        <i class="fa fa-camera" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <div class="mypage-profile-info">
+                    <span>
+                        <strong th:text="${myPage.userName}">김위플</strong><span
+                            class="mypage-profile-role"
+                            th:text="(${myPage.groupName != null and myPage.groupName != ''} ? ${myPage.groupName} : '소속 부서 없음')
+                                     + ' / ' + (${myPage.roleName != null and myPage.roleName != ''} ? ${myPage.roleName} : '-')">개발부 / 주임연구원</span>
+                    </span>
+                    <p th:text="'이메일 계정 : ' + ${myPage.email}">이메일 계정 : weple1234@weple.com</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 화면설명 4~7: 알림 및 수신 설정 -->
+        <form class="mypage-panel" method="post" th:action="@{/mypage/notification}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <h2 class="mypage-section-title">알림 및 수신 설정</h2>
+
+            <div class="mypage-notice-row" style="margin-top:0;padding-top:0;border-top:none;">
+                <div>
+                    <strong>실시간 웹 알림 수신</strong>
+                    <p>신규 알림을 실시간 팝업 및 헤더로 수신합니다.</p>
+                </div>
+                <label class="mypage-status-switch">
+                    <input type="hidden" name="webNotificationYn" value="N">
+                    <input type="checkbox" name="webNotificationYn" value="Y"
+                           th:checked="${myPage.webNotificationYn == 'Y'}">
+                    <span></span>
+                </label>
+            </div>
+
+            <div class="mypage-notice-row">
+                <div>
+                    <strong>이메일 알림 수신 연동</strong>
+                    <p th:text="'등록된 이메일 계정(' + ${myPage.email} + ')으로 알림을 수신합니다.'">
+                        등록된 이메일 계정으로 알림을 수신합니다.
+                    </p>
+                </div>
+                <label class="mypage-status-switch">
+                    <input type="hidden" name="emailNotificationYn" value="N">
+                    <input type="checkbox" name="emailNotificationYn" value="Y"
+                           th:checked="${myPage.emailNotificationYn == 'Y'}">
+                    <span></span>
+                </label>
+            </div>
+
+            <div class="mypage-scope-block">
+                <strong>알림 수신 범위 설정</strong>
+                <p>어떤 조건의 업무 알림을 받을지 범위를 선택합니다.</p>
+
+                <div class="mypage-notice-options">
+                    <label>
+                        <input type="radio" name="notificationArea" value="all"
+                               th:checked="${myPage.notificationArea == 'all'}">
+                        <span>전체 알림 수신</span>
+                        <small>(배정 일감, 참여 일감 댓글/파일, 프로젝트 초대 전체)</small>
+                    </label>
+
+                    <label>
+                        <input type="radio" name="notificationArea" value="mine"
+                               th:checked="${myPage.notificationArea == 'mine'}">
+                        <span>나에게 배정된 일감만 수신</span>
+                        <small>(본인이 담당자 혹은 지정된 일감 변경 건)</small>
+                    </label>
+
+                    <label>
+                        <input type="radio" name="notificationArea" value="mention"
+                               th:checked="${myPage.notificationArea == 'mention'}">
+                        <span>초대만 수신</span>
+                        <small>(프로젝트 참여 초대만)</small>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mypage-form-actions">
+                <button class="mypage-submit-button" type="submit">등록</button>
+            </div>
+        </form>
+    </div>
+</section>
 </body>
 </html>

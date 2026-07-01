@@ -10,10 +10,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.weple.cloud.notification.service.AlarmType;
+import com.weple.cloud.notification.service.NotificationService;
 import com.weple.cloud.project.service.ProjectMemberRoleVO;
 import com.weple.cloud.project.service.ProjectMemberService;
 import com.weple.cloud.project.service.ProjectMemberVO;
 import com.weple.cloud.project.service.ProjectService;
+import com.weple.cloud.project.service.ProjectVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +26,7 @@ public class ProjectMemberController {
 
     private final ProjectMemberService memberService;
     private final ProjectService projectService;
+    private final NotificationService notificationService;
 
     //  설정 > 구성원 탭
     @GetMapping("/project/settings/members")
@@ -83,6 +87,18 @@ public class ProjectMemberController {
 
         try {
             memberService.addMember(vo);
+            // 알림-은지(프로젝트 초대)
+            ProjectVO project = projectService.findById(String.valueOf(projectId));
+            String projectTitle = (project != null) ? project.getProjectTitle() : "프로젝트";
+            
+            notificationService.create(
+                    userCode,
+                    AlarmType.TAG_PROJECT_INVITE,
+                    "\"" + projectTitle + "\" 프로젝트에 참여자로 등록되었습니다.",
+                    AlarmType.TARGET_PROJECT,
+                    String.valueOf(projectId)
+                );
+            
             return ResponseEntity.ok("ok");
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getMessage());

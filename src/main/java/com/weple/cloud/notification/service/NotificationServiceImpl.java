@@ -5,23 +5,45 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.weple.cloud.notification.mapper.NotificationMapper;
+import com.weple.cloud.notification.service.mail.NotificationMailService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationMapper notificationMapper;
+    // 메일 발송 기능은 선택사항
+    private final ObjectProvider<NotificationMailService> mailServiceProvider;
 
     @Override
     @Transactional
     public void create(String userCode, String alarmTag, String alarmContent, String targetType, String targetId) {
-        AlarmVO alarmVO = new AlarmVO();
+        
+    	// 알림 만들기 전 수신자의 "알림 수신 범위" 설정 확인
+    	NotificationPreferenceVO preference = notificationMapper.selectNotificationPreference(userCode);
+        if (preference == null) {
+        	// 대상 사용자를 찾을 수 없는 경우 알림 만들지 않음
+        	log.debug("알림 대상 사용자를 찾을 수 없어 생성을 건너뜁니다. userCode={}", userCode);
+            return;
+        }
+        
+        if (!AlarmType.isEligible(preference.getNotificationArea(), alarmTag)) {
+            // 예) notificationArea=mine 인 사용자에게 TAG_PROJECT_INVITE/TAG_TASK_CREATED는 만들지 않음
+            log.debug("수신 범위({}) 설정으로 알림({})을 건너뜁니다. userCode={}",
+                    preference.getNotificationArea(), alarmTag, userCode);
+            return;
+        }
+    	
+    	AlarmVO alarmVO = new AlarmVO();
         alarmVO.setUserCode(userCode);
         alarmVO.setAlarmTag(alarmTag);
         alarmVO.setAlarmContent(alarmContent);
@@ -29,6 +51,21 @@ public class NotificationServiceImpl implements NotificationService {
         alarmVO.setTargetId(targetId);
 
         notificationMapper.insertAlarm(alarmVO);
+        
+        // "이메일 알림 수신 연동"이 켜져 있으면 이메일도 함께 발송
+        // 메일 발송 실패가 알림(웹) 생성 자체를 막으면 안 되므로 별도로 try/catch 함
+        if ("Y".equals(preference.getEmailNotificationYn())) {
+            NotificationMailService mailService = mailServiceProvider.getIfAvailable();
+            if (mailService == null) {
+                log.debug("메일 발송 서비스가 등록되어 있지 않아 이메일 발송을 건너뜁니다. (spring.mail.* 설정 필요) userCode={}", userCode);
+            } else {
+                try {
+                    mailService.sendAlarmMail(preference.getEmail(), alarmTag, alarmContent);
+                } catch (Exception e) {
+                    log.warn("알림 메일 발송에 실패했습니다. userCode={}, error={}", userCode, e.getMessage());
+                }
+            }
+        }
     }
 
     @Override

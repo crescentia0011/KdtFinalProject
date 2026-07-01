@@ -1,0 +1,318 @@
+/* ============================================================
+   마이페이지 공통 (Dv-044, Dv-045)
+   admin/user-list.css 의 톤(#6D5EF7)과 컴포넌트를 재사용한다.
+   ============================================================ */
+
+.mypage-page {
+    padding: 28px 30px 40px;
+    color: #374151;
+}
+
+.mypage-title {
+    margin: 0 0 18px;
+    color: #1f2937;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.mypage-message {
+    width: 100%;
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+.mypage-message.success {
+    border: 1px solid #DDD6FE;
+    background: #F1EDFF;
+    color: #5B4FEA;
+}
+.mypage-message.error {
+    border: 1px solid #FECACA;
+    background: #FEF2F2;
+    color: #EF4444;
+}
+
+/* 각 패널 공통 */
+.mypage-panel {
+    padding: 22px 26px 26px;
+    border: 1px solid #DDD6FE;
+    border-radius: 8px;
+    background: #ffffff;
+}
+.mypage-panel + .mypage-panel {
+    margin-top: 18px;
+}
+
+/* 패널 안 섹션 제목 (기본 계정 정보 / 알림 및 수신 설정 / 프로필 사진 변경) */
+.mypage-section-title {
+    margin: 0 0 18px;
+    color: #1f2937;
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+/* ------------------------------------------------------------
+   프로필 행: 아바타 + (이름/부서·직급 + 이메일) - Dv-044, Dv-045 공용
+   ------------------------------------------------------------ */
+
+.mypage-profile-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.mypage-avatar {
+    position: relative;
+    flex-shrink: 0;
+    width: 96px;
+    height: 96px;
+}
+.mypage-avatar-circle {
+    display: inline-flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #F1EDFF;
+    color: #6D5EF7;
+    font-size: 52px;
+}
+.mypage-avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mypage-avatar-camera {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    z-index: 1;
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    background: #6D5EF7;
+    color: #ffffff;
+    font-size: 13px;
+    text-decoration: none;
+}
+.mypage-avatar-camera:hover { background: #5B4FEA; }
+
+/* Dv-045 사진 변경 화면의 미리보기는 더 크게 (카메라 배지 없음) */
+.mypage-avatar.mypage-avatar-lg {
+    width: 128px;
+    height: 128px;
+}
+.mypage-avatar.mypage-avatar-lg .mypage-avatar-circle {
+    font-size: 68px;
+}
+
+/* Dv-045 전용: 아바타(128px) 중심이 아래 사진변경/삭제 버튼 그룹(178px, 중심 89px) 중심과
+   맞도록 행 전체를 살짝 우측으로 이동 (128/2=64 -> 89, 약 25px 차이) */
+.mypage-profile-row.mypage-profile-row--photo {
+    margin-left: 25px;
+}
+
+.mypage-profile-info strong {
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 800;
+}
+.mypage-profile-role {
+    margin-left: 8px;
+    color: #7b8798;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+.mypage-profile-info p {
+    margin: 6px 0 0;
+    color: #7b8798;
+    font-size: 12.5px;
+}
+
+/* ------------------------------------------------------------
+   알림 및 수신 설정 (Dv-044) - .user-notice-box 재사용
+   ------------------------------------------------------------ */
+
+.mypage-notice-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 48px;
+    align-items: center;
+    gap: 20px;
+    padding-top: 18px;
+    margin-top: 18px;
+    border-top: 1px solid #F1EDFF;
+}
+.mypage-notice-row strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 700;
+}
+.mypage-notice-row p {
+    margin: 0;
+    color: #7b8798;
+    font-size: 11px;
+}
+
+.mypage-status-switch {
+    display: inline-block;
+    width: 32px;
+    height: 18px;
+    cursor: pointer;
+}
+.mypage-status-switch input {
+    position: absolute;
+    opacity: 0;
+}
+.mypage-status-switch span {
+    position: relative;
+    display: block;
+    width: 32px;
+    height: 18px;
+    border-radius: 99px;
+    background: #d6dee9;
+}
+.mypage-status-switch span::after {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    content: "";
+}
+.mypage-status-switch input:checked + span { background: #6D5EF7; }
+.mypage-status-switch input:checked + span::after { transform: translateX(14px); }
+
+/* 알림 수신 범위 설정 */
+.mypage-scope-block {
+    padding-top: 18px;
+    margin-top: 18px;
+    border-top: 1px solid #F1EDFF;
+}
+.mypage-scope-block > strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 700;
+}
+.mypage-scope-block > p {
+    margin: 0 0 12px;
+    color: #7b8798;
+    font-size: 11px;
+}
+
+.mypage-notice-options {
+    padding: 14px 16px;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    background: #FAFAFC;
+}
+.mypage-notice-options label {
+    display: grid;
+    grid-template-columns: 18px 190px minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0;
+    color: #374151;
+    font-size: 12px;
+    cursor: pointer;
+}
+.mypage-notice-options input { accent-color: #6D5EF7; }
+.mypage-notice-options span { font-weight: 700; }
+.mypage-notice-options small { color: #6b7280; font-size: 11px; }
+
+.mypage-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+}
+.mypage-cancel-button,
+.mypage-submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 58px;
+    height: 34px;
+    padding: 0 16px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+.mypage-cancel-button {
+    border: 1px solid #EF4444;
+    background: #ffffff;
+    color: #EF4444;
+}
+.mypage-cancel-button:hover { background: #FEF2F2; }
+.mypage-submit-button {
+    border: 1px solid #6D5EF7;
+    background: #6D5EF7;
+    color: #ffffff;
+}
+.mypage-submit-button:hover { border-color: #5B4FEA; background: #5B4FEA; }
+
+/* ============================================================
+   프로필 사진 관리 (Dv-045)
+   ============================================================ */
+
+.mypage-photo-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+.mypage-photo-change-button,
+.mypage-photo-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 84px;
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.mypage-photo-change-button {
+    border: 1px solid #6D5EF7;
+    background: #ffffff;
+    color: #6D5EF7;
+}
+.mypage-photo-change-button:hover { background: #F6F2FF; }
+.mypage-photo-delete-button {
+    border: 1px solid #EF4444;
+    background: #ffffff;
+    color: #EF4444;
+}
+.mypage-photo-delete-button:hover { background: #FEF2F2; }
+
+.mypage-photo-hint {
+    margin-top: 16px;
+    color: #9CA3AF;
+    font-size: 11px;
+}
+
+@media (max-width: 768px) {
+    .mypage-page { padding: 20px; }
+    .mypage-notice-row { grid-template-columns: minmax(0, 1fr) 40px; }
+    .mypage-notice-options label { grid-template-columns: 18px minmax(0, 1fr); }
+    .mypage-notice-options small { grid-column: 2; }
+    .mypage-profile-row { align-items: flex-start; }
+}

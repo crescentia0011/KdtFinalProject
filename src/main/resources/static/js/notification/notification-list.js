@@ -94,7 +94,7 @@
         toast.innerHTML =
             '<div class="notif-toast-header">' +
                 '<span class="notif-toast-tag">' + (type === 'error' ? '오류' : '완료') + '</span>' +
-                '<button type="button" class="notif-toast-close">close</button>' +
+                '<button type="button" class="notif-toast-close" aria-label="닫기">&times;</button>' +
             '</div>' +
             '<div class="notif-toast-content"></div>';
 

@@ -1,7 +1,6 @@
 package com.weple.cloud.task.web;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -30,6 +29,8 @@ import org.springframework.web.util.UriUtils;
 import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.file.FileDownloadDTO;
 import com.weple.cloud.history.task.service.TaskHistoryService;
+import com.weple.cloud.notification.service.AlarmType;
+import com.weple.cloud.notification.service.NotificationService;
 import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.task.service.TaskCommentVO;
 import com.weple.cloud.task.service.TaskHistoryDTO;
@@ -50,6 +51,7 @@ public class TaskController {
 	private final TaskService taskService;
 	private final ProjectService projectService;
 	private final TaskHistoryService taskHistoryService; // 작업내역 일감 불러오기
+	private final NotificationService notificationService;
 	
 	//프로젝트 내부 일감 목록 페이지 로드
 	@GetMapping("/project/task")
@@ -296,6 +298,18 @@ public class TaskController {
         int result = taskService.insertTaskComment(commentVO);
         
         if (result > 0) {
+        	// 알림-은지(댓글 등록)
+        	TaskVO task = taskService.findTaskDetail(tId);
+        	if(task != null && task.getTaskManagerId() != null
+        			&& !task.getTaskManagerId().equals(userCode)) {
+        		notificationService.create(
+                        task.getTaskManagerId(),
+                        AlarmType.TAG_COMMENT,
+                        "참여 중인 일감에 댓글이 등록되었습니다.",
+                        AlarmType.TARGET_TASK,
+                        tId
+                  );
+        	}
             return ResponseEntity.ok(Map.of("message", "댓글이 등록되었습니다."));
         } else {
             return ResponseEntity.badRequest().body(Map.of("message", "댓글 등록에 실패했습니다."));
@@ -535,7 +549,37 @@ public class TaskController {
 	    taskService.updateTask(taskVO, files, deletedFileIds);
 	    
 	    TaskVO after = taskService.findTaskDetail(taskVO.getTaskId());
- 
+	    
+	    // 알림-은지(상태 변경)
+	    boolean statusChanged = before.getTaskStatusId() != null
+	            && !before.getTaskStatusId().equals(after.getTaskStatusId());
+
+	    if (statusChanged && after.getTaskManagerId() != null && !after.getTaskManagerId().isBlank()) {
+	        notificationService.create(
+	            after.getTaskManagerId(),
+	            AlarmType.TAG_STATUS_CHANGE,
+	            "담당 일감 [" + after.getTaskTitle() + "]의 상태가 변경되었습니다.",
+	            AlarmType.TARGET_TASK,
+	            after.getTaskId()
+	        );
+	    }
+	    
+	    // 알림-은지(첨부파일 등록)
+	    if (files != null && !files.isEmpty()
+	            && after.getTaskManagerId() != null && !after.getTaskManagerId().isBlank()) {
+	        for (MultipartFile file : files) {
+	            if (!file.isEmpty()) {
+	                notificationService.create(
+	                    after.getTaskManagerId(),
+	                    AlarmType.TAG_FILE,
+	                    "참여 중인 일감에 " + file.getOriginalFilename() + " 파일이 등록되었습니다.",
+	                    AlarmType.TARGET_TASK,
+	                    after.getTaskId()
+	                );
+	            }
+	        }
+	    }
+	    
 	    // 작업내역 저장-은지
 	    taskHistoryService.insertHistory(
 	    	  taskVO.getTaskId(), userCode, "UPDATE",

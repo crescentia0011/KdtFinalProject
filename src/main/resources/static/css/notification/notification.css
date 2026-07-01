@@ -5,7 +5,7 @@
 .notif-dropdown {
     position: absolute;
     top: calc(100% + 12px);
-    right: -60px;
+    right: -80px;
     width: 320px;
     max-height: 420px;
     overflow-y: auto;
@@ -36,19 +36,25 @@
 }
 .notif-goto-list:hover { color: #5B4FEA; text-decoration: underline; }
 
-.notif-dropdown-list { padding: 6px; }
+.notif-dropdown-list {
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
 
 .notif-dropdown-item {
     display: block;
     padding: 10px 10px;
     border-radius: 8px;
+    border: 1px solid #EEE8FF;
     text-decoration: none;
     color: inherit;
 }
-.notif-dropdown-item:hover { background: #F6F2FF; text-decoration: none; }
+.notif-dropdown-item:hover { background: #F6F2FF; border-color: #DDD2FF; text-decoration: none; }
 
-.notif-dropdown-item-unread { background: #F1EDFF; }
-.notif-dropdown-item-unread:hover { background: #EFEAFF; }
+.notif-dropdown-item-unread { background: #F1EDFF; border-color: #DDD2FF; }
+.notif-dropdown-item-unread:hover { background: #EFEAFF; border-color: #C9BBFA; }
 
 .notif-dropdown-item-content {
     font-size: 12.5px;
@@ -71,6 +77,28 @@
     text-align: center;
     color: #9CA3AF;
     font-size: 12px;
+}
+
+.notif-dropdown-loading {
+    padding: 24px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+.notif-loading-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #C4B5FD;
+    animation: notif-dot-bounce 1s ease-in-out infinite;
+}
+.notif-loading-dot:nth-child(1) { animation-delay: 0s; }
+.notif-loading-dot:nth-child(2) { animation-delay: .15s; }
+.notif-loading-dot:nth-child(3) { animation-delay: .3s; }
+@keyframes notif-dot-bounce {
+    0%, 80%, 100% { transform: scale(0.7); opacity: .4; }
+    40%            { transform: scale(1);   opacity: 1; }
 }
 
 /* ============================================================
@@ -118,9 +146,15 @@
     border: none;
     background: transparent;
     color: #9CA3AF;
-    font-size: 11px;
+    font-size: 18px;
+    line-height: 1;
     cursor: pointer;
     padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .notif-toast-close:hover { color: #6B7280; }
 
@@ -325,12 +359,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 76px;
     height: 22px;
-    padding: 0 10px;
+    padding: 0 8px;
     border-radius: 6px;
     font-size: 11px;
     font-weight: 700;
     white-space: nowrap;
+    text-align: center;
 }
 .tag-assign  { background: #EFF6FF; color: #3B82F6; } /* Info */
 .tag-status  { background: #ECFDF3; color: #22C55E; } /* Success */

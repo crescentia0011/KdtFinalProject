@@ -2,32 +2,23 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head></head>
 <body>
-
 <div id="popoverBody">
-
     <div class="notif-dropdown-header">
         <span class="notif-dropdown-title">최근 알림 내역</span>
         <a th:href="@{/notification/list}" class="notif-goto-list">알림 목록 바로가기</a>
     </div>
-
     <div class="notif-dropdown-list">
-
         <div th:if="${recentAlarmList == null or recentAlarmList.isEmpty()}" class="notif-dropdown-empty">
             새로운 알림이 없습니다.
         </div>
-
         <a th:each="alarm : ${recentAlarmList}"
            class="notif-dropdown-item"
            th:classappend="${alarm.checkYn == 'N'} ? 'notif-dropdown-item-unread'"
            th:href="@{/notification/{id}/go(id=${alarm.alarmId})}">
-
             <div class="notif-dropdown-item-content" th:utext="${alarm.alarmContent}">알림 내용</div>
             <div class="notif-dropdown-item-time" th:text="${alarm.relativeTime}">5분 전</div>
         </a>
-
     </div>
-
 </div>
-
 </body>
 </html>

@@ -75,7 +75,7 @@
         </div>
 
         <!-- 페이징 -->
-        <div class="alarm-pagination-wrap" th:if="${totalPages > 1}">
+        <div class="alarm-pagination-wrap">
             <a th:href="${currentPage > 1} ? @{/notification/list(page=${currentPage - 1}, status=${status})} : '#'"
                th:classappend="${currentPage <= 1} ? 'disabled'"
                class="alarm-page-btn">&lt; 이전</a>
