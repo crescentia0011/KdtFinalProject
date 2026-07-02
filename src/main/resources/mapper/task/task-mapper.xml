@@ -211,9 +211,14 @@
 </select>
 <!-- 자식 일감 리스트 -->
 <select id="childTask" resultType="TaskVO">			
-	SELECT task_title , task_id
+	SELECT task_title
+		   , task_id
+		   , task_status AS taskStatusId
+		   , task_progress AS taskProgress
+		   , parent_task_id AS parentTaskId
 	FROM task
 	WHERE parent_task_id = #{tId}
+		AND deleted_yn = 'N'
 </select>
 
 <!-- 일감 상세조회 테스트케이스 목록 -->

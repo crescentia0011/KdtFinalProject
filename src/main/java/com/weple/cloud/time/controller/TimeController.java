@@ -16,7 +16,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.weple.cloud.admin.service.UserService;
 import com.weple.cloud.admin.service.UserVO;
 import com.weple.cloud.auth.service.LoginUserDetails;
-import com.weple.cloud.history.task.service.TaskHistoryService;
 import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.project.service.ProjectVO;
 import com.weple.cloud.system.service.CodeValueService;
@@ -39,7 +38,6 @@ public class TimeController {
 	private final TimeService timeService;
 	private final UserService userService;
 	private final ProjectTimeSettingService projectTimeSettingService;
-	private final TaskHistoryService taskHistoryService;
 
 	// -------------------------------프로젝트 내 소요시간------------------------------
 	// 전체조회
@@ -137,47 +135,21 @@ public class TimeController {
 	@PostMapping("/insertProjectTime")
 	public String insertProjectTimeProcess(WorkTimeVO workTimeVO,
 										   @RequestParam(value="taskId", required=false) String taskId,
-										   RedirectAttributes redirectAttributes,
-										   @AuthenticationPrincipal LoginUserDetails loginUser,
-                        @RequestParam(value="returnTo", required=false) String returnTo) {
-
-	    
-	    
-	    TaskVO before = (taskId != null) ? taskService.findTaskDetail(taskId) : null;
-	    long oldSpentHours = (before != null) ? before.getSpentHoursSum() : 0; 
-	    
-	    timeService.addProjectTime(workTimeVO);
-	    redirectAttributes.addFlashAttribute("toastMessage", "소요시간이 등록되었습니다.");
-	    
-	    // 3. 등록 후, 업데이트된 일감의 소요시간 합을 다시 가져옴
-	    TaskVO after = (taskId != null) ? taskService.findTaskDetail(taskId) : null;
-	    long newSpentHours = (after != null) ? after.getSpentHoursSum() : 0;
-
-	    // 4. 소요시간이 변경되었다면 이력 기록
-	    if (taskId != null && oldSpentHours != newSpentHours) {
-	    	taskHistoryService.insertHistory(
-	            taskId, 
-	            loginUser.getLoginUser().getUserCode(), 
-	            "UPDATE",
-	            null, null, 
-	            null, null,
-	            null, null, 
-	            null, null,
-	            null, null,
-	            null, null,
-	            null, null,
-	            null, null,
-	            null, null,
-	            null, null,
-	            null, null,
-	            String.valueOf(oldSpentHours), 
-	            String.valueOf(newSpentHours),
-	            null, null  // 파일 이력
-	        );
+										   @RequestParam(value="returnTo", required=false) String returnTo,
+										   RedirectAttributes redirectAttributes) {
+	    try {
+	        timeService.addProjectTime(workTimeVO);
+	    } catch (IllegalStateException ex) {
+	        redirectAttributes.addFlashAttribute("toastType", "error");
+	        redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
+	        if ("detail".equals(returnTo) && taskId != null && !taskId.isEmpty()) {
+	            return "redirect:/project/task/detail/" + taskId + "?projectId=" + workTimeVO.getProjectId();
+	        }
+	        if (workTimeVO.getProjectId() != null && workTimeVO.getProjectId() != 0) {
+	            return "redirect:/insertProjectTime?projectId=" + workTimeVO.getProjectId();
+	        }
+	        return "redirect:/insertProjectTime";
 	    }
-	    
-								
-
 	    redirectAttributes.addFlashAttribute("toastMessage", "소요시간이 등록되었습니다.");
 	    // 일감 상세 페이지의 모달에서 등록한 경우, 해당 일감 상세 페이지로 되돌아감
 	    if ("detail".equals(returnTo) && taskId != null && !taskId.isEmpty()) {

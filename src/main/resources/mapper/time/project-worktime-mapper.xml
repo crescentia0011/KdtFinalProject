@@ -101,14 +101,7 @@
 		        , SYSDATE
 		        , SYSDATE
 		)
-	</insert>
-	<!-- 소요시간 합 일감 컬럼 추가(진)  -->
-	<update id="updateTaskSpentHoursSum" parameterType="WorkTimeVO">
-    	UPDATE task
-    	SET spent_hours_sum = NVL(spent_hours_sum, 0) + #{spentHour},
-        	updated_at = SYSDATE
-    	WHERE task_id = #{taskId}
-	</update>	
+	</insert>	
 	
 	<!-- 수정 -->
 	<update id="updateProjectTime" parameterType="WorkTimeVO">
@@ -136,4 +129,12 @@
 	        PROC_UPDATE_TASK_TIME;
 	    END;
 	</update>
+
+	<!-- 선택한 작업분류(taskClassificationId)의 라벨이 "완료"인지 확인 -->
+	<select id="countCompletedClassification" resultType="int">
+	    SELECT COUNT(*)
+	      FROM work_classification
+	     WHERE task_classification_id = #{workName}
+	       AND work_name = '완료'
+	</select>
 </mapper>

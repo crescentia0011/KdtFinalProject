@@ -29,10 +29,12 @@
                         <div class="module-flex-layout">
                             <div class="module-item-wrapper"
                                  th:each="module : ${moduleList}">
-                                <label class="checkbox-inline">
+                                <label class="checkbox-inline"
+                                       th:classappend="${module.defaultDescribe == '개요' or module.defaultDescribe == '설정'} ? ' module-readonly' : ''">
                                     <input type="checkbox" name="enabledModules"
 									       th:value="${module.commonId}"
-									       th:checked="${enabledCodes != null and enabledCodes.contains(module.commonId)}">
+									       th:checked="${(module.defaultDescribe == '개요' or module.defaultDescribe == '설정') ? true : (enabledCodes != null and enabledCodes.contains(module.commonId))}"
+									       th:disabled="${module.defaultDescribe == '개요' or module.defaultDescribe == '설정'}">
                                     <span class="custom-check-box"></span>
                                     <span class="module-text" th:text="${module.defaultDescribe}">모듈명</span>
                                 </label>
@@ -55,7 +57,8 @@
                                  th:each="type : ${taskTypeList}">
                                 <label class="checkbox-inline">
                                     <input type="checkbox" name="enabledTaskTypes"
-       									   th:value="${type.typeId}">
+       									   th:value="${type.typeId}"
+       									   th:checked="${enabledTaskTypeIds != null and enabledTaskTypeIds.contains(#strings.toString(type.typeId))}">
                                     <span class="custom-check-box"></span>
                                     <span class="module-text" th:text="${type.typeName}">일감유형명</span>
                                 </label>
@@ -86,9 +89,29 @@ document.getElementById('moduleSettingForm').addEventListener('submit', function
 function toggleAllChecks(containerId, checked) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    container.querySelectorAll('input[type="checkbox"]').forEach(function (chk) {
+    container.querySelectorAll('input[type="checkbox"]:not(:disabled)').forEach(function (chk) {
         chk.checked = checked;
     });
+}
+
+// 토스트 알림
+function showToast(msg, type) {
+    var old = document.getElementById('_toastWrap');
+    if (old) old.remove();
+    var wrap = document.createElement('div');
+    wrap.id = '_toastWrap';
+    wrap.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;';
+    var box = document.createElement('div');
+    box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
+    box.style.backgroundColor = (type === 'error') ? '#e53e3e' : (type === 'info' ? '#3b82f6' : '#38a169');
+    box.textContent = msg;
+    wrap.appendChild(box);
+    document.body.appendChild(wrap);
+    setTimeout(function () {
+        wrap.style.transition = 'opacity 0.4s';
+        wrap.style.opacity = '0';
+        setTimeout(function () { wrap.remove(); }, 400);
+    }, 2500);
 }
 
 // 취소 버튼: 토스트 띄우고 약간의 딜레이 후 이동

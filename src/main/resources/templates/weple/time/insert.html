@@ -148,7 +148,7 @@
 					<!-- 작업분류 -->
 					<div class="modal-field">
 						<label>작업분류 <span class="req">*</span></label> <select
-							name="workName" required>
+							id="workNameSelect" name="workName" required>
 							<option value="" disabled selected hidden>작업분류를 선택하세요.</option>
 							<option th:each="v : ${workTypeList}"
 								th:value="${v.taskClassificationId}" th:text="${v.workName}"></option>
@@ -168,8 +168,8 @@
 
 					<!-- 내용 -->
 					<div class="modal-field modal-field-textarea">
-						<label>내용</label>
-						<textarea name="spentContent" rows="3" placeholder="작업 내용을 입력하세요"></textarea>
+						<label>내용 <span class="req">*</span></label>
+						<textarea name="spentContent" rows="3" placeholder="작업 내용을 입력하세요" required></textarea>
 					</div>
 
 					<div class="modal-footer">
@@ -352,6 +352,29 @@ function clearSearch() {
   searchInput.focus();
 }
 
+// 현재 선택된 라디오의 행에 강조 클래스를 유지 (다른 행 선택 시 이전 강조는 해제)
+function markSelectedRow() {
+  document.querySelectorAll('#taskTableBody tr.row-selected').forEach(tr => tr.classList.remove('row-selected'));
+  const checked = document.querySelector('input[name="taskRadio"]:checked');
+  if (checked) {
+    const tr = checked.closest('tr');
+    if (tr) tr.classList.add('row-selected');
+  }
+}
+
+// 행 아무 곳이나 클릭해도 그 줄의 라디오가 선택되도록 (동적으로 추가되는 행까지 포함하기 위해 tbody에 이벤트 위임)
+document.getElementById('taskTableBody').addEventListener('click', function(e) {
+  const row = e.target.closest('tr');
+  if (!row) return;
+  const radio = row.querySelector('input[name="taskRadio"]');
+  if (!radio || radio.disabled) return;
+  // 라디오를 직접 클릭한 경우엔 브라우저 기본 동작에 맡기고 중복 처리하지 않음
+  if (e.target.tagName !== 'INPUT') {
+    radio.checked = true;
+  }
+  markSelectedRow();
+});
+
 // ── 모달 ──
 let selectedRow = null;
 
@@ -364,6 +387,21 @@ function updateRangeFill(rangeEl) {
   const filledColor = rangeEl.disabled ? '#94a3b8' : '#6D5EF7';
   rangeEl.style.background =
     `linear-gradient(to right, ${filledColor} 0%, ${filledColor} ${percent}%, #e2e8f0 ${percent}%, #e2e8f0 100%)`;
+}
+
+// 작업분류 select에서 "완료" 라벨을 가진 <option>을 찾음
+function findCompleteWorkNameOption(selectEl) {
+  return Array.from(selectEl.options).find(o => o.textContent.trim() === '완료');
+}
+
+// 진척도가 100%가 되면 작업분류를 자동으로 "완료"로 맞춰줌
+function syncWorkNameWithProgress(progressValue) {
+  const workNameSelect = document.getElementById('workNameSelect');
+  if (!workNameSelect) return;
+  const completeOption = findCompleteWorkNameOption(workNameSelect);
+  if (parseInt(progressValue) === 100 && completeOption) {
+    workNameSelect.value = completeOption.value;
+  }
 }
 
 function openModal() {
@@ -390,6 +428,7 @@ function openModal() {
   document.getElementById('progressText').textContent = initProgress + '%';
   document.getElementById('progressHint').style.display = 'none';
   document.getElementById('spentHourInput').value = '';
+  document.getElementById('workNameSelect').value = '';
   updateRangeFill(rangeEl);
 
   // 하위 일감 유무에 따라 진척도 편집 가능 여부/범위 결정
@@ -439,6 +478,19 @@ function closeModal() {
 document.getElementById('progressRange').addEventListener('input', function() {
   document.getElementById('progressText').textContent = this.value + '%';
   updateRangeFill(this);
+  syncWorkNameWithProgress(this.value);
+});
+
+// 진척도가 100%가 아닌데 작업분류를 "완료"로 직접 선택하려는 경우 막음
+document.getElementById('workNameSelect').addEventListener('change', function() {
+  const completeOption = findCompleteWorkNameOption(this);
+  if (completeOption && this.value === completeOption.value) {
+    const currentProgress = parseInt(document.getElementById('progressRange').value) || 0;
+    if (currentProgress !== 100) {
+      showToast('진척도가 100%가 아니면 작업분류를 완료로 설정할 수 없습니다.', 'error');
+      this.value = '';
+    }
+  }
 });
 
 // 모달 바깥 클릭 시 닫기 - 비활성화 (취소 버튼으로만 닫힘)
@@ -454,7 +506,6 @@ if (urlTaskId) {
         const radio = tr.querySelector('input[name="taskRadio"]');
         if (tr.dataset.id === urlTaskId) {
             radio.checked = true;
-            tr.style.background = '#F1EDFF';
         } else {
             if (radio) radio.disabled = true;
             tr.style.opacity = '0.4';
@@ -462,6 +513,7 @@ if (urlTaskId) {
             tr.style.cursor = 'default';
         }
     });
+    markSelectedRow();
 
     // task detail에서 넘어온 경우 목록 선택 없이 바로 모달 오픈
     openModal();
@@ -634,6 +686,14 @@ if (urlTaskId) {
 .task-table tbody tr:hover {
 	background: #F1EDFF;
 	cursor: pointer;
+}
+
+.task-table tbody tr.row-selected {
+	background: #F1EDFF;
+}
+
+.task-table tbody tr.row-selected:hover {
+	background: #EEEAFE;
 }
 
 .td-check {

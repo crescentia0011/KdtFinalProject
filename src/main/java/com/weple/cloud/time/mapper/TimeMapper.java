@@ -16,8 +16,6 @@ public interface TimeMapper {
 
 	// 등록
 	public long insertProjectTime(WorkTimeVO workTimeVO);
-	
-	public long updateTaskSpentHoursSum(WorkTimeVO workTimeVO);
 
 	// 수정
 	public long updateProjectTime(WorkTimeVO workTimeVO);
@@ -27,4 +25,7 @@ public interface TimeMapper {
 
 	// 일감별 소요시간 누적 합계 (프로시저)
 	public void updateTaskSpentHours();
+
+	// 선택한 작업분류(taskClassificationId)의 라벨이 "완료"인지 확인용
+	public int countCompletedClassification(@Param("workName") long workName);
 }

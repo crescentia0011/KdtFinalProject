@@ -1,5 +1,5 @@
 package com.weple.cloud.task.web;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -592,7 +592,8 @@ public class TaskController {
 	                                @AuthenticationPrincipal LoginUserDetails loginUser,
 	                                TaskVO taskVO,
 	                                @RequestParam(value = "files", required = false) List<MultipartFile> files,
-	                                @RequestParam(value = "deletedFileIds", required = false) List<Long> deletedFileIds) throws Exception {
+	                                @RequestParam(value = "deletedFileIds", required = false) List<Long> deletedFileIds,
+	                                RedirectAttributes redirectAttributes) throws Exception {
 	    
 		String userCode = loginUser.getLoginUser().getUserCode();
 	    taskVO.setProjectId(pId);
@@ -600,7 +601,16 @@ public class TaskController {
 
 	    // 수정 전 값 먼저 조회-은지
 	    TaskVO before = taskService.findTaskDetail(taskVO.getTaskId());
-
+	    String oldTitle = before.getTaskTitle();
+	    String oldTypeName = before.getTypeIdName();
+	    
+	    try {
+	        taskService.updateTask(taskVO, files, deletedFileIds);
+	    } catch (IllegalStateException ex) {
+	        redirectAttributes.addFlashAttribute("toastType", "error");
+	        redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
+	        return "redirect:/project/task/update/" + taskVO.getTaskId() + "?projectId=" + pId;
+	    }
 	    
 	    String oldFiles = "";
 	    if (before.getFileList() != null && !before.getFileList().isEmpty()) {
@@ -610,7 +620,7 @@ public class TaskController {
 	    }
 	    
 	    // 수정 처리 서비스 호출 (VO 내부에 taskId가 hidden으로 담겨서 넘어옵니다)
-	    taskService.updateTask(taskVO, files, deletedFileIds);
+	    //taskService.updateTask(taskVO, files, deletedFileIds);
 	    
 	    TaskVO after = taskService.findTaskDetail(taskVO.getTaskId());
 	    

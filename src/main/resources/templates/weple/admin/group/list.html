@@ -14,52 +14,55 @@
 			<div class="header-bar"></div>
 			<div class="content">
 				<h1 class="main-title">그룹</h1>
-				<div style="text-align: right; margin: 15px 0">
-					<button type="button" class="add-btn"
-						th:onclick="|location.href ='@{/groupInsert}'|">+ 새 그룹 추가</button>
-				</div>
 
-				<div class="search-container">
-					<button type="button" class="search-btn">
-						<svg class="search-icon" width="14" height="14"
-							viewBox="0 0 16 16" fill="none" stroke="currentColor"
-							stroke-width="1.5" aria-hidden="true">
+				<div class="list-card">
+					<div style="text-align: right; margin-bottom: 15px;">
+						<button type="button" class="add-btn"
+							th:onclick="|location.href ='@{/groupInsert}'|">+ 새 그룹 추가</button>
+					</div>
+
+					<div class="search-container">
+						<button type="button" class="search-btn">
+							<svg class="search-icon" width="14" height="14"
+								viewBox="0 0 16 16" fill="none" stroke="currentColor"
+								stroke-width="1.5" aria-hidden="true">
   								<circle cx="7" cy="7" r="5"></circle>
   								<path d="M11 11l3.5 3.5"></path>
-						</svg>
-					</button>
+							</svg>
+						</button>
 
-					<input type="text" id="groupSearchInput" class="search-input"
-						placeholder="그룹명을 입력하세요." />
-				</div>
+						<input type="text" id="groupSearchInput" class="search-input"
+							placeholder="그룹명을 입력하세요." />
+					</div>
 
-				<table class="data-table">
-					<thead>
-						<tr>
-							<th>NO</th>
-							<th>그룹명</th>
-							<th>사용자 수</th>
-							<th>상태</th>
-						</tr>
-					</thead>
-					<tbody>
-						<th:block th:each="info : ${systemGroupList}">
+					<table class="data-table">
+						<thead>
 							<tr>
-								<td>[[ ${info.groupId} ]]</td>
-								<td>[[ ${info.groupName} ]]</td>
-								<td>[[${info.userCount}]]명</td>
-								<td>
-									<button type="button" class="btn btn-sm btn-danger delete-btn"
-										th:data-id="${info.groupId}" th:data-name="${info.groupName}"
-										th:onclick="|location.href='@{/groupDelete(groupId=${info.groupId})}'|">
-										삭제</button>
-								</td>
+								<th>NO</th>
+								<th>그룹명</th>
+								<th>사용자 수</th>
+								<th>상태</th>
 							</tr>
-						</th:block>
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							<th:block th:each="info : ${systemGroupList}">
+								<tr>
+									<td>[[ ${info.groupId} ]]</td>
+									<td>[[ ${info.groupName} ]]</td>
+									<td>[[${info.userCount}]]명</td>
+									<td>
+										<button type="button" class="btn btn-sm btn-danger delete-btn"
+											th:data-id="${info.groupId}" th:data-name="${info.groupName}"
+											th:onclick="|location.href='@{/groupDelete(groupId=${info.groupId})}'|">
+											삭제</button>
+									</td>
+								</tr>
+							</th:block>
+						</tbody>
+					</table>
 
-				<div class="pagination-wrap" id="paginationWrap"></div>
+					<div class="pagination-wrap" id="paginationWrap"></div>
+				</div>
 			</div>
 		</div>
 
@@ -195,6 +198,15 @@
 	margin-bottom: 24px;
 }
 
+/* 그룹 사용자 목록(userList.html) 페이지와 통일된 카드 테두리 */
+.list-card {
+	border: 1px solid #e2e8f0;
+	border-radius: 14px;
+	background: #ffffff;
+	padding: 28px 30px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .03);
+}
+
 .add-btn {
 	padding: 10px 18px;
 	border: none;
@@ -253,7 +265,7 @@
 }
 
 .data-table th {
-	background: #fafafa;
+	background: #F1EDFF;
 	color: #666;
 	font-size: 14px;
 	font-weight: 600;
