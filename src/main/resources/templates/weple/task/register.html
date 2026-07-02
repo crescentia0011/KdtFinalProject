@@ -123,17 +123,23 @@
 							<option value="100">100 %</option>
 						</select>
 					</div>
+					
 					<div class="col-md-4">
-						<label class="form-label">마일스톤</label> <select
-							class="form-control form-select" name="milestoneId">
-							<option value="" disabled selected hidden>마일스톤 선택</option>
-							<option value="">선택 안 함</option>
-							<th:block th:each="milestone : ${milestoneList}">
-								<option th:value="${milestone.milestoneId}"
-									th:text="${milestone.milestoneTitle}"></option>
-							</th:block>
-						</select>
+					    <label class="form-label">마일스톤</label>
+					    <select class="form-control form-select" 
+					            th:name="${chosenMilestoneId != null} ? '' : 'milestoneId'" 
+					            th:disabled="${chosenMilestoneId != null}">
+					        <option value="" disabled th:selected="${chosenMilestoneId == null}" hidden>마일스톤 선택</option>
+					        <option value="">선택 안 함</option>
+					        <th:block th:each="milestone : ${milestoneList}">
+					            <option th:value="${milestone.milestoneId}"
+					                    th:text="${milestone.milestoneTitle}"
+					                    th:selected="${chosenMilestoneId != null and chosenMilestoneId == milestone.milestoneId}"></option>
+					        </th:block>
+					    </select>
+					    <input type="hidden" name="milestoneId" th:if="${chosenMilestoneId != null}" th:value="${chosenMilestoneId}">
 					</div>
+					
 					<div class="col-md-4">
 						<label class="form-label">상위일감</label>
 						<div style="position: relative;">

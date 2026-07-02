@@ -68,10 +68,14 @@ public class MilestoneController {
         model.addAttribute("detail", detailInfo);
         model.addAttribute("taskList", paginatedTasks);
         model.addAttribute("currentPage", page);
+        model.addAttribute("currentMenu", "milestone");
         model.addAttribute("sidebarMenu", "project");
         model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
         model.addAttribute("totalTasks", totalTaskCount);
         model.addAttribute("totalPages", (int) Math.ceil((double) totalTaskCount / pageSize));
+        
+        List<TaskTypeVO> taskTypeList = milestoneService.getTaskTypeList();
+        model.addAttribute("taskTypeList", taskTypeList);
 
         return "weple/milestone/detail"; // 상세조회 Thymeleaf 경로
     }
@@ -203,6 +207,7 @@ public class MilestoneController {
 		@PostMapping("/update")
 		public String milestoneUpdate(
 		        @RequestParam Long projectId,
+		        @RequestParam Long milestoneId,
 		        @RequestParam(value = "taskIds", required = false) List<String> taskIds, // 수정된 일감 ID 리스트
 		        MilestoneVO milestoneVO) {
 		    
@@ -211,7 +216,7 @@ public class MilestoneController {
 		    // 서비스단에서 마일스톤 수정 + 일감 초기화 후 재등록을 한 번에 처리
 		    milestoneService.modifyMilestone(milestoneVO, taskIds);
 		    
-		    return "redirect:/project/milestone?projectId=" + projectId;
+		    return "redirect:/project/milestone/detail?projectId=" + projectId + "&milestoneId=" + milestoneId;
 		}
 		
 		// 미지정 일감 비동기 조회 (수정 폼 모달용: 이미 내게 엮인 일감도 함께 조회되도록 milestoneId 추가)

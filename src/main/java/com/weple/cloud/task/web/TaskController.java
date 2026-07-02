@@ -152,7 +152,8 @@ public class TaskController {
 	
 	//일감 등록 페이지 로드 + 선택 목록 값 로드
 	@GetMapping("/project/task/insert")
-	public String projectTaskListInsert(@RequestParam("projectId") Long pId, 
+	public String projectTaskListInsert(@RequestParam("projectId") Long pId,
+			@RequestParam(value = "milestoneId", required = false) Long milestoneId,
 			@AuthenticationPrincipal LoginUserDetails loginUser, 
 			Model model) {
 		// 로그인 확인
@@ -215,6 +216,7 @@ public class TaskController {
 	    model.addAttribute("parentTaskList", taskService.findParent(pId));
 	    
 	    model.addAttribute("milestoneList", taskService.findMilestone(pId));
+	    model.addAttribute("chosenMilestoneId", milestoneId);
 	    
 	    model.addAttribute("sidebarMenu", "project");
 	    model.addAttribute("project", projectService.findById(String.valueOf(pId)));

@@ -65,6 +65,8 @@ public interface MilestoneService {
 	// 삭제
 	public int deleteMilestone(Long milestoneId);
 
+	void modifyMilestoneTasks(MilestoneVO milestoneVO, List<String> taskIds);
+
 	
 
 	

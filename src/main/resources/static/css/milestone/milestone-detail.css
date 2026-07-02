@@ -33,6 +33,8 @@
 		    color: #4d7df4;
 		    font-size: 18px;
 		    font-weight: 600;
+		    margin-right: 10px;
+		    margin-left : 10px;
 		    text-decoration: none;
 		}
 		
@@ -792,6 +794,7 @@
             }
         }
         
+        
 
         /* 상태 코드별 동적 컬러 클래스 */
         .status-progress { color: #4d7df4; }
@@ -811,3 +814,152 @@
                 min-width: 1000px; /* 800px -> 1000px */
             }
         }
+        
+        
+        
+        /* ==========================================
+		   1. 커스텀 모달창 구조 & 애니메이션
+		   ========================================== */
+		.custom-modal {
+			display: none; 
+			position: fixed;
+			z-index: 1050;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(15, 23, 42, 0.4); 
+			
+			/* 가로, 세로 화면 정중앙 배치를 강제 설정 */
+			align-items: center;
+			justify-content: center;
+		}
+		
+		/* 모달이 활성화 될 때 클래스 제어 (JavaScript show 클래스 토글용) */
+		.custom-modal.show {
+			display: flex !important;
+		}
+		
+		.custom-modal-content {
+			background-color: #fff;
+			border-radius: 12px;
+			width: 90%;
+			max-width: 850px;
+			margin: 0 auto; /* 강제 쏠림 방지 */
+			box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+			animation: slideDown 0.25s ease-out;
+		}
+		
+		@keyframes slideDown {
+			from { transform: translateY(-15px); opacity: 0; }
+			to { transform: translateY(0); opacity: 1; }
+		}
+		
+		.custom-modal-header {
+			padding: 16px 20px;
+			border-bottom: 1px solid #e2e8f0;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		
+		.close-modal {
+			font-size: 24px;
+			font-weight: bold;
+			color: #94a3b8;
+			cursor: pointer;
+		}
+		.close-modal:hover { 
+			color: #334155; 
+		}
+		
+		.custom-modal-body { 
+			padding: 20px; 
+		}
+		
+		.custom-modal-footer {
+			padding: 16px 20px;
+			border-top: 1px solid #e2e8f0;
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+		}
+		
+		/* 부트스트랩 페이지네이션 커스텀 마우스 커서 */
+		.page-link {
+			cursor: pointer;
+		}
+		
+		
+		/* ==========================================
+		   2. 모달 내부 검색 필터 및 폼 요소
+		   ========================================== */
+		.modal-filter-box {
+			background-color: #f8fafc;
+			padding: 12px;
+			border-radius: 8px;
+			border: 1px solid #e2e8f0;
+		}
+		
+		.form-control, .form-select {
+			border: 1px solid #cbd5e1 !important;
+			border-radius: 6px !important;
+			padding: 8px 12px !important;
+			height: auto !important;
+			box-shadow: none !important;
+			transition: border-color 0.2s;
+		}
+		
+		.form-control:focus, .form-select:focus {
+			border-color: #3b82f6 !important;
+		}
+		
+		
+		/* ==========================================
+		   3. 모달 내부 버튼 스타일
+		   ========================================== */
+		.btn-insert-submit {
+			background-color: #0000ff !important;
+			border-color: #0000ff !important;
+			color: white !important;
+			font-weight: bold;
+			border-radius: 6px;
+			padding: 8px 24px;
+			cursor: pointer;
+		}
+		
+		.btn-insert-cancel {
+			background-color: #ffffff;
+			border: 1px solid #cbd5e1;
+			color: #475569;
+			border-radius: 6px;
+			padding: 8px 24px;
+			cursor: pointer;
+		}
+		
+		
+		/* ==========================================
+		   4. 선택한 일감 프리뷰 & 배지 스타일 
+		   ========================================== */
+		.selected-tasks-preview-box {
+			border: 1px solid #e2e8f0;
+			background-color: #f8fafc;
+			padding: 12px 15px;
+			border-radius: 8px;
+			min-height: 50px;
+			font-size: 13px;
+			color: #64748b;
+			margin-top: 10px;
+		}
+		
+		.selected-task-badge {
+			display: inline-block;
+			background-color: #eff6ff;
+			color: #2563eb;
+			border: 1px solid #bfdbfe;
+			padding: 3px 8px;
+			border-radius: 4px;
+			margin-right: 6px;
+			margin-bottom: 6px;
+			font-weight: 500;
+		}

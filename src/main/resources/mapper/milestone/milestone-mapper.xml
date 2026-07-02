@@ -442,7 +442,8 @@
 	        milestone_describe = #{milestoneDescribe},
 	        finish_date = #{finishDate, jdbcType=DATE},
 	        parent_milestone_id = #{parentMilestoneId, jdbcType=NUMERIC},
-	        updated_at = SYSDATE
+	        updated_at = SYSDATE,
+	        milestone_status = #{milestoneStatus}
 	    WHERE milestone_id = #{milestoneId}
 	</update>
 
