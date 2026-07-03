@@ -18,8 +18,8 @@ public class SelectTotalTimeServiceImpl implements SelectTotalTimeService {
 	// -------------------------------전체 소요시간------------------------------
 	// 전체조회
 	@Override
-	public List<SelectTotalTimeVO> findSelectTotalTimeAll() {
-		return selectTotalTimeMapper.SelectTotalTimeAll();
+	public List<SelectTotalTimeVO> findSelectTotalTimeAll(Long companyId, String userCode, boolean isManager) {
+		return selectTotalTimeMapper.SelectTotalTimeAll(companyId, userCode, isManager);
 	}
 
 	// 등록

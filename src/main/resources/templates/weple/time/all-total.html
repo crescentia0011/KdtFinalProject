@@ -11,7 +11,7 @@
 		<div class="worktime-container">
 			<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
 			    <h3 style="margin: 0; font-size: 22px; font-weight: 700;">소요시간</h3>
-			    <button class="btn btn-primary" 
+			    <button th:if="${isManager}" class="btn btn-primary" 
 				        th:onclick="|location.href='@{/insertProjectTime}'|">
 				    + 소요시간 등록
 				</button>
@@ -38,7 +38,8 @@
 	                        <label><input type="checkbox" value="3" onchange="toggleFilter(this, 2)"> 사용자</label><br>
 	                        <label><input type="checkbox" value="4" onchange="toggleFilter(this, 3)"> 작업분류</label><br>
 	                        <label><input type="checkbox" value="5" onchange="toggleFilter(this, 4)"> 일감</label><br>
-	                        <label><input type="checkbox" value="6" onchange="toggleFilter(this, 5)"> 내용</label>
+	                        <label><input type="checkbox" value="6" onchange="toggleFilter(this, 5)"> 내용</label><br>
+	                        <label><input type="checkbox" value="7" onchange="toggleFilter(this, 0)"> 프로젝트명</label>
 	                    </div>
 	                </div>
 	            </div>
@@ -89,11 +90,21 @@
 									<span class="more-options-btn" onclick="toggleDropdown(this)">•••</span>
 									<div class="dropdown-menu-box">
 									    <button type="button" class="dropdown-item edit-btn"
+									    	th:if="${isManager or time.userCode == loginUserCode}"
 									        	th:onclick="|location.href='@{/updateProjectTime(workId=${time.workId})}'|">
 									        	✏️ 편집
 									    </button>
-									    <button type="button" class="dropdown-item delete-btn" 
+									    <button type="button" class="dropdown-item edit-btn"
+									    	th:unless="${isManager or time.userCode == loginUserCode}"
+									        	onclick="showToast('편집 권한이 없습니다.', 'error')">
+									        	✏️ 편집
+									    </button>
+									    <button type="button" class="dropdown-item delete-btn" th:if="${isManager}"
         										th:onclick="|deleteWork(${time.workId}, ${time.projectId})|">
+        										🗑️ 삭제
+        								</button>
+									    <button type="button" class="dropdown-item delete-btn" th:unless="${isManager}"
+        										onclick="showToast('삭제 권한이 없습니다.', 'error')">
         										🗑️ 삭제
         								</button>
 									</div>
@@ -203,15 +214,24 @@
 	function updatePagination(pageCount) {
 	    const pagingDiv = document.querySelector(".paging");
 	    if (pageCount === 0) pageCount = 1;
-	    
+
+	    // 페이지 번호를 10개 단위 블록으로 끊어서 보여준다.
+	    // 1~10페이지에서 "다음"을 누르면 11페이지(다음 블록 첫 페이지)로 이동.
+	    const blockSize = 10;
+	    const currentBlock = Math.floor((currentPage - 1) / blockSize);
+	    const startPage = currentBlock * blockSize + 1;
+	    const endPage = Math.min(startPage + blockSize - 1, pageCount);
+	    const isFirstBlock = startPage === 1;
+	    const isLastBlock = endPage === pageCount;
+
 	    pagingDiv.innerHTML = `
-	        <button class="page-btn" onclick="showPage(Math.max(1, currentPage - 1))">&lt; 이전</button>
+	        <button class="page-btn" onclick="showPage(${startPage - 1})" ${isFirstBlock ? 'disabled' : ''}>&lt; 이전</button>
 	        <div id="page-numbers" style="display: flex; gap: 5px; align-items: center;"></div>
-	        <button class="page-btn" onclick="showPage(Math.min(${pageCount}, currentPage + 1))">다음 &gt;</button>
+	        <button class="page-btn" onclick="showPage(${endPage + 1})" ${isLastBlock ? 'disabled' : ''}>다음 &gt;</button>
 	    `;
 
 	    const numberSpan = document.getElementById("page-numbers");
-	    for (let i = 1; i <= pageCount; i++) {
+	    for (let i = startPage; i <= endPage; i++) {
 	        const a = document.createElement("a");
 	        a.href = "#";
 	        a.innerText = i;
@@ -230,6 +250,30 @@
 	        if (menu !== menuBox) menu.classList.remove('show');
 	    });
 	    menuBox.classList.toggle('show');
+	}
+
+	// 토스트 알림 (권한 없음 안내용)
+	function showToast(msg, type) {
+	  var old = document.getElementById('_toastWrap');
+	  if (old) old.remove();
+
+	  var wrap = document.createElement('div');
+	  wrap.id = '_toastWrap';
+	  wrap.style.cssText = 'position:fixed;top:24px;left:50%;transform:translate(-50%,0);z-index:99999;';
+
+	  var box = document.createElement('div');
+	  box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
+	  box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
+	  box.textContent = msg;
+
+	  wrap.appendChild(box);
+	  document.body.appendChild(wrap);
+
+	  setTimeout(function() {
+	    wrap.style.transition = 'opacity 0.4s';
+	    wrap.style.opacity = '0';
+	    setTimeout(function() { wrap.remove(); }, 400);
+	  }, 2500);
 	}
 	window.onclick = function(event) {
 	    if (!event.target.matches('.more-options-btn')) {
@@ -255,11 +299,60 @@
 	    showPage(1);
 	}
 	    
+	    // 삭제 확인 모달 (파일관리 삭제 모달과 동일한 스타일)
+	    function showConfirmModal(title, msg, onConfirm, onCancel) {
+	        const old = document.getElementById('_confirmModalWrap');
+	        if (old) old.remove();
+	        const overlay = document.createElement('div');
+	        overlay.id = '_confirmModalWrap';
+	        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;';
+
+	        const box = document.createElement('div');
+	        box.style.cssText = 'background:#fff;border-radius:12px;width:380px;max-width:90vw;box-shadow:0 12px 40px rgba(139,124,248,.18);overflow:hidden;';
+
+	        const header = document.createElement('div');
+	        header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #DDD6FE;background:#F5F3FF;';
+	        const titleEl = document.createElement('span');
+	        titleEl.style.cssText = 'font-size:16px;font-weight:700;color:#1a1a2e;';
+	        titleEl.textContent = title;
+	        const closeBtn = document.createElement('button');
+	        closeBtn.textContent = '✕';
+	        closeBtn.style.cssText = 'background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;';
+	        closeBtn.onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
+	        header.appendChild(titleEl);
+	        header.appendChild(closeBtn);
+
+	        const body = document.createElement('div');
+	        body.style.cssText = 'padding:24px;text-align:center;';
+	        const msgEl = document.createElement('p');
+	        msgEl.style.cssText = 'font-size:14px;color:#1a1a2e;margin:0 0 24px;line-height:1.7;white-space:pre-line;';
+	        msgEl.textContent = msg;
+	        const btnWrap = document.createElement('div');
+	        btnWrap.style.cssText = 'display:flex;justify-content:center;gap:12px;';
+	        const btnCancel = document.createElement('button');
+	        btnCancel.textContent = '취소';
+	        btnCancel.style.cssText = 'padding:7px 16px;border:1px solid #DDD6FE;border-radius:6px;background:#fff;color:#4A5568;font-size:13px;font-weight:600;cursor:pointer;';
+	        btnCancel.onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
+	        const btnOk = document.createElement('button');
+	        btnOk.textContent = '삭제';
+	        btnOk.style.cssText = 'padding:7px 16px;border:1px solid #e53e3e;border-radius:6px;background:#e53e3e;color:#fff;font-size:13px;font-weight:600;cursor:pointer;';
+	        btnOk.onclick = () => { overlay.remove(); if (onConfirm) onConfirm(); };
+
+	        btnWrap.appendChild(btnCancel);
+	        btnWrap.appendChild(btnOk);
+	        body.appendChild(msgEl);
+	        body.appendChild(btnWrap);
+	        box.appendChild(header);
+	        box.appendChild(body);
+	        overlay.appendChild(box);
+	        document.body.appendChild(overlay);
+	    }
+
 	    //삭제버튼 컨펌
 		function deleteWork(workId, projectId) {
-		    if(confirm("정말 삭제하시겠습니까?")) {
+		    showConfirmModal('소요시간 삭제', '정말 삭제하시겠습니까?', () => {
 		        location.href = `/deleteTotalTime?workId=${workId}`;
-		    }
+		    });
 		}
 	    
 	    //CSV 내보내기
@@ -594,6 +687,11 @@
 	color: #999;
 	font-weight: 500;
 	padding: 5px 10px;
+}
+
+.page-btn:disabled {
+	color: #ccc;
+	cursor: not-allowed;
 }
 
 .paging a {

@@ -82,7 +82,7 @@ function showToast(msg, type) {
   if (old) old.remove();
   var wrap = document.createElement('div');
   wrap.id = '_toastWrap';
-  wrap.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;';
+  wrap.style.cssText = 'position:fixed;top:24px;left:50%;transform:translate(-50%,0);z-index:99999;';
   var box = document.createElement('div');
   box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
   box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
@@ -96,31 +96,50 @@ function showToast(msg, type) {
   }, 2500);
 }
 
-function showConfirm(msg, onOk, onCancel) {
+function showConfirm(msg, onOk, onCancel, title) {
   var old = document.getElementById('_confirmWrap');
   if (old) old.remove();
   var overlay = document.createElement('div');
   overlay.id = '_confirmWrap';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;';
+
   var box = document.createElement('div');
-  box.style.cssText = 'background:#fff;border-radius:10px;padding:28px 32px;min-width:280px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);';
+  box.style.cssText = 'background:#fff;border-radius:12px;width:380px;max-width:90vw;box-shadow:0 12px 40px rgba(139,124,248,.18);overflow:hidden;';
+
+  var header = document.createElement('div');
+  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #DDD6FE;background:#F5F3FF;';
+  var titleEl = document.createElement('span');
+  titleEl.style.cssText = 'font-size:16px;font-weight:700;color:#1a1a2e;';
+  titleEl.textContent = title || '확인';
+  var closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = 'background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;';
+  closeBtn.onclick = function() { overlay.remove(); if (onCancel) onCancel(); };
+  header.appendChild(titleEl);
+  header.appendChild(closeBtn);
+
+  var body = document.createElement('div');
+  body.style.cssText = 'padding:24px;text-align:center;';
   var txt = document.createElement('p');
-  txt.style.cssText = 'font-size:15px;font-weight:500;color:#1a1a2e;margin:0 0 24px;line-height:1.6;';
+  txt.style.cssText = 'font-size:14px;color:#1a1a2e;margin:0 0 24px;line-height:1.7;white-space:pre-line;';
   txt.textContent = msg;
   var btnWrap = document.createElement('div');
   btnWrap.style.cssText = 'display:flex;justify-content:center;gap:12px;';
   var btnCancel = document.createElement('button');
   btnCancel.textContent = '취소';
-  btnCancel.style.cssText = 'height:36px;padding:0 24px;background:#fff;border:1px solid #d1d5db;border-radius:6px;font-size:14px;cursor:pointer;';
+  btnCancel.style.cssText = 'padding:7px 16px;border:1px solid #DDD6FE;border-radius:6px;background:#fff;color:#4A5568;font-size:13px;font-weight:600;cursor:pointer;';
   btnCancel.onclick = function() { overlay.remove(); if (onCancel) onCancel(); };
   var btnOk = document.createElement('button');
   btnOk.textContent = '확인';
-  btnOk.style.cssText = 'height:36px;padding:0 24px;background:#e53e3e;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;';
+  btnOk.style.cssText = 'padding:7px 16px;border:1px solid #8B7CF8;border-radius:6px;background:#8B7CF8;color:#fff;font-size:13px;font-weight:600;cursor:pointer;';
   btnOk.onclick = function() { overlay.remove(); if (onOk) onOk(); };
+
   btnWrap.appendChild(btnCancel);
   btnWrap.appendChild(btnOk);
-  box.appendChild(txt);
-  box.appendChild(btnWrap);
+  body.appendChild(txt);
+  body.appendChild(btnWrap);
+  box.appendChild(header);
+  box.appendChild(body);
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 }

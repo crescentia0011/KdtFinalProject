@@ -22,8 +22,8 @@ public class TimeServiceImpl implements TimeService {
 	// -------------------------------프로젝트 내 소요시간------------------------------
 	// 전체조회
 	@Override
-	public List<WorkTimeVO> findProjectTimeAll(Long projectId) {
-		return timeMapper.projectTimeAll(projectId);
+	public List<WorkTimeVO> findProjectTimeAll(Long projectId, String userCode) {
+		return timeMapper.projectTimeAll(projectId, userCode);
 	}
 
 	// 단건 조회

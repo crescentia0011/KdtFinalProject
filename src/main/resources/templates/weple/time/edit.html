@@ -38,26 +38,20 @@
       <input type="hidden" name="projectId" th:value="${workTime.projectId}">
       <input type="hidden" name="taskId"    th:value="${workTime.taskId}">
 
-      <!-- 사용자 -->
-      <div class="edit-field edit-field-user">
+      <!-- 사용자 (고정) -->
+      <div class="edit-field">
         <label>사용자 <span class="req">*</span></label>
-        <div class="user-search-wrap">
-          <input type="text" id="userSearchInput"
-                 placeholder="이름 또는 초성으로 검색"
-                 th:value="${workTime.userName}"
-                 autocomplete="off">
-          <input type="hidden" id="selectedUserCode" name="userCode"
-                 th:value="${workTime.userCode}" required>
-          <ul id="userDropdown" class="user-dropdown"></ul>
-        </div>
+        <span class="edit-static-value" th:text="${workTime.userName}">-</span>
+        <input type="hidden" name="userCode" th:value="${workTime.userCode}">
       </div>
 
-      <!-- 작업일자 -->
+      <!-- 작업일자 (고정) -->
       <div class="edit-field">
         <label>작업일자 <span class="req">*</span></label>
-        <input type="date" name="workDate"
-               th:value="${workTime.workDate != null} ? ${#dates.format(workTime.workDate,'yyyy-MM-dd')} : ''"
-               required>
+        <span class="edit-static-value"
+              th:text="${workTime.workDate != null} ? ${#dates.format(workTime.workDate,'yyyy-MM-dd')} : '-'">-</span>
+        <input type="hidden" name="workDate"
+               th:value="${workTime.workDate != null} ? ${#dates.format(workTime.workDate,'yyyy-MM-dd')} : ''">
       </div>
 
       <!-- 소요시간 -->
@@ -81,12 +75,13 @@
         </select>
       </div>
 
-      <!-- 진척도 -->
+      <!-- 진척도 (고정, 소요시간에 따라 자동계산만 됨) -->
       <div class="edit-field">
         <label>진척도</label>
         <div class="progress-wrap">
-          <input type="range" id="progressRange" name="progress"
-                 min="0" max="100" value="0">
+          <input type="range" id="progressRange" disabled
+                 min="0" max="100" value="0" class="progress-locked">
+          <input type="hidden" id="progressValue" name="progress" value="0">
           <span id="progressText" class="progress-text">0%</span>
         </div>
       </div>
@@ -110,77 +105,29 @@
 
 <!-- Thymeleaf → JS -->
 <script th:inline="javascript">
-const userList      = /*[[${userList}]]*/ [];
 const estimatedTime = /*[[${workTime.estimatedTime}]]*/ 0;
 const savedSpentHour = /*[[${workTime.spentHour}]]*/ 0;
 
-// ── 진척도 초기값 설정 ──
+// ── 진척도 초기값 설정 (고정 표시, 소요시간에 연동해서만 갱신됨) ──
+function setProgress(pct) {
+  document.getElementById('progressRange').value = pct;
+  document.getElementById('progressValue').value = pct;
+  document.getElementById('progressText').textContent = pct + '%';
+}
 (function() {
   const pct = estimatedTime > 0
     ? Math.min(Math.round(savedSpentHour / estimatedTime * 100), 100)
     : 0;
-  document.getElementById('progressRange').value = pct;
-  document.getElementById('progressText').textContent = pct + '%';
+  setProgress(pct);
 })();
 
-// ── 소요시간 변경 시 진척도 자동계산 ──
+// ── 소요시간 변경 시 진척도 자동계산 (사용자가 직접 조작은 불가) ──
 document.getElementById('spentHourInput').addEventListener('input', function() {
   if (!estimatedTime) return;
   const pct = Math.min(Math.round((parseFloat(this.value)||0) / estimatedTime * 100), 100);
-  document.getElementById('progressRange').value = pct;
-  document.getElementById('progressText').textContent = pct + '%';
-});
-document.getElementById('progressRange').addEventListener('input', function() {
-  document.getElementById('progressText').textContent = this.value + '%';
+  setProgress(pct);
 });
 
-// ── 초성 추출 ──
-function getChosung(str) {
-  const CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
-  return (str||'').split('').map(ch => {
-    const code = ch.charCodeAt(0) - 0xAC00;
-    return code >= 0 && code <= 11171 ? CHO[Math.floor(code/588)] : ch;
-  }).join('');
-}
-function matchUser(name, kw) {
-  if (!kw) return true;
-  const n = (name||'').toLowerCase();
-  return n.includes(kw) || getChosung(name).includes(kw);
-}
-
-// ── 사용자 검색 자동완성 ──
-const userSearchInput  = document.getElementById('userSearchInput');
-const userDropdown     = document.getElementById('userDropdown');
-const selectedUserCode = document.getElementById('selectedUserCode');
-
-userSearchInput.addEventListener('input', function() {
-  const kw = this.value.trim().toLowerCase();
-  userDropdown.innerHTML = '';
-  selectedUserCode.value = '';
-
-  if (!kw) { userDropdown.style.display = 'none'; return; }
-
-  const matched = userList.filter(u => matchUser(u.userName, kw));
-  if (!matched.length) { userDropdown.style.display = 'none'; return; }
-
-  matched.forEach(u => {
-    const li = document.createElement('li');
-    li.textContent  = u.userName;
-    li.dataset.code = u.userCode;
-    li.addEventListener('click', () => {
-      userSearchInput.value  = u.userName;
-      selectedUserCode.value = u.userCode;
-      userDropdown.style.display = 'none';
-    });
-    userDropdown.appendChild(li);
-  });
-  userDropdown.style.display = 'block';
-});
-
-document.addEventListener('click', e => {
-  if (!userSearchInput.contains(e.target) && !userDropdown.contains(e.target))
-    userDropdown.style.display = 'none';
-});
 </script>
 
 <style>
@@ -250,41 +197,22 @@ document.addEventListener('click', e => {
 .edit-field select:focus { border-color: #6D5EF7; }
 .req { color: #ef4444; }
 
-/* 사용자 검색 */
-.edit-field-user { position: relative; }
-.user-search-wrap { flex: 1; position: relative; }
-.user-search-wrap input[type="text"] {
-  width: 100%;
-  height: 36px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 0 10px;
+/* 고정 값 표시 (사용자 / 작업일자) */
+.edit-static-value {
+  flex: 1;
   font-size: 14px;
-  outline: none;
+  font-weight: 600;
+  color: #1e293b;
 }
-.user-search-wrap input[type="text"]:focus { border-color: #6D5EF7; }
-.user-dropdown {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0; right: 0;
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.1);
-  max-height: 180px;
-  overflow-y: auto;
-  z-index: 10000;
-  list-style: none;
-  margin: 4px 0 0;
-  padding: 4px 0;
-}
-.user-dropdown li { padding: 9px 12px; cursor: pointer; font-size: 14px; }
-.user-dropdown li:hover { background: #F1EDFF; color: #6D5EF7; }
 
-/* 진척도 */
+/* 진척도 (고정 표시 - 드래그 불가) */
 .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
 .progress-wrap input[type="range"] { flex: 1; accent-color: #6D5EF7; }
+.progress-wrap input[type="range"].progress-locked {
+  opacity: .6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .progress-text { width: 38px; font-weight: 700; color: #6D5EF7; text-align: right; }
 
 /* textarea */

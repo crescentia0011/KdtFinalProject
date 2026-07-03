@@ -39,15 +39,32 @@ public class TimeController {
 	private final UserService userService;
 	private final ProjectTimeSettingService projectTimeSettingService;
 
+	private boolean isCompanyManager(com.weple.cloud.auth.service.LoginUserVO user) {
+		return Integer.valueOf(1).equals(user.getOwnerYn())
+			|| Integer.valueOf(1).equals(user.getAdminYn());
+	}
+
 	// -------------------------------프로젝트 내 소요시간------------------------------
-	// 전체조회
+	// 전체조회 (관리자 포함 누구나 본인이 등록한 건만 - 프로젝트 전체 현황은 전체 소요시간 페이지에서 확인)
 	@GetMapping("/projectTimeList")
 	public String projectTimeList(@RequestParam("projectId") long projectId,
 			@RequestParam(value = "taskId", required = false) String taskId,
 			@ModelAttribute("toastMessage") String toastMessage,
 			@ModelAttribute("toastError") String toastError,
-			Model model) {
-		List<WorkTimeVO> list = timeService.findProjectTimeAll(projectId);
+			Model model,
+			@AuthenticationPrincipal LoginUserDetails loginUser) {
+
+		// 멤버십 체크 (관리자는 항상 접근 가능)
+		boolean isManager = isCompanyManager(loginUser.getLoginUser());
+		try {
+			if (!isManager && !projectService.isMember(loginUser.getLoginUser().getUserCode(), projectId)) {
+				return "weple/access-denide";
+			}
+		} catch (Exception e) {
+			return "weple/access-denide";
+		}
+
+		List<WorkTimeVO> list = timeService.findProjectTimeAll(projectId, loginUser.getLoginUser().getUserCode());
 		// taskId가 있으면 해당 일감만 필터링
 		if (taskId != null && !taskId.isEmpty()) {
 		    list = list.stream()
@@ -60,6 +77,8 @@ public class TimeController {
 		    model.addAttribute("countSpentHour", list.get(0).getCountSpentHour());
 		    model.addAttribute("totalSpentHour", list.get(0).getTotalSpentHour());
 		}
+		model.addAttribute("isManager", isManager);
+		model.addAttribute("loginUserCode", loginUser.getLoginUser().getUserCode());
 		model.addAttribute("sidebarMenu", "project");
 		model.addAttribute("project", projectService.findById(String.valueOf(projectId)));  // ✅ 이렇게
 		model.addAttribute("projectId", projectId);
@@ -73,6 +92,19 @@ public class TimeController {
 	public String insertProjectTimeForm(@RequestParam(value="projectId", required=false) Long projectId,
 										@RequestParam(value="taskId", required=false) String taskId, Model model,
 										@AuthenticationPrincipal LoginUserDetails loginUser) {
+
+		boolean isManager = isCompanyManager(loginUser.getLoginUser());
+		try {
+			if (projectId == null || projectId == 0) {
+				// 프로젝트 선택 없이(=전체 소요시간 페이지에서) 진입하는 등록은 관리자만 허용
+				if (!isManager) return "weple/access-denide";
+			} else if (!isManager && !projectService.isMember(loginUser.getLoginUser().getUserCode(), projectId)) {
+				return "weple/access-denide";
+			}
+		} catch (Exception e) {
+			return "weple/access-denide";
+		}
+
 		List<ProjectVO> projectList = projectService.findAll("");
 		
 	    // 프로젝트 조회, 만약 조회 결과가 없으면 빈 객체라도 생성
@@ -85,6 +117,12 @@ public class TimeController {
 		
 		// 일감 목록 조회 (projectId 없으면 빈 리스트)
 		List<TaskVO> taskList = (projectId != null) ? taskService.findAll(projectId) : new java.util.ArrayList<>();
+		// 일반 사용자는 본인이 담당자로 지정된 일감에만 소요시간을 등록할 수 있음 (관리자는 일감 배정 대상이 아니라 전체 허용)
+		if (!isManager) {
+			taskList = taskList.stream()
+					.filter(t -> loginUser.getLoginUser().getUserCode().equals(t.getTaskManagerId()))
+					.collect(Collectors.toList());
+		}
 		for(TaskVO t : taskList) {
 		    System.out.println("데이터 확인 -> 제목: " + t.getTaskTitle() + ", 설명: " + t.getTaskDescribe());
 		}
@@ -136,7 +174,27 @@ public class TimeController {
 	public String insertProjectTimeProcess(WorkTimeVO workTimeVO,
 										   @RequestParam(value="taskId", required=false) String taskId,
 										   @RequestParam(value="returnTo", required=false) String returnTo,
+										   @AuthenticationPrincipal LoginUserDetails loginUser,
 										   RedirectAttributes redirectAttributes) {
+	    boolean isManager = isCompanyManager(loginUser.getLoginUser());
+	    Long projectId = workTimeVO.getProjectId();
+	    try {
+	        if (projectId == null || projectId == 0) {
+	            if (!isManager) return "weple/access-denide";
+	        } else if (!isManager && !projectService.isMember(loginUser.getLoginUser().getUserCode(), projectId)) {
+	            return "weple/access-denide";
+	        }
+	        // 일반 사용자는 본인이 담당자로 지정된 일감에만 등록 가능 (관리자는 일감 배정 대상이 아니라 예외 없이 전체 허용)
+	        if (!isManager) {
+	            TaskVO task = (workTimeVO.getTaskId() != null) ? taskService.findTaskDetail(workTimeVO.getTaskId()) : null;
+	            if (task == null || !loginUser.getLoginUser().getUserCode().equals(task.getTaskManagerId())) {
+	                return "weple/access-denide";
+	            }
+	        }
+	    } catch (Exception e) {
+	        return "weple/access-denide";
+	    }
+
 	    try {
 	        timeService.addProjectTime(workTimeVO);
 	    } catch (IllegalStateException ex) {
@@ -219,6 +277,12 @@ public class TimeController {
 		WorkTimeVO workTime = timeService.findProjectTimeOne(workId);
 		if (workTime == null) return "redirect:/projectTimeList";
 
+		// 본인이 등록한 건이거나 관리자만 수정 가능
+		boolean isManager = isCompanyManager(loginUser.getLoginUser());
+		if (!isManager && !loginUser.getLoginUser().getUserCode().equals(workTime.getUserCode())) {
+			return "weple/access-denide";
+		}
+
 		// 작업분류 목록 (사용중인 것 중, 이 프로젝트가 사용 선택한 것만)
 		List<CodeValueVO> workTypeList = codeValueService.findCodeValueAll(loginUser.getLoginUser().getCompanyId()).stream()
 			.filter(vo -> vo.getWorkName() != null && !vo.getWorkName().isEmpty())
@@ -242,7 +306,16 @@ public class TimeController {
 	
 	// 수정 처리
 	@PostMapping("/updateProjectTime")
-	public String updateProjectTimeProcess(WorkTimeVO workTimeVO, RedirectAttributes ra) {
+	public String updateProjectTimeProcess(WorkTimeVO workTimeVO, RedirectAttributes ra,
+			@AuthenticationPrincipal LoginUserDetails loginUser) {
+		WorkTimeVO original = timeService.findProjectTimeOne(workTimeVO.getWorkId());
+		if (original == null) return "redirect:/projectTimeList";
+
+		boolean isManager = isCompanyManager(loginUser.getLoginUser());
+		if (!isManager && !loginUser.getLoginUser().getUserCode().equals(original.getUserCode())) {
+			return "weple/access-denide";
+		}
+
 		timeService.modifyProjectTime(workTimeVO);
 		ra.addFlashAttribute("toastMessage", "소요시간이 수정되었습니다.");
 		// projectId가 있으면 프로젝트 소요시간 목록으로, 없으면 전체 소요시간 목록으로
@@ -252,9 +325,13 @@ public class TimeController {
 		return "redirect:/totalTimeList";
 	}
 	
-	// 삭제
+	// 삭제 (관리자만 가능)
 	@GetMapping("/deleteProjectTime")
-	public String deleteProjectTime(@RequestParam("projectId") long projectId, @RequestParam("workId") long workId) {
+	public String deleteProjectTime(@RequestParam("projectId") long projectId, @RequestParam("workId") long workId,
+			@AuthenticationPrincipal LoginUserDetails loginUser) {
+		if (!isCompanyManager(loginUser.getLoginUser())) {
+			return "weple/access-denide";
+		}
 		long result = timeService.removeProjectTime(workId);
 		return "redirect:/projectTimeList?projectId=" + projectId;
 	}

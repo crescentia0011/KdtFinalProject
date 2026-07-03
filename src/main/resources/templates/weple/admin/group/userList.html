@@ -73,6 +73,55 @@
 		</div>
 
 		<script>
+        // 제외 확인 모달 (파일관리 삭제 모달과 동일한 스타일)
+        function showConfirmModal(title, msg, onConfirm, onCancel) {
+            const old = document.getElementById('_confirmModalWrap');
+            if (old) old.remove();
+            const overlay = document.createElement('div');
+            overlay.id = '_confirmModalWrap';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;';
+
+            const box = document.createElement('div');
+            box.style.cssText = 'background:#fff;border-radius:12px;width:380px;max-width:90vw;box-shadow:0 12px 40px rgba(139,124,248,.18);overflow:hidden;';
+
+            const header = document.createElement('div');
+            header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #DDD6FE;background:#F5F3FF;';
+            const titleEl = document.createElement('span');
+            titleEl.style.cssText = 'font-size:16px;font-weight:700;color:#1a1a2e;';
+            titleEl.textContent = title;
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '✕';
+            closeBtn.style.cssText = 'background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;';
+            closeBtn.onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
+            header.appendChild(titleEl);
+            header.appendChild(closeBtn);
+
+            const body = document.createElement('div');
+            body.style.cssText = 'padding:24px;text-align:center;';
+            const msgEl = document.createElement('p');
+            msgEl.style.cssText = 'font-size:14px;color:#1a1a2e;margin:0 0 24px;line-height:1.7;white-space:pre-line;';
+            msgEl.textContent = msg;
+            const btnWrap = document.createElement('div');
+            btnWrap.style.cssText = 'display:flex;justify-content:center;gap:12px;';
+            const btnCancel = document.createElement('button');
+            btnCancel.textContent = '취소';
+            btnCancel.style.cssText = 'padding:7px 16px;border:1px solid #DDD6FE;border-radius:6px;background:#fff;color:#4A5568;font-size:13px;font-weight:600;cursor:pointer;';
+            btnCancel.onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
+            const btnOk = document.createElement('button');
+            btnOk.textContent = '삭제';
+            btnOk.style.cssText = 'padding:7px 16px;border:1px solid #e53e3e;border-radius:6px;background:#e53e3e;color:#fff;font-size:13px;font-weight:600;cursor:pointer;';
+            btnOk.onclick = () => { overlay.remove(); if (onConfirm) onConfirm(); };
+
+            btnWrap.appendChild(btnCancel);
+            btnWrap.appendChild(btnOk);
+            body.appendChild(msgEl);
+            body.appendChild(btnWrap);
+            box.appendChild(header);
+            box.appendChild(body);
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+        }
+
         // 1. 기존 삭제 로직 유지
         document.querySelectorAll(".delete-btn").forEach((btn) => {
           btn.addEventListener("click", function () {
@@ -80,8 +129,10 @@
             const name = this.dataset.name;
             const groupId = this.dataset.group;
 
-            if (id && name && confirm(`${name} 사용자를 현재 그룹에서 제외하시겠습니까?`)) {
-                location.href = `/groupUserDelete?userCode=${id}&groupId=${groupId}`;
+            if (id && name) {
+                showConfirmModal('그룹에서 제외', `${name} 사용자를 현재 그룹에서 제외하시겠습니까?`, () => {
+                    location.href = `/groupUserDelete?userCode=${id}&groupId=${groupId}`;
+                });
               }
           });
         });

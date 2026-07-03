@@ -8,8 +8,8 @@ import com.weple.cloud.time.service.WorkTimeVO;
 
 public interface TimeMapper {
 	// -------------------------------프로젝트 내 소요시간------------------------------
-	// 전체조회
-	public List<WorkTimeVO> projectTimeAll(@Param("projectId") Long projectId);
+	// 전체조회 (본인이 등록한 건만)
+	public List<WorkTimeVO> projectTimeAll(@Param("projectId") Long projectId, @Param("userCode") String userCode);
 
 	// 단건 조회
 	public WorkTimeVO projectTimeOne(@Param("workId") long workId);

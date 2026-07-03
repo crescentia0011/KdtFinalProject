@@ -46,6 +46,9 @@
 		LEFT JOIN work_classification w_cls ON w_tme.work_name = w_cls.task_classification_id
 		LEFT JOIN task t ON t.task_id = w_tme.task_id
 		WHERE w_tme.project_id = #{projectId}
+		<if test="userCode != null">
+		  AND w_tme.user_code = #{userCode}
+		</if>
 		ORDER BY w_tme.work_id DESC
 	</select>
 	

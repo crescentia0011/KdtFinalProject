@@ -17,7 +17,7 @@
 				<div class="file-toolbar-right">
 					<button class="page-btn active" onclick="openUploadModal()">📁
 						파일 등록</button>
-					<button class="page-btn" onclick="goDownloadHistory()">👤
+					<button th:if="${isManager}" class="page-btn" onclick="goDownloadHistory()">👤
 						다운로드 이력</button>
 				</div>
 			</div>
@@ -72,7 +72,7 @@
 							<th>업로드일</th>
 							<th>파일 버전</th>
 							<th width="90" style="text-align: center; white-space: nowrap;">다운로드</th>
-							<th width="60" style="text-align: center;">삭제</th>
+							<th th:if="${isManager}" width="60" style="text-align: center;">삭제</th>
 						</tr>
 					</thead>
 					<tbody id="fileTableBody">
@@ -109,7 +109,7 @@
         th:data-version-id="${file.versionId}"
         onclick="downloadFile(this.dataset.versionId)">⬇</button>
 </td>
-							<td class="td-center">
+							<td class="td-center" th:if="${isManager}">
 								<button class="icon-btn icon-btn-del" title="삭제"
 									th:data-file-id="${file.fileId}"
 									th:data-task-id="${file.taskId}"
@@ -191,7 +191,7 @@ function showToast(msg, type) {
   if (old) old.remove();
   const wrap = document.createElement('div');
   wrap.id = '_toastWrap';
-  wrap.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;';
+  wrap.style.cssText = 'position:fixed;top:24px;left:50%;transform:translate(-50%,0);z-index:99999;';
   const box = document.createElement('div');
   box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
   box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
