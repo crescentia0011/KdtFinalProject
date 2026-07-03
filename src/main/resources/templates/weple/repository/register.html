@@ -27,7 +27,7 @@
             </div>
             <div class="repository-form-row">
                 <label for="repositoryUrl">저장소 경로</label>
-                <input id="repositoryUrl" th:field="*{repositoryUrl}" placeholder="https://github.com/KDTFinalProject/KdtFinalProject.git" th:readonly="${repository.repositoryId != null}" required>
+                <input id="repositoryUrl" th:field="*{repositoryUrl}" placeholder="https://github.com/weple/example-repository.git" th:readonly="${repository.repositoryId != null}" required>
             </div>
             <label class="repository-check" for="mainRepository">
                 <input id="mainRepository" th:field="*{mainYn}" type="checkbox" value="Y">

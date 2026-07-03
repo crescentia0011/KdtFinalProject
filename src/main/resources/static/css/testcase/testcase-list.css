@@ -56,7 +56,7 @@
 }
 
 .tc-table th {
-	background-color: #fff;
+	background-color: #F1EDFF !important;
 	padding: 15px;
 	font-weight: bold;
 	color: #333;

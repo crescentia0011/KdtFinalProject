@@ -98,10 +98,11 @@
 				         style="width:100%; height:100%;">
 				        <pre class="preview-text" id="previewText">미리보기 로딩 중...</pre>
 				        <script th:inline="javascript">
-				            const filePath = /*[[${projectFileVersionList[0].savedName}]]*/ '';
-				            if (filePath) {
-				            	fetch('https://weple-cloud-files.s3.ap-northeast-2.amazonaws.com/' + filePath)
-				                    .then(r => r.text())
+				            const previewVersionId = /*[[${projectFileVersionList[0].versionId}]]*/ '';
+				            const previewProjectId = /*[[${projectId}]]*/ '';
+				            if (previewVersionId) {
+				                fetch('/project/' + previewProjectId + '/file/projectFilePreviewText/' + previewVersionId)
+				                    .then(r => { if (!r.ok) throw new Error('bad status'); return r.text(); })
 				                    .then(t => document.getElementById('previewText').textContent = t)
 				                    .catch(() => document.getElementById('previewText').textContent = '파일을 불러올 수 없습니다.');
 				            }
@@ -182,9 +183,9 @@ function showToast(msg, type) {
   if (old) old.remove();
   const wrap = document.createElement('div');
   wrap.id = '_toastWrap';
-  wrap.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;';
+  wrap.style.cssText = 'position:fixed;top:24px;left:50%;transform:translate(-50%,0);z-index:99999;';
   const box = document.createElement('div');
-  box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
+  box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:250px;';
   box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
   box.textContent = msg;
   wrap.appendChild(box);

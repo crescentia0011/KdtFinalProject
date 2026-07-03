@@ -34,19 +34,19 @@
                     <!-- 기존 회사에 가입 요청하기 위해 회사 코드를 입력받습니다. -->
                     <div class="login-field">
                         <label for="companyCode">회사 코드</label>
-                        <input class="login-input" type="text" id="companyCode" name="companyCode" placeholder="weple-00001" autocomplete="organization" required th:value="${signupRequest?.companyCode}">
+                        <input class="login-input" type="text" id="companyCode" name="companyCode" placeholder="CP-001" autocomplete="organization" required th:value="${signupRequest?.companyCode}">
                     </div>
 
                     <!-- 화면과 알림에서 사용할 사용자 이름을 입력받습니다. -->
                     <div class="login-field">
                         <label for="userName">이름</label>
-                        <input class="login-input" type="text" id="userName" name="userName" placeholder="신재구" autocomplete="name" required th:value="${signupRequest?.userName}">
+                        <input class="login-input" type="text" id="userName" name="userName" placeholder="김위플" autocomplete="name" required th:value="${signupRequest?.userName}">
                     </div>
 
                     <!-- 로그인할 때 사용할 아이디를 입력받습니다. -->
                     <div class="login-field">
                         <label for="loginId">아이디</label>
-                        <input class="login-input" type="text" id="loginId" name="loginId" placeholder="weple1234" autocomplete="username" minlength="4" maxlength="30" pattern="[a-zA-Z0-9._-]{4,30}" title="아이디는 영문, 숫자, 특수문자 ._- 조합 4~30자로 입력해주세요." required th:value="${signupRequest?.loginId}">
+                        <input class="login-input" type="text" id="loginId" name="loginId" placeholder="weple_user01" autocomplete="username" minlength="4" maxlength="30" pattern="[a-zA-Z0-9._-]{4,30}" title="아이디는 영문, 숫자, 특수문자 ._- 조합 4~30자로 입력해주세요." required th:value="${signupRequest?.loginId}">
                         <p class="join-valid-message" hidden>사용 가능한 아이디입니다</p>
                     </div>
 
@@ -65,7 +65,7 @@
                     <!-- 계정 연락과 안내에 사용할 이메일을 입력받습니다. -->
                     <div class="login-field">
                         <label for="email">이메일</label>
-                        <input class="login-input" type="email" id="email" name="email" placeholder="weple1234@email.com" autocomplete="email" required th:value="${signupRequest?.email}">
+                        <input class="login-input" type="email" id="email" name="email" placeholder="kim.weple@weple.com" autocomplete="email" required th:value="${signupRequest?.email}">
                     </div>
 
                     <!-- 사용자 연락처를 입력받습니다. -->

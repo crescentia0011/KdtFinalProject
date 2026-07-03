@@ -29,7 +29,7 @@ const startDateInput = document.getElementById('startDate');
             // 만약 기존에 입력된 완료일이 새로운 시작일보다 앞선다면 완료일 초기화
             if (finishDateInput.value && finishDateInput.value < this.value) {
                 finishDateInput.value = '';
-                alert('완료일은 시작일보다 빠를 수 없습니다. 다시 선택해주세요.');
+				showToast('완료일은 시작일보다 빠를 수 없습니다. 다시 선택해주세요.', true);
             }
         } else {
             finishDateInput.removeAttribute('min');
@@ -221,4 +221,21 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+function showToast(message, isError = false) {
+        let toastWrap = document.getElementById('dynamicToast');
+        if (toastWrap) toastWrap.remove(); 
+
+        toastWrap = document.createElement('div');
+        toastWrap.id = 'dynamicToast';
+        toastWrap.className = 'toast-wrap';
+        
+        toastWrap.innerHTML = `<div class="toast-msg ${isError ? 'toast-error' : 'toast-success'}">${message}</div>`;
+        document.body.appendChild(toastWrap);
+
+    
+        setTimeout(() => {
+            if (document.body.contains(toastWrap)) toastWrap.remove();
+        }, 3500); 
+    }
 

@@ -11,6 +11,15 @@
 
     <div th:replace="~{common/fragments/project-setting-tabs :: projectSettingTabs}"></div>
 
+    <div id="settingsMessageBox">
+        <p th:if="${toastMessage != null and (toastType == null or toastType != 'error')}"
+           class="time-setting-message time-setting-message-success"
+           th:text="${toastMessage}">시간추적 설정이 저장되었습니다.</p>
+        <p th:if="${toastMessage != null and toastType == 'error'}"
+           class="time-setting-message time-setting-message-error"
+           th:text="${toastMessage}">작업분류를 최소 1개 이상 선택해주세요.</p>
+    </div>
+
     <form id="timeSettingForm" method="post" th:action="@{/project/settings/time}">
         <input type="hidden" name="projectId" th:value="${projectId}">
 
@@ -56,22 +65,12 @@
 
     <script th:inline="javascript">
         function showToast(msg, type) {
-            var old = document.getElementById('_toastWrap');
-            if (old) old.remove();
-            var wrap = document.createElement('div');
-            wrap.id = '_toastWrap';
-            wrap.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;';
-            var box = document.createElement('div');
-            box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
-            box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
-            box.textContent = msg;
-            wrap.appendChild(box);
-            document.body.appendChild(wrap);
-            setTimeout(function () {
-                wrap.style.transition = 'opacity 0.4s';
-                wrap.style.opacity = '0';
-                setTimeout(function () { wrap.remove(); }, 400);
-            }, 2500);
+            const box = document.getElementById('settingsMessageBox');
+            box.innerHTML = '';
+            const p = document.createElement('p');
+            p.className = 'time-setting-message ' + (type === 'error' ? 'time-setting-message-error' : 'time-setting-message-success');
+            p.textContent = msg;
+            box.appendChild(p);
         }
 
         document.getElementById('resetSelectionBtn').addEventListener('click', function () {
@@ -87,14 +86,6 @@
                 showToast('작업분류를 최소 1개 이상 선택해주세요.', 'error');
             }
         });
-
-        window.addEventListener('DOMContentLoaded', function () {
-            const toastType = /*[[${toastType}]]*/ null;
-            const toastMessage = /*[[${toastMessage}]]*/ null;
-            if (toastMessage) {
-                showToast(toastMessage, toastType || 'success');
-            }
-        });
     </script>
 <style>
 .time-setting-toolbar {
@@ -102,6 +93,24 @@
     justify-content: flex-end;
     gap: 8px;
     margin-bottom: 12px;
+}
+
+.time-setting-message {
+    max-width: 760px;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: 5px;
+    font-size: 13px;
+}
+.time-setting-message-error {
+    border: 1px solid #FECACA;
+    background: #FEF2F2;
+    color: #EF4444;
+}
+.time-setting-message-success {
+    border: 1px solid #BBF7D0;
+    background: #F0FDF4;
+    color: #22C55E;
 }
 
 .btn-time-reset,

@@ -32,10 +32,9 @@
          <div class="header-box filter-box">
           <span class="box-title">일정 유형 필터</span>
           <div class="filter-group">
-            <label class="filter-item"><input type="checkbox" value="PROJECT_ALL" checked /><span class="badge badge-purple">● 프로젝트 전체</span></label>
-            <label class="filter-item"><input type="checkbox" value="MY_TASK" checked /><span class="badge badge-orange">● 내일감</span></label>
-            <label class="filter-item"><input type="checkbox" value="MILESTONE" checked /><span class="badge badge-blue">● 마일스톤</span></label>
-            <label class="filter-item"><input type="checkbox" value="PARENT_TASK" /><span class="badge badge-pink">● 상위 일감</span></label>
+            <label class="filter-item"><input type="checkbox" value="PROJECT_ALL" checked /><span class="badge badge-purple">● 전체</span></label>
+            <label class="filter-item"><input type="checkbox" value="MY_TASK"  /><span class="badge badge-orange">● 내일감</span></label>
+            <label class="filter-item"><input type="checkbox" value="MILESTONE"  /><span class="badge badge-blue">● 마일스톤</span></label>
           </div>
         </div>
       </div>
@@ -43,6 +42,24 @@
       <div id="calendar-center-title"></div>
       <div id="calendar"></div>
     </div>
+    
+    
+    
+    <div id="customMoreModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.3); z-index: 1050; justify-content: center; align-items: center;">
+    <div style="background: #fff; width: 450px; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        
+        <!-- 모달 헤더 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 15px;">
+            <h5 id="customMoreModalDate" style="margin: 0; font-size: 16px; font-weight: bold;"></h5>
+            <button type="button" id="customMoreModalClose" style="background: none; border: none; font-size: 18px; cursor: pointer;">X</button>
+        </div>
+        
+        <!-- 모달 바디 (리스트) -->
+        <ul id="customMoreModalList" style="list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto;">
+        </ul>
+        
+    </div>
+</div>
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
     <script th:src="@{/js/calendar/calendar.js}"></script>

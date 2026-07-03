@@ -14,7 +14,7 @@ public interface TestCaseService {
 
 	public List<TaskParentVO> findTestCaseTaskList(Long pId);
 	
-	public int insetTestCaseService(TestCaseVO TestCaseVO);
+	public int insertTestCaseService(TestCaseVO TestCaseVO);
 	
 	public int getTestCaseCount(long pId, String searchKeyword);
 

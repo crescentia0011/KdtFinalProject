@@ -5,6 +5,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <link rel="stylesheet" th:href="@{/css/groupList.css}" />
 <title>그룹 사용자 관리</title>
 </head>
@@ -15,42 +17,43 @@
 			<div class="content">
 
 				<div class="title-area">
-					<span class="parent-title">그룹</span> <span class="separator">&gt;&gt;</span>
+					<span class="parent-title">그룹</span> <span class="separator">|</span>
     				<span class="child-title">[[ ${selectedGroupName} ]]</span>
 				</div>
-										
-				<div class="action-bar">
-					<button type="button" class="add-user-btn"
-						th:onclick="|location.href='@{/groupUserInsert(groupId=${groupId})}'|">
-						+ 사용자 추가
-					</button>
-				</div>
 
-				<table class="data-table">
-					<thead>
-						<tr>
-							<th>NO</th>
-							<th>아이디</th>
-							<th>이름</th>
-							<th>이메일</th>
-							<th>역할</th>
-							<th>STATUS</th>
-						</tr>
-					</thead>
-					<tbody>
-						<th:block th:each="info, sts : ${systemGroupUserList}">
+				<div class="list-card">
+					<div class="action-bar">
+						<button type="button" class="add-user-btn"
+							th:onclick="|location.href='@{/groupUserInsert(groupId=${groupId})}'|">
+							+ 사용자 추가
+						</button>
+					</div>
+
+					<table class="data-table">
+						<thead>
 							<tr>
-								<td>[[ ${sts.count} ]]</td>
-								<td>[[ ${info.loginId} ]]</td>
-								<td>[[ ${info.userName} ]]</td>
-								<td>[[ ${info.email} ]]</td>
-								<td>[[ ${info.roleName} ]]</td>
-								<td>
-									<button type="button" class="delete-btn"
-											th:data-id="${info.loginId}"
-											th:data-name="${info.userName}"
-											th:data-group="${groupId}">
-											삭제
+								<th>NO</th>
+								<th>아이디</th>
+								<th>이름</th>
+								<th>이메일</th>
+								<th>역할</th>
+								<th>STATUS</th>
+							</tr>
+						</thead>
+						<tbody>
+							<th:block th:each="info, sts : ${systemGroupUserList}">
+								<tr>
+									<td>[[ ${sts.count} ]]</td>
+									<td>[[ ${info.loginId} ]]</td>
+									<td>[[ ${info.userName} ]]</td>
+									<td>[[ ${info.email} ]]</td>
+									<td>[[ ${info.roleName} ]]</td>
+									<td>
+										<button type="button" class="delete-btn"
+												th:data-id="${info.loginId}"
+												th:data-name="${info.userName}"
+												th:data-group="${groupId}">
+												삭제
 									</button>
 								</td>
 							</tr>
@@ -62,13 +65,39 @@
 					<div class="pagination-wrap" id="paginationWrap"></div>
 					<button type="button" class="back-to-group-btn"
 						th:onclick="|location.href='@{/groupList}'|">
-						<i class="fa-solid fa-arrow-left"></i> 그룹 목록으로
+						목록으로
 					</button>
+				</div>
 				</div>
 			</div>
 		</div>
 
 		<script>
+        // 제외 확인 모달 (파일관리 삭제 모달과 동일한 스타일)
+        function showConfirmModal(title, msg, onConfirm, onCancel) {
+            const old = document.getElementById('_confirmModalWrap');
+            if (old) old.remove();
+            const overlay = document.createElement('div');
+            overlay.id = '_confirmModalWrap';
+            overlay.className = 'wiki-confirm-overlay';
+            overlay.innerHTML =
+                '<div class="wiki-confirm-box">' +
+                    '<p class="wiki-confirm-title"></p>' +
+                    '<p class="wiki-confirm-msg"></p>' +
+                    '<div class="wiki-confirm-actions">' +
+                        '<button class="wiki-confirm-btn wiki-confirm-cancel" id="_confirmModalCancelBtn">취소</button>' +
+                        '<button class="wiki-confirm-btn wiki-confirm-ok" id="_confirmModalOkBtn">삭제</button>' +
+                    '</div>' +
+                '</div>';
+            overlay.querySelector('.wiki-confirm-title').textContent = title;
+            overlay.querySelector('.wiki-confirm-msg').textContent = msg;
+            document.body.appendChild(overlay);
+
+            document.getElementById('_confirmModalOkBtn').onclick = () => { overlay.remove(); if (onConfirm) onConfirm(); };
+            document.getElementById('_confirmModalCancelBtn').onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); if (onCancel) onCancel(); } });
+        }
+
         // 1. 기존 삭제 로직 유지
         document.querySelectorAll(".delete-btn").forEach((btn) => {
           btn.addEventListener("click", function () {
@@ -76,8 +105,10 @@
             const name = this.dataset.name;
             const groupId = this.dataset.group;
 
-            if (id && name && confirm(`${name} 사용자를 현재 그룹에서 제외하시겠습니까?`)) {
-                location.href = `/groupUserDelete?userCode=${id}&groupId=${groupId}`;
+            if (id && name) {
+                showConfirmModal('그룹에서 제외', `${name} 사용자를 현재 그룹에서 제외하시겠습니까?`, () => {
+                    location.href = `/groupUserDelete?userCode=${id}&groupId=${groupId}`;
+                });
               }
           });
         });
@@ -174,16 +205,30 @@
 	color: #000000;
 }
 
-.separator {
-	font-size: 16px;
-	color: #333;
-	font-weight: 600;
+.title-area .separator {
+	font-size: 20px !important;
+	color: #6D5EF7 !important;
+	font-weight: 700 !important;
+	margin: 0 2px;
+	padding: 0 !important;
+	line-height: 1 !important;
+	display: inline-block;
+	vertical-align: middle;
 }
 
 .child-title {
 	font-size: 20px;
 	font-weight: 700;
 	color: #000;
+}
+
+/* 프로젝트 목록 페이지와 통일된 카드 테두리 */
+.list-card {
+	border: 1px solid #e2e8f0;
+	border-radius: 14px;
+	background: #ffffff;
+	padding: 28px 30px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .03);
 }
 
 /* [3번] 우측 상단 사용자 추가 버튼 영역 */
@@ -216,10 +261,7 @@
 .data-table {
 	width: 100%;
 	border-collapse: collapse;
-	border: 1px solid #ebdada;
 	border-radius: 12px;
-	border-style: hidden;
-	box-shadow: 0 0 0 1px #e5e7eb;
 	overflow: hidden;
 }
 
@@ -405,6 +447,33 @@
 		justify-content: center;
 	}
 }
+
+/* ===== 삭제 확인 모달 (위키 삭제 모달과 동일 스타일) ===== */
+.wiki-confirm-overlay {
+	position: fixed; inset: 0; background: rgba(0,0,0,.15);
+	z-index: 99999; display: flex; align-items: center; justify-content: center;
+	animation: wikiConfirmFadeIn .18s ease;
+}
+@keyframes wikiConfirmFadeIn { from { opacity:0; } to { opacity:1; } }
+.wiki-confirm-box {
+	background: #fff; border-radius: 18px; padding: 26px 28px 22px;
+	min-width: 300px; max-width: 380px;
+	box-shadow: 0 12px 40px rgba(109,94,247,.18); text-align: center;
+	animation: wikiConfirmSlideUp .2s ease;
+}
+@keyframes wikiConfirmSlideUp { from { transform:translateY(12px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.wiki-confirm-title  { font-size: 15px; font-weight: 700; color: #374151; margin: 0 0 10px; }
+.wiki-confirm-msg    { font-size: 13px; color: #726F8F; margin: 0 0 20px; line-height: 1.6; white-space: pre-line; }
+.wiki-confirm-actions{ display: flex; gap: 8px; justify-content: center; }
+.wiki-confirm-btn {
+	display: inline-flex; align-items: center; justify-content: center;
+	height: 36px; min-width: 88px; padding: 0 20px;
+	border-radius: 10px; font-size: 13px; font-weight: 600;
+	cursor: pointer; border: none; transition: opacity .2s;
+}
+.wiki-confirm-btn:hover { opacity: .82; }
+.wiki-confirm-cancel { background: #F1EDFF; color: #6D5EF7; }
+.wiki-confirm-ok     { background: #EF4444; color: #fff; }
 </style>
 	</section>
 </body>

@@ -28,7 +28,7 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
             String newStatus,
             String oldManager,       
             String newManager,
-            String oldPriority,      
+            String oldPriority,
             String newPriority,
             String oldStartDate,     
             String newStartDate,

@@ -43,16 +43,33 @@ public class ProjectFileController {
 	private final ProjectFileService projectFileService;
 	private final ProjectService projectService;
 	private final S3Service s3Service;
-	
+
+	private boolean isCompanyManager(com.weple.cloud.auth.service.LoginUserVO user) {
+		return Integer.valueOf(1).equals(user.getOwnerYn())
+			|| Integer.valueOf(1).equals(user.getAdminYn());
+	}
+
+	private boolean canAccess(LoginUserDetails loginUser, String projectId) {
+		try {
+			if (isCompanyManager(loginUser.getLoginUser())) return true;
+			return projectService.isMember(loginUser.getLoginUser().getUserCode(), Long.valueOf(projectId));
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	// -------------------------------파일관리------------------------------		
 	// 전체조회
 	@GetMapping({"", "/projectFileList"})
-	public String projectFileList(@PathVariable String projectId, Model model) {
+	public String projectFileList(@PathVariable String projectId, Model model,
+			@AuthenticationPrincipal LoginUserDetails loginUser) {
+	    if (!canAccess(loginUser, projectId)) return "weple/access-denide";
 	    List<ProjectFileVO> list = projectFileService.findProjectFileAll(projectId);
 	    ProjectVO project = projectService.findById(projectId);
 	    model.addAttribute("projectFileList", list);
 	    model.addAttribute("projectId", projectId);
 	    model.addAttribute("project", project);
+	    model.addAttribute("isManager", isCompanyManager(loginUser.getLoginUser()));
 	    model.addAttribute("currentMenu", "file");
 	    model.addAttribute("sidebarMenu", "project");
 	    return "weple/file/list";
@@ -60,7 +77,9 @@ public class ProjectFileController {
 	
 	// 상세조회
 	@GetMapping("/projectFileInfo")
-	public String projectFileInfo(@PathVariable String projectId, String fileId, Model model) {
+	public String projectFileInfo(@PathVariable String projectId, String fileId, Model model,
+			@AuthenticationPrincipal LoginUserDetails loginUser) {
+		if (!canAccess(loginUser, projectId)) return "weple/access-denide";
 		ProjectFileVO projectFileInfoVO = projectFileService.findProjectFileInfo(fileId);
 		List<ProjectFileVersionsVO> versionList = projectFileService.findProjectFileVersionAll(fileId);
 	    
@@ -71,6 +90,7 @@ public class ProjectFileController {
 		model.addAttribute("projectFileVersionList", versionList);
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("project", project);
+		model.addAttribute("isManager", isCompanyManager(loginUser.getLoginUser()));
 		
 		model.addAttribute("currentMenu", "file");
 		model.addAttribute("sidebarMenu", "project");
@@ -79,19 +99,25 @@ public class ProjectFileController {
 		
 	// 등록
 	@GetMapping("/projectFileInsert")
-	public String projectFileInsertForm(@PathVariable String projectId) {
+	public String projectFileInsertForm(@PathVariable String projectId,
+			@AuthenticationPrincipal LoginUserDetails loginUser) {
+		if (!canAccess(loginUser, projectId)) return "weple/access-denide";
 		return "weple/file/list";
 	}
 	
 	@PostMapping("/projectFileInsert")
-	public String projectFileInsertProcess(@PathVariable String projectId, ProjectFileVO projectFileVO) {
+	public String projectFileInsertProcess(@PathVariable String projectId, ProjectFileVO projectFileVO,
+			@AuthenticationPrincipal LoginUserDetails loginUser) {
+		if (!canAccess(loginUser, projectId)) return "weple/access-denide";
 		String fno = projectFileService.addProjectFile(projectFileVO);
 		return "redirect:projectFileInfo?fno=" + fno;
 	}
 		
-	// 삭제
+	// 삭제 (관리자만 가능)
 	@GetMapping("/deleteProjectFile")
-	public String deleteProjectFile(@PathVariable String projectId, String fileId) {
+	public String deleteProjectFile(@PathVariable String projectId, String fileId,
+			@AuthenticationPrincipal LoginUserDetails loginUser) {
+		if (!isCompanyManager(loginUser.getLoginUser())) return "weple/access-denide";
 		try {
 			// file_download_history가 file_versions를 참조하고 있어서, 버전을 지우기 전에
 			// 그 버전들에 걸린 다운로드 이력부터 먼저 지워야 FK 제약에 안 걸림
@@ -146,6 +172,8 @@ public class ProjectFileController {
                                      @RequestParam("file") MultipartFile file,
                                      @RequestParam(value = "taskId", required = false) String taskId,
                                      @AuthenticationPrincipal LoginUserDetails loginUser) {
+
+        if (!canAccess(loginUser, projectId)) return "weple/access-denide";
 
         String originalName = file.getOriginalFilename();
         String savedName = UUID.randomUUID().toString() + "_" + originalName;
@@ -233,11 +261,39 @@ public class ProjectFileController {
         return result;
     }
     
+    // 텍스트 미리보기 (S3로 브라우저에서 직접 fetch하면 CORS에 막히므로 서버를 경유해서 내려줌)
+    @GetMapping("/projectFilePreviewText/{versionId}")
+    public ResponseEntity<String> projectFilePreviewText(@PathVariable String projectId,
+                                                           @PathVariable String versionId,
+                                                           @AuthenticationPrincipal LoginUserDetails loginUser) {
+        if (!canAccess(loginUser, projectId)) {
+            return ResponseEntity.status(403).build();
+        }
+        ProjectFileVersionsVO versionInfo = projectFileService.findVersionForDownload(versionId);
+
+        if (versionInfo == null || versionInfo.getSavedName() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try (ResponseInputStream<GetObjectResponse> s3Object = s3Service.downloadFile(versionInfo.getSavedName())) {
+            String text = new String(s3Object.readAllBytes(), StandardCharsets.UTF_8);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, "text/plain; charset=UTF-8")
+                    .body(text);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     // 다운로드
     @GetMapping("/projectFileDownload/{versionId}")
     public ResponseEntity<Resource> projectFileDownload(@PathVariable String projectId,
                                                          @PathVariable String versionId,
                                                          @AuthenticationPrincipal LoginUserDetails loginUser) {
+        if (!canAccess(loginUser, projectId)) {
+            return ResponseEntity.status(403).build();
+        }
         ProjectFileVersionsVO versionInfo = projectFileService.findVersionForDownload(versionId);
 
         if (versionInfo == null || versionInfo.getSavedName() == null) {
@@ -265,9 +321,11 @@ public class ProjectFileController {
         }
     }
 
-    // 다운로드 이력 화면 (기존 메서드 수정)
+    // 다운로드 이력 화면 (관리자만 가능)
     @GetMapping("/downloader")
-    public String downloader(@PathVariable String projectId, Model model) {
+    public String downloader(@PathVariable String projectId, Model model,
+            @AuthenticationPrincipal LoginUserDetails loginUser) {
+        if (!isCompanyManager(loginUser.getLoginUser())) return "weple/access-denide";
         ProjectVO project = projectService.findById(projectId);
         model.addAttribute("projectId", projectId);
         model.addAttribute("project", project);

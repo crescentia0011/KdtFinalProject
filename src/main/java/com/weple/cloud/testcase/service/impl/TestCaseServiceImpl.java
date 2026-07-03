@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.weple.cloud.task.service.TaskParentVO;
 import com.weple.cloud.testcase.mapper.TestCaseMapper;
+import com.weple.cloud.testcase.repository.TestCaseRepository;
 import com.weple.cloud.testcase.service.CoverdStatusVO;
 import com.weple.cloud.testcase.service.TestCaseMemberVO;
 import com.weple.cloud.testcase.service.TestCasePriorityVO;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class TestCaseServiceImpl implements TestCaseService{
 
 	private final TestCaseMapper testCaseMapper;
+	private final TestCaseRepository testCaseRepository;
 	
 	@Override
 	public List<TaskParentVO> findTestCaseTaskList(Long pId) {
@@ -46,7 +48,7 @@ public class TestCaseServiceImpl implements TestCaseService{
 	}
 
 	@Override
-	public int insetTestCaseService(TestCaseVO TestCaseVO) {
+	public int insertTestCaseService(TestCaseVO TestCaseVO) {
 		return testCaseMapper.insertTestCase(TestCaseVO);
 	}
 
@@ -77,14 +79,9 @@ public class TestCaseServiceImpl implements TestCaseService{
     }
 	
 	@Override
-	@Transactional
-	public void deleteTestCaseService(String testId, Long projectId) {
-	    // 프로젝트 ID까지 조건으로 주어 다른 프로젝트의 글이 삭제되는 보안 사고 방지
-	    int result = testCaseMapper.deleteTestCase(testId, projectId);
-	    
-	    if (result == 0) {
-	        throw new RuntimeException("삭제할 테스트 케이스를 찾을 수 없거나 삭제 권한이 없습니다.");
-	    }
-	}
+    @Transactional
+    public void deleteTestCaseService(String testId, Long projectId) {
+        testCaseRepository.deleteByTestIdAndProjectId(testId, projectId);
+    }
 
 }

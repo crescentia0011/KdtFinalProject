@@ -1,6 +1,7 @@
 package com.weple.cloud.testcase.web;
 
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -236,7 +237,7 @@ public class TestCaseController {
         vo.setProjectId(pId); 
 
         // 서비스 호출 (insert 실행)
-        testCaseService.insetTestCaseService(vo);
+        testCaseService.insertTestCaseService(vo);
 
         // 등록 완료 후 목록 페이지로 리다이렉트 (경로는 상황에 맞게 수정하세요)
         return "redirect:/project/testcase?projectId=" + pId; 
@@ -284,7 +285,7 @@ public class TestCaseController {
                                      Model model,
                                      @AuthenticationPrincipal LoginUserDetails loginUser) {
         
-        // 1. 로그인 및 인증 객체 체크
+        //  로그인 및 인증 객체 체크
         if (loginUser == null || loginUser.getLoginUser() == null) {
             return "weple/access-denide";
         }
@@ -299,23 +300,23 @@ public class TestCaseController {
 	        return "weple/access-denide";
 	    }
         
-        // 2. 실제 유저 정보에서 유저코드와 회사 ID 추출
+        // 실제 유저 정보에서 유저코드와 회사 ID 추출
         
         Long companyId = loginUser.getLoginUser().getCompanyId();
         
-        // 3. [해결포인트] 실제 등록폼에서 사용하는 올바른 서비스 메서드로 교체
+
         List<TestCaseMemberVO> memberList = testCaseService.findTestCaseMembers(pId);
         List<CoverdStatusVO> statusList = testCaseService.findCoverageStatus();
         List<TaskParentVO> taskList = testCaseService.findTestCaseTaskList(pId);
         List<TestCasePriorityVO> priorityList = testCaseService.findTestCasePriorities(companyId);
         memberList.removeIf(member -> member.getUserCode().equals(userCode));
         
-        // 4. 보내주신 상세조회용 서비스 호출 (조인 쿼리 실행 부)
-        // 서비스 메서드 구조에 맞게 (pId, testId) 혹은 (testId) 형태로 호출하세요.
+
+
         TestCaseVO testCaseDetail = testCaseService.findTestCaseDetail(pId, testId); 
         
-        // 5. 화면(Thymeleaf)으로 모든 필요한 데이터 바인딩
-        model.addAttribute("testCaseDetail", testCaseDetail); // 수정할 타겟 데이터
+
+        model.addAttribute("testCaseDetail", testCaseDetail);
         
         model.addAttribute("currentMenu", "testcase");
         model.addAttribute("projectId", pId);
@@ -326,7 +327,7 @@ public class TestCaseController {
         model.addAttribute("priorityList", priorityList);
         model.addAttribute("project", projectService.findById(String.valueOf(pId)));
         
-        return "weple/testcase/update"; // update.html 화면 렌더링
+        return "weple/testcase/update"; 
     }
 
     @PostMapping("/project/testcase/update")
@@ -371,20 +372,12 @@ public class TestCaseController {
 	
     
     @PostMapping("/project/testcase/delete/{testId}")
-    public String deleteTestCase(
-            @AuthenticationPrincipal LoginUserDetails loginUser,
-            @PathVariable("testId") String testId,
-            @RequestParam("projectId") Long projectId) {
+    public String deleteTestCase(@AuthenticationPrincipal LoginUserDetails loginUser,
+                                 @PathVariable("testId") String testId,
+                                 @RequestParam("projectId") Long projectId) {
 
-        // 1. 보안 체크
-        if (loginUser == null || loginUser.getLoginUser() == null) {
-            return "weple/access-denide";
-        }
-
-        // 2. 삭제 서비스 호출
+        if (loginUser == null || loginUser.getLoginUser() == null) return "weple/access-denide";
         testCaseService.deleteTestCaseService(testId, projectId);
-
-        // 3. 삭제 완료 후 프로젝트의 테스트케이스 목록 첫 페이지로 리다이렉트
         return "redirect:/project/testcase?projectId=" + projectId;
     }
 	

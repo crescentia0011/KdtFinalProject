@@ -10,7 +10,8 @@
 			t.priority AS priority,
 			t.task_title AS taskTitle,
 			t.task_progress AS taskProgress,
-			u.user_name AS taskManager, 
+			u.user_name AS taskManager,
+			t.task_manager AS taskManagerId,
 			t.created_at AS createdAt,
 			t.finish_date AS finishDate,
 			t.project_id AS projectId,
@@ -211,9 +212,14 @@
 </select>
 <!-- 자식 일감 리스트 -->
 <select id="childTask" resultType="TaskVO">			
-	SELECT task_title , task_id
+	SELECT task_title
+		   , task_id
+		   , task_status AS taskStatusId
+		   , task_progress AS taskProgress
+		   , parent_task_id AS parentTaskId
 	FROM task
 	WHERE parent_task_id = #{tId}
+		AND deleted_yn = 'N'
 </select>
 
 <!-- 일감 상세조회 테스트케이스 목록 -->
@@ -486,6 +492,7 @@ END;
     <where>
         t.project_id = #{projectId} 
         AND t.deleted_yn = 'N'
+        
 
         <if test="searchKeyword != null and searchKeyword != ''">
             AND t.task_title LIKE '%' || #{searchKeyword} || '%'
@@ -746,12 +753,8 @@ END;
 </select>
 <!-- 검색에 대한 일감전체 갯수 -->
 <select id="countAllWithFilters" resultType="int" parameterType="map">
-    SELECT COUNT(*)
+    SELECT COUNT(t.task_id)
     FROM task t
-    INNER JOIN project p ON t.project_id = p.project_id
-    INNER JOIN task_types tt ON t.type_id = tt.type_id
-    INNER JOIN common_code cc ON t.task_status = cc.common_id
-    LEFT JOIN users u ON t.task_manager = u.user_code
     <include refid="internalTaskConditions" />
 </select>
    

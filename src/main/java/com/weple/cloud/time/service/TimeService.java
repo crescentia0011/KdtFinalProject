@@ -6,7 +6,7 @@ import java.util.Map;
 public interface TimeService {
 	// -------------------------------프로젝트 내 소요시간------------------------------
 	// 전체조회
-	public List<WorkTimeVO> findProjectTimeAll(Long projectId);
+	public List<WorkTimeVO> findProjectTimeAll(Long projectId, String userCode);
 
 	// 단건 조회
 	public WorkTimeVO findProjectTimeOne(long workId);

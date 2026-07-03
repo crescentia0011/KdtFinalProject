@@ -159,6 +159,19 @@ public class MilestoneServiceImpl implements MilestoneService {
         }
         return stats;
     }
+    
+    @Override
+    @Transactional // 마일스톤 수정, 일감 해제, 일감 등록이 동시에 일어나므로 트랜잭션 필수
+    public void modifyMilestoneTasks(MilestoneVO milestoneVO, List<String> taskIds) {
+                
+        // 1. 기존에 이 마일스톤에 연결되어 있던 일감들을 전부 해제(NULL)
+        milestoneMapper.clearTasksMilestoneId(milestoneVO.getMilestoneId());
+        
+        // 2. 새로 최신화된 일감 리스트가 있다면 일괄 연결 
+        if (taskIds != null && !taskIds.isEmpty()) {
+            milestoneMapper.updateTasksMilestoneId(milestoneVO.getProjectId(), milestoneVO.getMilestoneId(), taskIds);
+        }
+    }
 	
     
     // 단건 조회
@@ -192,9 +205,7 @@ public class MilestoneServiceImpl implements MilestoneService {
             );
         }
     }
-	
-	
-	
+    
 	// 상위 마일스톤 조회
 	@Override
 	public List<MilestoneVO> getMilestoneListByProjectId(Long projectId) {

@@ -31,6 +31,17 @@ public class GroupServiceImpl implements GroupService {
 		return result == 1 ? systemGroupVO.getGroupId() : -1;
 	}
 
+	// 그룹 수정
+	@Override
+	public Map<String, Object> modifyGroup(SystemGroupVO systemGroupVO) {
+		Map<String, Object> map = new HashMap<>();
+		int result = groupMapper.updateGroup(systemGroupVO);
+		if (result >= 1) {
+			map.put("groupId", systemGroupVO.getGroupId());
+		}
+		return map;
+	}
+
 	// 그룹 삭제
 	@Override
 	public Map<String, Object> removeGroup(int groupId) {

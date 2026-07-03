@@ -188,12 +188,10 @@
     margin-bottom: 20px;
 }
 
-.task-section.subtasks-area {
-    margin-bottom: 0;
-}
+
 
 .task-section .section-title {
-    background: #f9f9f9;
+    background: #F1EDFF;
     padding: 10px 16px;
     font-weight: bold;
     font-size: 14px;
@@ -207,6 +205,7 @@
 }
 
 .task-section .section-content {
+	margin-bottom : 20px;
     padding: 16px;
     font-size: 14px;
 }
@@ -412,7 +411,7 @@
 }
 
 .time-table th {
-    background: #f5f5f5;
+    background: #F1EDFF;
     border-bottom: 1px solid #e0e0e0;
     color: #555;
     padding: 10px;
@@ -520,32 +519,36 @@
 
 /*토스트 메세지쪽*/
 .toast-wrap {
-        position: fixed;
-        top: 24px;
-        right: 24px; /* 💡 left 대신 right를 주어 오른쪽 맨 위로 고정 */
-        z-index: 9999;
-        animation: toastFadeOut 3.5s forwards; 
-    }
-    .toast-msg {
-        padding: 13px 20px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        color: #fff;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        text-align: center;
-        min-width: 250px; 
-    }
-    .toast-error {  background:#EF4444; background-color: #e53e3e; }
-    .toast-success { background:#22C55E; background-color: #38a169; }
+    position: fixed;
+    top: 24px;
+    left: 50%; /* 💡 왼쪽에서 50% 지점으로 이동 */
+    transform: translateX(-50%); /* 💡 요소 너비의 절반만큼 왼쪽으로 당겨서 정확한 중앙 정렬 */
+    z-index: 9999;
+    animation: toastFadeOut 3.5s forwards; 
+}
 
-    /* 💡 오른쪽 위에서 자연스럽게 내려오고 올라가도록 애니메이션 수정 */
-    @keyframes toastFadeOut {
-        0%   { opacity: 0; transform: translateY(-20px); }
-        10%  { opacity: 1; transform: translateY(0); } 
-        75%  { opacity: 1; transform: translateY(0); } 
-        100% { opacity: 0; transform: translateY(-20px); } 
-    }
+.toast-msg {
+    padding: 13px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    min-width: 250px; 
+}
+
+.toast-error { background: #EF4444; }
+.toast-success { background: #22C55E; }
+
+/* 💡 위 중앙에서 자연스럽게 내려오고 올라가도록 애니메이션 수정 */
+@keyframes toastFadeOut {
+    /* 원래 있던 transform: translateX(-50%)를 유지하면서 Y축 애니메이션을 섞어주어야 깨지지 않습니다. */
+    0%   { opacity: 0; transform: translate(-50%, -20px); }
+    10%  { opacity: 1; transform: translate(-50%, 0); } 
+    75%  { opacity: 1; transform: translate(-50%, 0); } 
+    100% { opacity: 0; transform: translate(-50%, -20px); } 
+}
 
     /* ==========================================
        2. 커스텀 삭제 확인 모달 (Confirm) 스타일 - 화면 정중앙 절대 고정
@@ -850,3 +853,272 @@
     cursor: not-allowed;
     accent-color: #94a3b8;
 }
+
+.trm-backdrop {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, .45);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 9999;
+		}
+		.trm-box {
+			background: #fff;
+			border-radius: 10px;
+			width: 560px;
+			max-width: 95vw;
+			max-height: 90vh;
+			overflow-y: auto;
+			box-shadow: 0 12px 40px rgba(0, 0, 0, .18);
+		}
+		.trm-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 18px 24px;
+			border-bottom: 1px solid #e2e8f0;
+			background: #f8fafc;
+			position: sticky;
+			top: 0;
+		}
+		.trm-title {
+			font-size: 16px;
+			font-weight: 700;
+			color: #1a1a2e;
+		}
+		.trm-close {
+			background: none;
+			border: none;
+			font-size: 18px;
+			color: #94a3b8;
+			cursor: pointer;
+		}
+		.trm-close:hover {
+			color: #475569;
+		}
+		.trm-summary {
+			background: #F1EDFF;
+			border-left: 3px solid #6D5EF7;
+			margin: 20px 24px 8px;
+			padding: 12px 14px;
+			border-radius: 0 6px 6px 0;
+		}
+		.trm-summary-row {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 4px;
+			font-size: 13px;
+		}
+		.trm-summary-row:last-child {
+			margin-bottom: 0;
+		}
+		.trm-s-label {
+			color: #94a3b8;
+			font-weight: 600;
+			min-width: 36px;
+		}
+		.trm-s-value {
+			color: #1e293b;
+		}
+		.trm-field {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 10px 24px;
+			border-bottom: 1px solid #f1f5f9;
+		}
+		.trm-field label {
+			width: 90px;
+			font-weight: 600;
+			color: #475569;
+			font-size: 13px;
+			flex-shrink: 0;
+		}
+		.trm-field input[type="date"], .trm-field input[type="number"], .trm-field select {
+			flex: 1;
+			height: 36px;
+			border: 1px solid #d1d5db;
+			border-radius: 6px;
+			padding: 0 10px;
+			font-size: 14px;
+			outline: none;
+		}
+		.trm-field input:focus, .trm-field select:focus {
+			border-color: #6D5EF7;
+		}
+		.trm-req {
+			color: #ef4444;
+		}
+		.trm-static-user {
+			flex: 1;
+			font-size: 14px;
+			font-weight: 600;
+			color: #1e293b;
+		}
+		.trm-field-user {
+			position: relative;
+		}
+		.trm-user-search-wrap {
+			flex: 1;
+			position: relative;
+		}
+		.trm-user-search-wrap input[type="text"] {
+			width: 100%;
+			height: 36px;
+			border: 1px solid #d1d5db;
+			border-radius: 6px;
+			padding: 0 10px;
+			font-size: 14px;
+			outline: none;
+		}
+		.trm-user-search-wrap input[type="text"]:focus {
+			border-color: #6D5EF7;
+		}
+		.trm-user-dropdown {
+			display: none;
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			background: #fff;
+			border: 1px solid #d1d5db;
+			border-radius: 6px;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+			max-height: 180px;
+			overflow-y: auto;
+			z-index: 10000;
+			list-style: none;
+			margin: 4px 0 0;
+			padding: 4px 0;
+		}
+		.trm-user-dropdown li {
+			padding: 9px 12px;
+			cursor: pointer;
+			font-size: 14px;
+			color: #333;
+		}
+		.trm-user-dropdown li:hover {
+			background: #F1EDFF;
+			color: #6D5EF7;
+		}
+		.trm-progress-wrap {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+		.trm-progress-wrap input[type="range"] {
+			flex: 1;
+			-webkit-appearance: none;
+			appearance: none;
+			height: 6px;
+			border-radius: 3px;
+			outline: none;
+			cursor: pointer;
+			background: #e2e8f0; /* JS가 값에 따라 linear-gradient로 덮어씀 */
+		}
+		.trm-progress-wrap input[type="range"]::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			width: 16px;
+			height: 16px;
+			border-radius: 50%;
+			background: #6D5EF7;
+			cursor: pointer;
+			border: 2px solid #fff;
+			box-shadow: 0 0 0 1px #6D5EF7;
+		}
+		.trm-progress-wrap input[type="range"]::-moz-range-thumb {
+			width: 16px;
+			height: 16px;
+			border-radius: 50%;
+			background: #6D5EF7;
+			cursor: pointer;
+			border: 2px solid #fff;
+			box-shadow: 0 0 0 1px #6D5EF7;
+		}
+		.trm-progress-wrap input[type="range"]::-moz-range-track {
+			height: 6px;
+			border-radius: 3px;
+			background: transparent;
+		}
+		.trm-progress-text {
+			width: 38px;
+			font-weight: 700;
+			color: #6D5EF7;
+			text-align: right;
+		}
+		.trm-progress-wrap input[type="range"].trm-progress-locked {
+			opacity: .5;
+			cursor: not-allowed;
+		}
+		.trm-progress-wrap input[type="range"].trm-progress-locked::-webkit-slider-thumb {
+			background: #94a3b8;
+			box-shadow: 0 0 0 1px #94a3b8;
+		}
+		.trm-progress-wrap input[type="range"].trm-progress-locked::-moz-range-thumb {
+			background: #94a3b8;
+			box-shadow: 0 0 0 1px #94a3b8;
+		}
+		.trm-progress-hint {
+			margin: -4px 24px 0;
+			padding-left: 102px;
+			font-size: 12px;
+			color: #94a3b8;
+		}
+		.trm-field-textarea {
+			align-items: flex-start;
+			padding-top: 12px;
+		}
+		.trm-field-textarea label {
+			padding-top: 6px;
+		}
+		.trm-field textarea {
+			flex: 1;
+			border: 1px solid #d1d5db;
+			border-radius: 6px;
+			padding: 8px 10px;
+			font-size: 14px;
+			font-family: inherit;
+			outline: none;
+			resize: vertical;
+			min-height: 72px;
+			line-height: 1.5;
+		}
+		.trm-field textarea:focus {
+			border-color: #6D5EF7;
+		}
+		.trm-footer {
+			display: flex;
+			justify-content: flex-end;
+			gap: 10px;
+			padding: 16px 24px;
+			background: #f8fafc;
+			border-top: 1px solid #e2e8f0;
+		}
+		.trm-btn-cancel {
+			height: 38px;
+			padding: 0 22px;
+			background: #fff;
+			border: 1px solid #d1d5db;
+			border-radius: 6px;
+			font-size: 14px;
+			cursor: pointer;
+		}
+		.trm-btn-cancel:hover {
+			background: #f1f5f9;
+		}
+		.trm-btn-submit {
+			height: 38px;
+			padding: 0 28px;
+			background: #6D5EF7;
+			color: #fff;
+			border: none;
+			border-radius: 6px;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+		}
+		.trm-btn-submit:hover {
+			background: #5B4FEA;
+		}

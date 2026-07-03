@@ -189,7 +189,7 @@
 
 	<script th:inline="javascript">
 	    const projectId = /*[[${projectId}]]*/ null;
-	    const milestoneId = /*[[${milestone.milestoneId}]]*/ null; // milestoneId가 모델에 없다면 milestone.milestoneId로 안전하게 변경
+	    const milestoneId = /*[[${milestone.milestoneId}]]*/ null; 
 	    
 	    // 하나의 스크립트 안에서 안전하게 객체 초기화
 	    const initialTasks = {};

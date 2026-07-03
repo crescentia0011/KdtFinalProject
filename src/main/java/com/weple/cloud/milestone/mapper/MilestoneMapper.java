@@ -47,7 +47,8 @@ public interface MilestoneMapper {
 	// 마일스톤 등록
 	public int insertMilestone(MilestoneVO milestoneVO);
 	
-	// 마일스톤에 연결한 일감 업데이트
+	
+	// 마일스톤에 연결한 일감 등록
 	public void updateTasksMilestoneId(
 	        @Param("projectId") Long projectId,
 	        @Param("milestoneId") Long milestoneId, 

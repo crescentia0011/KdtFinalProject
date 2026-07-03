@@ -15,7 +15,7 @@
 
     <div class="milestone-page-header">
 	    <h1 class="milestone-page-title">로드맵</h1>
-	    <div class="header-action-group">
+        <div class="header-action-group" th:if="${canManageMilestone}">
 	        <a th:href="@{/project/milestone/version/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 버전 추가</a>
 	        <a th:href="@{/project/milestone/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 마일스톤 추가</a>
 	    </div>
@@ -45,7 +45,7 @@
 				        </div>
 				    </div>
 				    
-				    <div class="milestone-action-group" style="display: flex; gap: 8px; flex-shrink: 0;">
+                    <div class="milestone-action-group" th:if="${canManageMilestone}" style="display: flex; gap: 8px; flex-shrink: 0;">
                         <button type="button" class="milestone-edit-btn" onclick="enableEditMode(this)">편집</button>
                         <button type="button" class="milestone-delete-btn milestone-delete-trigger" 
                                 th:data-milestone-id="${milestone.milestoneId}"
@@ -53,7 +53,7 @@
                     </div>
 				</div>
 
-                <div class="edit-mode-container" style="display: none; width: 100%; flex-direction: column; gap: 12px;">
+                <div class="edit-mode-container" th:if="${canManageMilestone}" style="display: none; width: 100%; flex-direction: column; gap: 12px;">
 				    <div style="display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 20px;">
 				        <div class="milestone-edit-inputs" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
 				            <input type="text" class="edit-title-input" th:value="${milestone.milestoneTitle}" placeholder="마일스톤명 입력" />
@@ -146,7 +146,7 @@
             </div>
         </div>
         
-        <dialog class="milestone-delete-dialog" id="milestoneDeleteDialog" aria-labelledby="milestoneDeleteDialogTitle">
+        <dialog th:if="${canManageMilestone}" class="milestone-delete-dialog" id="milestoneDeleteDialog" aria-labelledby="milestoneDeleteDialogTitle">
             <div class="milestone-delete-dialog-header">
                 <h2 id="milestoneDeleteDialogTitle">마일스톤 삭제</h2>
                 <button class="milestone-dialog-close" type="button" aria-label="닫기" data-milestone-delete-close>&times;</button>
@@ -174,6 +174,7 @@
     <script th:inline="javascript">
     function toggleStatusText(checkbox) {
         const container = checkbox.closest('.edit-mode-container');
+        if(!container) return; // 권한 없을 시 돔 미생성 예외방지
         const textSpan = container.querySelector('.switch-text');
         const progress = parseInt(textSpan.getAttribute('data-progress') || '0', 10);
         
@@ -233,14 +234,14 @@
     
         const formData = new URLSearchParams();
         formData.append('milestoneId', milestoneId);
-        formData.append('projectId', [[${projectId}]]); // 정적 파싱 대신 타임리프 인라인 문법 활용 안전성 확보
+        formData.append('projectId', [[${projectId}]]); 
         formData.append('milestoneTitle', updatedTitle);
         formData.append('finishDate', updatedDate);
         formData.append('milestoneStatus', updatedStatus);
         formData.append('milestoneDescribe', milestoneDescribe);
         formData.append(csrfParameter, csrfToken);
     
-        fetch('/project/milestone/update', {
+        fetch('/project/milestone/update-parent', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: formData
@@ -267,7 +268,7 @@
         const promptSpan = document.getElementById('milestoneDeletePrompt');
         const milestoneIdInput = document.getElementById('milestoneDeleteId');
 
-        if (!dialog) return;
+        if (!dialog) return; // 권한이 없는 사용자는 대화상자가 랜더링되지 않으므로 예외 처리 추가
 
         document.querySelectorAll('.milestone-delete-trigger').forEach(function (button) {
             button.addEventListener('click', function () {

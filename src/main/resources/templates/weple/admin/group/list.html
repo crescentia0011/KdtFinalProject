@@ -5,86 +5,152 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" th:href="@{/css/groupList.css}" />
+<link rel="stylesheet" th:href="@{/css/system/project-list.css}" />
 <title>그룹 관리</title>
 </head>
 <body>
-	<section>
-		<div class="container">
-			<div class="header-bar"></div>
-			<div class="content">
-				<h1 class="main-title">그룹</h1>
-				<div style="text-align: right; margin: 15px 0">
-					<button type="button" class="add-btn"
-						th:onclick="|location.href ='@{/groupInsert}'|">+ 새 그룹 추가</button>
-				</div>
+	<section class="project-page">
 
-				<div class="search-container">
-					<button type="button" class="search-btn">
-						<svg class="search-icon" width="14" height="14"
-							viewBox="0 0 16 16" fill="none" stroke="currentColor"
-							stroke-width="1.5" aria-hidden="true">
-  								<circle cx="7" cy="7" r="5"></circle>
-  								<path d="M11 11l3.5 3.5"></path>
-						</svg>
-					</button>
-
-					<input type="text" id="groupSearchInput" class="search-input"
+		<h3 class="project-title">그룹</h3>
+		<div class="project-card">
+			<div class="project-toolbar">
+				<div class="project-search">
+					<i class="fa fa-search"></i>
+					<input type="text" id="groupSearchInput"
 						placeholder="그룹명을 입력하세요." />
 				</div>
+				<a class="project-create-btn" th:href="@{/groupInsert}">
+					<i class="fa fa-folder"></i>
+					<span>+ 새 그룹 추가</span>
+				</a>
+			</div>
 
-				<table class="data-table">
+			<div class="project-table-wrap">
+				<table class="project-table data-table">
 					<thead>
 						<tr>
 							<th>NO</th>
 							<th>그룹명</th>
 							<th>사용자 수</th>
-							<th>상태</th>
+							<th>관리</th>
 						</tr>
 					</thead>
 					<tbody>
+						<tr th:if="${#lists.isEmpty(systemGroupList)}">
+							<td colspan="4" class="empty-message">등록된 그룹이 없습니다.</td>
+						</tr>
 						<th:block th:each="info : ${systemGroupList}">
-							<tr>
+							<tr th:data-id="${info.groupId}">
 								<td>[[ ${info.groupId} ]]</td>
-								<td>[[ ${info.groupName} ]]</td>
-								<td>[[${info.userCount}]]명</td>
 								<td>
-									<button type="button" class="btn btn-sm btn-danger delete-btn"
-										th:data-id="${info.groupId}" th:data-name="${info.groupName}"
-										th:onclick="|location.href='@{/groupDelete(groupId=${info.groupId})}'|">
-										삭제</button>
+									<a class="project-link" th:href="@{/groupUserList(groupId=${info.groupId})}"
+										th:text="${info.groupName}"></a>
+								</td>
+								<td>[[${info.userCount}]]명</td>
+								<td style="position: relative; text-align: center;"
+									onclick="event.stopPropagation();">
+									<div class="dropdown-wrapper">
+										<span class="more-options-btn" onclick="toggleDropdown(this)">•••</span>
+										<div class="dropdown-menu-box">
+											<button type="button" class="dropdown-item edit-btn"
+												th:data-id="${info.groupId}" th:data-name="${info.groupName}"
+												onclick="openGroupEditModal(this)">✏️ 편집</button>
+											<button type="button" class="dropdown-item delete-btn"
+												th:data-id="${info.groupId}" th:data-name="${info.groupName}">
+												🗑️ 삭제</button>
+										</div>
+									</div>
 								</td>
 							</tr>
 						</th:block>
 					</tbody>
 				</table>
-
-				<div class="pagination-wrap" id="paginationWrap"></div>
 			</div>
+
+			<div class="pagination-wrap" id="paginationWrap"></div>
 		</div>
 
+		<!-- 그룹명 편집 모달 -->
+		<div id="groupEditModal" class="wiki-confirm-overlay" style="display: none;">
+			<div class="wiki-confirm-box" style="text-align: left;">
+				<p class="wiki-confirm-title" style="text-align: center; margin-bottom: 18px;">그룹명 편집</p>
+				<form id="groupEditForm" method="post" th:action="@{/groupUpdate}">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+					<input type="hidden" id="groupEditId" name="groupId">
+					<input type="text" id="groupEditNameInput" name="groupName" maxlength="50" required
+						style="width:100%; height:40px; padding:0 12px; border:1px solid #DDD6FE; border-radius:8px; font-size:14px; outline:none; box-sizing:border-box; margin-bottom:20px;">
+					<div class="wiki-confirm-actions">
+						<button type="button" class="wiki-confirm-btn wiki-confirm-cancel" onclick="closeGroupEditModal()">취소</button>
+						<button type="submit" class="wiki-confirm-btn wiki-confirm-ok" style="background:#6D5EF7;">저장</button>
+					</div>
+				</form>
+			</div>
+		</div>
 		<script>
-      // 1. 기존 유지: 행 클릭 시 이동 및 삭제 버튼 클릭 로직
+      // 삭제 확인 모달 (위키 삭제 모달과 동일한 스타일)
+      function showConfirmModal(title, msg, onConfirm, onCancel) {
+          const old = document.getElementById('_confirmModalWrap');
+          if (old) old.remove();
+          const overlay = document.createElement('div');
+          overlay.id = '_confirmModalWrap';
+          overlay.className = 'wiki-confirm-overlay';
+          overlay.innerHTML =
+              '<div class="wiki-confirm-box">' +
+                  '<p class="wiki-confirm-title"></p>' +
+                  '<p class="wiki-confirm-msg"></p>' +
+                  '<div class="wiki-confirm-actions">' +
+                      '<button class="wiki-confirm-btn wiki-confirm-cancel" id="_confirmModalCancelBtn">취소</button>' +
+                      '<button class="wiki-confirm-btn wiki-confirm-ok" id="_confirmModalOkBtn">삭제</button>' +
+                  '</div>' +
+              '</div>';
+          overlay.querySelector('.wiki-confirm-title').textContent = title;
+          overlay.querySelector('.wiki-confirm-msg').textContent = msg;
+          document.body.appendChild(overlay);
+
+          document.getElementById('_confirmModalOkBtn').onclick = () => { overlay.remove(); if (onConfirm) onConfirm(); };
+          document.getElementById('_confirmModalCancelBtn').onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
+          overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); if (onCancel) onCancel(); } });
+      }
+
+      // 드롭다운 토글 (관리 프로젝트 탭과 동일한 패턴)
+      function toggleDropdown(el) {
+          document.querySelectorAll('.dropdown-menu-box').forEach(menu => {
+              if (menu !== el.nextElementSibling) {
+                  menu.classList.remove('show');
+              }
+          });
+          el.nextElementSibling.classList.toggle('show');
+      }
+
+      // 그룹명 편집 모달
+      function openGroupEditModal(btn) {
+          document.getElementById('groupEditId').value = btn.dataset.id;
+          document.getElementById('groupEditNameInput').value = btn.dataset.name;
+          document.getElementById('groupEditModal').style.display = 'flex';
+          document.getElementById('groupEditNameInput').focus();
+      }
+      function closeGroupEditModal() {
+          document.getElementById('groupEditModal').style.display = 'none';
+      }
+      document.getElementById('groupEditModal').addEventListener('click', function (e) {
+          if (e.target === this) closeGroupEditModal();
+      });
+
+      document.addEventListener('click', function () {
+          document.querySelectorAll('.dropdown-menu-box').forEach(menu => menu.classList.remove('show'));
+      });
+
+      // 1. 삭제 버튼 클릭 로직
       document.querySelectorAll(".delete-btn").forEach((btn) => {
-          const row = btn.closest("tr");
-          const groupId = btn.dataset.id;
-
-          if (row && groupId) {
-              row.style.cursor = "pointer";
-              row.addEventListener("click", function () {
-                  location.href = `/groupUserList?groupId=${groupId}`;
-              });
-          }
-
           btn.addEventListener("click", function (e) {
-              e.stopPropagation(); 
-              e.preventDefault(); 
+              e.stopPropagation();
+              e.preventDefault();
 
               const id = this.dataset.id;
               const name = this.dataset.name;
-              if (confirm(`${name} 그룹을 정말 삭제하시겠습니까?`)) {
+              showConfirmModal('그룹 삭제', `${name} 그룹을 정말 삭제하시겠습니까?`, () => {
                   location.href = `/groupDelete?groupId=${id}`;
-              }
+              });
           });
       });
 
@@ -95,7 +161,7 @@
       function renderTableAndPagination() {
           const searchInput = document.getElementById('groupSearchInput');
           const keyword = searchInput ? searchInput.value.trim().toLowerCase() : '';
-          const allRows = Array.from(document.querySelectorAll('.data-table tbody tr'));
+          const allRows = Array.from(document.querySelectorAll('.project-table tbody tr'));
           
           // A. 검색 키워드가 포함된 행들만 골라내기 (필터링)
           const filteredRows = allRows.filter(row => {
@@ -171,199 +237,32 @@
 
 <Style>
 
-
-.container {
-	width: 100%;
-	min-height: 100vh;
-	background: #fff;
-	border-radius: 0;
-	box-shadow: none;
-	overflow: hidden;
-	display: flex;
-	flex-direction: column;
+/* ===== 삭제 확인 모달 (위키 삭제 모달과 동일 스타일) ===== */
+.wiki-confirm-overlay {
+	position: fixed; inset: 0; background: rgba(0,0,0,.15);
+	z-index: 99999; display: flex; align-items: center; justify-content: center;
+	animation: wikiConfirmFadeIn .18s ease;
 }
-
-.content {
-	padding: 30px;
-	flex: 1;
+@keyframes wikiConfirmFadeIn { from { opacity:0; } to { opacity:1; } }
+.wiki-confirm-box {
+	background: #fff; border-radius: 18px; padding: 26px 28px 22px;
+	min-width: 300px; max-width: 380px;
+	box-shadow: 0 12px 40px rgba(109,94,247,.18); text-align: center;
+	animation: wikiConfirmSlideUp .2s ease;
 }
-
-.main-title {
-	font-size: 24px;
-	font-weight: 700;
-	color: #000000;
-	margin-bottom: 24px;
+@keyframes wikiConfirmSlideUp { from { transform:translateY(12px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.wiki-confirm-title  { font-size: 15px; font-weight: 700; color: #374151; margin: 0 0 10px; }
+.wiki-confirm-msg    { font-size: 13px; color: #726F8F; margin: 0 0 20px; line-height: 1.6; white-space: pre-line; }
+.wiki-confirm-actions{ display: flex; gap: 8px; justify-content: center; }
+.wiki-confirm-btn {
+	display: inline-flex; align-items: center; justify-content: center;
+	height: 36px; min-width: 88px; padding: 0 20px;
+	border-radius: 10px; font-size: 13px; font-weight: 600;
+	cursor: pointer; border: none; transition: opacity .2s;
 }
-
-.add-btn {
-	padding: 10px 18px;
-	border: none;
-	border-radius: 5px;
-	background: #6D5EF7;
-	color: #fff;
-	font-size: 14px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: 0.2s;
-}
-
-.add-btn:hover {
-	background: #5747E6;
-}
-
-.search-container {
-	position: relative;
-	width: 300px;
-	margin-bottom: 20px;
-}
-
-.search-btn {
-	position: absolute;
-	left: 12px;
-	top: 50%;
-	transform: translateY(-50%);
-	border: none;
-	background: none;
-	cursor: pointer;
-	color: #999;
-}
-
-.search-btn:hover {
-	color: #6D5EF7;
-}
-
-.search-input {
-	width: 100%;
-	padding: 10px 12px 10px 38px;
-	border: 1px solid #ddd;
-	outline: none;
-	transition: 0.2s;
-	border-radius: 10px;
-}
-
-.search-input:focus {
-	border-color: #6D5EF7;
-	box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
-}
-
-.data-table {
-	width: 100%;
-	border-collapse: collapse;
-	border: 1px solid #e5e5e5;
-}
-
-.data-table th {
-	background: #fafafa;
-	color: #666;
-	font-size: 14px;
-	font-weight: 600;
-	padding: 14px;
-	border-bottom: 1px solid #e5e5e5;
-	text-align: center;
-}
-
-.data-table td {
-	padding: 16px 14px;
-	border-bottom: 1px solid #eee;
-	color: #333;
-	text-align: center;
-}
-
-.data-table tbody tr:hover {
-	background: #fafafa;
-}
-
-.data-table tbody tr:last-child td {
-	border-bottom: none;
-}
-
-.data-table th:nth-child(1), .data-table td:nth-child(1) {
-	width: 15%;
-}
-
-.data-table th:nth-child(2), .data-table td:nth-child(2) {
-	width: 40%;
-}
-
-.data-table th:nth-child(3), .data-table td:nth-child(3) {
-	width: 25%;
-}
-
-.data-table th:nth-child(4), .data-table td:nth-child(4) {
-	width: 20%;
-}
-
-.pagination-wrap {
-	display: flex !important;
-	flex-direction: row !important;
-	justify-content: center;
-	align-items: center;
-	gap: 8px;
-	margin-top: 30px;
-	margin-bottom: 10px;
-	width: 100%;
-}
-
-.page-btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-width: 34px;
-	height: 34px;
-	padding: 0 8px;
-	text-decoration: none;
-	font-size: 13px;
-	font-weight: 500;
-	color: #5d6b87;
-	border: none;
-	background: transparent;
-	transition: all 0.2s ease;
-}
-
-.page-btn.active {
-	border-radius: 8px;
-	background: #6D5EF7;
-	color: #fff;
-	font-weight: 700;
-}
-
-.page-btn.disabled {
-	opacity: 0.4;
-	pointer-events: none;
-}
-
-.page-btn:hover:not(.active):not(.disabled) {
-	color: #6D5EF7;
-}
-
-@media ( max-width : 768px) {
-	body {
-		padding: 0;
-	}
-	.search-container {
-		width: 100%;
-	}
-	.data-table {
-		font-size: 14px;
-	}
-	.add-btn {
-		width: 100%;
-	}
-}
-
-.delete-btn {
-	background-color: #ff0000 !important;
-	border-color: #ef3826 !important;
-	border-radius: 16px !important;
-	color: #ffffff !important;
-	padding: 6px 18px !important;
-	font-weight: 500;
-}
-
-.delete-btn:hover {
-	background-color: #d32f1f !important;
-	border-color: #d32f1f !important;
-}
+.wiki-confirm-btn:hover { opacity: .82; }
+.wiki-confirm-cancel { background: #F1EDFF; color: #6D5EF7; }
+.wiki-confirm-ok     { background: #EF4444; color: #fff; }
 
 </Style>
 	</section>

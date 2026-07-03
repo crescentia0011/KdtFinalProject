@@ -64,6 +64,10 @@ public class SecurityConfig {
                 // 일감유형 화면과 일감유형 CRUD는 최고관리자 또는 관리자만 접근할 수 있다
                 .requestMatchers("/system/taskType", "/system/taskType/**")
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
+                
+                // 마일스톤 CUD는 k1_version 권한을 가진 사람만 접근할 수 있다
+                .requestMatchers("/version/insert", "/insert", "/update", "/update-parent", "/delete")
+                .authenticated()
 
                 // 사용자 관리 목록과 활성·비활성 변경은 기업 최고관리자 또는 관리자만 처리할 수 있음
                 .requestMatchers("/userList", "/userList/**")
@@ -95,6 +99,14 @@ public class SecurityConfig {
                 
                 // 관리 페이지 내부 코드값 관리는 기업 최고관리자 또는 관리자만 접근할 수 있음
                 .requestMatchers("codeValueList", "/codeInsert", "codeUpdate", "/updateOrder")
+                .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
+                
+                // 그룹 관리·코드값 관리는 기업 최고관리자 또는 관리자만 접근할 수 있음
+                .requestMatchers(
+                    "/groupList", "/groupInsert", "/groupUpdate", "/groupDelete",
+                    "/groupUserList", "/groupUserInsert", "/groupUserUpdate", "/groupUserDelete",
+                    "/codeValueList", "/codeInsert", "/codeUpdate", "/codeDelete", "/updateOrder"
+                )
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
                 
                 // 그 외 요청은 로그인 필요

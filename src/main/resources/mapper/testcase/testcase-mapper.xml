@@ -35,7 +35,7 @@
 	</select>
 	
 	<!-- 테스트 케이스 등록 -->
-	<insert id="insertTestCase" parameterType="TestCaseVO">
+<insert id="insertTestCase" parameterType="TestCaseVO">
     <selectKey keyProperty="testId" resultType="string" order="BEFORE">
         SELECT 'TST-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' || 
                (SELECT NVL(MAX(TO_NUMBER(SUBSTR(test_id, 12))), 0) + 1
@@ -170,10 +170,5 @@
     </set>
     WHERE test_id = #{testId}
 </update>
-<delete id="deleteTestCase">
-    DELETE FROM test_case 
-    WHERE test_id = #{testId} 
-      AND project_id = #{projectId}
-</delete>
 
 </mapper>

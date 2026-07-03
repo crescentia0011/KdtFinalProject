@@ -1,15 +1,13 @@
 package com.weple.cloud.task.web;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +29,7 @@ import com.weple.cloud.admin.service.UserService;
 import com.weple.cloud.admin.service.UserVO;
 import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.file.FileDownloadDTO;
+import com.weple.cloud.file.S3Service;
 import com.weple.cloud.file.TaskFileVO;
 import com.weple.cloud.history.task.service.TaskHistoryService;
 import com.weple.cloud.notification.service.AlarmType;
@@ -50,6 +49,8 @@ import com.weple.cloud.task.service.TaskVO;
 import com.weple.cloud.time.service.ProjectTimeSettingService;
 
 import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 
 @Controller
@@ -63,6 +64,7 @@ public class TaskController {
 	private final UserService userService;
 	private final CodeValueService codeValueService;
 	private final ProjectTimeSettingService projectTimeSettingService;
+	private final S3Service s3Service;
 	
 	//프로젝트 내부 일감 목록 페이지 로드
 	@GetMapping("/project/task")
@@ -152,7 +154,8 @@ public class TaskController {
 	
 	//일감 등록 페이지 로드 + 선택 목록 값 로드
 	@GetMapping("/project/task/insert")
-	public String projectTaskListInsert(@RequestParam("projectId") Long pId, 
+	public String projectTaskListInsert(@RequestParam("projectId") Long pId,
+			@RequestParam(value = "milestoneId", required = false) Long milestoneId,
 			@AuthenticationPrincipal LoginUserDetails loginUser, 
 			Model model) {
 		// 로그인 확인
@@ -215,6 +218,7 @@ public class TaskController {
 	    model.addAttribute("parentTaskList", taskService.findParent(pId));
 	    
 	    model.addAttribute("milestoneList", taskService.findMilestone(pId));
+	    model.addAttribute("chosenMilestoneId", milestoneId);
 	    
 	    model.addAttribute("sidebarMenu", "project");
 	    model.addAttribute("project", projectService.findById(String.valueOf(pId)));
@@ -298,6 +302,8 @@ public class TaskController {
 		TaskVO taskDetail = taskService.findTaskDetail(tId);
 		List<TaskTestCaseDTO> taskTestCase = taskService.findTestCase(tId, pId);
 		List<TaskCommentVO> taskComment = taskService.findTaskComment(tId);
+		System.out.println(taskComment);
+		System.out.println("tId = " + tId);
 		List<TaskVO> childTaskList = taskService.findChildTask(tId);
 		List<TaskHistoryDTO> updateHistoryList = taskService.taskUpdateHistory(tId);
 		List<TaskSpentTimeVO> spentTimeList = taskService.taskSpentTime(tId);
@@ -592,7 +598,8 @@ public class TaskController {
 	                                @AuthenticationPrincipal LoginUserDetails loginUser,
 	                                TaskVO taskVO,
 	                                @RequestParam(value = "files", required = false) List<MultipartFile> files,
-	                                @RequestParam(value = "deletedFileIds", required = false) List<Long> deletedFileIds) throws Exception {
+	                                @RequestParam(value = "deletedFileIds", required = false) List<Long> deletedFileIds,
+	                                RedirectAttributes redirectAttributes) throws Exception {
 	    
 		String userCode = loginUser.getLoginUser().getUserCode();
 	    taskVO.setProjectId(pId);
@@ -600,7 +607,16 @@ public class TaskController {
 
 	    // 수정 전 값 먼저 조회-은지
 	    TaskVO before = taskService.findTaskDetail(taskVO.getTaskId());
-
+	    String oldTitle = before.getTaskTitle();
+	    String oldTypeName = before.getTypeIdName();
+	    
+	    try {
+	        taskService.updateTask(taskVO, files, deletedFileIds);
+	    } catch (IllegalStateException ex) {
+	        redirectAttributes.addFlashAttribute("toastType", "error");
+	        redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
+	        return "redirect:/project/task/update/" + taskVO.getTaskId() + "?projectId=" + pId;
+	    }
 	    
 	    String oldFiles = "";
 	    if (before.getFileList() != null && !before.getFileList().isEmpty()) {
@@ -610,7 +626,7 @@ public class TaskController {
 	    }
 	    
 	    // 수정 처리 서비스 호출 (VO 내부에 taskId가 hidden으로 담겨서 넘어옵니다)
-	    taskService.updateTask(taskVO, files, deletedFileIds);
+	    //taskService.updateTask(taskVO, files, deletedFileIds);
 	    
 	    TaskVO after = taskService.findTaskDetail(taskVO.getTaskId());
 	    
@@ -737,6 +753,7 @@ public class TaskController {
 	    Integer adminYn = loginUser.getLoginUser().getAdminYn();
 	    // 최신 댓글 목록 다시 조회
 	    List<TaskCommentVO> taskComment = taskService.findTaskComment(tId);
+	    System.out.println("fragment tId = " + tId);
 	    model.addAttribute("taskComment", taskComment);
 	    
 	    // 권한 처리를 위한 로그인 유저 코드 세팅
@@ -758,45 +775,40 @@ public class TaskController {
         return obj == null ? "" : obj.toString();
     }
 	//  파일 다운로드
-	@GetMapping("/project/download/{versionId}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable("versionId") Long versionId) {
-	    System.out.println("=== download controller ===");
-	    System.out.println("versionId = " + versionId);
-		
-        // 1. DB에서 조인된 파일 & 버전 정보 조회
-        FileDownloadDTO fileInfo = taskService.getFileForDownload(versionId);
-        System.out.println("fileInfo = " + fileInfo);
-        if (fileInfo == null) {
-            return ResponseEntity.notFound().build(); // 삭제됐거나 없는 파일
+    @GetMapping("/project/download/{fileId}")
+    public ResponseEntity<Resource> downloadTaskFile(@PathVariable("fileId") Long fileId) {
+        
+
+        // DB에서 파일 정보 가져오기
+        FileDownloadDTO fileInfo = taskService.getFileForDownload(fileId);
+        
+        if (fileInfo == null || fileInfo.getSavedName() == null) {
+            System.out.println("DB에 파일 정보가 없거나 savedName이 없습니다.");
+            return ResponseEntity.notFound().build();
         }
 
         try {
-            // FILE_PATH = "C:/weple_uploads/tasks", SAVED_NAME = "UUID_images.png" 인 경우를 고려
-            Path filePath;
-            if (fileInfo.getFilePath().endsWith(fileInfo.getSavedName())) {
-                filePath = Paths.get(fileInfo.getFilePath()); // 이미 전체 경로인 경우
-            } else {
-                filePath = Paths.get(fileInfo.getFilePath(), fileInfo.getSavedName()); // 경로 + 파일명 조합
-            }
+            System.out.println("S3에서 다운로드 시도할 파일명(savedName): " + fileInfo.getSavedName());
 
+            // S3에서 파일 스트림 꺼내오기
+            ResponseInputStream<GetObjectResponse> s3Object = s3Service.downloadFile(fileInfo.getSavedName());
+            
+            // 스프링이 읽을 수 있게 Resource로 변환
+            Resource resource = new InputStreamResource(s3Object);
 
-            Resource resource = new UrlResource(filePath.toUri());
-
-            if (!resource.exists() || !resource.isReadable()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            // 3. LOGICAL_NAME(사용자에게 보여질 원래 이름)으로 한글 깨짐 방지 인코딩
+            // 다운로드 창에 띄워줄 원본 파일명 설정 (한글 깨짐 방지)
             String encodedFileName = UriUtils.encode(fileInfo.getLogicalName(), StandardCharsets.UTF_8);
             String contentDisposition = "attachment; filename=\"" + encodedFileName + "\"";
-            System.out.println("download!! versionId = " + versionId);
-            // 4. 응답 객체 생성
+
+            // 클라이언트(브라우저)로 응답 보내기
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
                     .header(HttpHeaders.CONTENT_TYPE, "application/octet-stream")
+                    .contentLength(s3Object.response().contentLength()) // 다운로드 진행 상태바 표시용
                     .body(resource);
 
         } catch (Exception e) {
+            System.out.println("S3 다운로드 중 에러 발생");
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }

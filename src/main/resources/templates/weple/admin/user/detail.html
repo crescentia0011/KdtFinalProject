@@ -23,11 +23,15 @@
             <section class="user-detail-card">
                 <div class="user-detail-profile">
                     <div class="user-detail-avatar">
+                        <!-- users.profile_image에 저장된 URL이 있으면 해당 프로필 이미지를 우선 출력함 -->
                         <img th:if="${userDetail.profileImage != null and userDetail.profileImage != ''}"
                              th:src="${userDetail.profileImage}"
-                             th:alt="${userDetail.userName + ' 프로필 이미지'}">
-                        <i th:unless="${userDetail.profileImage != null and userDetail.profileImage != ''}"
-                           class="fa fa-user-circle" aria-hidden="true"></i>
+                             th:alt="${userDetail.userName + ' 프로필 이미지'}"
+                             onerror="this.onerror=null; this.src='/images/default-profile.svg';">
+                        <img th:unless="${userDetail.profileImage != null and userDetail.profileImage != ''}"
+                             class="user-detail-avatar-default"
+                             th:src="@{/images/default-profile.svg}"
+                             alt="기본 프로필 이미지">
                     </div>
                     <div>
                         <strong th:text="${userDetail.userName}">송팀원</strong>

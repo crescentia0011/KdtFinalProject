@@ -60,15 +60,15 @@ button:hover {
 
 /* 보기 방식 활성화 버튼 */
 .view-btn.active {
-  background-color: #3b82f6;
+  background-color: #5B4FEA !important;
   color: white;
-  border-color: #3b82f6;
+  border-color:#5B4FEA !important;
   font-weight: bold;
 }
 
 /* 오늘 버튼 */
 .today-btn {
-  color: #3b82f6;
+  color: #5B4FEA !important;
   font-weight: bold;
   margin-left: 4px;
 }
@@ -111,6 +111,56 @@ button:hover {
 .badge-orange { background-color: #ffedd5; color: #ea580c; }
 .badge-blue   { background-color: #dbeafe; color: #2563eb; }
 .badge-pink   { background-color: #fce7f3; color: #db2777; }
+
+
+.fc-daygrid-event {
+  border-radius: 4px !important;    /* 모서리를 둥글게 */
+  margin-bottom: 3px !important;    /* 위아래 일정 간격 띄우기 */
+  padding: 2px 4px !important;      /* 내부 여백 */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* 얕은 그림자로 입체감 부여 */
+  border: none !important;          /* 기본 테두리 제거 */
+}
+
+/* 텍스트 가독성 향상 */
+.fc-event-title {
+  font-weight: 600 !important;      /* 글씨를 조금 더 굵게 */
+  color: #1f2937 !important;        /* 텍스트를 진한 회색으로 변경 (배경색이 연할 때 유용) */
+}
+
+/* 연속된 일정(Background Event)의 투명도 조절 */
+.fc-event {
+  opacity: 0.9;
+}
+.fc-event:hover {
+  opacity: 1;                       /* 마우스 오버 시 또렷하게 */
+  filter: brightness(0.95);         /* 살짝 어두워지는 효과 */
+}
+
+/* '+ 더보기' 링크 디자인 */
+.fc-daygrid-more-link {
+  font-weight: 700 !important;
+  color: #5B4FEA !important;        /* 파란색 계열로 강조 */
+  background-color:   #EFEAFF;
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+/* 팝업 창(더보기 클릭 시 나오는 창) 디자인 */
+.fc-popover {
+  border-radius: 8px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 4px;
+}
+
+.fc-popover-header {
+  background-color: #f9fafb !important;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  font-weight: bold;
+}
 
 
 

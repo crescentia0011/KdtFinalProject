@@ -6,7 +6,7 @@ import java.util.Map;
 public interface SelectTotalTimeService {
 	// -------------------------------전체 소요시간------------------------------
 	// 전체조회
-	public List<SelectTotalTimeVO> findSelectTotalTimeAll();
+	public List<SelectTotalTimeVO> findSelectTotalTimeAll(Long companyId, String userCode, boolean isManager);
 	
 	// 등록
 	public long addSelectTotalTime(SelectTotalTimeVO selectTotalTimeVO);

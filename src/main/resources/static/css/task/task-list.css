@@ -85,7 +85,7 @@
 }
 
 .custom-table th {
-	background-color: #f8fafc !important;
+	background-color: #F1EDFF !important;
 	color: #64748b;
 	font-weight: 600;
 	border-bottom: 1px solid #e2e8f0 !important;
@@ -411,3 +411,5 @@ div.choices .choices__list--multiple .choices__item .choices__button:hover {
     background: #eef4ff;
     color: #5747E6;
 }
+
+

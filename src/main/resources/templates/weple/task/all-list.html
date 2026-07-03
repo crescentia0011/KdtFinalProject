@@ -21,8 +21,7 @@
 			<h3 style="color: #1e293b; font-weight: 700; margin: 0;">전체 일감</h3>
 			<button th:if="${isAdminOrOwner or taskPerms.k3Add != null}"
 				type="button" data-toggle="modal" data-target="#projectSelectModal"
-				class="btn btn-sm text-primary fw-bold"
-				style="background: none; border: none; color: #5B4FEA; font-weight: bold;">
+				class="btn-create-task">
 				+ 새 일감만들기</button>
 		</div>
 
@@ -46,7 +45,7 @@
 						<label th:each="proj : ${projectList}"> <input
 							type="checkbox" name="projectIds" th:value="${proj.projectId}"
 							th:checked="${param.projectIds != null and #arrays.contains(param.projectIds, #strings.toString(proj.projectId))}">
-							<span th:text="${proj.projectTitle}">프로젝트명</span>
+							<span   th:text="${proj.projectTitle}">프로젝트명</span>
 						</label>
 					</div>
 				</div>
@@ -57,7 +56,7 @@
 						<label th:each="type : ${typeList}"> <input
 							type="checkbox" name="typeIds" th:value="${type.typeId}"
 							th:checked="${param.typeIds != null and #arrays.contains(param.typeIds, #strings.toString(type.typeId))}">
-							<span th:text="${type.typeName}">기능개발</span>
+							<span th:text="${type.typeName}" >기능개발</span>
 						</label>
 					</div>
 				</div>
@@ -184,7 +183,7 @@
 						style="cursor: pointer;">
 						<td th:text="${status.count}">1</td>
 						<td><a href="#"
-							style="text-decoration: none; color: #3b82f6; font-weight: 500;"
+							style="text-decoration: none; color: #5B4FEA; font-weight: 500;"
 							th:text="${task.projectTitle}">프로젝트명</a></td>
 						<td th:text="${task.typeName}">기획</td>
 						<td th:text="${task.defaultDescribe}">신규</td>

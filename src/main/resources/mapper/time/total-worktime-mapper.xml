@@ -36,6 +36,19 @@
 		LEFT JOIN users u ON u.user_code = w_tme.user_code
 		LEFT JOIN work_classification w_cls ON w_tme.work_name = w_cls.task_classification_id
 		LEFT JOIN task t ON t.task_id = w_tme.task_id
+		<choose>
+		  <!-- 관리자: 프로젝트 멤버십과 무관하게(관리자는 모든 프로젝트에 접근 가능) 같은 회사 전체 사용자의 건 -->
+		  <when test="isManager">
+		    WHERE u.company_id = #{companyId}
+		  </when>
+		  <!-- 일반 사용자: 본인이 속한 프로젝트 안에서 본인이 등록한 건만 -->
+		  <otherwise>
+		    WHERE w_tme.project_id IN (
+		            SELECT m.project_id FROM members m WHERE m.user_code = #{userCode}
+		          )
+		      AND w_tme.user_code = #{userCode}
+		  </otherwise>
+		</choose>
 		ORDER BY w_tme.work_id DESC
 	</select>
 
