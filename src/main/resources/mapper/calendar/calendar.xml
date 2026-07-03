@@ -14,6 +14,7 @@
         FROM task
         WHERE deleted_yn = 'N'
         AND project_id = #{projectId}
+        AND task_manager = #{userCode}
 
         UNION ALL
 

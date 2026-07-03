@@ -687,7 +687,7 @@
     padding: 8px 14px;
     border-radius: var(--user-radius-control);
     background: var(--user-bg);
-    color: var(--user-success);
+    color: var(--user-primary);
     font-size: 13px;
     font-weight: 700;
 }
@@ -704,7 +704,7 @@
 }
 
 .user-project-title {
-    color: var(--user-success);
+    color: var(--user-primary);
 }
 
 .user-project-role-label {

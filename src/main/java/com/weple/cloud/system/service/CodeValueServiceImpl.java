@@ -65,6 +65,15 @@ public class CodeValueServiceImpl implements CodeValueService {
 	    codeValueMapper.updateCodeValue(codeValueVO);
 	}
 
+	// 삭제
+	@Override
+	public void removeCodeValue(String type, String id) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("type", type);
+		params.put("id", id);
+		codeValueMapper.deleteCodeValue(params);
+	}
+
 	// 수정 (수정 시 모든 기본값을 N으로 변경)
 	@Override
 	public void resetDefaultYn(Map<String, Object> params) {

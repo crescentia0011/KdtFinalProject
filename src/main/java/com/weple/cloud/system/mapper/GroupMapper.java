@@ -13,6 +13,9 @@ public interface GroupMapper {
 
 	// 등록
 	public int insertGroup(SystemGroupVO systemGroupVO);
+	
+	// 수정
+	public int updateGroup(SystemGroupVO systemGroupVO);
 
 	// 삭제
 	public int deleteGroup(int groupId);

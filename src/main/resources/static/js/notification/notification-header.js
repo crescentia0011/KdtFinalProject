@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var POLL_INTERVAL_MS = 15000;
+    var POLL_INTERVAL_MS = 5000;
     var TOAST_AUTO_CLOSE_MS = 5000;
 
     var bellBtn = document.getElementById('notifBellBtn');

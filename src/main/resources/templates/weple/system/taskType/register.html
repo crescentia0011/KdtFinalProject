@@ -8,37 +8,35 @@
 </head>
 <body>
 
-    <section>
+    <section class="project-page">
 
-        <div class="mb-4" style="max-width: 800px; margin: 0 auto 20px auto;">
-            <h4 style="font-weight: bold; color: #2c3e50;">일감 유형 등록</h4>
+        <div class="project-toolbar-top">
+            <h3 class="project-title" th:text="${taskType != null} ? '일감 유형 수정' : '일감 유형 등록'">일감 유형 등록</h3>
         </div>
 
-        <div class="form-container shadow-sm">
+        <div class="project-card">
             <form th:action="${taskType != null} ? @{/system/taskType/update} : @{/system/taskType/insert}"
                   th:method="${taskType != null} ? 'put' : 'post'">
             
             	<input type="hidden" name="typeId" th:if="${taskType != null}" th:value="${taskType.typeId}">
                 
-                <div class="form-group">
-                    <label for="typeName" class="form-label">
-                        이름<span class="required">*</span>
-                    </label>
-                    <input type="text" id="typeName" name="typeName" class="custom-input" 
+                <div class="form-group-row">
+                    <label for="typeName" class="form-label required">이름</label>
+                    <input type="text" id="typeName" name="typeName" class="form-input-text" 
                            placeholder="일감 유형 이름을 입력해 주세요." required
                            th:value="${taskType != null} ? ${taskType.typeName} : ''">
                 </div>
 
-                <div class="form-group">
+                <div class="form-group-row">
                     <label for="taskTypeDescribe" class="form-label">설명</label>
-                    <textarea id="taskTypeDescribe" name="taskTypeDescribe" class="custom-input custom-textarea" 
+                    <textarea id="taskTypeDescribe" name="taskTypeDescribe" class="form-textarea" 
                               placeholder="일감 유형에 대한 설명을 입력해 주세요."
                               th:text="${taskType != null} ? ${taskType.taskTypeDescribe} : ''"></textarea>
                 </div>
 
-                <div class="form-footer">
-                    <button type="button" class="btn-cancel" onclick="history.back();">취소</button>
-                    <button type="submit" class="btn-submit" th:text="${taskType != null} ? '수정' : '저장'">저장</button>
+                <div class="button-group-right">
+                    <button type="button" class="page-btn btn-cancel" onclick="history.back();">취소</button>
+                    <button type="submit" class="page-btn active btn-submit" th:text="${taskType != null} ? '수정' : '저장'">저장</button>
                 </div>
                 
             </form>

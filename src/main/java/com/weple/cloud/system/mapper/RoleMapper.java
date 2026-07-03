@@ -11,10 +11,10 @@ import com.weple.cloud.system.service.RoleVO;
 @Mapper
 public interface RoleMapper {
 	// 전체 목록 조회
-	List<RoleVO> selectRoleList();
+	List<RoleVO> selectRoleList(@Param("companyId") Long companyId);
 	
 	// 단건 조회
-	RoleVO selectRoleById(Long roleId);
+	RoleVO selectRoleById(@Param("roleId") Long roleId, @Param("companyId") Long companyId);
 	
 	// 전체 권한 목록 조회
 	List<PermissionVO> selectPermissionList();
@@ -38,7 +38,7 @@ public interface RoleMapper {
 	int deleteRolePermissions(Long roleId);
 	
 	// 역할 삭제
-	int deleteRole(Long roleId);
+	int deleteRole(@Param("roleId") Long roleId, @Param("companyId") Long companyId);
 	
 	Long selectRoleIdByName(@Param("companyId") Long companyId, @Param("roleName") String roleName);
 }

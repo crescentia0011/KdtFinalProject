@@ -11,6 +11,9 @@ public interface GroupService {
 	// 등록
 	public int addGroup(SystemGroupVO systemGroupVO);
 
+	// 수정
+	public Map<String, Object> modifyGroup(SystemGroupVO systemGroupVO);
+
 	// 삭제
 	public Map<String, Object> removeGroup(int groupId);
 }

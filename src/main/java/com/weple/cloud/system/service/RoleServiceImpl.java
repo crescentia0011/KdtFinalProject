@@ -16,14 +16,14 @@ public class RoleServiceImpl implements RoleService {
 	
 	// 목록 조회
 	@Override
-	public List<RoleVO> selectRoleList() {
-		return roleMapper.selectRoleList();
+	public List<RoleVO> selectRoleList(Long companyId) {
+	    return roleMapper.selectRoleList(companyId);
 	}
 	
 	// 단건 조회
 	@Override
-	public RoleVO selectRoleById(Long roleId) {
-		return roleMapper.selectRoleById(roleId);
+	public RoleVO selectRoleById(Long roleId, Long companyId) {
+	    return roleMapper.selectRoleById(roleId, companyId);
 	}
 	
 	// 전체 권한 목록
@@ -55,22 +55,22 @@ public class RoleServiceImpl implements RoleService {
 	@Override
 	@Transactional
 	public int updateRole(RoleVO roleVO) {
-		int result = roleMapper.updateRole(roleVO);
-		roleMapper.deleteRolePermissions(roleVO.getRoleId());
-		if(roleVO.getPermissionCodes() != null) {
-			for(String code : roleVO.getPermissionCodes()) {
-				roleMapper.insertRolePermission(roleVO.getRoleId(), code);
-			}
-		}
-		return 1;
+	    int result = roleMapper.updateRole(roleVO);
+	    
+	    roleMapper.deleteRolePermissions(roleVO.getRoleId());
+	    if (roleVO.getPermissionCodes() != null) {
+	        for (String code : roleVO.getPermissionCodes()) {
+	            roleMapper.insertRolePermission(roleVO.getRoleId(), code);
+	        }
+	    }
+	    return result;
 	}
 
 	// 역할 삭제
 	@Override
 	@Transactional
-	public int deleteRole(Long roleId) {
-		roleMapper.deleteRolePermissions(roleId); // 매핑 먼저 삭제
-		return roleMapper.deleteRole(roleId);
+	public int deleteRole(Long roleId, Long companyId) {
+	    return roleMapper.deleteRole(roleId, companyId);
 	}
 
 	@Override

@@ -86,6 +86,13 @@ public class SystemController {
 		return "redirect:groupList";
 	}
 
+	// 수정 (그룹 목록 페이지 내 모달에서 바로 처리)
+	@PostMapping("groupUpdate")
+	public String groupUpdateProcess(SystemGroupVO systemGroupVO) {
+		groupService.modifyGroup(systemGroupVO);
+		return "redirect:groupList";
+	}
+
 	// 삭제
 	@GetMapping("groupDelete")
 	public String groupDelete(Integer groupId) {
@@ -422,6 +429,21 @@ public class SystemController {
 	    return "redirect:codeValueList";
 	}
 	
+	// 삭제
+	@PostMapping("/codeDelete")
+	@ResponseBody
+	public Map<String, Object> codeDeleteProcess(@RequestParam("cno") String cno, @RequestParam("type") String type) {
+		Map<String, Object> result = new java.util.HashMap<>();
+		try {
+			codeValueService.removeCodeValue(type, cno);
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("message", "삭제 중 오류가 발생했습니다.");
+		}
+		return result;
+	}
+
 	//드래그앤드랍
 	@PostMapping("/updateOrder")
 	@ResponseBody
@@ -461,221 +483,223 @@ public class SystemController {
 	    }
 	}
 
-		// -------------------------------프로젝트------------------------------
+	// -------------------------------프로젝트------------------------------
+	   
+    @Autowired
+    private SystemProjectService systemProjectService;
+    @Autowired
+    private ProjectMemberService projectMemberService;
+    @Autowired
+    private com.weple.cloud.project.service.ProjectService projectService;
+
+    private boolean isCompanyManager(LoginUserVO user) {
+        return Integer.valueOf(1).equals(user.getOwnerYn())
+            || Integer.valueOf(1).equals(user.getAdminYn());
+    }
+    
+    // 프로젝트 목록: 관리자가 아니면 "본인이 속한 프로젝트"만 보여줌
+    @GetMapping("/system/project/list")
+    public String projectList(
+          @RequestParam(defaultValue = "1") int page,
+            @RequestParam(required = false) String keyword,
+            @ModelAttribute("toastMessage") String toastMessage,
+            @AuthenticationPrincipal LoginUserDetails loginUser,
+            Model model) {
+       
+       boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        String userCode = loginUser.getLoginUser().getUserCode();
+
+        // 관리자도 아니고 어디서도 k1_create 권한이 없으면 접근 자체 차단
+        Set<String> anyPerms = isManager
+                ? Set.of("k1_create")
+                : projectService.findAnyProjectPermissionCodes(userCode);
+        if (!isManager && anyPerms.isEmpty()) {
+            return "weple/access-denide";
+        }
+       
+       int pageSize = 10;
+       
+       SystemProjectVO vo = new SystemProjectVO();
+        vo.setPage(page);
+        vo.setPageSize(pageSize);
+        vo.setKeyword(keyword);
+        vo.setCompanyId(String.valueOf(loginUser.getLoginUser().getCompanyId()));
+        // 관리자가 아니면 본인이 속한 프로젝트만 필터링
+        if (!isManager) {
+            vo.setUserCode(userCode);
+        }
+        
+        List<SystemProjectVO> projectList = systemProjectService.selectProjectList(vo);
+        int totalCount = systemProjectService.selectProjectCount(vo);
+        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+        model.addAttribute("projectList",projectList);
+        model.addAttribute("totalCount", totalCount);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("sidebarMenu", "system");
+        model.addAttribute("currentMenu", "systemproject");
+
+        return "weple/system/projectList";
+    }
+    
+    // 프로젝트 생성
+    @GetMapping("/system/project")
+    public String projectCreateForm(@AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
+
+        boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager && !projectService.findAnyProjectPermissionCodes(loginUser.getLoginUser().getUserCode()).contains("k1_create")) {
+            return "weple/access-denide";
+        }
+
+        Long companyId = loginUser.getLoginUser().getCompanyId();
+
+        // 관리-설정(systemModules)에서 활성화한 모듈은 "기본 체크"로만 반영 (숨기지 않고 전체 다 보여줌)
+        List<String> enabledCodes = systemModuleService.findEnabledModuleCodes(companyId);
+        model.addAttribute("enabledCodes", enabledCodes);
+
+        model.addAttribute("sidebarMenu", "system");
+        model.addAttribute("currentMenu", "systemproject");
+
+        return "weple/system/projectCreate";
+    }
+
+    @PostMapping("/system/project")
+    public String projectCreateProcess(
+          SystemProjectVO projectVO,
+          @AuthenticationPrincipal LoginUserDetails loginUser,
+          RedirectAttributes redirectAttributes,
+          Model model) {
+
+       boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager && !projectService.findAnyProjectPermissionCodes(loginUser.getLoginUser().getUserCode()).contains("k1_create")) {
+            return "weple/access-denide";
+        }
+
+        // 식별자 중복 체크
+        if (systemProjectService.existsByIdentifier(projectVO.getProjectIdentifier())) {
+            redirectAttributes.addFlashAttribute("toastError",
+                "이미 존재하는 식별자입니다: " + projectVO.getProjectIdentifier());
+            return "redirect:/system/project";
+        }
+        
+        // 상태 기본값 세팅
+        projectVO.setStatus("j1");
+        
+        // 개요(b1), 설정(b11)은 항상 강제 포함
+        List<String> moduleNames = projectVO.getModuleNames();
+        if (moduleNames == null) moduleNames = new ArrayList<>();
+        if (!moduleNames.contains("b1"))  moduleNames.add("b1");
+        if (!moduleNames.contains("b11")) moduleNames.add("b11");
+        projectVO.setModuleNames(moduleNames);
+        
+        int result = systemProjectService.createProject(projectVO);
+        
+       if(result > 0) {
+          // ↓ 3번 항목(생성자 구성원 자동 등록)과 같이 처리
+            Long companyId = loginUser.getLoginUser().getCompanyId();
+            Long adminRoleId = roleService.selectRoleIdByName(companyId, "관리자");
+
+            ProjectMemberVO creator = new ProjectMemberVO();
+            creator.setProjectId(projectVO.getProjectId());
+            creator.setUserCode(loginUser.getLoginUser().getUserCode());
+            creator.setRoleId(adminRoleId);
+            projectMemberService.addMember(creator);
+          
+          return "redirect:/system/project/list";
+       }else {
+          model.addAttribute("errorMessage", "프로젝트 생성에 실패했습니다.");
+          model.addAttribute("sidebarMenu", "system");
+          model.addAttribute("currentMenu", "systemproject");
+          
+          
+          return "weple/system/projectCreate";
+       }
+    }
+    
+    // 프로젝트 수정
+    @GetMapping("/system/project/update/{projectId}")
+    public String projectUpdateForm(
+            @PathVariable String projectId,
+            @AuthenticationPrincipal LoginUserDetails loginUser,
+            Model model){
+
+        boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager) {
+            Set<String> perms = projectMemberService.findProjectPermissionCodes(
+                    loginUser.getLoginUser().getUserCode(), Long.parseLong(projectId));
+            if (!perms.contains("k1_create")) {
+                return "weple/access-denide";
+            }
+        }
+
+                SystemProjectVO project = systemProjectService.selectProjectById(Long.parseLong(projectId));
+
+                model.addAttribute("project", project);
+                model.addAttribute("sidebarMenu", "system");
+                model.addAttribute("currentMenu", "systemproject");
+
+                return "weple/system/projectUpdate";
+            }
+            
+    @PostMapping("/system/project/update")
+    public String projectUpdateProcess(
+          SystemProjectVO projectVO,
+          @AuthenticationPrincipal LoginUserDetails loginUser,
+          RedirectAttributes redirectAttributes) {
+
+       boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager) {
+            Set<String> perms = projectMemberService.findProjectPermissionCodes(
+                    loginUser.getLoginUser().getUserCode(), projectVO.getProjectId());
+            if (!perms.contains("k1_create")) {
+                return "weple/access-denide";
+            }
+        }
+       
+       List<String> moduleNames = projectVO.getModuleNames();
+        if (moduleNames == null) moduleNames = new ArrayList<>();
+        if (!moduleNames.contains("b1"))  moduleNames.add("b1");
+        if (!moduleNames.contains("b11")) moduleNames.add("b11");
+        projectVO.setModuleNames(moduleNames);
+       
+       int result = systemProjectService.updateProject(projectVO);
+       
+       if(result > 0) {
+          redirectAttributes.addFlashAttribute("toastMessage", "프로젝트가 수정되었습니다.");
+          return "redirect:/system/project/list";
+       } else {
+          redirectAttributes.addFlashAttribute("toastError", "프로젝트 수정에 실패했습니다.");
+          return "redirect:/system/project/update/"+projectVO.getProjectId();
+       }
+       
+    }
+    
+    // 프로젝트 삭제
+    @PostMapping("/system/project/delete")
+    public String deleteProject(
+          @RequestParam String projectId,
+          @AuthenticationPrincipal LoginUserDetails loginUser,
+          RedirectAttributes redirectAttributes) {
+
+       boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager) {
+            Set<String> perms = projectMemberService.findProjectPermissionCodes(
+                    loginUser.getLoginUser().getUserCode(), Long.parseLong(projectId));
+            if (!perms.contains("k1_create")) {
+                return "weple/access-denide";
+            }
+        }
+       
+       int result = systemProjectService.deleteProject(projectId);
+       
+       if(result > 0) {
+          redirectAttributes.addFlashAttribute("toastMessage", "프로젝트가 삭제되었습니다.");
+       }
+       return "redirect:/system/project/list";
+    }
 	
-		@Autowired
-		private SystemProjectService systemProjectService;
-		@Autowired
-		private ProjectMemberService projectMemberService;
-		@Autowired
-		private com.weple.cloud.project.service.ProjectService projectService;
-
-		private boolean isCompanyManager(LoginUserVO user) {
-		    return Integer.valueOf(1).equals(user.getOwnerYn())
-		        || Integer.valueOf(1).equals(user.getAdminYn());
-		}
-		
-		// 프로젝트 목록: 관리자가 아니면 "본인이 속한 프로젝트"만 보여줌
-		@GetMapping("/system/project/list")
-		public String projectList(
-				@RequestParam(defaultValue = "1") int page,
-		        @RequestParam(required = false) String keyword,
-		        @ModelAttribute("toastMessage") String toastMessage,
-		        @AuthenticationPrincipal LoginUserDetails loginUser,
-		        Model model) {
-			
-			boolean isManager = isCompanyManager(loginUser.getLoginUser());
-		    String userCode = loginUser.getLoginUser().getUserCode();
-
-		    // 관리자도 아니고 어디서도 k1_create 권한이 없으면 접근 자체 차단
-		    Set<String> anyPerms = isManager
-		            ? Set.of("k1_create")
-		            : projectService.findAnyProjectPermissionCodes(userCode);
-		    if (!isManager && anyPerms.isEmpty()) {
-		        return "weple/access-denide";
-		    }
-			
-			int pageSize = 10;
-			
-			SystemProjectVO vo = new SystemProjectVO();
-		    vo.setPage(page);
-		    vo.setPageSize(pageSize);
-		    vo.setKeyword(keyword);
-		    // 관리자가 아니면 본인이 속한 프로젝트만 필터링
-		    if (!isManager) {
-		        vo.setUserCode(userCode);
-		    }
-		    
-		    List<SystemProjectVO> projectList = systemProjectService.selectProjectList(vo);
-		    int totalCount = systemProjectService.selectProjectCount(vo);
-		    int totalPages = (int) Math.ceil((double) totalCount / pageSize);
-
-		    model.addAttribute("projectList",projectList);
-		    model.addAttribute("totalCount", totalCount);
-		    model.addAttribute("totalPages", totalPages);
-		    model.addAttribute("currentPage", page);
-		    model.addAttribute("keyword", keyword);
-		    model.addAttribute("sidebarMenu", "system");
-		    model.addAttribute("currentMenu", "systemproject");
-
-		    return "weple/system/projectList";
-		}
-		
-		// 프로젝트 생성
-		@GetMapping("/system/project")
-		public String projectCreateForm(@AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
-
-		    boolean isManager = isCompanyManager(loginUser.getLoginUser());
-		    if (!isManager && !projectService.findAnyProjectPermissionCodes(loginUser.getLoginUser().getUserCode()).contains("k1_create")) {
-		        return "weple/access-denide";
-		    }
-
-		    Long companyId = loginUser.getLoginUser().getCompanyId();
-
-		    // 관리-설정(systemModules)에서 활성화한 모듈은 "기본 체크"로만 반영 (숨기지 않고 전체 다 보여줌)
-		    List<String> enabledCodes = systemModuleService.findEnabledModuleCodes(companyId);
-		    model.addAttribute("enabledCodes", enabledCodes);
-
-		    model.addAttribute("sidebarMenu", "system");
-		    model.addAttribute("currentMenu", "systemproject");
-
-		    return "weple/system/projectCreate";
-		}
-
-		@PostMapping("/system/project")
-		public String projectCreateProcess(
-				SystemProjectVO projectVO,
-				@AuthenticationPrincipal LoginUserDetails loginUser,
-				RedirectAttributes redirectAttributes,
-				Model model) {
-
-			boolean isManager = isCompanyManager(loginUser.getLoginUser());
-		    if (!isManager && !projectService.findAnyProjectPermissionCodes(loginUser.getLoginUser().getUserCode()).contains("k1_create")) {
-		        return "weple/access-denide";
-		    }
-
-			 // 식별자 중복 체크
-		    if (systemProjectService.existsByIdentifier(projectVO.getProjectIdentifier())) {
-		        redirectAttributes.addFlashAttribute("toastError",
-		            "이미 존재하는 식별자입니다: " + projectVO.getProjectIdentifier());
-		        return "redirect:/system/project";
-		    }
-		    
-		    // 상태 기본값 세팅
-		    projectVO.setStatus("j1");
-		    
-		    // 개요(b1), 설정(b11)은 항상 강제 포함
-		    List<String> moduleNames = projectVO.getModuleNames();
-		    if (moduleNames == null) moduleNames = new ArrayList<>();
-		    if (!moduleNames.contains("b1"))  moduleNames.add("b1");
-		    if (!moduleNames.contains("b11")) moduleNames.add("b11");
-		    projectVO.setModuleNames(moduleNames);
-		    
-		    int result = systemProjectService.createProject(projectVO);
-		    
-			if(result > 0) {
-				// ↓ 3번 항목(생성자 구성원 자동 등록)과 같이 처리
-		        Long companyId = loginUser.getLoginUser().getCompanyId();
-		        Long adminRoleId = roleService.selectRoleIdByName(companyId, "관리자");
-
-		        ProjectMemberVO creator = new ProjectMemberVO();
-		        creator.setProjectId(projectVO.getProjectId());
-		        creator.setUserCode(loginUser.getLoginUser().getUserCode());
-		        creator.setRoleId(adminRoleId);
-		        projectMemberService.addMember(creator);
-				
-				return "redirect:/system/project/list";
-			}else {
-				model.addAttribute("errorMessage", "프로젝트 생성에 실패했습니다.");
-				model.addAttribute("sidebarMenu", "system");
-				model.addAttribute("currentMenu", "systemproject");
-				
-				
-				return "weple/system/projectCreate";
-			}
-		}
-		
-		// 프로젝트 수정
-		@GetMapping("/system/project/update/{projectId}")
-		public String projectUpdateForm(
-		        @PathVariable String projectId,
-		        @AuthenticationPrincipal LoginUserDetails loginUser,
-		        Model model){
-
-		    boolean isManager = isCompanyManager(loginUser.getLoginUser());
-		    if (!isManager) {
-		        Set<String> perms = projectMemberService.findProjectPermissionCodes(
-		                loginUser.getLoginUser().getUserCode(), Long.parseLong(projectId));
-		        if (!perms.contains("k1_create")) {
-		            return "weple/access-denide";
-		        }
-		    }
-
-		            SystemProjectVO project = systemProjectService.selectProjectById(Long.parseLong(projectId));
-
-		            model.addAttribute("project", project);
-		            model.addAttribute("sidebarMenu", "system");
-		            model.addAttribute("currentMenu", "systemproject");
-
-		            return "weple/system/projectUpdate";
-		        }
-		        
-		@PostMapping("/system/project/update")
-		public String projectUpdateProcess(
-				SystemProjectVO projectVO,
-				@AuthenticationPrincipal LoginUserDetails loginUser,
-				RedirectAttributes redirectAttributes) {
-
-			boolean isManager = isCompanyManager(loginUser.getLoginUser());
-		    if (!isManager) {
-		        Set<String> perms = projectMemberService.findProjectPermissionCodes(
-		                loginUser.getLoginUser().getUserCode(), projectVO.getProjectId());
-		        if (!perms.contains("k1_create")) {
-		            return "weple/access-denide";
-		        }
-		    }
-			
-			List<String> moduleNames = projectVO.getModuleNames();
-		    if (moduleNames == null) moduleNames = new ArrayList<>();
-		    if (!moduleNames.contains("b1"))  moduleNames.add("b1");
-		    if (!moduleNames.contains("b11")) moduleNames.add("b11");
-		    projectVO.setModuleNames(moduleNames);
-			
-			int result = systemProjectService.updateProject(projectVO);
-			
-			if(result > 0) {
-				redirectAttributes.addFlashAttribute("toastMessage", "프로젝트가 수정되었습니다.");
-				return "redirect:/system/project/list";
-			} else {
-				redirectAttributes.addFlashAttribute("toastError", "프로젝트 수정에 실패했습니다.");
-				return "redirect:/system/project/update/"+projectVO.getProjectId();
-			}
-			
-		}
-		
-		// 프로젝트 삭제
-		@PostMapping("/system/project/delete")
-		public String deleteProject(
-				@RequestParam String projectId,
-				@AuthenticationPrincipal LoginUserDetails loginUser,
-				RedirectAttributes redirectAttributes) {
-
-			boolean isManager = isCompanyManager(loginUser.getLoginUser());
-		    if (!isManager) {
-		        Set<String> perms = projectMemberService.findProjectPermissionCodes(
-		                loginUser.getLoginUser().getUserCode(), Long.parseLong(projectId));
-		        if (!perms.contains("k1_create")) {
-		            return "weple/access-denide";
-		        }
-		    }
-			
-			int result = systemProjectService.deleteProject(projectId);
-			
-			if(result > 0) {
-				redirectAttributes.addFlashAttribute("toastMessage", "프로젝트가 삭제되었습니다.");
-			}
-			return "redirect:/system/project/list";
-		}
 	
 	// -------------------------------역할 및 권한------------------------------
 	@Autowired
@@ -684,8 +708,10 @@ public class SystemController {
 	// 역할 목록
 	@GetMapping("/system/role")
 	public String roleList(@ModelAttribute("toastMessage") String toastMessage,
+						   @AuthenticationPrincipal LoginUserDetails loginUser,
 							Model model) {
-		model.addAttribute("roleList", roleService.selectRoleList());
+		Long companyId = loginUser.getLoginUser().getCompanyId();
+		model.addAttribute("roleList", roleService.selectRoleList(companyId));
 		
 		model.addAttribute("sidebarMenu", "system");
 	    model.addAttribute("currentMenu", "systemrole");
@@ -705,13 +731,19 @@ public class SystemController {
 	
 	// 역할 수정 폼
 	@GetMapping("/system/role/edit")
-	public String roleEditForm(@RequestParam Long roleId, Model model) {
-		model.addAttribute("role", roleService.selectRoleById(roleId));
-		model.addAttribute("checkedCodes", roleService.selectPermissionCodesByRoleid(roleId));
-		model.addAttribute("groupedPermissions", groupPermissions(roleService.selectPermissionList()));
-		model.addAttribute("mode", "edit");
-		
-		model.addAttribute("sidebarMenu", "system");
+	public String roleEditForm(@RequestParam Long roleId,
+	                            @AuthenticationPrincipal LoginUserDetails loginUser,
+	                            Model model) {
+	    Long companyId = loginUser.getLoginUser().getCompanyId();
+	    RoleVO role = roleService.selectRoleById(roleId, companyId);
+	    if (role == null) {
+	        return "weple/access-denide"; // 남의 회사 roleId면 여기서 차단
+	    }
+	    model.addAttribute("role", role);
+	    model.addAttribute("checkedCodes", roleService.selectPermissionCodesByRoleid(roleId));
+	    model.addAttribute("groupedPermissions", groupPermissions(roleService.selectPermissionList()));
+	    model.addAttribute("mode", "edit");
+	    model.addAttribute("sidebarMenu", "system");
 	    model.addAttribute("currentMenu", "systemrole");
 	    return "weple/system/roleCreate";
 	}
@@ -732,24 +764,30 @@ public class SystemController {
 	
 	// 역할 수정 처리
 	@PostMapping("/system/role/edit")
-	public String roleEditProcess(RoleVO roleVO,
-								  RedirectAttributes redirectAttributes) {
-		int result = roleService.updateRole(roleVO);
-		if(result > 0) {
-			redirectAttributes.addFlashAttribute("toastMessage", "역할이 수정되었습니다.");
-		}
-		return "redirect:/system/role";
+	public String roleEditProcess(@AuthenticationPrincipal LoginUserDetails loginUser,
+	                               RoleVO roleVO,
+	                               RedirectAttributes redirectAttributes) {
+	    roleVO.setCompanyId(loginUser.getLoginUser().getCompanyId());
+	    int result = roleService.updateRole(roleVO);
+	    if (result > 0) {
+	        redirectAttributes.addFlashAttribute("toastMessage", "역할이 수정되었습니다.");
+	    } else {
+	        redirectAttributes.addFlashAttribute("toastError", "수정 권한이 없거나 존재하지 않는 역할입니다.");
+	    }
+	    return "redirect:/system/role";
 	}
 	
 	// 역할 삭제
 	@PostMapping("/system/role/delete")
 	public String deleteRole(@RequestParam Long roleId,
-			 				 RedirectAttributes redirectAttributes) {
-		int result = roleService.deleteRole(roleId);
-		if(result > 0) {
-			redirectAttributes.addFlashAttribute("toastMessage", "역할이 삭제되었습니다.");
-		}
-		return "redirect:/system/role";
+	                          @AuthenticationPrincipal LoginUserDetails loginUser,
+	                          RedirectAttributes redirectAttributes) {
+	    Long companyId = loginUser.getLoginUser().getCompanyId();
+	    int result = roleService.deleteRole(roleId, companyId);
+	    if(result > 0) {
+	        redirectAttributes.addFlashAttribute("toastMessage", "역할이 삭제되었습니다.");
+	    }
+	    return "redirect:/system/role";
 	}
 	
 	// private 헬퍼: permissionList → tagLabel 기준 LinkedHashMap

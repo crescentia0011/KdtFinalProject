@@ -47,6 +47,14 @@
 				    <if test="keyword != null and keyword != ''">
 				        p.project_title LIKE '%' || #{keyword} || '%'
 				    </if>
+				    <if test="companyId != null and companyId != ''">
+				        AND EXISTS (
+				            SELECT 1 FROM members m2
+				            JOIN users u2 ON m2.user_code = u2.user_code
+				            WHERE m2.project_id = p.project_id
+				              AND u2.company_id = #{companyId}
+				        )
+				    </if>
 				    <if test="userCode != null and userCode != ''">
 				        AND EXISTS (
 				            SELECT 1 FROM members m
@@ -71,6 +79,14 @@
         <where>
 		    <if test="keyword != null and keyword != ''">
 		        p.project_title LIKE '%' || #{keyword} || '%'
+		    </if>
+		    <if test="companyId != null and companyId != ''">
+		        AND EXISTS (
+		            SELECT 1 FROM members m2
+		            JOIN users u2 ON m2.user_code = u2.user_code
+		            WHERE m2.project_id = p.project_id
+		              AND u2.company_id = #{companyId}
+		        )
 		    </if>
 		    <if test="userCode != null and userCode != ''">
 		        AND EXISTS (

@@ -21,8 +21,7 @@
 			<h3 style="color: #1e293b; font-weight: 700; margin: 0;">전체 일감</h3>
 			<button th:if="${isAdminOrOwner or taskPerms.k3Add != null}"
 				type="button" data-toggle="modal" data-target="#projectSelectModal"
-				class="btn btn-sm text-primary fw-bold"
-				style="background: none; border: none; color: #5B4FEA; font-weight: bold;">
+				class="btn-create-task">
 				+ 새 일감만들기</button>
 		</div>
 

@@ -207,6 +207,18 @@
     border-color: #9CA3AF !important;
     cursor: not-allowed;
 }
+
+#labelOverview .custom-check-box::after,
+#labelSettings .custom-check-box::after {
+    content: "✓" !important;
+    color: #fff !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+}
 #labelOverview .module-text,
 #labelSettings .module-text {
     color: #9CA3AF;

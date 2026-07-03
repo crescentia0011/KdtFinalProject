@@ -8,6 +8,7 @@
 	           role_name,
 	           created_at
 	    FROM roles
+	    WHERE company_id = #{companyId}
 	    ORDER BY role_id
 	</select>
 	
@@ -19,6 +20,7 @@
 			   created_at
 		FROM roles
 		WHERE role_id = #{roleId}
+		  AND company_id = #{companyId}
 	</select>
 	
 	<!-- 전체 권한 목록 -->
@@ -62,6 +64,7 @@
 		UPDATE roles
 		SET role_name = #{roleName}
 		WHERE role_id = #{roleId}
+		  AND company_id = #{companyId}
 	</update>
 	
 	<!-- 역할-권한 매핑 전체 삭제 -->
@@ -76,6 +79,7 @@
 		DELETE
 		FROM roles
 		WHERE role_id = #{roleId}
+		  AND company_id = #{companyId}
 	</delete>
 	
 	<select id="selectRoleIdByName" resultType="long">

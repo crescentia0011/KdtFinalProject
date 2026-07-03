@@ -211,29 +211,36 @@
 .kanban-type-badge.type-improve { color: #50CD89; background: #E8FFF3; }
 .kanban-type-badge.type-default { color: #94A3B8; background: #F1F3F7; }
 
-/* 우선순위 색상 */
+/* 우선순위 색상 (7단계 모두 서로 다른 색으로 구분) */
 .priority-icon{
     font-size:12px;
 }
 
-/* 아이콘만 색상 */
-.priority-critical .priority-icon{
-    color:#EF4444;
+.priority-critical .priority-icon{   /* 매우높음: 진한 빨강 */
+    color:#B91C1C;
 }
 
-.priority-high .priority-icon{
-    color:#F59E0B;
+.priority-urgent .priority-icon{     /* 긴급: 주황빨강 */
+    color:#F97316;
 }
 
-.priority-normal .priority-icon{
+.priority-high .priority-icon{       /* 높음: 앰버(노랑) */
+    color:#EAB308;
+}
+
+.priority-normal .priority-icon{     /* 보통: 초록 */
     color:#22C55E;
 }
 
-.priority-low .priority-icon{
+.priority-default .priority-icon{    /* 기본값: 하늘색 */
+    color:#0EA5E9;
+}
+
+.priority-low .priority-icon{        /* 낮음: 파랑 */
     color:#3B82F6;
 }
 
-.priority-lowest .priority-icon{
+.priority-lowest .priority-icon{     /* 매우낮음: 연회색 */
     color:#9CA3AF;
 }
 

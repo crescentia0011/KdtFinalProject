@@ -43,7 +43,16 @@
 		        <div th:each="task : ${tasksByStatus.get(status.commonId)}"
 				     th:with="canEditThis=${isAdminOrOwner
 				                     or (taskPerms != null and taskPerms.k3Edit == 'k3_edit')
-				                     or (taskPerms != null and taskPerms.k3Myedit == 'k3_myedit' and task.taskManagerId == loginUserCode)}"
+				                     or (taskPerms != null and taskPerms.k3Myedit == 'k3_myedit' and task.taskManagerId == loginUserCode)},
+				              priorityClass=${
+				                     task.priority == '매우높음' ? 'priority-critical' :
+				                     (task.priority == '긴급'    ? 'priority-urgent' :
+				                     (task.priority == '높음'    ? 'priority-high' :
+				                     (task.priority == '보통'    ? 'priority-normal' :
+				                     (task.priority == '기본값'  ? 'priority-default' :
+				                     (task.priority == '낮음'    ? 'priority-low' :
+				                     (task.priority == '매우낮음' ? 'priority-lowest' :
+				                     'priority-normal')))))) }"
 				     class="kanban-card"
 				     th:classappend="${canEditThis} ? 'kanban-card-editable' : 'kanban-card-readonly'"
 				     th:attr="data-task-id=${task.taskId}"
@@ -68,16 +77,7 @@
 					        #0
 					    </span>
 					
-					    <span th:class="${#strings.contains(task.priority,'매우높음')} ?
-						        'kanban-priority priority-critical' :
-						        (${#strings.contains(task.priority,'높음')} ?
-						        'kanban-priority priority-high' :
-						        (${#strings.contains(task.priority,'매우낮음')} ?
-						        'kanban-priority priority-lowest' :
-						        (${#strings.contains(task.priority,'낮음')} ?
-						        'kanban-priority priority-low' :
-						        'kanban-priority priority-normal')))"
-						>
+					    <span th:class="'kanban-priority ' + ${priorityClass}">
 						    <i class="fa fa-signal priority-icon"></i>
 						    <span th:text="${task.priority}"></span>
 						</span>

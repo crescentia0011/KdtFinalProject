@@ -60,15 +60,15 @@ button:hover {
 
 /* 보기 방식 활성화 버튼 */
 .view-btn.active {
-  background-color: #3b82f6;
+  background-color: #5B4FEA !important;
   color: white;
-  border-color: #3b82f6;
+  border-color:#5B4FEA !important;
   font-weight: bold;
 }
 
 /* 오늘 버튼 */
 .today-btn {
-  color: #3b82f6;
+  color: #5B4FEA !important;
   font-weight: bold;
   margin-left: 4px;
 }

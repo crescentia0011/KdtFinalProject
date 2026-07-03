@@ -47,6 +47,13 @@
 			  )
 	</insert>
 	
+	<!-- 수정 -->
+	<update id="updateGroup" parameterType="SystemGroupVO">
+		UPDATE groups
+		SET group_name = #{groupName}
+		WHERE group_id = #{groupId}
+	</update>
+
 	<!-- 삭제 -->
 	<delete id="deleteGroup" parameterType="int">
 		DELETE FROM groups

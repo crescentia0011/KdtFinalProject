@@ -4,10 +4,10 @@ import java.util.List;
 
 public interface RoleService {
 	// 목록 조회
-	List<RoleVO> selectRoleList();
+	List<RoleVO> selectRoleList(Long companyId);
 	
 	// 단건 조회
-	RoleVO selectRoleById(Long roleId);
+	RoleVO selectRoleById(Long roleId, Long companyId);
 	
 	// 전체 권한 목록
 	List<PermissionVO> selectPermissionList();
@@ -22,7 +22,7 @@ public interface RoleService {
 	int updateRole(RoleVO roleVO);
 	
 	// 역할 삭제
-	int deleteRole(Long roleId);
+	int deleteRole(Long roleId, Long companyId);
 	
 	Long selectRoleIdByName(Long companyId, String roleName);
 }

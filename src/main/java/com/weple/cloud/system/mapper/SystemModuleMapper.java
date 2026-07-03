@@ -16,6 +16,6 @@ public interface SystemModuleMapper {
     
     List<TaskTypeVO> findTaskTypeAll(Long companyId);
     List<String> findEnabledTaskTypeIds(Long companyId);
-    long deleteTaskTypesByCompany(Long companyId);
-    long insertTaskType(@Param("typeId") String typeId, @Param("typeName") String typeName, @Param("companyId") Long companyId);
+    long resetTaskTypeEnabled(Long companyId);
+    long enableTaskTypes(@Param("companyId") Long companyId, @Param("typeIds") List<String> typeIds);
 }

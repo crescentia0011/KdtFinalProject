@@ -39,4 +39,5 @@ public class SystemProjectVO {
     private int totalCount;
     // 관리자가 아닌 사용자의 프로젝트 목록 필터링용 (본인이 속한 프로젝트만 조회)
     private String userCode;
+    private String companyId;
 }
