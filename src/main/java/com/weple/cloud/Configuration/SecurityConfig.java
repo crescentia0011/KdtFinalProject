@@ -105,7 +105,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/groupList", "/groupInsert", "/groupDelete",
                     "/groupUserList", "/groupUserInsert", "/groupUserUpdate", "/groupUserDelete",
-                    "/codeValueList", "/codeInsert", "/codeUpdate", "/updateOrder"
+                    "/codeValueList", "/codeInsert", "/codeUpdate", "/codeDelete", "/updateOrder"
                 )
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
                 

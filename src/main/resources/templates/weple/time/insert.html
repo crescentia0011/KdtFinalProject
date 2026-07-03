@@ -24,100 +24,22 @@
 			    </select>
 			</div>
 
-			<!-- ② 일감 검색 카드 -->
+			<!-- ② 소요시간 입력 카드 (원래 모달이던 폼이 메인 페이지로 이동) -->
 			<div class="task-card">
-				<div class="task-card-title">일감 선택</div>
+				<div class="task-card-title">소요시간 등록</div>
 
-				<!-- 검색창 -->
-				<div class="search-row">
-					<div class="search-input-wrap">
-						<input type="text" id="taskSearchInput" placeholder="일감명을 입력하세요"
-							autocomplete="off">
-						<button class="btn-clear" id="btnClear" onclick="clearSearch()"
-							title="검색어 지우기" style="display: none;">✕</button>
-					</div>
-					<button class="btn-search" onclick="filterTasks()">검색</button>
-				</div>
-
-				<!-- 일감 테이블 -->
-				<div class="table-wrap">
-					<table class="task-table">
-						<colgroup>
-							<col style="width: 44px">
-							<col style="width: 28%">
-							<col style="width: 28%">
-							<col style="width: 14%">
-							<col style="width: 14%">
-							<col style="width: 12%">
-						</colgroup>
-						<thead>
-							<tr>
-								<th></th>
-								<th>일감명</th>
-								<th>설명</th>
-								<th>담당자</th>
-								<th>유형</th>
-								<th>마감일</th>
-							</tr>
-						</thead>
-						<tbody id="taskTableBody">
-							<tr id="emptyRow">
-								<td colspan="6" class="empty-row">등록된 일감이 없습니다.</td>
-							</tr>
-							<tr th:each="t : ${taskList}" th:data-title="${t.taskTitle}"
-								th:data-describe="${t.taskDescribe}" th:data-id="${t.taskId}"
-								th:data-estimated="${t.estimatedTime}"
-								th:data-manager="${t.taskManager}" th:data-type="${t.typeName}"
-								th:data-finish="${t.finishDate}"
-								th:data-progress="${t.taskProgress != null} ? ${t.taskProgress} : 0">
-								<td class="td-check"><input type="radio" name="taskRadio"
-									th:value="${t.taskId}"></td>
-								<td class="td-ellipsis" th:text="${t.taskTitle}"></td>
-								<td class="td-ellipsis td-desc" th:text="${t.taskDescribe}"></td>
-								<td class="td-ellipsis" th:text="${t.taskManager}"></td>
-								<td class="td-ellipsis" th:text="${t.typeName}"></td>
-								<td class="td-ellipsis" th:text="${t.finishDate}"></td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-
-				<!-- 페이징 -->
-				<div class="paging-row" id="pagingArea"></div>
-
-				<!-- 선택 버튼 -->
-				<div class="select-btn-row">
-					<button type="button" class="btn-select btn-list"
-						th:if="${workTimeVO.projectId != null and workTimeVO.projectId != 0}"
-						th:onclick="|location.href='@{/projectTimeList(projectId=${workTimeVO.projectId})}'|">목록으로</button>
-					<button type="button" class="btn-select btn-list"
-						th:if="${workTimeVO.projectId == null or workTimeVO.projectId == 0}"
-						onclick="location.href='/totalTimeList'">목록으로</button>
-					<button class="btn-select" onclick="openModal()">선택</button>
-				</div>
-			</div>
-
-		</div>
-
-		<!-- ③ 소요시간 입력 모달 -->
-		<div id="timeModal" class="modal-backdrop" style="display: none;">
-			<div class="modal-box">
-				<div class="modal-header">
-					<span class="modal-title">소요시간 등록</span>
-					<button class="modal-close" onclick="closeModal()">✕</button>
-				</div>
-
-				<form th:action="@{/insertProjectTime}" method="post">
+				<form id="timeForm" th:action="@{/insertProjectTime}" method="post">
 					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 					<input type="hidden" id="modalProjectId" name="projectId" th:value="${workTimeVO.projectId}">
 					<input type="hidden" id="modalTaskId" name="taskId">
 					<input type="hidden" name="returnTaskId" th:value="${taskId}">
 
-					<!-- 선택된 일감 정보 요약 -->
+					<!-- 선택된 일감 정보 요약 + 일감 선택 버튼 -->
 					<div class="modal-task-summary">
 						<div class="summary-row">
-							<span class="s-label">일감</span> <span class="s-value"
-								id="summaryTitle">-</span>
+							<span class="s-label">일감</span>
+							<span class="s-value" id="summaryTitle">선택된 일감이 없습니다.</span>
+							<button type="button" class="btn-pick-task" onclick="openTaskModal()">일감 선택</button>
 						</div>
 						<div class="summary-row">
 							<span class="s-label">설명</span> <span class="s-value"
@@ -173,14 +95,94 @@
 					</div>
 
 					<div class="modal-footer">
-						<button type="button" class="btn-cancel" onclick="closeModal()">취소</button>
+						<button type="button" class="btn-cancel"
+							th:if="${workTimeVO.projectId != null and workTimeVO.projectId != 0}"
+							th:onclick="|location.href='@{/projectTimeList(projectId=${workTimeVO.projectId})}'|">취소</button>
+						<button type="button" class="btn-cancel"
+							th:if="${workTimeVO.projectId == null or workTimeVO.projectId == 0}"
+							onclick="location.href='/totalTimeList'">취소</button>
 						<button type="submit" class="btn-submit">등록</button>
 					</div>
 				</form>
 			</div>
+
 		</div>
 
-		<script th:inline="javascript">
+		<!-- ③ 일감 선택 모달 (원래 페이지였던 검색/목록/페이징이 모달로 이동) -->
+		<div id="taskModal" class="modal-backdrop" style="display: none;">
+			<div class="modal-box">
+				<div class="modal-header">
+					<span class="modal-title">일감 선택</span>
+					<button class="modal-close" onclick="closeTaskModal()">✕</button>
+				</div>
+
+				<div class="task-modal-body">
+					<!-- 검색창 -->
+					<div class="search-row">
+						<div class="search-input-wrap">
+							<input type="text" id="taskSearchInput" placeholder="일감명을 입력하세요"
+								autocomplete="off">
+							<button class="btn-clear" id="btnClear" onclick="clearSearch()"
+								title="검색어 지우기" style="display: none;">✕</button>
+						</div>
+						<button class="btn-search" onclick="filterTasks()">검색</button>
+					</div>
+
+					<!-- 일감 테이블 -->
+					<div class="table-wrap">
+						<table class="task-table">
+							<colgroup>
+								<col style="width: 44px">
+								<col style="width: 28%">
+								<col style="width: 28%">
+								<col style="width: 14%">
+								<col style="width: 14%">
+								<col style="width: 12%">
+							</colgroup>
+							<thead>
+								<tr>
+									<th></th>
+									<th>일감명</th>
+									<th>설명</th>
+									<th>담당자</th>
+									<th>유형</th>
+									<th>마감일</th>
+								</tr>
+							</thead>
+							<tbody id="taskTableBody">
+								<tr id="emptyRow">
+									<td colspan="6" class="empty-row">등록된 일감이 없습니다.</td>
+								</tr>
+								<tr th:each="t : ${taskList}" th:data-title="${t.taskTitle}"
+									th:data-describe="${t.taskDescribe}" th:data-id="${t.taskId}"
+									th:data-estimated="${t.estimatedTime}"
+									th:data-manager="${t.taskManager}" th:data-type="${t.typeName}"
+									th:data-finish="${t.finishDate}"
+									th:data-progress="${t.taskProgress != null} ? ${t.taskProgress} : 0">
+									<td class="td-check"><input type="radio" name="taskRadio"
+										th:value="${t.taskId}"></td>
+									<td class="td-ellipsis" th:text="${t.taskTitle}"></td>
+									<td class="td-ellipsis td-desc" th:text="${t.taskDescribe}"></td>
+									<td class="td-ellipsis" th:text="${t.taskManager}"></td>
+									<td class="td-ellipsis" th:text="${t.typeName}"></td>
+									<td class="td-ellipsis" th:text="${t.finishDate}"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<!-- 페이징 -->
+					<div class="paging-row" id="pagingArea"></div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn-cancel" onclick="closeTaskModal()">취소</button>
+					<button type="button" class="btn-submit" onclick="confirmTaskSelect()">선택</button>
+				</div>
+			</div>
+		</div>
+
+<script th:inline="javascript">
 
 /* ── 토스트 & 컨펌 공통 함수 ── */
 function showToast(msg, type) {
@@ -193,7 +195,7 @@ function showToast(msg, type) {
   wrap.style.cssText = 'position:fixed;top:24px;left:50%;transform:translate(-50%,0);z-index:99999;';
 
   var box = document.createElement('div');
-  box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:220px;';
+  box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:250px;';
   box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
   box.textContent = msg;
 
@@ -212,6 +214,8 @@ function showToast(msg, type) {
 function onProjectChange(projectId) {
   // 선택한 프로젝트의 일감을 Ajax로 불러옴
   document.getElementById('modalProjectId').value = projectId;
+  // 프로젝트가 바뀌면 이전에 골라둔 일감 선택은 무효화
+  resetTaskSelection();
   fetch('/getTasksByProject?projectId=' + projectId)
     .then(res => res.json())
     .then(tasks => {
@@ -375,7 +379,7 @@ document.getElementById('taskTableBody').addEventListener('click', function(e) {
   markSelectedRow();
 });
 
-// ── 모달 ──
+// ── 일감 선택 모달 ──
 let selectedRow = null;
 
 // range input의 트랙을 현재 값(min~max 대비 %)만큼 색이 채워지도록 갱신
@@ -404,22 +408,14 @@ function syncWorkNameWithProgress(progressValue) {
   }
 }
 
-function openModal() {
-  const checked = document.querySelector('input[name="taskRadio"]:checked');
-  if (!checked) { showToast('일감을 선택해주세요.', 'error'); return; }
+// 일감을 하나 확정 선택했을 때 메인 폼(요약/진척도 등)에 반영
+function selectTaskRow(row) {
+  selectedRow = row;
+  document.getElementById('modalTaskId').value = row.id;
+  document.getElementById('summaryTitle').textContent = row.title    || '-';
+  document.getElementById('summaryDesc').textContent  = row.describe || '-';
 
-  // 관리자 모드에서 프로젝트 미선택 체크
-  const projectSel = document.getElementById('projectSelect');
-  if (projectSel && !projectSel.value) { showToast('프로젝트를 먼저 선택해주세요.', 'error'); return; }
-
-  selectedRow = allRows.find(r => r.id === checked.value);
-  if (!selectedRow) return;
-
-  document.getElementById('modalTaskId').value = selectedRow.id;
-  document.getElementById('summaryTitle').textContent = selectedRow.title    || '-';
-  document.getElementById('summaryDesc').textContent  = selectedRow.describe || '-';
-
-  const initProgress = selectedRow.progress || 0;
+  const initProgress = row.progress || 0;
   const rangeEl = document.getElementById('progressRange');
   rangeEl.disabled = false;
   rangeEl.classList.remove('progress-locked');
@@ -432,10 +428,40 @@ function openModal() {
   updateRangeFill(rangeEl);
 
   // 하위 일감 유무에 따라 진척도 편집 가능 여부/범위 결정
-  applyProgressLock(selectedRow.id, initProgress);
+  applyProgressLock(row.id, initProgress);
+}
 
-  document.getElementById('timeModal').style.display = 'flex';
+// 프로젝트를 바꾸는 등 기존 선택이 무효화될 때 폼 요약/필드를 초기화
+function resetTaskSelection() {
+  selectedRow = null;
+  document.getElementById('modalTaskId').value = '';
+  document.getElementById('summaryTitle').textContent = '선택된 일감이 없습니다.';
+  document.getElementById('summaryDesc').textContent  = '-';
+}
+
+function openTaskModal() {
+  // 관리자 모드에서 프로젝트 미선택 체크
+  const projectSel = document.getElementById('projectSelect');
+  if (projectSel && !projectSel.value) { showToast('프로젝트를 먼저 선택해주세요.', 'error'); return; }
+
+  document.getElementById('taskModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+}
+
+function closeTaskModal() {
+  document.getElementById('taskModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function confirmTaskSelect() {
+  const checked = document.querySelector('input[name="taskRadio"]:checked');
+  if (!checked) { showToast('일감을 선택해주세요.', 'error'); return; }
+
+  const row = allRows.find(r => r.id === checked.value);
+  if (!row) return;
+
+  selectTaskRow(row);
+  closeTaskModal();
 }
 
 function applyProgressLock(taskId, currentProgress) {
@@ -470,11 +496,6 @@ function applyProgressLock(taskId, currentProgress) {
     });
 }
 
-function closeModal() {
-  document.getElementById('timeModal').style.display = 'none';
-  document.body.style.overflow = '';
-}
-
 document.getElementById('progressRange').addEventListener('input', function() {
   document.getElementById('progressText').textContent = this.value + '%';
   updateRangeFill(this);
@@ -493,13 +514,23 @@ document.getElementById('workNameSelect').addEventListener('change', function() 
   }
 });
 
+// 일감을 아직 선택 안 했으면 등록 자체를 막고 일감 선택 모달을 열어줌
+document.getElementById('timeForm').addEventListener('submit', function(e) {
+  if (!document.getElementById('modalTaskId').value) {
+    e.preventDefault();
+    showToast('일감을 선택해주세요.', 'error');
+    openTaskModal();
+  }
+});
+
 // 모달 바깥 클릭 시 닫기 - 비활성화 (취소 버튼으로만 닫힘)
 
 
 // 초기 렌더
 renderTable();
 
-// taskId가 있으면 해당 일감만 선택 가능하게 제한
+// taskId가 있으면(일감 상세 페이지에서 넘어온 경우) 해당 일감만 선택 가능하게 제한하고
+// 모달을 열 것도 없이 바로 메인 폼에 그 일감을 채워준다.
 const urlTaskId = /*[[${taskId != null ? taskId : ''}]]*/ '';
 if (urlTaskId) {
     document.querySelectorAll('#taskTableBody tr[data-id]').forEach(tr => {
@@ -515,8 +546,8 @@ if (urlTaskId) {
     });
     markSelectedRow();
 
-    // task detail에서 넘어온 경우 목록 선택 없이 바로 모달 오픈
-    openModal();
+    const preselected = allRows.find(r => r.id === urlTaskId);
+    if (preselected) selectTaskRow(preselected);
 }
 </script>
 
@@ -524,6 +555,7 @@ if (urlTaskId) {
 /* ── 전체 래퍼 ── */
 .insert-wrap {
 	width: 95%;
+	max-width: 680px;
 	margin: 32px auto;
 	padding: 0;
 	font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
@@ -572,23 +604,26 @@ if (urlTaskId) {
 	border-color: #6D5EF7;
 }
 
-/* ── 일감 카드 ── */
+/* ── 소요시간 입력 카드 (원래 일감 카드 스타일 재사용) ── */
 .task-card {
 	background: #fff;
 	border: 1px solid #e2e8f0;
 	border-radius: 8px;
-	padding: 24px;
+	padding: 0;
+	overflow: hidden;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
 }
 
 .task-card-title {
 	font-size: 16px;
 	font-weight: 700;
-	color: #6D5EF7;
-	margin-bottom: 16px;
+	color: #1a1a2e;
+	padding: 18px 24px;
+	border-bottom: 1px solid #e2e8f0;
+	background: #f8fafc;
 }
 
-/* ── 검색창 ── */
+/* ── 검색창 (모달 내부) ── */
 .search-row {
 	display: flex;
 	gap: 8px;
@@ -757,30 +792,26 @@ if (urlTaskId) {
 	border-color: #6D5EF7 !important;
 }
 
-/* ── 선택 버튼 ── */
-.select-btn-row {
-	display: flex;
-	justify-content: space-between;
-	margin-top: 16px;
-}
-
-.btn-select {
-	height: 38px;
-	padding: 0 28px;
-	background: #6D5EF7;
-	color: #fff;
-	border: none;
+/* ── 일감 선택 버튼 (요약 영역 안) ── */
+.btn-pick-task {
+	margin-left: auto;
+	height: 28px;
+	padding: 0 14px;
+	background: #fff;
+	color: #6D5EF7;
+	border: 1px solid #6D5EF7;
 	border-radius: 6px;
-	font-size: 14px;
+	font-size: 12px;
 	font-weight: 600;
 	cursor: pointer;
+	flex-shrink: 0;
 }
 
-.btn-select:hover {
-	background: #5B4FEA;
+.btn-pick-task:hover {
+	background: #F1EDFF;
 }
 
-/* ── 모달 ── */
+/* ── 모달 (이제는 일감 선택용) ── */
 .modal-backdrop {
 	position: fixed;
 	inset: 0;
@@ -791,7 +822,6 @@ if (urlTaskId) {
 	z-index: 9999;
 }
 
-/* 파일 등록 모달(.modal-box-lg)과 동일한 크기로 확대 */
 .modal-box {
 	background: #fff;
 	border-radius: 10px;
@@ -836,6 +866,10 @@ if (urlTaskId) {
 	color: #475569;
 }
 
+.task-modal-body {
+	padding: 24px;
+}
+
 .modal-task-summary {
 	background: #F1EDFF;
 	border-left: 3px solid #6D5EF7;
@@ -846,6 +880,7 @@ if (urlTaskId) {
 
 .summary-row {
 	display: flex;
+	align-items: center;
 	gap: 10px;
 	margin-bottom: 4px;
 	font-size: 13px;
@@ -905,60 +940,6 @@ if (urlTaskId) {
 	font-size: 14px;
 	font-weight: 600;
 	color: #1e293b;
-}
-
-/* 사용자 검색 */
-.modal-field-user {
-	position: relative;
-}
-
-.user-search-wrap {
-	flex: 1;
-	position: relative;
-}
-
-.user-search-wrap input[type="text"] {
-	width: 100%;
-	height: 40px;
-	border: 1px solid #d1d5db;
-	border-radius: 6px;
-	padding: 0 12px;
-	font-size: 14px;
-	outline: none;
-}
-
-.user-search-wrap input[type="text"]:focus {
-	border-color: #6D5EF7;
-}
-
-.user-dropdown {
-	display: none;
-	position: absolute;
-	top: 100%;
-	left: 0;
-	right: 0;
-	background: #fff;
-	border: 1px solid #d1d5db;
-	border-radius: 6px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
-	max-height: 220px;
-	overflow-y: auto;
-	z-index: 10000;
-	list-style: none;
-	margin: 4px 0 0;
-	padding: 4px 0;
-}
-
-.user-dropdown li {
-	padding: 9px 12px;
-	cursor: pointer;
-	font-size: 14px;
-	color: #333;
-}
-
-.user-dropdown li:hover {
-	background: #F1EDFF;
-	color: #6D5EF7;
 }
 
 .progress-wrap {

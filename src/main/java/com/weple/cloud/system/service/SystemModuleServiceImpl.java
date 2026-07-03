@@ -52,14 +52,11 @@ public class SystemModuleServiceImpl implements SystemModuleService{
     @Override
     @Transactional
     public void saveEnabledTaskTypes(Long companyId, List<String> taskTypeIds) {
-        systemModuleMapper.deleteTaskTypesByCompany(companyId);
+        systemModuleMapper.resetTaskTypeEnabled(companyId);
 
-        if (taskTypeIds == null) return;
+        if (taskTypeIds == null || taskTypeIds.isEmpty()) return;
 
-        for (String id : new java.util.LinkedHashSet<>(taskTypeIds)) {
-            String typeId = companyId + "_" + id;
-            systemModuleMapper.insertTaskType(typeId, id, companyId);
-        }
+        systemModuleMapper.enableTaskTypes(companyId, new java.util.ArrayList<>(new java.util.LinkedHashSet<>(taskTypeIds)));
     }  
 	
 }

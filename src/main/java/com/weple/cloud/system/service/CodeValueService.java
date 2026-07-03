@@ -25,6 +25,9 @@ public interface CodeValueService {
 	// 수정 (데이터 1개씩 수정 가능)
 	public void modifyCodeValue(CodeValueVO codeValueVO, String type);
 	
+	// 삭제
+	public void removeCodeValue(String type, String id);
+	
 	// 수정 (드래그 앤 드랍으로 순서 변경한 데이터 저장)
 	// public void updateOrder(String type, String cno, long orderNum);
 	

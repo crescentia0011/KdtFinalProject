@@ -167,6 +167,18 @@
 	    </if>
 	</select>
 	
+	<!-- 코드값 삭제 -->
+	<delete id="deleteCodeValue" parameterType="map">
+		<choose>
+			<when test="type == 'work'">
+				DELETE FROM work_classification WHERE task_classification_id = #{id}
+			</when>
+			<otherwise>
+				DELETE FROM task_priority WHERE task_priority_id = #{id}
+			</otherwise>
+		</choose>
+	</delete>
+
 	<!-- 드래그앤드랍 -->
 	<update id="updateCodeOrder" parameterType="java.util.List">
 	    BEGIN

@@ -79,47 +79,23 @@
             if (old) old.remove();
             const overlay = document.createElement('div');
             overlay.id = '_confirmModalWrap';
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;';
-
-            const box = document.createElement('div');
-            box.style.cssText = 'background:#fff;border-radius:12px;width:380px;max-width:90vw;box-shadow:0 12px 40px rgba(139,124,248,.18);overflow:hidden;';
-
-            const header = document.createElement('div');
-            header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #DDD6FE;background:#F5F3FF;';
-            const titleEl = document.createElement('span');
-            titleEl.style.cssText = 'font-size:16px;font-weight:700;color:#1a1a2e;';
-            titleEl.textContent = title;
-            const closeBtn = document.createElement('button');
-            closeBtn.textContent = '✕';
-            closeBtn.style.cssText = 'background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;';
-            closeBtn.onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
-            header.appendChild(titleEl);
-            header.appendChild(closeBtn);
-
-            const body = document.createElement('div');
-            body.style.cssText = 'padding:24px;text-align:center;';
-            const msgEl = document.createElement('p');
-            msgEl.style.cssText = 'font-size:14px;color:#1a1a2e;margin:0 0 24px;line-height:1.7;white-space:pre-line;';
-            msgEl.textContent = msg;
-            const btnWrap = document.createElement('div');
-            btnWrap.style.cssText = 'display:flex;justify-content:center;gap:12px;';
-            const btnCancel = document.createElement('button');
-            btnCancel.textContent = '취소';
-            btnCancel.style.cssText = 'padding:7px 16px;border:1px solid #DDD6FE;border-radius:6px;background:#fff;color:#4A5568;font-size:13px;font-weight:600;cursor:pointer;';
-            btnCancel.onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
-            const btnOk = document.createElement('button');
-            btnOk.textContent = '삭제';
-            btnOk.style.cssText = 'padding:7px 16px;border:1px solid #e53e3e;border-radius:6px;background:#e53e3e;color:#fff;font-size:13px;font-weight:600;cursor:pointer;';
-            btnOk.onclick = () => { overlay.remove(); if (onConfirm) onConfirm(); };
-
-            btnWrap.appendChild(btnCancel);
-            btnWrap.appendChild(btnOk);
-            body.appendChild(msgEl);
-            body.appendChild(btnWrap);
-            box.appendChild(header);
-            box.appendChild(body);
-            overlay.appendChild(box);
+            overlay.className = 'wiki-confirm-overlay';
+            overlay.innerHTML =
+                '<div class="wiki-confirm-box">' +
+                    '<p class="wiki-confirm-title"></p>' +
+                    '<p class="wiki-confirm-msg"></p>' +
+                    '<div class="wiki-confirm-actions">' +
+                        '<button class="wiki-confirm-btn wiki-confirm-cancel" id="_confirmModalCancelBtn">취소</button>' +
+                        '<button class="wiki-confirm-btn wiki-confirm-ok" id="_confirmModalOkBtn">삭제</button>' +
+                    '</div>' +
+                '</div>';
+            overlay.querySelector('.wiki-confirm-title').textContent = title;
+            overlay.querySelector('.wiki-confirm-msg').textContent = msg;
             document.body.appendChild(overlay);
+
+            document.getElementById('_confirmModalOkBtn').onclick = () => { overlay.remove(); if (onConfirm) onConfirm(); };
+            document.getElementById('_confirmModalCancelBtn').onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); if (onCancel) onCancel(); } });
         }
 
         // 1. 기존 삭제 로직 유지
@@ -471,6 +447,33 @@
 		justify-content: center;
 	}
 }
+
+/* ===== 삭제 확인 모달 (위키 삭제 모달과 동일 스타일) ===== */
+.wiki-confirm-overlay {
+	position: fixed; inset: 0; background: rgba(0,0,0,.15);
+	z-index: 99999; display: flex; align-items: center; justify-content: center;
+	animation: wikiConfirmFadeIn .18s ease;
+}
+@keyframes wikiConfirmFadeIn { from { opacity:0; } to { opacity:1; } }
+.wiki-confirm-box {
+	background: #fff; border-radius: 18px; padding: 26px 28px 22px;
+	min-width: 300px; max-width: 380px;
+	box-shadow: 0 12px 40px rgba(109,94,247,.18); text-align: center;
+	animation: wikiConfirmSlideUp .2s ease;
+}
+@keyframes wikiConfirmSlideUp { from { transform:translateY(12px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.wiki-confirm-title  { font-size: 15px; font-weight: 700; color: #374151; margin: 0 0 10px; }
+.wiki-confirm-msg    { font-size: 13px; color: #726F8F; margin: 0 0 20px; line-height: 1.6; white-space: pre-line; }
+.wiki-confirm-actions{ display: flex; gap: 8px; justify-content: center; }
+.wiki-confirm-btn {
+	display: inline-flex; align-items: center; justify-content: center;
+	height: 36px; min-width: 88px; padding: 0 20px;
+	border-radius: 10px; font-size: 13px; font-weight: 600;
+	cursor: pointer; border: none; transition: opacity .2s;
+}
+.wiki-confirm-btn:hover { opacity: .82; }
+.wiki-confirm-cancel { background: #F1EDFF; color: #6D5EF7; }
+.wiki-confirm-ok     { background: #EF4444; color: #fff; }
 </style>
 	</section>
 </body>

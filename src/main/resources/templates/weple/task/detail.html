@@ -28,8 +28,11 @@
 						th:onclick="|location.href='@{/project/task/update/{id}(id=*{taskId}, projectId=${projectId})}'|">
 						✏️ 수정</button>
 
-					<button class="btn btn-log" type="button" onclick="openTimeRegisterModal()">⏱️
-						소요시간 등록</button>
+					<button class="btn btn-log" type="button" onclick="openTimeRegisterModal()"
+						     th:if="${isAdminOrOwner} or *{taskManagerId} == ${currentUserCode}">⏱️
+						     소요시간 등록</button>
+
+
 
 					<button type="button" class="btn btn-delete task-delete-trigger"
 						th:if="${isAdminOrOwner} or ${taskPerms.k3Delete != null}"

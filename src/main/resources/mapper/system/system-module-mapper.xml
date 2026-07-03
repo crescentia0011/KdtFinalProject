@@ -34,23 +34,30 @@
 	</select>
 
 	<!-- 회사가 새 프로젝트에 기본 포함하기로 저장해둔 일감유형 ID 목록 -->
+	<!-- task_types가 이미 company_id로 회사에 종속돼 있어서, 별도 매핑 테이블 없이 이 컬럼 하나로 처리 -->
 	<select id="findEnabledTaskTypeIds" parameterType="Long" resultType="String">
 	    SELECT type_id
-	    FROM project_manage_setting
+	    FROM task_types
 	    WHERE company_id = #{companyId}
+	      AND default_enabled_yn = 'Y'
 	</select>
 
-	<delete id="deleteTaskTypesByCompany" parameterType="Long">
-	    DELETE FROM project_manage_setting
+	<!-- 저장 전 초기화: 이 회사의 일감유형을 전부 '기본 미포함'으로 되돌림 -->
+	<update id="resetTaskTypeEnabled" parameterType="Long">
+	    UPDATE task_types
+	    SET default_enabled_yn = 'N'
 	    WHERE company_id = #{companyId}
-	</delete>
+	</update>
 
-	<insert id="insertTaskType">
-	    <selectKey resultType="Long" keyProperty="projectManageId" order="BEFORE">
-	        SELECT NVL(MAX(project_manage_id), 0) + 1 FROM project_manage_setting
-	    </selectKey>
-	    INSERT INTO project_manage_setting (project_manage_id, company_id, type_id)
-	    VALUES (#{projectManageId}, #{companyId}, #{typeName})
-	</insert>
+	<!-- 선택된 일감유형들만 '기본 포함'으로 표시 -->
+	<update id="enableTaskTypes">
+	    UPDATE task_types
+	    SET default_enabled_yn = 'Y'
+	    WHERE company_id = #{companyId}
+	      AND type_id IN
+	      <foreach collection="typeIds" item="typeId" open="(" separator="," close=")">
+	          #{typeId}
+	      </foreach>
+	</update>
 	
 </mapper>

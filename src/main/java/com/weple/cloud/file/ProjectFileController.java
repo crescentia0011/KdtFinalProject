@@ -261,6 +261,31 @@ public class ProjectFileController {
         return result;
     }
     
+    // 텍스트 미리보기 (S3로 브라우저에서 직접 fetch하면 CORS에 막히므로 서버를 경유해서 내려줌)
+    @GetMapping("/projectFilePreviewText/{versionId}")
+    public ResponseEntity<String> projectFilePreviewText(@PathVariable String projectId,
+                                                           @PathVariable String versionId,
+                                                           @AuthenticationPrincipal LoginUserDetails loginUser) {
+        if (!canAccess(loginUser, projectId)) {
+            return ResponseEntity.status(403).build();
+        }
+        ProjectFileVersionsVO versionInfo = projectFileService.findVersionForDownload(versionId);
+
+        if (versionInfo == null || versionInfo.getSavedName() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try (ResponseInputStream<GetObjectResponse> s3Object = s3Service.downloadFile(versionInfo.getSavedName())) {
+            String text = new String(s3Object.readAllBytes(), StandardCharsets.UTF_8);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, "text/plain; charset=UTF-8")
+                    .body(text);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     // 다운로드
     @GetMapping("/projectFileDownload/{versionId}")
     public ResponseEntity<Resource> projectFileDownload(@PathVariable String projectId,

@@ -20,6 +20,7 @@
 					<h3 class="card-title">작업분류(시간추적)</h3>
 					<button class="btn-add" th:onclick="|location.href='@{/codeInsert(type='work')}'|">+ 코드값 추가</button>
 				</div>
+				<div class="code-table-wrap">
 				<table class="code-table">
 					<thead>
 						<tr>
@@ -30,7 +31,10 @@
 						</tr>
 					</thead>
 					<tbody>
-						<th:block th:each="item : ${codeList}" th:if="${item.workName != null}" >
+					<tr th:if="${codeList == null or codeList.?[workName != null].isEmpty()}">
+						<td colspan="4" class="empty-message">표시할 데이터가 없습니다</td>
+					</tr>
+					<th:block th:each="item : ${codeList}" th:if="${item.workName != null}" >
 							<tr th:data-id="${item.taskClassificationId}"
 								th:data-company-id="${item.companyId}" 
     							th:data-default-yn="${item.defaultYn}" 
@@ -45,11 +49,15 @@
 									<button class="btn-action" title="수정" 	th:onclick="|location.href='@{/codeUpdate(cno=${item.taskClassificationId}, type='work')}'|">
 											<i class="fa fa-pencil"></i>
 									</button>
+									<button type="button" class="btn-action btn-delete code-delete-trigger" title="삭제"
+										th:data-id="${item.taskClassificationId}" th:data-type="work"
+										th:data-name="${item.workName}">❌</button>
 								</td>
 							</tr>
 						</th:block>
 					</tbody>
 				</table>
+				</div>
 			</div>
 
 			<div class="code-card">
@@ -57,6 +65,7 @@
 					<h3 class="card-title">일감 우선순위</h3>
 					<button class="btn-add" th:onclick="|location.href='@{/codeInsert(type='map')}'|">+ 코드값 추가</button>
 				</div>
+				<div class="code-table-wrap">
 				<table class="code-table">
 					<thead>
 						<tr>
@@ -67,7 +76,10 @@
 						</tr>
 					</thead>
 					<tbody>
-						<th:block th:each="item : ${codeList}" th:if="${item.priorityName != null}" th:data-id="${item.taskPriorityId}">
+					<tr th:if="${codeList == null or codeList.?[priorityName != null].isEmpty()}">
+						<td colspan="4" class="empty-message">표시할 데이터가 없습니다</td>
+					</tr>
+					<th:block th:each="item : ${codeList}" th:if="${item.priorityName != null}" th:data-id="${item.taskPriorityId}">
 							<tr th:data-id="${item.taskPriorityId}"
 								th:data-company-id="${item.companyId}" 
     							th:data-default-yn="${item.defaultYn}" 
@@ -83,11 +95,15 @@
 									<button class="btn-action" title="수정"	th:onclick="|location.href='@{/codeUpdate(cno=${item.taskPriorityId}, type='priority')}'|">
 										<i class="fa fa-pencil"></i>
 									</button>
+									<button type="button" class="btn-action btn-delete code-delete-trigger" title="삭제"
+										th:data-id="${item.taskPriorityId}" th:data-type="priority"
+										th:data-name="${item.priorityName}">❌</button>
 								</td>
 							</tr>
 						</th:block>
 					</tbody>
 				</table>
+				</div>
 			</div>
 		</div>
 		
@@ -158,6 +174,86 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
+// 토스트 (그룹/소요시간/파일관리 등과 동일한 스타일)
+function showToast(msg, type) {
+    const old = document.getElementById('_toastWrap');
+    if (old) old.remove();
+    const wrap = document.createElement('div');
+    wrap.id = '_toastWrap';
+    wrap.style.cssText = 'position:fixed;top:24px;left:50%;transform:translate(-50%,0);z-index:99999;';
+    const box = document.createElement('div');
+    box.style.cssText = 'padding:16px 28px;border-radius:8px;font-size:15px;font-weight:500;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);text-align:center;min-width:250px;';
+    box.style.backgroundColor = (type === 'error') ? '#e53e3e' : '#38a169';
+    box.textContent = msg;
+    wrap.appendChild(box);
+    document.body.appendChild(wrap);
+    setTimeout(() => {
+        wrap.style.transition = 'opacity 0.4s';
+        wrap.style.opacity = '0';
+        setTimeout(() => wrap.remove(), 400);
+    }, 2500);
+}
+
+// 삭제 확인 모달 (위키 삭제 모달과 동일한 스타일)
+function showConfirmModal(title, msg, onConfirm, onCancel) {
+    const old = document.getElementById('_confirmModalWrap');
+    if (old) old.remove();
+    const overlay = document.createElement('div');
+    overlay.id = '_confirmModalWrap';
+    overlay.className = 'wiki-confirm-overlay';
+    overlay.innerHTML =
+        '<div class="wiki-confirm-box">' +
+            '<p class="wiki-confirm-title"></p>' +
+            '<p class="wiki-confirm-msg"></p>' +
+            '<div class="wiki-confirm-actions">' +
+                '<button class="wiki-confirm-btn wiki-confirm-cancel" id="_confirmModalCancelBtn">취소</button>' +
+                '<button class="wiki-confirm-btn wiki-confirm-ok" id="_confirmModalOkBtn">삭제</button>' +
+            '</div>' +
+        '</div>';
+    overlay.querySelector('.wiki-confirm-title').textContent = title;
+    overlay.querySelector('.wiki-confirm-msg').textContent = msg;
+    document.body.appendChild(overlay);
+
+    document.getElementById('_confirmModalOkBtn').onclick = () => { overlay.remove(); if (onConfirm) onConfirm(); };
+    document.getElementById('_confirmModalCancelBtn').onclick = () => { overlay.remove(); if (onCancel) onCancel(); };
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.remove(); if (onCancel) onCancel(); } });
+}
+
+// 코드값 삭제
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.code-delete-trigger');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    const type = btn.dataset.type;
+    const name = btn.dataset.name;
+
+    showConfirmModal('코드값 삭제', `"${name}" 코드값을 정말 삭제하시겠습니까?`, () => {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+        const body = new URLSearchParams({ cno: id, type: type });
+
+        fetch('[[@{/codeDelete}]]', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                [csrfHeader]: csrfToken
+            },
+            body: body.toString()
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                btn.closest('tr').remove();
+                showToast('삭제되었습니다.', 'success');
+            } else {
+                showToast(data.message || '삭제 중 오류가 발생했습니다.', 'error');
+            }
+        })
+        .catch(() => showToast('서버와 통신할 수 없습니다.', 'error'));
+    });
+});
 </script>
 		
 		<style>
@@ -204,17 +300,18 @@ document.addEventListener("DOMContentLoaded", function() {
 .page-title {
 	font-size: 24px;
 	font-weight: 700;
-	margin-bottom: 24px;
+	margin-bottom: 20px;
+	color: #111827;
 }
 
 /* ===========================카드=========================== */
 .code-card {
 	background: #fff;
-	border: 1px solid #e5e7eb;
-	border-radius: 10px;
-	padding: 24px;
+	border: 1px solid #DDD6FE;
+	border-radius: 24px;
+	padding: 30px;
 	margin-bottom: 28px;
-	box-shadow: 0 2px 6px rgba(0, 0, 0, .04);
+	box-shadow: 0 2px 10px rgba(0, 0, 0, .03);
 }
 
 .card-header {
@@ -239,10 +336,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
 /* ===========================버튼=========================== */
 .btn-add {
-	height: 36px;
-	padding: 0 16px;
-	border: 1px solid #d1d5db;
-	border-radius: 6px;
+	height: 40px;
+	padding: 0 18px;
+	border: none;
+	border-radius: 10px;
 	background: #6D5EF7;
 	color: #ffffff;
 	cursor: pointer;
@@ -257,30 +354,75 @@ document.addEventListener("DOMContentLoaded", function() {
 }
 
 /* ===========================테이블========================== */
+.code-table-wrap {
+	border: 1px solid #DDD6FE;
+	border-radius: 14px;
+	overflow: hidden;
+	background: #fff;
+}
+
 .code-table {
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 14px;
-	border: 1px solid #e5e7eb;
 }
 
 .code-table thead th {
 	background: #F1EDFF;
-	color: #64748b;
+	color: #5d6b87;
 	padding: 13px 16px;
-	font-weight: 600;
-	border-bottom: 1px solid #e5e7eb;
+	font-weight: 700;
+	font-size: 13px;
+	border-bottom: 1px solid #DDD6FE;
 }
 
 .code-table tbody td {
 	padding: 15px 16px;
-	border-bottom: 1px solid #eef2f7;
+	border-top: 1px solid #DDD6FE;
 	vertical-align: middle;
 }
 
-.code-table tbody tr:hover {
-	background: #fafafa;
+.code-table tbody tr:first-child td {
+	border-top: none;
 }
+
+.code-table tbody tr:hover {
+	background: #FAFAFC;
+}
+
+.empty-message {
+	padding: 40px !important;
+	text-align: center !important;
+	color: #9CA3AF;
+	font-size: 14px;
+}
+
+/* ===== 삭제 확인 모달 (위키 삭제 모달과 동일 스타일) ===== */
+.wiki-confirm-overlay {
+	position: fixed; inset: 0; background: rgba(0,0,0,.15);
+	z-index: 99999; display: flex; align-items: center; justify-content: center;
+	animation: wikiConfirmFadeIn .18s ease;
+}
+@keyframes wikiConfirmFadeIn { from { opacity:0; } to { opacity:1; } }
+.wiki-confirm-box {
+	background: #fff; border-radius: 18px; padding: 26px 28px 22px;
+	min-width: 300px; max-width: 380px;
+	box-shadow: 0 12px 40px rgba(109,94,247,.18); text-align: center;
+	animation: wikiConfirmSlideUp .2s ease;
+}
+@keyframes wikiConfirmSlideUp { from { transform:translateY(12px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.wiki-confirm-title  { font-size: 15px; font-weight: 700; color: #374151; margin: 0 0 10px; }
+.wiki-confirm-msg    { font-size: 13px; color: #726F8F; margin: 0 0 20px; line-height: 1.6; white-space: pre-line; }
+.wiki-confirm-actions{ display: flex; gap: 8px; justify-content: center; }
+.wiki-confirm-btn {
+	display: inline-flex; align-items: center; justify-content: center;
+	height: 36px; min-width: 88px; padding: 0 20px;
+	border-radius: 10px; font-size: 13px; font-weight: 600;
+	cursor: pointer; border: none; transition: opacity .2s;
+}
+.wiki-confirm-btn:hover { opacity: .82; }
+.wiki-confirm-cancel { background: #F1EDFF; color: #6D5EF7; }
+.wiki-confirm-ok     { background: #EF4444; color: #fff; }
 
 /* ==========================체크========================== */
 .check-icon {
@@ -347,6 +489,12 @@ document.addEventListener("DOMContentLoaded", function() {
 .btn-action:hover {
 	background: #f1f5f9;
 	border-color: #94a3b8;
+}
+
+.btn-delete:hover {
+	background: #fff5f5;
+	border-color: #ff8787;
+	color: #fa5252;
 }
 
 /* ===========================반응형=========================== */
