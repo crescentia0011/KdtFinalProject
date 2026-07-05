@@ -2,28 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.weple.cloud.dashboard.mapper.DashboardMapper"> 
 <select id="selectTasksDueWithinAWeek" resultType="TaskVO">
-        SELECT
-            t.task_id AS taskId, 
-            p.project_title AS projectTitle, 
-            tt.type_name AS typeName,
-            cc.default_describe AS defaultDescribe, 
-            t.priority AS priority, 
-            t.task_title AS taskTitle,
-            t.task_progress AS taskProgress, 
-            u.user_name AS taskManager, 
-            t.created_at AS createdAt,
-            t.finish_date AS finishDate, 
-            t.project_id AS projectId, 
-            t.task_manager AS taskManagerId
-        FROM task t
-        INNER JOIN project p ON t.project_id = p.project_id
-        INNER JOIN task_types tt ON t.type_id = tt.type_id
-        INNER JOIN common_code cc ON t.task_status = cc.common_id
-        LEFT JOIN users u ON t.task_manager = u.user_code
-        WHERE t.task_manager = #{userCode}
-          AND t.finish_date BETWEEN TRUNC(SYSDATE) AND TRUNC(SYSDATE) + 7
-          ORDER BY t.finish_date ASC
-    </select>
+    SELECT
+        t.task_id       AS taskId, 
+        t.task_title    AS taskTitle,
+        t.finish_date   AS finishDate, 
+        t.project_id    AS projectId, 
+        p.project_title AS projectTitle
+    FROM task t
+    INNER JOIN project p ON t.project_id = p.project_id
+    WHERE t.task_manager = #{userCode}
+      AND t.finish_date &gt;= TRUNC(SYSDATE)
+      AND t.finish_date &lt; TRUNC(SYSDATE) + 8
+    ORDER BY t.finish_date ASC
+</select>
     
     <select id="selectProjectsByMember" resultType="DashboardProjectDTO">
         SELECT 
@@ -71,104 +62,127 @@
     
     <select id="selectRecentActivities" resultType="com.weple.cloud.history.worklog.service.WorkLogVO">
     SELECT * FROM (
-        SELECT
-            inner_q.*,
+        SELECT 
+            main_q.*, 
             ROWNUM AS rn
         FROM (
-            SELECT
-                th.history_id,
-                th.task_id,
-                t.project_id AS projectId,
-                p.project_title AS projectTitle,
-                u.user_name AS userName,
-                NVL(d_title.new_value, t.task_title) AS taskTitle,
-                NVL(d_type.new_value, tt.type_name) AS typeName,
-                cc.default_describe AS defaultDescribe,
-                th.action_type, /* 카멜케이스 별칭 제거 -> 팀원 원본 selectAll과 통일 */
-                th.action_at   /* 카멜케이스 별칭 제거 -> 자동 매핑 활용 */
-            FROM task_history th
-            INNER JOIN task t ON th.task_id = t.task_id
-            INNER JOIN users u ON th.changed_by = u.user_code
-            INNER JOIN task_types tt ON t.type_id = tt.type_id
-            LEFT JOIN project p ON t.project_id = p.project_id
-            LEFT JOIN task_history_detail d_title 
-                   ON th.history_id = d_title.history_id AND d_title.field_name = 'task_title'
-            LEFT JOIN task_history_detail d_type 
-                   ON th.history_id = d_type.history_id AND d_type.field_name = 'type_name'
-            LEFT OUTER JOIN common_code cc 
-                        ON t.task_status = cc.common_id AND cc.common_code = '0E'
-            <where>
-                <choose>
-                    <when test="projectId != null and projectId != ''">
-                        AND t.project_id = TO_NUMBER(#{projectId})
-                    </when>
-                    <when test="projectIds != null and projectIds.size() > 0">
-                        AND t.project_id IN
-                        <foreach collection="projectIds" item="id" open="(" separator="," close=")">
-                            #{id}
-                        </foreach>
-                    </when>
-                </choose>
-            </where>
+            /* 1. 업무 히스토리 최신 20건 */
+            SELECT * FROM (
+                SELECT
+                    th.history_id AS historyId,
+                    th.task_id AS taskId,
+                    t.project_id AS projectId,
+                    th.action_type AS actionType,
+                    th.action_at AS actionAt,
+                    th.changed_by AS changedBy,
+                    /* 조인이 필요한 텍스트 정보는 안쪽에서 최소한으로 처리하거나 바깥에서 처리 */
+                    p.project_title AS projectTitle,
+                    u.user_name AS userName,
+                    NVL(d_title.new_value, t.task_title) AS taskTitle,
+                    NVL(d_type.new_value, tt.type_name) AS typeName,
+                    cc.default_describe AS defaultDescribe
+                FROM task_history th
+                INNER JOIN task t ON th.task_id = t.task_id
+                INNER JOIN users u ON th.changed_by = u.user_code
+                INNER JOIN task_types tt ON t.type_id = tt.type_id
+                LEFT JOIN project p ON t.project_id = p.project_id
+                LEFT JOIN task_history_detail d_title 
+                       ON th.history_id = d_title.history_id AND d_title.field_name = 'task_title'
+                LEFT JOIN task_history_detail d_type 
+                       ON th.history_id = d_type.history_id AND d_type.field_name = 'type_name'
+                LEFT JOIN common_code cc 
+                       ON t.task_status = cc.common_id AND cc.common_code = '0E'
+                <where>
+                    <choose>
+                        <when test="projectId != null and projectId != ''">
+                            AND t.project_id = #{projectId}
+                        </when>
+                        <when test="projectIds != null and projectIds.size() > 0">
+                            AND t.project_id IN
+                            <foreach collection="projectIds" item="id" open="(" separator="," close=")">
+                                #{id}
+                            </foreach>
+                        </when>
+                    </choose>
+                </where>
+                ORDER BY th.action_at DESC
+            ) WHERE ROWNUM &lt;= 20
 
             UNION ALL
 
-            SELECT
-                NULL AS history_id,
-                w.wiki_page_id AS task_id,
-                w.project_id AS projectId,
-                p2.project_title AS projectTitle,
-                u2.user_name AS userName,
-                w.title AS taskTitle,
-                '위키' AS typeName,
-                '위키 생성' AS defaultDescribe,
-                'CREATE' AS action_type,
-                w.created_at AS action_at /* 스네이크 케이스 유지 */
-            FROM wiki_pages w
-            JOIN users u2 ON w.user_code = u2.user_code
-            LEFT JOIN project p2 ON w.project_id = p2.project_id
-            <where>
-                <choose>
-                    <when test="projectId != null and projectId != ''">
-                        AND w.project_id = TO_NUMBER(#{projectId})
-                    </when>
-                    <when test="projectIds != null and projectIds.size() > 0">
-                        AND w.project_id IN
-                        <foreach collection="projectIds" item="id" open="(" separator="," close=")">
-                            #{id}
-                        </foreach>
-                    </when>
-                </choose>
-            </where>
+            /* 2. 위키 생성 최신 20건 */
+            SELECT * FROM (
+                SELECT
+                    NULL AS historyId,
+                    w.wiki_page_id AS taskId,
+                    w.project_id AS projectId,
+                    'CREATE' AS actionType,
+                    w.created_at AS actionAt,
+                    w.user_code AS changedBy,
+                    p2.project_title AS projectTitle,
+                    u2.user_name AS userName,
+                    w.title AS taskTitle,
+                    '위키' AS typeName,
+                    '위키 생성' AS defaultDescribe
+                FROM wiki_pages w
+                INNER JOIN users u2 ON w.user_code = u2.user_code
+                LEFT JOIN project p2 ON w.project_id = p2.project_id
+                <where>
+                    <choose>
+                        <when test="projectId != null and projectId != ''">
+                            AND w.project_id = #{projectId}
+                        </when>
+                        <when test="projectIds != null and projectIds.size() > 0">
+                            AND w.project_id IN
+                            <foreach collection="projectIds" item="id" open="(" separator="," close=")">
+                                #{id}
+                            </foreach>
+                        </when>
+                    </choose>
+                </where>
+                ORDER BY w.created_at DESC
+            ) WHERE ROWNUM &lt;= 20
 
             UNION ALL
 
-            SELECT
-                NULL, wp.wiki_page_id, wp.project_id, p3.project_title, u3.user_name,
-                h.title, '위키', '위키 수정', 'UPDATE', h.created_at
-            FROM wiki_histories h
-            JOIN wiki_pages wp ON h.wiki_page_id = wp.wiki_page_id
-            JOIN users u3 ON h.user_code = u3.user_code
-            LEFT JOIN project p3 ON wp.project_id = p3.project_id
-            <where>
-                <choose>
-                    <when test="projectId != null and projectId != ''">
-                        AND wp.project_id = TO_NUMBER(#{projectId})
-                    </when>
-                    <when test="projectIds != null and projectIds.size() > 0">
-                        AND wp.project_id IN
-                        <foreach collection="projectIds" item="id" open="(" separator="," close=")">
-                            #{id}
-                        </foreach>
-                    </when>
-                </choose>
-            </where>
+            /* 3. 위키 수정 최신 20건 */
+            SELECT * FROM (
+                SELECT
+                    NULL AS historyId,
+                    wp.wiki_page_id AS taskId,
+                    wp.project_id AS projectId,
+                    'UPDATE' AS actionType,
+                    h.created_at AS actionAt,
+                    h.user_code AS changedBy,
+                    p3.project_title AS projectTitle,
+                    u3.user_name AS userName,
+                    h.title AS taskTitle,
+                    '위키' AS typeName,
+                    '위키 수정' AS defaultDescribe
+                FROM wiki_histories h
+                INNER JOIN wiki_pages wp ON h.wiki_page_id = wp.wiki_page_id
+                INNER JOIN users u3 ON h.user_code = u3.user_code
+                LEFT JOIN project p3 ON wp.project_id = p3.project_id
+                <where>
+                    <choose>
+                        <when test="projectId != null and projectId != ''">
+                            AND wp.project_id = #{projectId}
+                        </when>
+                        <when test="projectIds != null and projectIds.size() > 0">
+                            AND wp.project_id IN
+                            <foreach collection="projectIds" item="id" open="(" separator="," close=")">
+                                #{id}
+                            </foreach>
+                        </when>
+                    </choose>
+                </where>
+                ORDER BY h.created_at DESC
+            ) WHERE ROWNUM &lt;= 20
 
-            ORDER BY action_at DESC /* 정렬 기준을 스네이크 케이스로 변경 */
-        ) inner_q
-        WHERE ROWNUM &lt;= 20
+        ) main_q
+        ORDER BY actionAt DESC
     )
-    WHERE rn &gt; 0
+    WHERE ROWNUM &lt;= 20
 </select>
 
 </mapper>
