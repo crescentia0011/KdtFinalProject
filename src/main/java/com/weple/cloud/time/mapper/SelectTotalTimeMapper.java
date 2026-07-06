@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 import com.weple.cloud.time.service.SelectTotalTimeVO;
+import com.weple.cloud.time.service.WorkTimeVO;
 
 
 public interface SelectTotalTimeMapper {
@@ -15,6 +16,8 @@ public interface SelectTotalTimeMapper {
 	
 	//등록
 	public long insertSelectTotalTime(SelectTotalTimeVO selectTotalTimeVO);
+	
+
 	
 	// 수정
 	public long updateSelectTotalTime(SelectTotalTimeVO selectTotalTimeVO);

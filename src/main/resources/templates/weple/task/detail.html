@@ -75,7 +75,7 @@
 						</div>
 						<div class="info-row">
 							<span class="label">소요시간:</span> <span class="value link-color"
-								th:text="|${spentSum} 시간|"></span>
+								th:text="|${taskDetail.spentHoursSum} 시간|"></span>
 						</div>
 					</div>
 					<div class="info-column">
@@ -135,9 +135,7 @@
 
 				<div class="task-section subtasks-area">
 					<div class="section-title">
-						<span>하위 일감</span> <a
-							th:href="@{/project/task/insert(projectId=${projectId})}"
-							class="btn-add">추가</a>
+						<span>하위 일감</span> 
 					</div>
 
 					<div class="section-content">
@@ -225,6 +223,9 @@
             
             <th:block th:if="${history.actionType == 'CREATE'}">
                 <strong th:text="${detail.newValue}"></strong>(으)로 설정하여 생성했습니다.
+            </th:block>
+            <th:block th:if="${history.actionType == 'ADD_SUBTASK'}">
+                <strong th:text="${detail.newValue}"></strong>가 하위일감으로 등록되었습니다.
             </th:block>
 
         </div>

@@ -16,14 +16,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.weple.cloud.admin.service.UserService;
 import com.weple.cloud.admin.service.UserVO;
 import com.weple.cloud.auth.service.LoginUserDetails;
+import com.weple.cloud.history.task.service.TaskHistoryService;
 import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.project.service.ProjectVO;
 import com.weple.cloud.system.service.CodeValueService;
 import com.weple.cloud.system.service.CodeValueVO;
 import com.weple.cloud.task.service.TaskService;
 import com.weple.cloud.task.service.TaskVO;
-import com.weple.cloud.time.service.TimeService;
 import com.weple.cloud.time.service.ProjectTimeSettingService;
+import com.weple.cloud.time.service.TimeService;
 import com.weple.cloud.time.service.WorkTimeVO;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class TimeController {
 	private final TimeService timeService;
 	private final UserService userService;
 	private final ProjectTimeSettingService projectTimeSettingService;
+	private final TaskHistoryService taskHistoryService;
 
 	private boolean isCompanyManager(com.weple.cloud.auth.service.LoginUserVO user) {
 		return Integer.valueOf(1).equals(user.getOwnerYn())
@@ -177,6 +179,10 @@ public class TimeController {
 										   @AuthenticationPrincipal LoginUserDetails loginUser,
 										   RedirectAttributes redirectAttributes) {
 	    boolean isManager = isCompanyManager(loginUser.getLoginUser());
+	    
+
+	    
+	    
 	    Long projectId = workTimeVO.getProjectId();
 	    try {
 	        if (projectId == null || projectId == 0) {
@@ -194,9 +200,35 @@ public class TimeController {
 	    } catch (Exception e) {
 	        return "weple/access-denide";
 	    }
+	    
+	    TaskVO before = (taskId != null) ? taskService.findTaskDetail(taskId) : null;
+	    long oldSpentHours = (before != null) ? before.getSpentHoursSum() : 0;
 
 	    try {
 	        timeService.addProjectTime(workTimeVO);
+	        TaskVO after = (taskId != null) ? taskService.findTaskDetail(taskId) : null;
+	        long newSpentHours = (after != null) ? after.getSpentHoursSum() : 0;
+	        if (taskId != null && oldSpentHours != newSpentHours) {
+	            taskHistoryService.insertHistory(
+	                taskId, 
+	                loginUser.getLoginUser().getUserCode(), 
+	                "UPDATE",
+	                null, null, 
+	                null, null,
+	                null, null, 
+	                null, null,
+	                null, null,
+	                null, null,
+	                null, null,
+	                null, null,
+	                null, null,
+	                null, null,
+	                null, null,
+	                String.valueOf(oldSpentHours), 
+	                String.valueOf(newSpentHours),
+	                null, null  // 파일 이력
+	            );
+	        }
 	    } catch (IllegalStateException ex) {
 	        redirectAttributes.addFlashAttribute("toastType", "error");
 	        redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());

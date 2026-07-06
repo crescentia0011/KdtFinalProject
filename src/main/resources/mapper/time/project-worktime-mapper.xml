@@ -105,6 +105,12 @@
 		        , SYSDATE
 		)
 	</insert>	
+	<!-- 소요시간 합계 -->
+	<update id="updateTaskSpentHoursSum" parameterType="WorkTimeVO">
+    	UPDATE task
+    	SET spent_hours_sum = NVL(spent_hours_sum, 0) + #{spentHour}
+    	WHERE task_id = #{taskId}
+	</update>
 	
 	<!-- 수정 -->
 	<update id="updateProjectTime" parameterType="WorkTimeVO">

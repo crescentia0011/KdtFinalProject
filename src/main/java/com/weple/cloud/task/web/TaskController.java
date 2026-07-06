@@ -273,9 +273,9 @@ public class TaskController {
 	    	    null ,toStr(createdTask.getSpentHoursSum()),
 	    	    null, newFiles
 	    	);
-	    if (createdTask.getParentTaskId() != null && !createdTask.getParentTaskId().trim().isEmpty()) {
+	    if (taskVO.getParentTaskId() != null && !createdTask.getParentTaskId().trim().isEmpty()) {
             taskHistoryService.insertSubTaskHistory(
-                createdTask.getParentTaskId(), 
+            		taskVO.getParentTaskId(), 
                 userCode,                     
                 createdTask.getTaskTitle()     
             );

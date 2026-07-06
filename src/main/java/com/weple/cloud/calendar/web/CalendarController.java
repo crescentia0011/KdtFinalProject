@@ -31,6 +31,7 @@ public class CalendarController {
         model.addAttribute("currentMenu", "calendar");
         model.addAttribute("projectId", pId);
         model.addAttribute("project", projectService.findById(String.valueOf(pId)));
+        model.addAttribute("sidebarMenu", "project");
         return "weple/calendar/project";
     }
     
