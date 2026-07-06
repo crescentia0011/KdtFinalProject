@@ -44,4 +44,7 @@ public interface RoleMapper {
 	int countMemberRolesByRoleId(@Param("roleId") Long roleId);
 	
 	Long selectRoleIdByName(@Param("companyId") Long companyId, @Param("roleName") String roleName);
+	
+	// 역할 이름 대신 특정 권한 코드를 가진 역할 조회 (이름 기반 조회 실패 시 폴백용)
+	Long selectRoleIdByPermission(@Param("companyId") Long companyId, @Param("permissionCode") String permissionCode);
 }

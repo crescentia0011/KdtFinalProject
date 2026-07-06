@@ -63,10 +63,6 @@
         	<a th:href="@{/project/calendar(projectId=${projectId})}">캘린더</a>
         </li>
         
-        <li th:classappend="${currentMenu == 'board'} ? 'active' : ''">
-		    <a th:href="@{/board(projectId=${projectId})}">게시판</a>
-		</li>
-        
         <li th:if="${moduleNames != null 
 		             and #lists.contains(moduleNames, 'b11') 
 		             and (canSaveSetting == true or isCompanyManager == true)}"

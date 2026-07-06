@@ -12,9 +12,11 @@
             <div th:replace="~{common/fragments/sidebar :: sidebarFragment}"></div>
         </div>
 
-        <div class="right_col" role="main" style="padding: 0 !important; margin-left: 230px;">
+        <div class="right_col" role="main" style="padding: 81px 0 0 0 !important; margin-left: 230px;">
             
-            <div class="top_nav" th:replace="~{common/fragments/header :: headerFragment}"></div>
+            <div class="top_nav">
+			    <div th:replace="~{common/fragments/header :: headerFragment}"></div>
+			</div>
             
             <div class="sub_menu_nav" th:replace="~{common/fragments/navbarSetting :: navbarSettingFragment}"></div>
 

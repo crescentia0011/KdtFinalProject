@@ -467,6 +467,7 @@ public class TaskController {
 	    
 	    Map<String, Object> allParams = new HashMap<>();
 	    allParams.put("tManager", userCode);
+	    allParams.put("companyId", companyId);
 	    allParams.put("searchKeyword", searchKeyword);
 	    allParams.put("projectIds", projectIds);
 	    allParams.put("typeIds", typeIds);
@@ -659,6 +660,21 @@ public class TaskController {
 	            after.getTaskId()
 	        );
 	    }
+	    
+	    // 알림-은지(담당자 변경/재배정)
+	    boolean managerChanged = after.getTaskManagerId() != null && !after.getTaskManagerId().isBlank()
+	            && !after.getTaskManagerId().equals(before.getTaskManagerId());
+
+	    if (managerChanged && !after.getTaskManagerId().equals(userCode)) {
+	        notificationService.create(
+	            after.getTaskManagerId(),
+	            AlarmType.TAG_TASK_ASSIGN,
+	            "일감 [" + after.getTaskTitle() + "]이 본인에게 배정되었습니다.",
+	            AlarmType.TARGET_TASK,
+	            after.getTaskId()
+	        );
+	    }
+	    
 	    
 	    // 알림-은지(첨부파일 등록)
 	    if (files != null && !files.isEmpty()

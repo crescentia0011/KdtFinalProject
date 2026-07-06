@@ -1,20 +1,11 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    flatpickr.localize(flatpickr.l10ns.ko);
+    // 시작일 선택 시 마감일의 최소 선택 가능일을 시작일로 제한 (네이티브 date input)
+    const startInput = document.getElementById("startDate");
+    const finishInput = document.getElementById("finishDate");
 
-    const startPicker = flatpickr("#startDate", {
-        dateFormat: "Y-m-d",
-        allowInput: false,
-        onChange: function(selectedDates) {
-            if (selectedDates.length > 0) {
-                finishPicker.set("minDate", selectedDates[0]);
-            }
-        }
-    });
-
-    const finishPicker = flatpickr("#finishDate", {
-        dateFormat: "Y-m-d",
-        allowInput: false
+    startInput.addEventListener("change", function () {
+        finishInput.min = startInput.value;
     });
 
 	// 설정 모듈: 클릭해도 해제 안 되도록

@@ -234,45 +234,11 @@
     border-color: #DDD6FE;
 }
 
-.date-input.flatpickr-input {
-    background-color: #fff !important;
-    color: #111827 !important;
-}
-
 .date-input:not([readonly]):focus {
     border-color: #6D5EF7;
     outline: none;
 }
 
-/* ===== flatpickr 캘린더 UI (작업내역 동일) ===== */
-.flatpickr-calendar { width: 240px !important; max-width: 240px !important; padding: 8px !important; }
-.flatpickr-calendar.arrowTop:before, .flatpickr-calendar.arrowTop:after { display: none; }
-.flatpickr-months { align-items: center; margin-bottom: 8px; }
-.flatpickr-months .flatpickr-month { height: 36px; color: #111827; }
-.flatpickr-current-month,
-.flatpickr-current-month .flatpickr-monthDropdown-months,
-.flatpickr-current-month input.cur-year { font-size: 14px; font-weight: 700; color: #111827 !important; background: transparent; border-radius: 6px; padding: 0; }
-.flatpickr-months .flatpickr-prev-month,
-.flatpickr-months .flatpickr-next-month { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; fill: #94A3B8; }
-.flatpickr-months .flatpickr-prev-month:hover,
-.flatpickr-months .flatpickr-next-month:hover { background: #F1EDFF; }
-.flatpickr-months .flatpickr-prev-month:hover svg,
-.flatpickr-months .flatpickr-next-month:hover svg { fill: #6D5EF7; }
-.flatpickr-weekdays { margin-bottom: 4px; }
-span.flatpickr-weekday { font-size: 11px; font-weight: 700; color: #94A3B8; }
-.dayContainer { width: 224px !important; min-width: 224px !important; }
-.flatpickr-days { width: 224px !important; }
-.flatpickr-day { width: 30px !important; max-width: 30px !important; height: 30px !important; line-height: 30px !important; font-size: 12px !important; border-radius: 6px !important; }
-.flatpickr-day.flatpickr-disabled,
-.flatpickr-day.prevMonthDay,
-.flatpickr-day.nextMonthDay { color: #94A3B8; }
-.flatpickr-day:hover { background: #F1EDFF; border-color: #F1EDFF; color: #6D5EF7; }
-.flatpickr-day.today { background: #F1EDFF !important; color: #6D5EF7 !important; border: none !important; border-radius: 8px !important; }
-.flatpickr-day.today:hover { background: #F1EDFF !important; border-color: #6D5EF7 !important; border-radius: 8px !important; color: #6D5EF7 !important; }
-.flatpickr-day.selected,
-.flatpickr-day.selected:hover { background: #6D5EF7 !important; border-color: #6D5EF7 !important; color: #fff !important; font-weight: 700 !important; border-radius: 8px !important; }
-.flatpickr-day.inRange { background: #F1EDFF !important; border-color: #F1EDFF !important; box-shadow: -5px 0 0 #F1EDFF, 5px 0 0 #F1EDFF !important; color: #6D5EF7 !important; }
-.numInputWrapper:hover { background: transparent; }
 /* ===== 토스트 ===== */
 .toast-wrap {
     position: fixed;

@@ -20,7 +20,6 @@
     var WEB_NOTIF_ENABLED = notifWrap ? notifWrap.getAttribute('data-web-notif-yn') !== 'N' : true;
 
     var LAST_SEEN_KEY = 'weple_notif_last_seen_alarm_id';
-    var TOAST_FRESHNESS_MS = 20000; // 알림 발생 후 20초 이내면 '방금 생긴 알림'으로 간주하여 토스트 표시
 
     function getLastSeenAlarmId() {
         try {
@@ -197,8 +196,13 @@
 	                // 팝오버 캐시 무효화 (다음에 종 클릭하면 최신 목록으로 갱신됨)
 	                try { sessionStorage.removeItem(POPOVER_CACHE_KEY); } catch (e) {}
 
+	                // id 기준으로 이미 "안 본 알림"만 걸러졌으므로(unseen), 생성 후 몇 초가
+	                // 지났는지는 더 이상 토스트 표시 여부를 가르는 조건으로 쓰지 않는다.
+	                // (과거엔 20초 이내인지 추가로 검사했는데, 백그라운드 탭에서는 setInterval이
+	                // 브라우저 정책상 느려져서 그 사이 20초가 지나버리면 토스트가 영영 안 뜨는
+	                // 버그가 있었음 - 탭을 계속 보고 있을 때만 뜨고 아닐 때 안 뜨는 것처럼 보였던 원인)
 	                unseen.slice().reverse().forEach(function (alarm) {
-	                    if (isFresh(alarm.alarmDate)) {
+	                    if (!isFuture(alarm.alarmDate)) {
 	                        showToast(alarm);
 	                    }
 	                });
@@ -211,19 +215,25 @@
 	        });
 	}
 
-    function isFresh(alarmDateStr) {
+    function isFuture(alarmDateStr) {
         if (!alarmDateStr) return false;
         var alarmTime = new Date(alarmDateStr).getTime();
         if (isNaN(alarmTime)) return false;
-        var diff = Date.now() - alarmTime;
-        // diff가 음수라는 건 알림 시각이 "미래"라는 뜻 -> 서버/DB 시간 오차 등 비정상 상황이므로
-        // 신선한 알림으로 취급하지 않는다. (과거 이 방어 코드가 없어서 알림 시각이 미래로 잘못
-        // 저장되었을 때 몇 시간이 지나도 팝업이 계속 뜨는 버그가 있었음 - 근본 원인은 SQL 수정으로 해결됨)
-        return diff >= 0 && diff <= TOAST_FRESHNESS_MS;
+        // 알림 시각이 "미래"라는 건 서버/DB 시간 오차 등 비정상 상황이므로
+        // 그런 경우에만 토스트를 스킵한다. (그 외엔 항상 표시)
+        return alarmTime > Date.now();
     }
 
     if (WEB_NOTIF_ENABLED) {
         poll();
         setInterval(poll, POLL_INTERVAL_MS);
+
+        // 백그라운드 탭에서는 브라우저가 setInterval을 강제로 늦추므로,
+        // 탭을 다시 보게 된 순간 바로 한 번 더 폴링해서 체감 지연을 줄인다.
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible') {
+                poll();
+            }
+        });
     }
 })();

@@ -1,26 +1,19 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    flatpickr.localize(flatpickr.l10ns.ko);
+    // 시작일/마감일 서로의 선택 가능 범위를 제한 (네이티브 date input)
+    const startInput = document.getElementById("startDate");
+    const finishInput = document.getElementById("finishDate");
 
-    const startPicker = flatpickr("#startDate", {
-        dateFormat: "Y-m-d",
-        allowInput: false,
-        onChange: function(selectedDates) {
-            if (selectedDates[0]) {
-                finishPicker.set('minDate', selectedDates[0]);
-            }
-        }
+    startInput.addEventListener("change", function () {
+        finishInput.min = startInput.value;
+    });
+    finishInput.addEventListener("change", function () {
+        startInput.max = finishInput.value;
     });
 
-    const finishPicker = flatpickr("#finishDate", {
-        dateFormat: "Y-m-d",
-        allowInput: false,
-        onChange: function(selectedDates) {
-            if (selectedDates[0]) {
-                startPicker.set('maxDate', selectedDates[0]);
-            }
-        }
-    });
+    // 페이지 진입 시 기존 값 기준으로도 범위 제한 적용
+    if (startInput.value) finishInput.min = startInput.value;
+    if (finishInput.value) startInput.max = finishInput.value;
 
     // 전체선택
     document.getElementById("selectAll").addEventListener("click", function () {
