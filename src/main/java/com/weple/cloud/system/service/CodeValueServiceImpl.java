@@ -48,6 +48,16 @@ public class CodeValueServiceImpl implements CodeValueService {
 	    return codeValueMapper.insertCodeValue(map);
 	}
 
+	// [프로시저] 등록 - 기본값 처리 + 등록을 SP_ADD_CODE_VALUE 한 번으로 처리
+	@Override
+	public String addCodeValueByProc(CodeValueVO codeValueVO, String type) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("vo", codeValueVO);
+		map.put("type", type);
+		codeValueMapper.addCodeValueByProc(map);
+		return codeValueVO.getGeneratedId(); // OUT 파라미터로 채워진 신규 ID
+	}
+
 	// 수정 (데이터 1개씩 수정 가능)
 	@Override
 	public void modifyCodeValue(CodeValueVO codeValueVO, String type) {
@@ -63,6 +73,15 @@ public class CodeValueServiceImpl implements CodeValueService {
 	        codeValueMapper.resetDefaultYn(params);
 	    }
 	    codeValueMapper.updateCodeValue(codeValueVO);
+	}
+
+	// [프로시저] 수정 - 사용여부/기본값 처리 + 수정을 SP_UPDATE_CODE_VALUE 한 번으로 처리
+	@Override
+	public void modifyCodeValueByProc(CodeValueVO codeValueVO, String type) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("vo", codeValueVO);
+		map.put("type", type);
+		codeValueMapper.updateCodeValueByProc(map);
 	}
 
 	// 삭제

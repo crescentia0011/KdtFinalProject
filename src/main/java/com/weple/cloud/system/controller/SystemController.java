@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.weple.cloud.auth.service.LoginUserDetails;
+import com.weple.cloud.auth.service.LoginUserVO;
+import com.weple.cloud.project.service.ProjectMemberService;
+import com.weple.cloud.project.service.ProjectMemberVO;
 import com.weple.cloud.system.service.CodeValueService;
 import com.weple.cloud.system.service.CodeValueVO;
 import com.weple.cloud.system.service.GroupService;
@@ -337,311 +341,365 @@ public class SystemController {
 	}
 
 	// -------------------------------코드값------------------------------
-	// 전체조회
-	@GetMapping("codeValueList")
-	public String codeValueList(Model model, @AuthenticationPrincipal LoginUserDetails loginUser) {
-		Long companyId = loginUser.getLoginUser().getCompanyId();
-		List<CodeValueVO> codeList = codeValueService.findCodeValueAll(companyId);
-		// 조회 결과가 없으면 빈 리스트 생성해서 넣음
-		if (codeList == null) {
-			codeList = new java.util.ArrayList<>();
+		// 전체조회
+		@GetMapping("codeValueList")
+		public String codeValueList(Model model, @AuthenticationPrincipal LoginUserDetails loginUser) {
+			Long companyId = loginUser.getLoginUser().getCompanyId();
+			List<CodeValueVO> codeList = codeValueService.findCodeValueAll(companyId);
+			// 조회 결과가 없으면 빈 리스트 생성해서 넣음
+			if (codeList == null) {
+				codeList = new java.util.ArrayList<>();
+			}
+			model.addAttribute("codeList", codeList);
+			model.addAttribute("codeList", codeList);
+			model.addAttribute("menu", "code");
+			model.addAttribute("sidebarMenu", "system");
+
+			return "weple/admin/code/list";
 		}
-		model.addAttribute("codeList", codeList);
-		model.addAttribute("codeList", codeList);
-		model.addAttribute("menu", "code");
-		model.addAttribute("sidebarMenu", "system");
 
-		return "weple/admin/code/list";
-	}
-
-	// 등록 양식
-	@GetMapping("/codeInsert")
-	//codeInsert?type=work처럼 접속하면 실행, type 값을 받아 화면에 전달
-	public String codeInsertForm(@RequestParam("type") String type, Model model) {
-		// 타입이 WORK이면 작업분류, 아니면 일감 우선순위
-		String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
-	    model.addAttribute("pageTitle", pageTitle);
-		model.addAttribute("type", type);
-		model.addAttribute("menu", "code");
-		model.addAttribute("sidebarMenu", "system");
-		// 현재 기본값 이름 (등록 폼에서 기본값 설정 시 confirm 메시지에 표시)
-		String defaultName = codeValueService.findDefaultNameByType(type, null);
-		model.addAttribute("defaultItemName", (defaultName != null ? defaultName : "없음"));
-		return "weple/admin/code/codeForm";
-	}
-
-	// 등록 처리
-	@PostMapping("codeInsert")
-	//용자가 입력한 폼(form)의 값들을 CodeValueVO 객체에 자동으로 담아즘
-	public String codeInsertProcess(@ModelAttribute("CodeValue") CodeValueVO codeValueVO, @RequestParam("type") String type, Model model,
-			@AuthenticationPrincipal LoginUserDetails loginUser) {
-		codeValueVO.setCompanyId(loginUser.getLoginUser().getCompanyId());
-		//체크박스는 체크하면 값이 오고, 체크하지 않으면 null
-	    codeValueVO.setUsingYn(codeValueVO.getUsingYn() != null ? "Y" : "N");
-	    codeValueVO.setDefaultYn(codeValueVO.getDefaultYn() != null ? "Y" : "N");
-	    // 기본값으로 등록했으면 다른 기본값은 모두 N로 변경
-	    if ("Y".equals(codeValueVO.getDefaultYn())) {
-	        codeValueService.resetAllDefaultYn(type); 
-	    }
-	    
-		codeValueService.addCodeValue(codeValueVO, type);
-		return "redirect:codeValueList";
-	}
-
-	// 수정 양식
-	@GetMapping("codeUpdate")
-	// CNO=수정할 코드의 번호(ID), TYPE=작업분류인지, 일감 우선순위인지 구분하는 값
-	public String codeUpdateForm(@RequestParam("cno") String cno, @RequestParam("type") String type, Model model) {
-		CodeValueVO vo = new CodeValueVO();
-		//type에 따라 ID 저장
-		if ("work".equals(type)) {
-	        vo.setTaskClassificationId(cno);
-	    } else {
-	        vo.setTaskPriorityId(cno);
-	    }
-
-	    CodeValueVO result = codeValueService.findCodeValueInfo(vo, type);
-	    
-	    String defaultName = codeValueService.findDefaultNameByType(type, cno);
-	    model.addAttribute("defaultItemName", (defaultName != null ? defaultName : "없음"));
-
-	    String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
-	    model.addAttribute("pageTitle", pageTitle);
-	    model.addAttribute("CodeValue", result);
-		model.addAttribute("type", type);
-		model.addAttribute("menu", "code");
-		model.addAttribute("sidebarMenu", "system");
-		return "weple/admin/code/codeForm";
-	}
-
-	// 수정 처리
-	@PostMapping("codeUpdate")
-	public String codeUpdateProcess(CodeValueVO codeValueVO, @RequestParam("type") String type, HttpServletRequest request) {
-		String defaultYn = (request.getParameter("defaultYn") != null) ? "Y" : "N";
-	    codeValueVO.setDefaultYn(defaultYn);
-	    String usingYn = (request.getParameter("usingYn") != null) ? "Y" : "N";
-	    codeValueVO.setUsingYn(usingYn);
-		codeValueService.modifyCodeValue(codeValueVO, type);
-	    return "redirect:codeValueList";
-	}
-	
-	// 삭제
-	@PostMapping("/codeDelete")
-	@ResponseBody
-	public Map<String, Object> codeDeleteProcess(@RequestParam("cno") String cno, @RequestParam("type") String type) {
-		Map<String, Object> result = new java.util.HashMap<>();
-		try {
-			codeValueService.removeCodeValue(type, cno);
-			result.put("success", true);
-		} catch (Exception e) {
-			result.put("success", false);
-			result.put("message", "삭제 중 오류가 발생했습니다.");
+		// 등록 양식
+		@GetMapping("/codeInsert")
+		//codeInsert?type=work처럼 접속하면 실행, type 값을 받아 화면에 전달
+		public String codeInsertForm(@RequestParam("type") String type, Model model) {
+			// 타입이 WORK이면 작업분류, 아니면 일감 우선순위
+			String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
+		    model.addAttribute("pageTitle", pageTitle);
+			model.addAttribute("type", type);
+			model.addAttribute("menu", "code");
+			model.addAttribute("sidebarMenu", "system");
+			// 현재 기본값 이름 (등록 폼에서 기본값 설정 시 confirm 메시지에 표시)
+			String defaultName = codeValueService.findDefaultNameByType(type, null);
+			model.addAttribute("defaultItemName", (defaultName != null ? defaultName : "없음"));
+			return "weple/admin/code/codeForm";
 		}
-		return result;
-	}
 
-	//드래그앤드랍
-	@PostMapping("/updateOrder")
-	@ResponseBody
-	public Map<String, Object> updateOrder(@RequestBody Map<String, Object> params,
-			@AuthenticationPrincipal LoginUserDetails loginUser) throws Exception {
-	    try {
-	        String type = (String) params.get("type");
-	        List<Map<String, Object>> items = (List<Map<String, Object>>) params.get("items");
-	        
-	        if (items == null || items.isEmpty()) {
-	            throw new Exception("저장할 데이터가 없습니다.");
-	        }
+		// 등록 처리
+		@PostMapping("codeInsert")
+		//용자가 입력한 폼(form)의 값들을 CodeValueVO 객체에 자동으로 담아즘
+		public String codeInsertProcess(@ModelAttribute("CodeValue") CodeValueVO codeValueVO, @RequestParam("type") String type, Model model,
+				@AuthenticationPrincipal LoginUserDetails loginUser) {
+			codeValueVO.setCompanyId(loginUser.getLoginUser().getCompanyId());
+			//체크박스는 체크하면 값이 오고, 체크하지 않으면 null
+		    codeValueVO.setUsingYn(codeValueVO.getUsingYn() != null ? "Y" : "N");
+		    codeValueVO.setDefaultYn(codeValueVO.getDefaultYn() != null ? "Y" : "N");
+		    // [프로시저] 기본값 처리(회사 스코프)+등록을 SP_ADD_CODE_VALUE 한 번으로 처리
+		    codeValueService.addCodeValueByProc(codeValueVO, type);
+			return "redirect:codeValueList";
+		}
 
-	        Long companyId = loginUser.getLoginUser().getCompanyId();
-	        List<CodeValueVO> itemList = new ArrayList<>();
-	        int order = 1;
-	        for (Map<String, Object> item : items) {
-	            CodeValueVO vo = new CodeValueVO();
-	            vo.setOrderNo(order++);
-	            vo.setCompanyId(companyId);
-	            if ("work".equals(type)) {
-	                vo.setTaskClassificationId(String.valueOf(item.get("id")));
-	            } else {
-	                vo.setTaskPriorityId(String.valueOf(item.get("id")));
-	            }
-	            itemList.add(vo);
-	        }
-	        
-	        codeValueService.reorderCodes(type, itemList);
-	        
-	        Map<String, Object> response = new HashMap<>();
-	        response.put("status", "success");
-	        return response;
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        throw e;
-	    }
-	}
+		// 수정 양식
+		@GetMapping("codeUpdate")
+		// CNO=수정할 코드의 번호(ID), TYPE=작업분류인지, 일감 우선순위인지 구분하는 값
+		public String codeUpdateForm(@RequestParam("cno") String cno, @RequestParam("type") String type, Model model) {
+			CodeValueVO vo = new CodeValueVO();
+			//type에 따라 ID 저장
+			if ("work".equals(type)) {
+		        vo.setTaskClassificationId(cno);
+		    } else {
+		        vo.setTaskPriorityId(cno);
+		    }
+
+		    CodeValueVO result = codeValueService.findCodeValueInfo(vo, type);
+		    
+		    String defaultName = codeValueService.findDefaultNameByType(type, cno);
+		    model.addAttribute("defaultItemName", (defaultName != null ? defaultName : "없음"));
+
+		    String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
+		    model.addAttribute("pageTitle", pageTitle);
+		    model.addAttribute("CodeValue", result);
+			model.addAttribute("type", type);
+			model.addAttribute("menu", "code");
+			model.addAttribute("sidebarMenu", "system");
+			return "weple/admin/code/codeForm";
+		}
+
+		// 수정 처리
+		@PostMapping("codeUpdate")
+		public String codeUpdateProcess(CodeValueVO codeValueVO, @RequestParam("type") String type, HttpServletRequest request,
+				@AuthenticationPrincipal LoginUserDetails loginUser) {
+			String defaultYn = (request.getParameter("defaultYn") != null) ? "Y" : "N";
+		    codeValueVO.setDefaultYn(defaultYn);
+		    String usingYn = (request.getParameter("usingYn") != null) ? "Y" : "N";
+		    codeValueVO.setUsingYn(usingYn);
+		    // companyId는 폼에 없으므로(신뢰 불가) 세션의 로그인 정보에서 가져와 회사 스코프를 보장
+		    codeValueVO.setCompanyId(loginUser.getLoginUser().getCompanyId());
+		    // [프로시저] 사용여부/기본값 처리(회사 스코프)+수정을 SP_UPDATE_CODE_VALUE 한 번으로 처리
+			codeValueService.modifyCodeValueByProc(codeValueVO, type);
+		    return "redirect:codeValueList";
+		}
+		
+		// 삭제
+		@PostMapping("/codeDelete")
+		@ResponseBody
+		public Map<String, Object> codeDeleteProcess(@RequestParam("cno") String cno, @RequestParam("type") String type) {
+			Map<String, Object> result = new java.util.HashMap<>();
+			try {
+				codeValueService.removeCodeValue(type, cno);
+				result.put("success", true);
+			} catch (Exception e) {
+				result.put("success", false);
+				result.put("message", "삭제 중 오류가 발생했습니다.");
+			}
+			return result;
+		}
+
+		//드래그앤드랍
+		@PostMapping("/updateOrder")
+		@ResponseBody
+		public Map<String, Object> updateOrder(@RequestBody Map<String, Object> params,
+				@AuthenticationPrincipal LoginUserDetails loginUser) throws Exception {
+		    try {
+		        String type = (String) params.get("type");
+		        List<Map<String, Object>> items = (List<Map<String, Object>>) params.get("items");
+		        
+		        if (items == null || items.isEmpty()) {
+		            throw new Exception("저장할 데이터가 없습니다.");
+		        }
+
+		        Long companyId = loginUser.getLoginUser().getCompanyId();
+		        List<CodeValueVO> itemList = new ArrayList<>();
+		        int order = 1;
+		        for (Map<String, Object> item : items) {
+		            CodeValueVO vo = new CodeValueVO();
+		            vo.setOrderNo(order++);
+		            vo.setCompanyId(companyId);
+		            if ("work".equals(type)) {
+		                vo.setTaskClassificationId(String.valueOf(item.get("id")));
+		            } else {
+		                vo.setTaskPriorityId(String.valueOf(item.get("id")));
+		            }
+		            itemList.add(vo);
+		        }
+		        
+		        codeValueService.reorderCodes(type, itemList);
+		        
+		        Map<String, Object> response = new HashMap<>();
+		        response.put("status", "success");
+		        return response;
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        throw e;
+		    }
+		}
 
 	// -------------------------------프로젝트------------------------------
+	   
+    @Autowired
+    private SystemProjectService systemProjectService;
+    @Autowired
+    private ProjectMemberService projectMemberService;
+    @Autowired
+    private com.weple.cloud.project.service.ProjectService projectService;
+
+    private boolean isCompanyManager(LoginUserVO user) {
+        return Integer.valueOf(1).equals(user.getOwnerYn())
+            || Integer.valueOf(1).equals(user.getAdminYn());
+    }
+    
+    // 프로젝트 목록: 관리자가 아니면 "본인이 속한 프로젝트"만 보여줌
+    @GetMapping("/system/project/list")
+    public String projectList(
+          @RequestParam(defaultValue = "1") int page,
+            @RequestParam(required = false) String keyword,
+            @ModelAttribute("toastMessage") String toastMessage,
+            @AuthenticationPrincipal LoginUserDetails loginUser,
+            Model model) {
+       
+       boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        String userCode = loginUser.getLoginUser().getUserCode();
+
+        // 관리자도 아니고 어디서도 k1_create 권한이 없으면 접근 자체 차단
+        Set<String> anyPerms = isManager
+                ? Set.of("k1_create")
+                : projectService.findAnyProjectPermissionCodes(userCode);
+        if (!isManager && anyPerms.isEmpty()) {
+            return "weple/access-denide";
+        }
+       
+       int pageSize = 10;
+       
+       SystemProjectVO vo = new SystemProjectVO();
+        vo.setPage(page);
+        vo.setPageSize(pageSize);
+        vo.setKeyword(keyword);
+        vo.setCompanyId(String.valueOf(loginUser.getLoginUser().getCompanyId()));
+        // 관리자가 아니면 본인이 속한 프로젝트만 필터링
+        if (!isManager) {
+            vo.setUserCode(userCode);
+        }
+        
+        List<SystemProjectVO> projectList = systemProjectService.selectProjectList(vo);
+        int totalCount = systemProjectService.selectProjectCount(vo);
+        int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+        model.addAttribute("projectList",projectList);
+        model.addAttribute("totalCount", totalCount);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("sidebarMenu", "system");
+        model.addAttribute("currentMenu", "systemproject");
+
+        return "weple/system/projectList";
+    }
+    
+    // 프로젝트 생성
+    @GetMapping("/system/project")
+    public String projectCreateForm(@AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
+
+        boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager && !projectService.findAnyProjectPermissionCodes(loginUser.getLoginUser().getUserCode()).contains("k1_create")) {
+            return "weple/access-denide";
+        }
+
+        Long companyId = loginUser.getLoginUser().getCompanyId();
+
+        // 관리-설정(systemModules)에서 활성화한 모듈은 "기본 체크"로만 반영 (숨기지 않고 전체 다 보여줌)
+        List<String> enabledCodes = systemModuleService.findEnabledModuleCodes(companyId);
+        model.addAttribute("enabledCodes", enabledCodes);
+
+        model.addAttribute("sidebarMenu", "system");
+        model.addAttribute("currentMenu", "systemproject");
+
+        return "weple/system/projectCreate";
+    }
+
+    @PostMapping("/system/project")
+    public String projectCreateProcess(
+          SystemProjectVO projectVO,
+          @AuthenticationPrincipal LoginUserDetails loginUser,
+          RedirectAttributes redirectAttributes,
+          Model model) {
+
+       boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager && !projectService.findAnyProjectPermissionCodes(loginUser.getLoginUser().getUserCode()).contains("k1_create")) {
+            return "weple/access-denide";
+        }
+
+        // 식별자 중복 체크
+        if (systemProjectService.existsByIdentifier(projectVO.getProjectIdentifier())) {
+            redirectAttributes.addFlashAttribute("toastError",
+                "이미 존재하는 식별자입니다: " + projectVO.getProjectIdentifier());
+            return "redirect:/system/project";
+        }
+        
+        // 상태 기본값 세팅
+        projectVO.setStatus("j1");
+        
+        // 개요(b1), 설정(b11)은 항상 강제 포함
+        List<String> moduleNames = projectVO.getModuleNames();
+        if (moduleNames == null) moduleNames = new ArrayList<>();
+        if (!moduleNames.contains("b1"))  moduleNames.add("b1");
+        if (!moduleNames.contains("b11")) moduleNames.add("b11");
+        projectVO.setModuleNames(moduleNames);
+        
+        int result = systemProjectService.createProject(projectVO);
+        
+       if(result > 0) {
+          // ↓ 3번 항목(생성자 구성원 자동 등록)과 같이 처리
+            Long companyId = loginUser.getLoginUser().getCompanyId();
+            Long adminRoleId = roleService.selectRoleIdByName(companyId, "관리자");
+
+            ProjectMemberVO creator = new ProjectMemberVO();
+            creator.setProjectId(projectVO.getProjectId());
+            creator.setUserCode(loginUser.getLoginUser().getUserCode());
+            creator.setRoleId(adminRoleId);
+            projectMemberService.addMember(creator);
+          
+          return "redirect:/system/project/list";
+       }else {
+          model.addAttribute("errorMessage", "프로젝트 생성에 실패했습니다.");
+          model.addAttribute("sidebarMenu", "system");
+          model.addAttribute("currentMenu", "systemproject");
+          
+          
+          return "weple/system/projectCreate";
+       }
+    }
+    
+    // 프로젝트 수정
+    @GetMapping("/system/project/update/{projectId}")
+    public String projectUpdateForm(
+            @PathVariable String projectId,
+            @AuthenticationPrincipal LoginUserDetails loginUser,
+            Model model){
+
+        boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager) {
+            Set<String> perms = projectMemberService.findProjectPermissionCodes(
+                    loginUser.getLoginUser().getUserCode(), Long.parseLong(projectId));
+            if (!perms.contains("k1_create")) {
+                return "weple/access-denide";
+            }
+        }
+
+                SystemProjectVO project = systemProjectService.selectProjectById(Long.parseLong(projectId));
+
+                model.addAttribute("project", project);
+                model.addAttribute("sidebarMenu", "system");
+                model.addAttribute("currentMenu", "systemproject");
+
+                return "weple/system/projectUpdate";
+            }
+            
+    @PostMapping("/system/project/update")
+    public String projectUpdateProcess(
+          SystemProjectVO projectVO,
+          @AuthenticationPrincipal LoginUserDetails loginUser,
+          RedirectAttributes redirectAttributes) {
+
+       boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager) {
+            Set<String> perms = projectMemberService.findProjectPermissionCodes(
+                    loginUser.getLoginUser().getUserCode(), projectVO.getProjectId());
+            if (!perms.contains("k1_create")) {
+                return "weple/access-denide";
+            }
+        }
+       
+       List<String> moduleNames = projectVO.getModuleNames();
+        if (moduleNames == null) moduleNames = new ArrayList<>();
+        if (!moduleNames.contains("b1"))  moduleNames.add("b1");
+        if (!moduleNames.contains("b11")) moduleNames.add("b11");
+        projectVO.setModuleNames(moduleNames);
+       
+       int result = systemProjectService.updateProject(projectVO);
+       
+       if(result > 0) {
+          redirectAttributes.addFlashAttribute("toastMessage", "프로젝트가 수정되었습니다.");
+          return "redirect:/system/project/list";
+       } else {
+          redirectAttributes.addFlashAttribute("toastError", "프로젝트 수정에 실패했습니다.");
+          return "redirect:/system/project/update/"+projectVO.getProjectId();
+       }
+       
+    }
+    
+    // 프로젝트 삭제
+    @PostMapping("/system/project/delete")
+    public String deleteProject(
+          @RequestParam String projectId,
+          @AuthenticationPrincipal LoginUserDetails loginUser,
+          RedirectAttributes redirectAttributes) {
+
+       boolean isManager = isCompanyManager(loginUser.getLoginUser());
+        if (!isManager) {
+            Set<String> perms = projectMemberService.findProjectPermissionCodes(
+                    loginUser.getLoginUser().getUserCode(), Long.parseLong(projectId));
+            if (!perms.contains("k1_create")) {
+                return "weple/access-denide";
+            }
+        }
+       
+       int result = systemProjectService.deleteProject(projectId);
+       
+       if(result > 0) {
+          redirectAttributes.addFlashAttribute("toastMessage", "프로젝트가 삭제되었습니다.");
+       }
+       return "redirect:/system/project/list";
+    }
 	
-	@Autowired
-	private SystemProjectService systemProjectService;
-	
-	// 프로젝트 조회
-	@GetMapping("/system/project/list")
-	public String projectList(
-			@RequestParam(defaultValue = "1") int page,
-	        @RequestParam(required = false) String keyword,
-	        @ModelAttribute("toastMessage") String toastMessage,
-	        Model model) {
-		
-		// 프로젝트 목록: 관리자가 아니면 "본인이 속한 프로젝트"만 보여줌
-		@GetMapping("/system/project/list")
-		public String projectList(
-				@RequestParam(defaultValue = "1") int page,
-		        @RequestParam(required = false) String keyword,
-		        @ModelAttribute("toastMessage") String toastMessage,
-		        @AuthenticationPrincipal LoginUserDetails loginUser,
-		        Model model) {
-			
-			boolean isManager = isCompanyManager(loginUser.getLoginUser());
-		    String userCode = loginUser.getLoginUser().getUserCode();
-
-		    // 관리자도 아니고 어디서도 k1_create 권한이 없으면 접근 자체 차단
-		    Set<String> anyPerms = isManager
-		            ? Set.of("k1_create")
-		            : projectService.findAnyProjectPermissionCodes(userCode);
-		    if (!isManager && anyPerms.isEmpty()) {
-		        return "weple/access-denide";
-		    }
-			
-			int pageSize = 10;
-			
-			SystemProjectVO vo = new SystemProjectVO();
-		    vo.setPage(page);
-		    vo.setPageSize(pageSize);
-		    vo.setKeyword(keyword);
-		    vo.setCompanyId(String.valueOf(loginUser.getLoginUser().getCompanyId()));
-		    // 관리자가 아니면 본인이 속한 프로젝트만 필터링
-		    if (!isManager) {
-		        vo.setUserCode(userCode);
-		    }
-		    
-		    List<SystemProjectVO> projectList = systemProjectService.selectProjectList(vo);
-		    int totalCount = systemProjectService.selectProjectCount(vo);
-		    int totalPages = (int) Math.ceil((double) totalCount / pageSize);
-
-		    model.addAttribute("projectList",projectList);
-		    model.addAttribute("totalCount", totalCount);
-		    model.addAttribute("totalPages", totalPages);
-		    model.addAttribute("currentPage", page);
-		    model.addAttribute("keyword", keyword);
-		    model.addAttribute("sidebarMenu", "system");
-		    model.addAttribute("currentMenu", "systemproject");
-
-		    return "weple/system/projectList";
-		}
-		
-		SystemProjectVO vo = new SystemProjectVO();
-	    vo.setPage(page);
-	    vo.setPageSize(pageSize);
-	    vo.setKeyword(keyword);
-	    
-	    List<SystemProjectVO> projectList = systemProjectService.selectProjectList(vo);
-	    int totalCount = systemProjectService.selectProjectCount(vo);
-
-	    int totalPages = (int) Math.ceil((double) totalCount / pageSize);
-
-	    model.addAttribute("projectList",projectList);
-	    model.addAttribute("totalCount", totalCount);
-	    model.addAttribute("totalPages", totalPages);
-	    model.addAttribute("currentPage", page);
-	    model.addAttribute("keyword", keyword);
-	    
-	    model.addAttribute("sidebarMenu", "system");
-	    model.addAttribute("currentMenu", "systemproject");
-
-	    return "weple/system/projectList";
-	}
-	
-	// 프로젝트 생성
-	@GetMapping("/system/project")
-	public String projectCreateForm(Model model) {
-
-		model.addAttribute("sidebarMenu", "system");
-		model.addAttribute("currentMenu", "systemproject");
-
-		return "weple/system/projectCreate";
-	}
-
-	@PostMapping("/system/project")
-	public String projectCreateProcess(SystemProjectVO projectVO, RedirectAttributes redirectAttributes, Model model) {
-		 // 식별자 중복 체크
-	    if (systemProjectService.existsByIdentifier(projectVO.getProjectIdentifier())) {
-	        redirectAttributes.addFlashAttribute("toastError",
-	            "이미 존재하는 식별자입니다: " + projectVO.getProjectIdentifier());
-	        return "redirect:/system/project";
-	    }
-	    
-	    // 상태 기본값 세팅
-	    projectVO.setStatus("j1");
-	    
-	    int result = systemProjectService.createProject(projectVO);
-	    
-		if(result > 0) {
-			return "redirect:/system/project/list";
-		}else {
-			model.addAttribute("errorMessage", "프로젝트 생성에 실패했습니다.");
-			model.addAttribute("sidebarMenu", "system");
-			model.addAttribute("currentMenu", "systemproject");
-			
-			
-			return "weple/system/projectCreate";
-		}
-	}
-	
-	// 프로젝트 수정
-	@GetMapping("/system/project/update/{projectId}")
-	public String projectUpdateForm(
-			@PathVariable String projectId,
-	        Model model){
-				
-				SystemProjectVO project = systemProjectService.selectProjectById(Long.parseLong(projectId));
-				
-				model.addAttribute("project", project);
-				model.addAttribute("sidebarMenu", "system");
-				model.addAttribute("currentMenu", "systemproject");
-				
-				return "weple/system/projectUpdate";
-			}
-	        
-	@PostMapping("/system/project/update")
-	public String projectUpdateProcess(
-			SystemProjectVO projectVO,
-			RedirectAttributes redirectAttributes) {
-		
-		int result = systemProjectService.updateProject(projectVO);
-		
-		if(result > 0) {
-			redirectAttributes.addFlashAttribute("toastMessage", "프로젝트가 수정되었습니다.");
-			return "redirect:/system/project/list";
-		} else {
-			redirectAttributes.addFlashAttribute("toastError", "프로젝트 수정에 실패했습니다.");
-			return "redirect:/system/project/update/"+projectVO.getProjectId();
-		}
-		
-	}
-	
-	// 프로젝트 삭제
-	@PostMapping("/system/project/delete")
-	public String deleteProject(
-			@RequestParam String projectId,
-			RedirectAttributes redirectAttributes) {
-		
-		int result = systemProjectService.deleteProject(projectId);
-		
-		if(result > 0) {
-			redirectAttributes.addFlashAttribute("toastMessage", "프로젝트가 삭제되었습니다.");
-		}
-		return "redirect:/system/project/list";
-	}
 	
 	// -------------------------------역할 및 권한------------------------------
 	@Autowired
