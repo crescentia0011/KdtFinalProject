@@ -52,7 +52,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
             request.getSession().removeAttribute("LOGIN_COMPANY_CODE");
         }
 
-        setDefaultTargetUrl("/");
+        setDefaultTargetUrl("/dashboard");
         setAlwaysUseDefaultTargetUrl(true);
         super.onAuthenticationSuccess(request, response, authentication);
     }

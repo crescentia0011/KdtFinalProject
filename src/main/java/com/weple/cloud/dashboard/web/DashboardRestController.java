@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.dashboard.service.DashboardProjectDTO;
 import com.weple.cloud.dashboard.service.DashboardService;
-import com.weple.cloud.history.worklog.service.WorkLogVO;
+import com.weple.cloud.dashboard.service.WorkLog2VO;
 import com.weple.cloud.task.service.TaskVO;
 
 import lombok.RequiredArgsConstructor;
@@ -66,11 +66,10 @@ public class DashboardRestController {
     @GetMapping("/recent-activities")
     public ResponseEntity<?> getRecentActivities(
             @AuthenticationPrincipal LoginUserDetails loginUser,
-            @RequestParam(required = false) String projectId) {
+            @RequestParam(value = "projectId", required = false) String projectId,
+            @RequestParam(value = "limit", defaultValue = "1000") int limit) {
         
-        String userCode = loginUser.getLoginUser().getUserCode();
-        List<WorkLogVO> activities = dashboardService.getRecentActivities(userCode, projectId);
-        
+        List<WorkLog2VO> activities = dashboardService.getRecentActivities(loginUser.getLoginUser(), projectId, limit);
         return ResponseEntity.ok(activities);
     }
 }

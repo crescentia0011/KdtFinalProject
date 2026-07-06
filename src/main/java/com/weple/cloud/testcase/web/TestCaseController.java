@@ -90,6 +90,7 @@ public class TestCaseController {
 	    
 	    // 기타 공통 데이터
 	    model.addAttribute("currentMenu", "testcase");
+	    model.addAttribute("sidebarMenu", "project");
 	    model.addAttribute("projectId", pId); 
 	    model.addAttribute("currentTab", "testcase");
 	    model.addAttribute("project", projectService.findById(String.valueOf(pId)));
@@ -148,7 +149,7 @@ public class TestCaseController {
 	    model.addAttribute("totalPages", totalPages);
 	    model.addAttribute("startPage", startPage);
 	    model.addAttribute("endPage", endPage);
-    	
+	    model.addAttribute("sidebarMenu", "project");
         model.addAttribute("currentMenu", "testcase"); 
         model.addAttribute("projectId", pId);
         model.addAttribute("currentTab", "coverage");
@@ -191,6 +192,7 @@ public class TestCaseController {
     	model.addAttribute("statusList",statusList);
     	model.addAttribute("taskList",taskList);
     	model.addAttribute("priorityList",priorityList);
+    	model.addAttribute("sidebarMenu", "project");
     	model.addAttribute("project", projectService.findById(String.valueOf(pId)));
     	
     	return "weple/testcase/register";
@@ -270,6 +272,7 @@ public class TestCaseController {
     	model.addAttribute("taskId",testCaseDetail.getTaskId());
         model.addAttribute("testId", testId);
         model.addAttribute("currentMenu", "testcase");
+        model.addAttribute("sidebarMenu", "project");
         model.addAttribute("project", projectService.findById(String.valueOf(pId)));
     	
     	return "weple/testcase/detail";
@@ -315,6 +318,7 @@ public class TestCaseController {
         model.addAttribute("testCaseDetail", testCaseDetail);
         
         model.addAttribute("currentMenu", "testcase");
+        model.addAttribute("sidebarMenu", "project");
         model.addAttribute("projectId", pId);
         model.addAttribute("loginUserCode", userCode);
         model.addAttribute("memberList", memberList);

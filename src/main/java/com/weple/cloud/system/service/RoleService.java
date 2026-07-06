@@ -28,4 +28,7 @@ public interface RoleService {
 	boolean isRoleInUse(Long roleId);
 	
 	Long selectRoleIdByName(Long companyId, String roleName);
+	
+	// 역할 이름 대신 특정 권한 코드를 가진 역할 조회 (이름 기반 조회 실패 시 폴백용)
+	Long selectRoleIdByPermission(Long companyId, String permissionCode);
 }

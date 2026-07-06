@@ -83,4 +83,9 @@ public class RoleServiceImpl implements RoleService {
 	public Long selectRoleIdByName(Long companyId, String roleName) {
 		return roleMapper.selectRoleIdByName(companyId, roleName);
 	}
+
+	@Override
+	public Long selectRoleIdByPermission(Long companyId, String permissionCode) {
+		return roleMapper.selectRoleIdByPermission(companyId, permissionCode);
+	}
 }

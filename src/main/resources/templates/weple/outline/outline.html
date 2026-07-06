@@ -10,8 +10,11 @@
 <body>
 <section>
 
-    <script>
+    <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function () {
+    	
+    	const projectStatus = [[${project != null ? project.status : 'null'}]];
+        console.log("원본 status 값:", projectStatus);
         
         // =======================================================
         // 1. 드롭다운 셀렉트 박스 전환 제어 및 펼침 리셋 로직
@@ -82,15 +85,14 @@
                 });
             }
         });
-    });
     </script>
 
     <div class="outline-page-header">
     <h1 class="outline-page-title" th:text="${project != null ? project.projectTitle : '프로젝트 개요'}">프로젝트명</h1>
     <span class="outline-badge" 
           th:if="${project != null}"
-          th:classappend="${project.status == 'j1' ? 'badge-new' : (project.status == 'j2' ? 'badge-process' : (project.status == 'j3' ? 'badge-success' : ''))}"
-          th:text="${project.status == 'j1' ? '신규' : (project.status == 'j2' ? '진행 중' : (project.status == 'j3' ? '완료' : '미지정'))}">
+          th:classappend="${project.status == '신규' ? 'badge-new' : (project.status == '진행 중' ? 'badge-process' : (project.status == '완료' ? 'badge-success' : ''))}"
+          th:text="${project.status == '신규' ? '신규' : (project.status == '진행 중' ? '진행 중' : (project.status == '완료' ? '완료' : '미지정'))}">
         상태
     </span>
 </div>
@@ -236,7 +238,6 @@
             </div>
             
         </div>
-    </div>
 </section>
 </body>
 </html>

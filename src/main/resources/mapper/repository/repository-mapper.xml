@@ -12,14 +12,22 @@
         WHERE project_id = #{projectId}
     </select>
 
-    <!-- 다른 프로젝트의 동일 저장소 등록은 허용하고, 현재 프로젝트 범위에서만 중복을 확인합니다. -->
-    <select id="countRepositoryByNameOrUrl" resultType="int">
+    <!-- URL 중복은 허용하고, 같은 회사·프로젝트 안에서 저장소명만 중복 확인합니다. -->
+    <select id="countRepositoryByName" resultType="int">
         SELECT COUNT(*)
         FROM repository_setting
         WHERE company_id = #{companyId}
           AND project_id = #{projectId}
-          AND (repository_identifier = #{repositoryName}
-               OR repository_url = #{repositoryUrl})
+          AND repository_identifier = #{repositoryName}
+    </select>
+
+    <!-- 저장소명은 회사가 달라도 중복 허용하고, GitHub URL은 다른 회사에서 이미 쓰면 차단합니다. -->
+    <select id="countRepositoryUrlInOtherCompany" resultType="int">
+        SELECT COUNT(*)
+        FROM repository_setting
+        WHERE company_id != #{companyId}
+          AND LOWER(REGEXP_REPLACE(RTRIM(repository_url, '/'), '\.git$', '')) =
+              LOWER(REGEXP_REPLACE(RTRIM(#{repositoryUrl}, '/'), '\.git$', ''))
     </select>
 
     <!-- 저장소 목록 화면에서 현재 회사·프로젝트에 등록된 모든 저장소를 조회합니다. -->

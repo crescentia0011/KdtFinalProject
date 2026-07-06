@@ -1,11 +1,17 @@
 (function () {
-    var DATE_FORMAT = 'Y.m.d';
-    if (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.ko) {
-        flatpickr.localize(flatpickr.l10ns.ko);
+    // yyyy-MM-dd (네이티브 date input 값) <-> yyyy.MM.dd (서버/매퍼가 기대하는 포맷) 상호 변환
+    function toDotFormat(dashStr) {
+        return dashStr ? dashStr.replaceAll('-', '.') : '';
     }
-    function parseFormatted(str) {
+    function toDashFormat(date) {
+        var y = date.getFullYear();
+        var m = String(date.getMonth() + 1).padStart(2, '0');
+        var d = String(date.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + d;
+    }
+    function parseDash(str) {
         if (!str) return null;
-        var parts = str.split('.');
+        var parts = str.split('-');
         if (parts.length !== 3) return null;
         var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
         return isNaN(d.getTime()) ? null : d;
@@ -16,72 +22,72 @@
         return d;
     }
 
-    var startInput = document.getElementById('startDateInput');
-    var endInput   = document.getElementById('endDateInput');
-    var searchForm = document.getElementById('searchForm');
-    var searchFlag = document.getElementById('searchFlag');
+    var startInput  = document.getElementById('startDateInput');
+    var endInput    = document.getElementById('endDateInput');
+    var startHidden = document.getElementById('startDateHidden');
+    var endHidden   = document.getElementById('endDateHidden');
+    var searchForm  = document.getElementById('searchForm');
+    var searchFlag  = document.getElementById('searchFlag');
 
-    function syncTimePeriod() {
+    function syncHiddenAndPeriod() {
+        startHidden.value = toDotFormat(startInput.value);
+        endHidden.value   = toDotFormat(endInput.value);
+
         var periodEl = document.querySelector('.time-period');
-        if (periodEl && startInput.value && endInput.value) {
-            periodEl.textContent = startInput.value + ' ~ ' + endInput.value;
+        if (periodEl && startHidden.value && endHidden.value) {
+            periodEl.textContent = startHidden.value + ' ~ ' + endHidden.value;
         }
     }
-
-    var startPicker = flatpickr(startInput, {
-        dateFormat: DATE_FORMAT, allowInput: false,
-        onChange: function (selectedDates) {
-            if (selectedDates[0]) endPicker.set('minDate', selectedDates[0]);
-        }
-    });
-    var endPicker = flatpickr(endInput, {
-        dateFormat: DATE_FORMAT, allowInput: false,
-        onChange: function (selectedDates) {
-            if (selectedDates[0]) startPicker.set('maxDate', selectedDates[0]);
-        }
-    });
 
     function setRange(start, end) {
-        startPicker.set('maxDate', null);
-        endPicker.set('minDate', null);
-        startPicker.setDate(start, false);
-        endPicker.setDate(end, false);
-        startPicker.set('maxDate', end);
-        endPicker.set('minDate', start);
+        startInput.value = toDashFormat(start);
+        endInput.value   = toDashFormat(end);
+        endInput.min   = startInput.value;
+        startInput.max = endInput.value;
+        syncHiddenAndPeriod();
     }
+
     function applyRecentDays(days) {
         var today = new Date();
         setRange(addDays(today, -(days - 1)), today);
     }
 
-    var initStart = parseFormatted(startInput.value);
-    var initEnd   = parseFormatted(endInput.value);
+    startInput.addEventListener('change', function () {
+        endInput.min = startInput.value;
+        syncHiddenAndPeriod();
+    });
+    endInput.addEventListener('change', function () {
+        startInput.max = endInput.value;
+        syncHiddenAndPeriod();
+    });
+
+    var initStart = parseDash(startInput.value);
+    var initEnd   = parseDash(endInput.value);
     if (initStart && initEnd) {
         setRange(initStart, initEnd);
     } else {
         applyRecentDays(5);
     }
-    syncTimePeriod();
 
     document.getElementById('recentPeriodBtn').addEventListener('click', function () {
         applyRecentDays(5);
         searchFlag.value = 'true';
-        setTimeout(function () { syncTimePeriod(); searchForm.submit(); }, 0);
+        searchForm.submit();
     });
 
     document.getElementById('dateBackBtn').addEventListener('click', function () {
-        var curStart = parseFormatted(startInput.value);
-        var curEnd   = parseFormatted(endInput.value);
+        var curStart = parseDash(startInput.value);
+        var curEnd   = parseDash(endInput.value);
         if (!curStart || !curEnd) {
             applyRecentDays(5);
         } else {
-            var rangeDays = Math.round((curEnd.getTime() - curStart.getTime()) / (24*60*60*1000)) + 1;
+            var rangeDays = Math.round((curEnd.getTime() - curStart.getTime()) / (24 * 60 * 60 * 1000)) + 1;
             var newEnd    = addDays(curStart, -1);
             var newStart  = addDays(newEnd, -(rangeDays - 1));
             setRange(newStart, newEnd);
         }
         searchFlag.value = 'true';
-        setTimeout(function () { syncTimePeriod(); searchForm.submit(); }, 0);
+        searchForm.submit();
     });
 
     document.getElementById('resetBtn').addEventListener('click', function () {
@@ -89,11 +95,13 @@
         if (projectSelect) projectSelect.value = '';
         var userSelect = searchForm.querySelector('select[name="userCode"]');
         if (userSelect) userSelect.value = '';
-        searchForm.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+        searchForm.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
             cb.checked = false;
         });
         applyRecentDays(5);
         searchFlag.value = 'false';
-        setTimeout(function () { syncTimePeriod(); searchForm.submit(); }, 0);
+        searchForm.submit();
     });
+
+    searchForm.addEventListener('submit', syncHiddenAndPeriod);
 })();

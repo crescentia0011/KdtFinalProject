@@ -4,6 +4,8 @@
    Weple Premium Theme - Definite Layout System (Soft & Clean Blue Ver.4)
    ========================================================================== */
 
+
+
 /* 1. 불릿 기호 제거 초기화 */
 .nav.side-menu li,
 .sub_menu_nav ul li,
@@ -149,18 +151,30 @@ body.nav-sm .container.body .right_col {
     float: right !important;
 }
 
-/* 4. [상단 헤더바] - 중앙 정렬 무너짐 교정 */
+/* 4. [상단 헤더바] - 중앙 정렬 무너짐 교정 + 스크롤 시에도 상단에 항상 고정 */
 .top_nav,
 .top_nav .nav_menu,
 .nav_menu {
     background: #ffffff !important;
 }
 
+.top_nav {
+    position: fixed !important;
+    top: 0 !important;
+    left: 230px !important;
+    right: 0 !important;
+    width: auto !important;
+    margin: 0 !important;      /* 새로 추가 */
+    padding: 0 !important;     /* 새로 추가 */
+    box-sizing: border-box !important;
+    z-index: 999 !important;
+}
+
 .top_nav .nav_menu {
     border-bottom: 1px solid #DDD6FE !important;
     margin-bottom: 0 !important;
     padding: 0 24px !important;
-    height: 60px !important;
+    height: 81px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
@@ -171,7 +185,7 @@ body.nav-sm .container.body .right_col {
     font-weight: bold !important;
     color: #433D74 !important;
     margin: 0 !important;
-    line-height: 60px !important;
+    line-height: 81px !important;
 }
 
 .header-profile-right {

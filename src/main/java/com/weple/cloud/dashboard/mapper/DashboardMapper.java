@@ -1,13 +1,12 @@
 package com.weple.cloud.dashboard.mapper;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.weple.cloud.dashboard.service.DashboardProjectDTO;
-import com.weple.cloud.history.worklog.service.WorkLogVO;
+import com.weple.cloud.dashboard.service.WorkLog2VO;
 import com.weple.cloud.task.service.TaskVO;
 
 @Mapper
@@ -18,7 +17,10 @@ public interface DashboardMapper {
     
     List<DashboardProjectDTO> selectAllProjectsForDashboard();
     
-    List<WorkLogVO> selectRecentActivities(Map<String, Object> params);
+    List<WorkLog2VO> selectRecentActivities(
+            @Param("projectIds") List<Long> projectIds, 
+            @Param("limit") int limit
+        );
 
 	
 }

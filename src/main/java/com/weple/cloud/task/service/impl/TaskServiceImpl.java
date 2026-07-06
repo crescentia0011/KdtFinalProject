@@ -106,9 +106,10 @@ public class TaskServiceImpl implements TaskService {
 		String currentTaskId = taskVO.getTaskId();
 
 		// 알림-은지
-		if (result > 0 && taskVO.getTaskManager() != null && !taskVO.getTaskManager().isBlank()) {
-			notificationService.create(taskVO.getTaskManager(), AlarmType.TAG_TASK_ASSIGN,
-					"새로운 일감 [" + taskVO.getTaskTitle() + "]이 본인에게 배정되었습니다.", AlarmType.TARGET_TASK, taskVO.getTaskId());
+		if (currentTaskId != null && !currentTaskId.isBlank()
+		        && taskVO.getTaskManager() != null && !taskVO.getTaskManager().isBlank()) {
+		    notificationService.create(taskVO.getTaskManager(), AlarmType.TAG_TASK_ASSIGN,
+		            "새로운 일감 [" + taskVO.getTaskTitle() + "]이 본인에게 배정되었습니다.", AlarmType.TARGET_TASK, taskVO.getTaskId());
 		}
 
 		// 파일 체크

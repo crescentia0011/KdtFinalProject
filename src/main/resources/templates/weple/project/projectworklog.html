@@ -7,7 +7,6 @@
     <meta charset="UTF-8">
     <title>프로젝트 작업내역</title>
     <link rel="stylesheet" href="/css/project/project-worklog.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
 </head>
 
 <body>
@@ -43,13 +42,15 @@
                     <div class="date-range-wrap">
                         <!-- ★ 화살표 제거 -->
                         <button type="button" id="dateBackBtn" class="date-arrow-btn">이전 5일</button>
-                        <input type="text" id="startDateInput" name="startDate"
-                               th:value="${startDate}" class="filter-input-date"
-                               placeholder="2026.06.05" readonly>
+                        <input type="date" id="startDateInput"
+                               th:value="${startDate != null ? #strings.replace(startDate, '.', '-') : ''}"
+                               class="filter-input-date">
+                        <input type="hidden" id="startDateHidden" name="startDate" th:value="${startDate}">
                         <span class="date-separator">~</span>
-                        <input type="text" id="endDateInput" name="endDate"
-                               th:value="${endDate}" class="filter-input-date"
-                               placeholder="2026.06.09" readonly>
+                        <input type="date" id="endDateInput"
+                               th:value="${endDate != null ? #strings.replace(endDate, '.', '-') : ''}"
+                               class="filter-input-date">
+                        <input type="hidden" id="endDateHidden" name="endDate" th:value="${endDate}">
                         <button type="button" id="recentPeriodBtn" class="date-period-btn">최근 5일</button>
                     </div>
                 </div>
@@ -198,8 +199,6 @@
 
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/ko.js"></script>
 	<script src="/js/project/projectworklog.js"></script>
 
 </section>

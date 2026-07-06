@@ -33,7 +33,7 @@
 }
 
 .approval-table-wrap {
-    overflow-x: auto;
+    overflow-x: visible;
     border: 1px solid #DDD6FE;
     border-radius: 14px;
     background: #ffffff;
@@ -41,7 +41,7 @@
 
 .approval-table {
     width: 100%;
-    min-width: 940px;
+    min-width: 0;
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -165,5 +165,13 @@
 @media (max-width: 768px) {
     .approval-page {
         padding: 20px;
+    }
+
+    .approval-table-wrap {
+        overflow-x: auto;
+    }
+
+    .approval-table {
+        min-width: 940px;
     }
 }

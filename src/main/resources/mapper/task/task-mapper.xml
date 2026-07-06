@@ -654,7 +654,7 @@ END;
 <sql id="myTaskConditions">
     <where>
         t.deleted_yn = 'N'
-
+		
         <if test="isAdminOrOwner == null or !isAdminOrOwner">
             AND t.task_manager = #{tManager}
         </if>

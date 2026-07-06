@@ -25,10 +25,14 @@ public class RepositoryServiceImpl implements RepositoryService {
     @Transactional
     public void registerRepository(RepositoryVO repository) {
         validate(repository);
-        if (repositoryMapper.countRepositoryByNameOrUrl(
+        if (repositoryMapper.countRepositoryByName(
                 repository.getCompanyId(), repository.getProjectId(),
-                repository.getRepositoryName(), repository.getRepositoryUrl()) > 0) {
-            throw new IllegalArgumentException("이미 등록된 저장소명 또는 GitHub 주소입니다.");
+                repository.getRepositoryName()) > 0) {
+            throw new IllegalArgumentException("이미 등록된 저장소명입니다.");
+        }
+        if (repositoryMapper.countRepositoryUrlInOtherCompany(
+                repository.getCompanyId(), repository.getRepositoryUrl()) > 0) {
+            throw new IllegalArgumentException("이미 다른 회사에서 사용 중인 GitHub 주소입니다.");
         }
 
         confirmAndClearExistingMainRepository(repository);

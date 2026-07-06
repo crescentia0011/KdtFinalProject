@@ -12,13 +12,13 @@
     <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
         <div class="menu_section">
             <ul class="nav side-menu">
-                <li th:classappend="${sidebarMenu == 'dashboard'} ? 'active' : ''"><a th:href="@{/dashboard}"></i> 대시보드</a></li>
+                <li th:classappend="${sidebarMenu == 'dashboard'} ? 'active' : ''"><a th:href="@{/dashboard}"><i class="fa fa-dashboard"></i> 대시보드</a></li>
                 <li th:classappend="${sidebarMenu == 'task'} ? 'active' : ''"><a th:href="@{/task/all-list}"><i class="fa fa-tasks"></i> 일감</a></li>
                 <li th:classappend="${sidebarMenu == 'project'} ? 'active' : ''"><a th:href="@{/project}"><i class="fa fa-folder-open"></i> 프로젝트</a></li>
                 <li th:classappend="${sidebarMenu == 'work-history'} ? 'active' : ''"><a th:href="@{/worklog}"><i class="fa fa-history"></i> 작업내역</a></li>
                 <li th:classappend="${sidebarMenu == 'time'} ? 'active' : ''"><a th:href="@{/totalTimeList}"><i class="fa fa-clock-o"></i> 소요시간</a></li>
                 <li th:classappend="${sidebarMenu == 'system'} ? 'active' : ''"
-                    sec:authorize="hasAnyAuthority('ROLE_COMPANY_OWNER','ROLE_COMPANY_ADMIN')">
+                    th:if="${canManageSystem}">
                     <a th:href="@{/system/project/list}"><i class="fa fa-gears"></i> 관리</a>
                 </li>
             </ul>

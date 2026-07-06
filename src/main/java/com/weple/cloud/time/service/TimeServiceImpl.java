@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.weple.cloud.history.task.service.TaskHistoryService;
 import com.weple.cloud.task.mapper.TaskMapper;
 import com.weple.cloud.task.service.TaskVO;
 import com.weple.cloud.time.mapper.TimeMapper;
@@ -18,6 +19,7 @@ public class TimeServiceImpl implements TimeService {
 
 	private final TimeMapper timeMapper;
 	private final TaskMapper taskMapper;
+	private final TaskHistoryService taskHistoryService;
 
 	// -------------------------------프로젝트 내 소요시간------------------------------
 	// 전체조회
@@ -50,7 +52,10 @@ public class TimeServiceImpl implements TimeService {
 		}
 
 		long result = timeMapper.insertProjectTime(workTimeVO);
+
 		if (result > 0) {
+			// 소요시간 합계
+			timeMapper.updateTaskSpentHoursSum(workTimeVO);
 			// 사용자가 입력한 진척도가 있으면(잠금 상태가 아니었으면) 이 일감 자신에게만 반영.
 			// 상위 일감은 여기서 절대 건드리지 않는다 — 상위 일감의 진척도 "수정 가능 여부"는
 			// /hasChildTask API(하위/하위의 하위 전체가 100%인지)가 프론트에서 판단해서

@@ -16,11 +16,14 @@ public interface RepositoryMapper {
     // 프로젝트에 등록된 저장소 건수 조회함
     int countRepositoriesByProjectId(@Param("projectId") Long projectId);
 
-    // 같은 회사, 같은 프로젝트 안에서 저장소명 또는 GitHub 주소 중복 확인함
-    int countRepositoryByNameOrUrl(@Param("companyId") Long companyId,
-                                   @Param("projectId") Long projectId,
-                                   @Param("repositoryName") String repositoryName,
-                                   @Param("repositoryUrl") String repositoryUrl);
+    // 같은 회사, 같은 프로젝트 안에서 저장소명 중복만 확인함
+    int countRepositoryByName(@Param("companyId") Long companyId,
+                              @Param("projectId") Long projectId,
+                              @Param("repositoryName") String repositoryName);
+
+    // 저장소명은 회사가 달라도 중복 허용하지만, GitHub URL은 다른 회사에서 이미 쓰면 차단함
+    int countRepositoryUrlInOtherCompany(@Param("companyId") Long companyId,
+                                         @Param("repositoryUrl") String repositoryUrl);
 
     // 수정 중인 저장소 자신을 제외하고 저장소명 중복 확인함
     int countRepositoryNameExcept(@Param("companyId") Long companyId,

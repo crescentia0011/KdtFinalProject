@@ -79,6 +79,8 @@
 		        , SYSDATE
 		)
 	</insert>
+	
+
 
 	<!-- 수정 -->
 	<update id="updateSelectTotalTime" parameterType="SelectTotalTimeVO">
@@ -93,6 +95,7 @@
        		   , updated_at = SYSDATE  WHERE work_id = #{workId}
 		WHERE work_id = #{workId}
 	</update>
+
 
 	<!-- 삭제 -->
 	<delete id="deleteSelectTotalTime" parameterType="long">
