@@ -80,40 +80,98 @@
 		FROM project
 		WHERE project_id = #{pId}
 	</select>
-	
-<insert id="insertTask" parameterType="TaskVO">
-    <selectKey keyProperty="taskId" resultType="string" order="BEFORE">
-        SELECT 'TSK-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' || 
-               (SELECT NVL(MAX(TO_NUMBER(SUBSTR(task_id, 12))), 0) + 1
-                FROM task 
-                WHERE task_id LIKE 'TSK-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_%')
-        FROM DUAL
-    </selectKey>
 
+<!-- 일감 등록 plsql 프로시저
+CREATE OR REPLACE PROCEDURE PR_INSERT_TASK (
+    p_task_title      IN task.task_title%TYPE,
+    p_task_describe   IN task.task_describe%TYPE,
+    p_task_status     IN task.task_status%TYPE,
+    p_priority        IN task.priority%TYPE,
+    p_task_manager    IN task.task_manager%TYPE,
+    p_start_date      IN task.start_date%TYPE,
+    p_finish_date     IN task.finish_date%TYPE,
+    p_estimated_time  IN task.estimated_time%TYPE,
+    p_task_progress   IN task.task_progress%TYPE,
+    p_parent_title    IN VARCHAR2,
+    p_milestone_id    IN task.milestone_id%TYPE,
+    p_project_id      IN task.project_id%TYPE,
+    p_user_code       IN task.user_code%TYPE,
+    p_type_name       IN VARCHAR2,
+    o_task_id         OUT task.task_id%TYPE 
+) AS
+    v_new_task_id     VARCHAR2(50);
+    v_parent_task_id  VARCHAR2(50);
+    v_type_id         NUMBER;
+    v_seq_num         NUMBER;
+    v_prefix          VARCHAR2(20);
+BEGIN
+    
+    v_prefix := 'TSK-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_';
+    
+    
+    SELECT NVL(MAX(TO_NUMBER(SUBSTR(task_id, 12))), 0) + 1
+      INTO v_seq_num
+      FROM task 
+     WHERE task_id LIKE v_prefix || '%';
+    
+    v_new_task_id := v_prefix || v_seq_num;
+    
+    
+    IF p_parent_title IS NOT NULL THEN
+        SELECT MAX(task_id) INTO v_parent_task_id 
+          FROM task 
+         WHERE task_title = p_parent_title;
+    END IF;
+    
+   
+    IF p_type_name IS NOT NULL THEN
+        SELECT MAX(type_id) INTO v_type_id 
+          FROM task_types 
+         WHERE type_name = p_type_name;
+    END IF;
+    
     INSERT INTO task (
         task_id, task_title, task_describe, task_status, priority,
         task_manager, start_date, finish_date, estimated_time, task_progress,
         parent_task_id, spent_hours_sum, created_at, milestone_id, project_id,
         user_code, type_id
     ) VALUES (
-        #{taskId}, 
-        #{taskTitle}, 
-        #{taskDescribe, jdbcType=VARCHAR}, 
-        #{taskStatus}, 
-        #{priority},
-        #{taskManager, jdbcType=VARCHAR}, 
-        #{startDate, jdbcType=DATE},
-        #{finishDate, jdbcType=DATE},
-        #{estimatedTime}, 
-        #{taskProgress},
-        (SELECT MAX(task_id) FROM task WHERE task_title = #{parentTaskTitle, jdbcType=VARCHAR}),
-        0, 
-        SYSDATE, 
-        #{milestoneId}, 
-        #{projectId}, 
-        #{userCode},
-        (SELECT MAX(type_id) FROM task_types WHERE type_name = #{typeIdName, jdbcType=VARCHAR})
-    )
+        v_new_task_id, p_task_title, p_task_describe, p_task_status, p_priority,
+        p_task_manager, p_start_date, p_finish_date, p_estimated_time, p_task_progress,
+        v_parent_task_id, 0, SYSDATE, p_milestone_id, p_project_id,
+        p_user_code, v_type_id
+    );
+    
+   
+    o_task_id := v_new_task_id;
+    
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        
+        RAISE_APPLICATION_ERROR(-20001, '일감 ID 생성 중 동시성 충돌이 발생했습니다. 다시 시도해주세요.');
+    WHEN OTHERS THEN
+        RAISE_APPLICATION_ERROR(-20002, '일감 등록 중 오류가 발생했습니다: ' || SQLERRM);
+END PR_INSERT_TASK;
+/ -->	
+	
+<insert id="insertTask" statementType="CALLABLE" parameterType="TaskVO">
+    { CALL PR_INSERT_TASK(
+        #{taskTitle,       mode=IN, jdbcType=VARCHAR},
+        #{taskDescribe,    mode=IN, jdbcType=VARCHAR},
+        #{taskStatus,      mode=IN, jdbcType=VARCHAR},
+        #{priority,        mode=IN, jdbcType=VARCHAR},
+        #{taskManager,     mode=IN, jdbcType=VARCHAR},
+        #{startDate,       mode=IN, jdbcType=DATE},
+        #{finishDate,      mode=IN, jdbcType=DATE},
+        #{estimatedTime,   mode=IN, jdbcType=NUMERIC},
+        #{taskProgress,    mode=IN, jdbcType=NUMERIC},
+        #{parentTaskTitle, mode=IN, jdbcType=VARCHAR},
+        #{milestoneId,     mode=IN, jdbcType=NUMERIC}, <!-- 숫자 타입(NUMBER)이라면 NUMERIC으로 변경 -->
+        #{projectId,       mode=IN, jdbcType=NUMERIC}, <!-- 숫자 타입(NUMBER)이라면 NUMERIC으로 변경 -->
+        #{userCode,        mode=IN, jdbcType=VARCHAR},
+        #{typeIdName,      mode=IN, jdbcType=VARCHAR},
+        #{taskId,          mode=OUT, jdbcType=VARCHAR}
+    ) }
 </insert>
 
 <!-- 상세조회 -->

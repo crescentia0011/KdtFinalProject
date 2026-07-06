@@ -34,54 +34,7 @@
 		WHERE company_id  = #{cId}  AND using_yn = 'Y'
 	</select>
 	
-	<!-- 테스트 케이스 등록 -->
-<insert id="insertTestCase" parameterType="TestCaseVO">
-    <selectKey keyProperty="testId" resultType="string" order="BEFORE">
-        SELECT 'TST-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_' || 
-               (SELECT NVL(MAX(TO_NUMBER(SUBSTR(test_id, 12))), 0) + 1
-                FROM test_case 
-                WHERE test_id LIKE 'TST-' || TO_CHAR(SYSDATE, 'YYMMDD') || '_%')
-        FROM DUAL
-    </selectKey>
-
-    INSERT INTO test_case (
-        test_id,
-        task_id,
-        milestone_version,
-        project_id,
-        user_code,
-        test_name,
-        created_at,
-        test_date,
-        priority,
-        test_yn,
-        test_manager,
-        test_content,
-        test_describe,
-        coverage_status
-    ) VALUES (
-        #{testId},
-        #{taskId},
-        (
-            SELECT m_parent.milestone_title
-            FROM task t
-            JOIN milestone m_child ON t.milestone_id = m_child.milestone_id
-            JOIN milestone m_parent ON m_child.parent_milestone_id = m_parent.milestone_id
-            WHERE t.task_id = #{taskId}
-        ),
-        #{projectId},
-        #{userCode},
-        #{testName},
-        SYSDATE,
-        #{testDate, jdbcType=DATE},
-        #{priority},
-        #{testYn},
-        #{testManager, jdbcType=VARCHAR},
-        #{testContent, jdbcType=VARCHAR},
-        #{testDescribe, jdbcType=VARCHAR},
-        #{coverageStatus, jdbcType=VARCHAR}
-    )
-</insert>
+	
 <!-- 테스트케이스 총 갯수 -->
 <select id="getTestCaseCount" resultType="int">
     SELECT COUNT(*)
@@ -128,47 +81,6 @@
         ) A WHERE rownum &lt;= #{offset} + #{pageSize}
     ) WHERE rnum &gt; #{offset}
 </select>
-<select id="testCaseDetail" resultType="TestCaseVO">
-	SELECT 
-                tc.test_id            AS testId,
-                tc.task_id            AS taskId,
-                tc.milestone_version  AS milestoneVersion,
-                tc.project_id         AS projectId,
-                tc.user_code          AS userCode,
-                tc.test_name          AS testName,
-                tc.created_at         AS createdAt,
-                tc.test_date          AS testDate,
-                tc.priority           AS priority,
-                tc.test_yn            AS testYn,
-                tc.test_manager       AS testManager,
-                tc.test_content       AS testContent,
-                tc.test_describe      AS testDescribe,
-                tc.coverage_status    AS coverageStatus,
-                u.user_name           AS userName,    
-                t.task_title          AS taskTitle,   
-                NVL(m.user_name, '-') AS managerName 
-            FROM test_case tc
-            LEFT JOIN users u ON tc.user_code = u.user_code   
-            LEFT JOIN users m ON tc.test_manager = m.user_code 
-            LEFT JOIN task t ON tc.task_id = t.task_id
-            WHERE tc.project_id = #{pId} AND tc.test_id = #{tsId}
-            ORDER BY tc.created_at DESC 	
-</select>
-<update id="updateTestCase" parameterType="TestCaseVO">
-    UPDATE test_case
-    <set>
-        <if test="taskId != null">task_id = #{taskId},</if>
-        <if test="milestoneVersion != null">milestone_version = #{milestoneVersion},</if>
-        <if test="testName != null">test_name = #{testName},</if>
-        <if test="testDate != null">test_date = #{testDate},</if>
-        <if test="priority != null">priority = #{priority},</if>
-        <if test="testYn != null">test_yn = #{testYn},</if>
-        <if test="testManager != null">test_manager = #{testManager},</if>
-        <if test="testContent != null">test_content = #{testContent},</if>
-        <if test="testDescribe != null">test_describe = #{testDescribe},</if>
-        <if test="coverageStatus != null">coverage_status = #{coverageStatus}</if>
-    </set>
-    WHERE test_id = #{testId}
-</update>
+
 
 </mapper>

@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const typeId = row.getAttribute('data-id');
         const typeName = row.querySelector('td').textContent.trim();
 
-        // 💡 브라우저 기본 confirm 대신 참조용 커스텀 모달 showConfirm 적용
+        // 커스텀 모달 호출
         showConfirm('일감 유형 삭제', `[${typeName}] 일감 유형을 정말 삭제하시겠습니까?`).then((isConfirmed) => {
             if (isConfirmed) {
                 const csrfToken = document.getElementById('_csrf').getAttribute('content');
@@ -89,5 +89,41 @@ document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => {
             toastWrap.remove();
         }, 3500);
+    }
+
+    /**
+     * 4. 커스텀 삭제 확인 모달 (Promise 기반) - 추가된 부분
+     */
+    function showConfirm(title, desc) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-modal-overlay';
+            
+            overlay.innerHTML = `
+                <div class="custom-modal-box">
+                    <div class="custom-modal-title">${title}</div>
+                    <div class="custom-modal-desc">${desc}</div>
+                    <div class="custom-modal-btns">
+                        <button class="modal-btn-cancel" id="modalCancelBtn">취소</button>
+                        <button class="modal-btn-delete" id="modalDeleteBtn">삭제</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            // CSS 트랜지션 트리거용 (0.01초 뒤 클래스 추가)
+            setTimeout(() => overlay.classList.add('show'), 10);
+
+            const close = (result) => {
+                overlay.classList.remove('show');
+                setTimeout(() => {
+                    if (document.body.contains(overlay)) overlay.remove();
+                    resolve(result); // 사용자가 누른 결과값(true/false)을 반환
+                }, 200); 
+            };
+
+            document.getElementById('modalCancelBtn').onclick = () => close(false);
+            document.getElementById('modalDeleteBtn').onclick = () => close(true);
+        });
     }
 });

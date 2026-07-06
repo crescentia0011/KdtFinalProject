@@ -20,7 +20,6 @@ public interface TestCaseMapper {
 
 	public List<TaskParentVO> testCaseTaskList(@Param("pId") long pId);
 	
-	public int insertTestCase(TestCaseVO testCaseVO);
 	
 	public int getTestCaseCount(@Param("pId") long pId, @Param("searchKeyword") String searchKeyword);
 	
@@ -29,10 +28,6 @@ public interface TestCaseMapper {
 										@Param("offset") int offset, 
 										@Param("pageSize") int pageSize);
 	
-	public TestCaseVO testCaseDetail(@Param("pId") long pId, @Param("tsId") String tsId);
 	
-	public int updateTestCase(TestCaseVO testCaseVO);
-	
-	public int deleteTestCase(@Param("testId") String testId, @Param("projectId") Long projectId);
 
 }

@@ -34,7 +34,15 @@
 	<!--
 		알림 1건 생성.
 		alarm_id는 ALARM_ID_SEQ로 채번한다.
-		alarm_date는 등록 시각(KST)으로 자동 세팅, check_yn은 항상 'N'(읽지 않음)으로 시작한다.
+		alarm_date는 등록 시각(SYSDATE, DB 서버가 이미 KST로 설정되어 있어 별도 보정 불필요)으로
+		자동 세팅, check_yn은 항상 'N'(읽지 않음)으로 시작한다.
+
+		※ 기존에 SYSDATE + 9/24로 9시간을 더해서 저장하던 버그가 있었음.
+		   - 다른 테이블(login, file, task_history, signup 등)은 전부 순수 SYSDATE만 사용하고 있어
+		     DB 서버 SYSDATE 자체가 이미 KST 기준임이 확인됨.
+		   - 알림만 9시간 미래로 저장되다 보니, 생성 후 9시간이 지나기 전까지는
+		     서버의 상대시간 계산(now - alarmDate)이 음수가 되어 "방금 전"으로 표시되고,
+		     클라이언트 폴링의 "최근 알림인지" 판정도 계속 참으로 나와 실시간 팝업이 반복 노출되는 원인이었음.
 	-->
 	<insert id="insertAlarm" parameterType="AlarmVO">
 		<selectKey keyProperty="alarmId" resultType="long" order="BEFORE">
@@ -55,7 +63,7 @@
 			#{alarmTag},
 			#{alarmContent},
 			'N',
-			SYSDATE + 9/24,
+			SYSDATE,
 			#{targetType},
 			#{targetId}
 		)
@@ -129,7 +137,7 @@
 	<update id="toggleCheckYn">
 		UPDATE alarm
 		   SET check_yn  = CASE WHEN check_yn = 'Y' THEN 'N' ELSE 'Y' END,
-		       alarm_chk = CASE WHEN check_yn = 'Y' THEN NULL ELSE SYSDATE + 9/24 END
+		       alarm_chk = CASE WHEN check_yn = 'Y' THEN NULL ELSE SYSDATE END
 		 WHERE alarm_id = #{alarmId}
 		   AND user_code = #{userCode}
 	</update>
@@ -138,7 +146,7 @@
 	<update id="markRead">
 		UPDATE alarm
 		   SET check_yn = 'Y',
-		       alarm_chk = SYSDATE + 9/24
+		       alarm_chk = SYSDATE
 		 WHERE alarm_id = #{alarmId}
 		   AND user_code = #{userCode}
 		   AND check_yn = 'N'
@@ -148,7 +156,7 @@
 	<update id="updateAllRead">
 		UPDATE alarm
 		   SET check_yn = 'Y',
-		       alarm_chk = SYSDATE + 9/24
+		       alarm_chk = SYSDATE
 		 WHERE user_code = #{userCode}
 		   AND check_yn = 'N'
 	</update>

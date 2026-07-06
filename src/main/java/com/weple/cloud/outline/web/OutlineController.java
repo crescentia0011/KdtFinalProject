@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.weple.cloud.outline.service.OutlineService;
 import com.weple.cloud.outline.service.ProjectGroupMemberDTO;
 import com.weple.cloud.outline.service.ProjectProgressDTO;
+import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.project.service.ProjectVO;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class OutlineController {
 	
 	private final OutlineService outlineService;
+	private final ProjectService projectService;
 	
 	// 프로젝트 개요 조회
 	@GetMapping("/project/outline")
@@ -27,6 +29,7 @@ public class OutlineController {
 		model.addAttribute("currentMenu", "outline");
 		model.addAttribute("sidebarMenu", "project");
 		model.addAttribute("projectId", projectId); 
+		model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
 		
 		// 프로젝트 정보 조회 - 삭제되었거나 존재하지 않으면 안내 후 접근 제한
 		ProjectVO project = outlineService.getProjectById(projectId);

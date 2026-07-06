@@ -298,7 +298,7 @@ document.querySelectorAll('#taskTableBody tr[data-id]').forEach(tr => {
 });
 
 // ── 페이징 ──
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 let currentPage = 1;
 let filteredRows = [...allRows];
 
@@ -555,7 +555,7 @@ if (urlTaskId) {
 /* ── 전체 래퍼 ── */
 .insert-wrap {
 	width: 95%;
-	max-width: 680px;
+	max-width: 1400px;
 	margin: 32px auto;
 	padding: 0;
 	font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
@@ -615,10 +615,10 @@ if (urlTaskId) {
 }
 
 .task-card-title {
-	font-size: 16px;
+	font-size: 18px;
 	font-weight: 700;
 	color: #1a1a2e;
-	padding: 18px 24px;
+	padding: 26px 32px;
 	border-bottom: 1px solid #e2e8f0;
 	background: #f8fafc;
 }
@@ -825,7 +825,7 @@ if (urlTaskId) {
 .modal-box {
 	background: #fff;
 	border-radius: 10px;
-	width: 680px;
+	width: 820px;
 	max-width: 95vw;
 	max-height: 90vh;
 	overflow-y: auto;
@@ -873,8 +873,8 @@ if (urlTaskId) {
 .modal-task-summary {
 	background: #F1EDFF;
 	border-left: 3px solid #6D5EF7;
-	margin: 24px 28px 10px;
-	padding: 14px 16px;
+	margin: 32px 32px 14px;
+	padding: 20px 22px;
 	border-radius: 0 6px 6px 0;
 }
 
@@ -904,7 +904,7 @@ if (urlTaskId) {
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	padding: 12px 28px;
+	padding: 20px 32px;
 	border-bottom: 1px solid #f1f5f9;
 }
 
@@ -919,11 +919,11 @@ if (urlTaskId) {
 .modal-field input[type="date"], .modal-field input[type="number"],
 	.modal-field select {
 	flex: 1;
-	height: 40px;
+	height: 48px;
 	border: 1px solid #d1d5db;
 	border-radius: 6px;
-	padding: 0 12px;
-	font-size: 14px;
+	padding: 0 14px;
+	font-size: 15px;
 	outline: none;
 }
 
@@ -1029,13 +1029,13 @@ if (urlTaskId) {
 	flex: 1;
 	border: 1px solid #d1d5db;
 	border-radius: 6px;
-	padding: 10px 12px;
-	font-size: 14px;
+	padding: 12px 14px;
+	font-size: 15px;
 	font-family: inherit;
 	outline: none;
 	resize: vertical;
-	min-height: 84px;
-	line-height: 1.5;
+	min-height: 130px;
+	line-height: 1.6;
 }
 
 .modal-field textarea:focus {
@@ -1046,7 +1046,7 @@ if (urlTaskId) {
 	display: flex;
 	justify-content: flex-end;
 	gap: 10px;
-	padding: 18px 28px;
+	padding: 24px 32px;
 	background: #f8fafc;
 	border-top: 1px solid #e2e8f0;
 }

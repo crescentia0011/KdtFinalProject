@@ -96,11 +96,13 @@ public class ProjectController {
         int totalCount;
 
         if (isManager) {
-            // 관리자는 전체 프로젝트 조회
-            list       = projectService.findAll(keyword, offset, pageSize);
-            totalCount = projectService.countAll(keyword);
+            // 관리자는 소속 회사의 전체 프로젝트 조회 (구성원으로 등록 안 된 프로젝트도 포함)
+            // - 구성원 추가 등 관리 작업을 위해 관리자는 프로젝트 진입이 가능해야 함
+            String companyId = String.valueOf(loginUser.getLoginUser().getCompanyId());
+            list       = projectService.findAllByCompany(companyId, keyword, offset, pageSize);
+            totalCount = projectService.countAllByCompany(companyId, keyword);
         } else {
-            // 일반 사용자는 참여 중인 프로젝트만 조회
+            // 일반 사용자는 본인이 속한 프로젝트만 조회
             list       = projectService.findAllByMember(userCode, keyword, offset, pageSize);
             totalCount = projectService.countAllByMember(userCode, keyword);
         }

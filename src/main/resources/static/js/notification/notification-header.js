@@ -215,7 +215,11 @@
         if (!alarmDateStr) return false;
         var alarmTime = new Date(alarmDateStr).getTime();
         if (isNaN(alarmTime)) return false;
-        return (Date.now() - alarmTime) <= TOAST_FRESHNESS_MS;
+        var diff = Date.now() - alarmTime;
+        // diff가 음수라는 건 알림 시각이 "미래"라는 뜻 -> 서버/DB 시간 오차 등 비정상 상황이므로
+        // 신선한 알림으로 취급하지 않는다. (과거 이 방어 코드가 없어서 알림 시각이 미래로 잘못
+        // 저장되었을 때 몇 시간이 지나도 팝업이 계속 뜨는 버그가 있었음 - 근본 원인은 SQL 수정으로 해결됨)
+        return diff >= 0 && diff <= TOAST_FRESHNESS_MS;
     }
 
     if (WEB_NOTIF_ENABLED) {

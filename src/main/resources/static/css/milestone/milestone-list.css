@@ -453,3 +453,88 @@ input:disabled + .slider {
     background: #ffa39e;
     cursor: not-allowed;
 }
+
+/*토스트 메세지쪽*/
+.toast-wrap {
+    position: fixed;
+    top: 24px;
+    left: 50%; /* 💡 왼쪽에서 50% 지점으로 이동 */
+    transform: translateX(-50%); /* 💡 요소 너비의 절반만큼 왼쪽으로 당겨서 정확한 중앙 정렬 */
+    z-index: 9999;
+    animation: toastFadeOut 3.5s forwards; 
+}
+
+.toast-msg {
+    padding: 13px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    min-width: 250px; 
+}
+
+.toast-error { background: #EF4444; }
+.toast-success { background: #22C55E; }
+
+/* 💡 위 중앙에서 자연스럽게 내려오고 올라가도록 애니메이션 수정 */
+@keyframes toastFadeOut {
+    /* 원래 있던 transform: translateX(-50%)를 유지하면서 Y축 애니메이션을 섞어주어야 깨지지 않습니다. */
+    0%   { opacity: 0; transform: translate(-50%, -20px); }
+    10%  { opacity: 1; transform: translate(-50%, 0); } 
+    75%  { opacity: 1; transform: translate(-50%, 0); } 
+    100% { opacity: 0; transform: translate(-50%, -20px); } 
+}
+
+/* ==========================================
+       2. 커스텀 삭제 확인 모달 (Confirm) 스타일 - 화면 정중앙 절대 고정
+       ========================================== */
+    .custom-modal-overlay {
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        width: 100vw;  
+        height: 100vh; 
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 10000; 
+        opacity: 0; 
+        visibility: hidden; 
+        transition: all 0.2s ease-in-out;
+    }
+    .custom-modal-overlay.show { opacity: 1; visibility: visible; }
+    
+    .custom-modal-box {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -60%); 
+        
+        background: #fff; 
+        padding: 25px 30px; 
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        text-align: center; 
+        width: 320px;
+        transition: transform 0.2s ease-in-out;
+    }
+    .custom-modal-overlay.show .custom-modal-box { transform: translate(-50%, -50%); }
+    
+    .custom-modal-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 10px; }
+    .custom-modal-desc { font-size: 14px; color: #6b7280; margin-bottom: 24px; line-height: 1.5; }
+    .custom-modal-btns { display: flex; justify-content: center; gap: 8px; }
+
+    /* 모달 버튼 디자인 */
+    .modal-btn-cancel {
+        padding: 7px 16px; border:1px solid #DDD6FE; background:#FFFFFF;
+        border-radius: 5px; color: #495057; font-size: 13px; cursor: pointer; transition: 0.2s;
+        min-width: 70px;
+    }
+    .modal-btn-cancel:hover { background:#F1EDFF; }
+    
+    .modal-btn-delete {
+        padding: 7px 16px; border: 1px solid #EF4444;  background:#EF4444; 
+        border-radius: 5px; color: #fff; font-size: 13px; cursor: pointer; transition: 0.2s;
+        min-width: 70px;
+    }
+    .modal-btn-delete:hover { background:#DC2626; border-color: #c53030; }

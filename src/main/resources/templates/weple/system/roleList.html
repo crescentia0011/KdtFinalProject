@@ -97,7 +97,12 @@
         </div>
     </div>
 
-    <div id="toast" class="toast-message" th:text="${toastMessage}"></div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var serverToastMessage = /*[[${toastMessage}]]*/ '';
+        var serverToastType    = /*[[${toastType}]]*/ '';
+        /*]]>*/
+    </script>
 
     <script defer src="/js/system/role-list.js"></script>
 </section>

@@ -198,48 +198,40 @@ public class TestCaseController {
     
     @PostMapping("/project/testcase/register")
     public String registerTestCase(
-            // 1. 시큐리티 인증 객체에서 로그인 유저 정보 가져오기
             @AuthenticationPrincipal LoginUserDetails loginUser,
-            // 2. URL 파라미터나 폼 숨김 필드로 넘어오는 projectId
             @RequestParam("projectId") Long pId, 
-            
-            // 3. 폼에서 입력받는 데이터들
-            @RequestParam("taskId") String taskId, // 일감 선택에서 넘어온 값
+            @RequestParam("taskId") String taskId,
             @RequestParam("title") String title,
             @RequestParam("status") String status,
             @RequestParam(value = "testCaseManager", required = false) String testCaseManager,
             @RequestParam("priority") String priority,
+            // java.util.Date 대신 java.time.LocalDate로 바로 매핑합니다.
             @RequestParam(value = "testDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date testDate,
             @RequestParam("isTested") String isTested,
             @RequestParam("testResult") String testResult,
             @RequestParam(value = "description", required = false) String description
     ) {
-        
-        // 로그인한 사용자의 userCode 추출
         String userCode = loginUser.getLoginUser().getUserCode();
         
-        // VO 객체 생성 및 데이터 매핑
+        // VO 세팅 (VO의 testDate 필드도 LocalDate로 변경해 주는 것이 좋습니다)
         TestCaseVO vo = new TestCaseVO();
         
         vo.setTestName(title);
         vo.setCoverageStatus(status);
         vo.setTestManager(testCaseManager);
         vo.setPriority(priority);
-        vo.setTestDate(testDate);
+        // VO에 Date 타입이 유지되어야 한다면, 컨트롤러에서 Date 매핑을 유지하고 Service에서 변환(3번 코드)하세요.
+        vo.setTestDate(testDate); // VO가 LocalDate로 수정되었다고 가정
         vo.setTestYn(isTested);
         vo.setTestContent(testResult);
         vo.setTestDescribe(description);
         
-        // 추가된 3가지 핵심 데이터 세팅
         vo.setTaskId(taskId);
         vo.setUserCode(userCode);
-        // VO의 projectId가 String 타입이라면 String.valueOf()로 변환해서 넣어줍니다.
         vo.setProjectId(pId); 
 
-        // 서비스 호출 (insert 실행)
         testCaseService.insertTestCaseService(vo);
 
-        // 등록 완료 후 목록 페이지로 리다이렉트 (경로는 상황에 맞게 수정하세요)
         return "redirect:/project/testcase?projectId=" + pId; 
     }
 	
@@ -253,8 +245,13 @@ public class TestCaseController {
     	if (loginUser == null || loginUser.getLoginUser() == null) {
             return "weple/access-denide";
         }
+    	
+    	Integer ownerYn = loginUser.getLoginUser().getOwnerYn();
+    	Integer adminYn = loginUser.getLoginUser().getAdminYn();
+    	boolean isAdminOrOwner = (ownerYn != null && ownerYn == 1) || (adminYn != null && adminYn == 1);
     	String userCode = loginUser.getLoginUser().getUserCode();
     	
+    	System.out.println("관리자 여부 : " + isAdminOrOwner);
     	List<TaskMemberVO> projMemberList = taskService.findMember(projectId);
 
 	    boolean isProjectMember = projMemberList.stream()
@@ -266,8 +263,7 @@ public class TestCaseController {
     	    
     	
     	TestCaseVO testCaseDetail = testCaseService.findTestCaseDetail(projectId, testId);
-    	System.out.println("여기 " +testCaseDetail);
-    	System.out.println("여기 " +userCode);
+    	model.addAttribute("isAdminOrOwner", isAdminOrOwner);
     	model.addAttribute("loginUserCode",userCode);
     	model.addAttribute("testCaseDetail",testCaseDetail);
     	model.addAttribute("projectId", projectId);

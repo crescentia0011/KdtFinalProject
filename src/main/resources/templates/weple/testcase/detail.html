@@ -72,7 +72,7 @@
     </div>
 
     <div class="btn-area">
-    <th:block th:if="${#strings.equals(testCaseDetail.userCode, loginUserCode)}">
+    <th:block th:if="${isAdminOrOwner or #strings.equals(testCaseDetail.userCode, loginUserCode)}">
         <button type="button" class="btn btn-primary"
                 th:onclick="|location.href='@{/project/testcase/update(projectId=${projectId}, testId=${testCaseDetail.testId})}'|">✏ 편집</button>
         
@@ -81,6 +81,7 @@
         th:data-test-name="${testCaseDetail.testName}"
         th:data-project-id="${projectId}"
         onclick="openTcDeleteModal(this)">🗑 삭제</button>
+        </th:block>
 
 <dialog class="tc-delete-dialog" id="tcDeleteDialog">
     <div class="tc-dialog-header">

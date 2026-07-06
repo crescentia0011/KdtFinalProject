@@ -47,12 +47,20 @@
 				    <if test="keyword != null and keyword != ''">
 				        p.project_title LIKE '%' || #{keyword} || '%'
 				    </if>
+				    <!-- 구성원이 한 명도 없는 프로젝트는 소속 회사를 특정할 방법이 없으므로
+				         관리자 화면에서 누락되지 않도록 예외적으로 통과시킴 -->
 				    <if test="companyId != null and companyId != ''">
-				        AND EXISTS (
-				            SELECT 1 FROM members m2
-				            JOIN users u2 ON m2.user_code = u2.user_code
-				            WHERE m2.project_id = p.project_id
-				              AND u2.company_id = #{companyId}
+				        AND (
+				            NOT EXISTS (
+				                SELECT 1 FROM members m3
+				                WHERE m3.project_id = p.project_id
+				            )
+				            OR EXISTS (
+				                SELECT 1 FROM members m2
+				                JOIN users u2 ON m2.user_code = u2.user_code
+				                WHERE m2.project_id = p.project_id
+				                  AND u2.company_id = #{companyId}
+				            )
 				        )
 				    </if>
 				    <if test="userCode != null and userCode != ''">
@@ -80,12 +88,20 @@
 		    <if test="keyword != null and keyword != ''">
 		        p.project_title LIKE '%' || #{keyword} || '%'
 		    </if>
+		    <!-- 구성원이 한 명도 없는 프로젝트는 소속 회사를 특정할 방법이 없으므로
+		         관리자 화면에서 누락되지 않도록 예외적으로 통과시킴 -->
 		    <if test="companyId != null and companyId != ''">
-		        AND EXISTS (
-		            SELECT 1 FROM members m2
-		            JOIN users u2 ON m2.user_code = u2.user_code
-		            WHERE m2.project_id = p.project_id
-		              AND u2.company_id = #{companyId}
+		        AND (
+		            NOT EXISTS (
+		                SELECT 1 FROM members m3
+		                WHERE m3.project_id = p.project_id
+		            )
+		            OR EXISTS (
+		                SELECT 1 FROM members m2
+		                JOIN users u2 ON m2.user_code = u2.user_code
+		                WHERE m2.project_id = p.project_id
+		                  AND u2.company_id = #{companyId}
+		            )
 		        )
 		    </if>
 		    <if test="userCode != null and userCode != ''">

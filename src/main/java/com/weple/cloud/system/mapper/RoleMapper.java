@@ -40,5 +40,8 @@ public interface RoleMapper {
 	// 역할 삭제
 	int deleteRole(@Param("roleId") Long roleId, @Param("companyId") Long companyId);
 	
+	// 역할이 구성원에게 할당되어 사용 중인지 확인 (member_roles 참조 건수)
+	int countMemberRolesByRoleId(@Param("roleId") Long roleId);
+	
 	Long selectRoleIdByName(@Param("companyId") Long companyId, @Param("roleName") String roleName);
 }

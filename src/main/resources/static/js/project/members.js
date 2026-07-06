@@ -1,22 +1,24 @@
 var searchTimer   = null;
 var deleteTargets = [];
 var currentTab    = 'user';
+var pendingRoleChanges = {}; // { memberId: roleId }
 
-/* ══ 토스트 ══ */
-function showToast(type, msg) {
-    var c = document.getElementById('memberToastContainer');
-    var el = document.createElement('div');
-    el.className = 'member-toast toast-' + type;
-    var ic = {success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
-    el.innerHTML = '<span>' + (ic[type]||'ℹ️') + '</span><span class="t-msg">' + msg + '</span>'
-                 + '<button onclick="rmToast(this.parentElement)">✕</button>';
-    c.appendChild(el);
-    setTimeout(function(){ rmToast(el); }, 3000);
-}
-function rmToast(el) {
-    if (!el || el.classList.contains('out')) return;
-    el.classList.add('out');
-    setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 200);
+/* ══ 토스트 (task-detail.js와 동일한 방식으로 통일) ══ */
+function showToast(message, type) {
+    var toastWrap = document.getElementById('dynamicToast');
+    if (toastWrap) toastWrap.remove();
+
+    toastWrap = document.createElement('div');
+    toastWrap.id = 'dynamicToast';
+    toastWrap.className = 'toast-wrap';
+
+    var cls = (type === 'error' || type === 'warning') ? 'toast-' + type : 'toast-success';
+    toastWrap.innerHTML = '<div class="toast-msg ' + cls + '">' + message + '</div>';
+    document.body.appendChild(toastWrap);
+
+    setTimeout(function () {
+        if (document.body.contains(toastWrap)) toastWrap.remove();
+    }, 3500);
 }
 
 /* ══ 체크박스 ══ */
@@ -66,10 +68,10 @@ function executeDelete() {
         });
     });
     chain.then(function() {
-        showToast('success', '삭제되었습니다.');
+        showToast('삭제되었습니다.', 'success');
         closeDeleteModal();
         setTimeout(function(){ location.reload(); }, 800);
-    }).catch(function(){ showToast('error', '삭제 중 오류가 발생했습니다.'); });
+    }).catch(function(){ showToast('삭제 중 오류가 발생했습니다.', 'error'); });
 }
 
 /* ══ 추가 모달 ══ */
@@ -172,11 +174,11 @@ function submitAddMember() {
     });
 
     if (!toAdd.length && !toRemove.length) {
-        showToast('warning', '변경된 내용이 없습니다.');
+        showToast('변경된 내용이 없습니다.', 'warning');
         return;
     }
     if (toAdd.length && !roleInput) {
-        showToast('warning', '새로 추가할 구성원의 역할을 선택해주세요.');
+        showToast('새로 추가할 구성원의 역할을 선택해주세요.', 'warning');
         return;
     }
 
@@ -206,10 +208,10 @@ function submitAddMember() {
     });
 
     chain.then(function() {
-        showToast('success', '구성원 정보가 저장되었습니다.');
+        showToast('구성원 정보가 저장되었습니다.', 'success');
         closeAddModal();
         setTimeout(function(){ location.reload(); }, 800);
-    }).catch(function(){ showToast('error', '저장 중 오류가 발생했습니다.'); });
+    }).catch(function(){ showToast('저장 중 오류가 발생했습니다.', 'error'); });
 }
 
 /* ══ 외부 클릭 닫기 ══ */
@@ -218,19 +220,58 @@ document.addEventListener('click', function(e) {
     if (e.target.id === 'deleteConfirmModal') closeDeleteModal();
 });
 
-function updateMemberRole(sel) {
-    var memberId = sel.getAttribute('data-member-id');
-    var roleId   = sel.value;
+/* ══ 역할 편집 (배치 저장) ══ */
+function onRoleSelectChange(sel) {
+    var memberId     = sel.getAttribute('data-member-id');
+    var originalRole = sel.getAttribute('data-original-role') || '';
+    var newRole      = sel.value || '';
+
+    if (newRole === originalRole) {
+        delete pendingRoleChanges[memberId];
+        sel.classList.remove('role-changed');
+    } else {
+        pendingRoleChanges[memberId] = newRole;
+        sel.classList.add('role-changed');
+    }
+    syncSaveRolesBtn();
+}
+
+function syncSaveRolesBtn() {
+    var btn = document.getElementById('saveRolesBtn');
+    if (!btn) return;
+    var cnt = Object.keys(pendingRoleChanges).length;
+    btn.textContent = cnt > 0 ? '저장 (' + cnt + ')' : '저장';
+    btn.classList.toggle('disabled', cnt === 0);
+}
+
+function saveMemberRoles() {
+    var memberIds = Object.keys(pendingRoleChanges);
+    if (!memberIds.length) return;
 
     var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
     headers[csrfHeader] = csrfToken;
-    var p = new URLSearchParams();
-    p.append('memberId', memberId);
-    p.append('projectId', String(projectId));
-    p.append('roleId', roleId);
+    var chain = Promise.resolve();
+    var failed = false;
 
-    fetch('/project/settings/members/updateRole', { method:'POST', headers:headers, body:p.toString() })
-        .then(function(r){ if (!r.ok) throw new Error(); return r.text(); })
-        .then(function(){ showToast('success', '역할이 변경되었습니다.'); })
-        .catch(function(){ showToast('error', '역할 변경 중 오류가 발생했습니다.'); });
+    memberIds.forEach(function(memberId) {
+        chain = chain.then(function() {
+            var p = new URLSearchParams();
+            p.append('memberId', memberId);
+            p.append('projectId', String(projectId));
+            p.append('roleId', pendingRoleChanges[memberId]);
+            return fetch('/project/settings/members/updateRole', { method:'POST', headers:headers, body:p.toString() })
+                .then(function(r){ if (!r.ok) throw new Error(); })
+                .catch(function(){ failed = true; });
+        });
+    });
+
+    chain.then(function() {
+        if (failed) {
+            showToast('일부 역할 변경 중 오류가 발생했습니다.', 'error');
+        } else {
+            showToast('역할이 저장되었습니다.', 'success');
+        }
+        pendingRoleChanges = {};
+        setTimeout(function(){ location.reload(); }, 800);
+    });
 }

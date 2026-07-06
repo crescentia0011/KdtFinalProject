@@ -81,6 +81,13 @@
 		WHERE role_id = #{roleId}
 		  AND company_id = #{companyId}
 	</delete>
+
+	<!-- 역할 사용 여부 확인 (구성원에게 할당된 건수) -->
+	<select id="countMemberRolesByRoleId" parameterType="long" resultType="int">
+		SELECT COUNT(*)
+		FROM member_roles
+		WHERE role_id = #{roleId}
+	</select>
 	
 	<select id="selectRoleIdByName" resultType="long">
 	    SELECT role_id FROM (

@@ -359,9 +359,13 @@ public class MilestoneController {
 		}
 		LoginUserVO user = loginUser.getLoginUser();
 		if (isCompanyManager(user)) {
-			// 최고관리자는 모든 마일스톤 관리 권한 패스
-			return Set.of(PERMISSION_MILESTONE_CREATE_UPDATE_DELETE);
-		}
+	        return Set.of(
+	            PERMISSION_MILESTONE_CREATE_UPDATE_DELETE, // k1_version
+	            PERMISSION_TASK_CREATE,                    // k3_add
+	            PERMISSION_TASK_UPDATE,                    // k3_edit
+	            PERMISSION_TASK_MYUPDATE                   // k3_myedit
+	        );
+	    }
 		// 일반 팀원은 프로젝트 단위로 맵핑된 세부 권한 코드를 DB에서 긁어옴
 		return repositoryService.findProjectPermissionCodes(user.getUserCode(), projectId);
 	}

@@ -18,15 +18,28 @@ function initRoleList() {
         }
     };
 
-    const toast = document.getElementById("toast");
-    if (toast && toast.textContent.trim() !== "") {
-        toast.style.opacity = "1";
-        toast.style.visibility = "visible";
-        setTimeout(function () {
-            toast.style.opacity = "0";
-            toast.style.visibility = "hidden";
-        }, 3000);
+    const message = (typeof serverToastMessage !== 'undefined') ? serverToastMessage : '';
+    if (message && message.trim() !== '') {
+        var isError = (typeof serverToastType !== 'undefined') && serverToastType === 'error';
+        showToast(message, isError);
     }
+}
+
+/* ══ 토스트 (task-detail.js와 동일한 방식으로 통일) ══ */
+function showToast(message, isError) {
+    var toastWrap = document.getElementById('dynamicToast');
+    if (toastWrap) toastWrap.remove();
+
+    toastWrap = document.createElement('div');
+    toastWrap.id = 'dynamicToast';
+    toastWrap.className = 'toast-wrap';
+
+    toastWrap.innerHTML = '<div class="toast-msg ' + (isError ? 'toast-error' : 'toast-success') + '">' + message + '</div>';
+    document.body.appendChild(toastWrap);
+
+    setTimeout(function () {
+        if (document.body.contains(toastWrap)) toastWrap.remove();
+    }, 3500);
 }
 
 if (document.readyState === "complete") { initRoleList(); }

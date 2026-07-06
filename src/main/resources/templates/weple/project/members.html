@@ -10,11 +10,16 @@
 <body>
 <section class="settings-page">
 
-    <div id="memberToastContainer" class="member-toast-container"></div>
     <div th:replace="~{common/fragments/project-setting-tabs :: projectSettingTabs}"></div>
 
-        <!-- 테이블 헤더 영역: 삭제 버튼 우측 고정 -->
+        <!-- 테이블 헤더 영역: 저장/삭제 버튼 우측 고정 -->
         <div class="members-toolbar">
+		    <button th:if="${canManageMember}"
+		            type="button" id="saveRolesBtn"
+		            class="btn-save-roles disabled"
+		            onclick="saveMemberRoles()">
+		        저장
+		    </button>
 		    <button th:if="${canManageMember}"
 		            type="button" id="deleteSelectedBtn"
 		            class="btn-delete-selected disabled"
@@ -72,8 +77,8 @@
 		            <td class="col-role">
 					    <select th:if="${canManageMember}"
 					            class="role-select"
-					            th:attr="data-member-id=${m.memberId}"
-					            onchange="updateMemberRole(this)">
+					            th:attr="data-member-id=${m.memberId},data-original-role=${m.roleId}"
+					            onchange="onRoleSelectChange(this)">
 					        <option value="">역할 없음</option>
 					        <option th:each="role : ${roleList}"
 					                th:value="${role.roleId}"

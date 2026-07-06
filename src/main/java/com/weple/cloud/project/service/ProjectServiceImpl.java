@@ -117,6 +117,17 @@ public class ProjectServiceImpl implements ProjectService {
 		return projectMapper.countAllByMember(userCode, keyword);
 	}
 
+	// 관리자용 - 소속 회사 전체 프로젝트 조회 (구성원 여부 무관)
+	@Override
+	public List<ProjectVO> findAllByCompany(String companyId, String keyword, int offset, int pageSize) {
+		return projectMapper.selectAllByCompany(companyId, keyword, offset, pageSize);
+	}
+
+	@Override
+	public int countAllByCompany(String companyId, String keyword) {
+		return projectMapper.countAllByCompany(companyId, keyword);
+	}
+
 	@Override
 	public Set<String> findAnyProjectPermissionCodes(String userCode) {
 		return new HashSet<>(projectMapper.selectAnyProjectPermissionCodes(userCode));

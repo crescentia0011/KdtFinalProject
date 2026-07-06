@@ -28,4 +28,7 @@ public class CodeValueVO {
 	private String taskPriorityId;
 	private String priorityName;
 	private long orderNo;
+	
+	// 프로시저(SP_ADD_CODE_VALUE) 호출용 - 등록 후 생성된 ID를 담는 OUT 파라미터
+	private String generatedId;
 }

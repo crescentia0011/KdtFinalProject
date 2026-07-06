@@ -18,6 +18,9 @@ public interface CodeValueMapper {
 	// 등록
 	public long insertCodeValue(Map<String, Object> map);
 
+	// [프로시저] 등록 (기본값 처리 + 등록을 한 번에 처리, company_id 스코프 버그 수정 포함)
+	public void addCodeValueByProc(Map<String, Object> map);
+
 	// 수정 시 나 제외하고 모든 기본값을 N으로 변경
 	public void resetDefaultYn(Map<String, Object> params);
 	
@@ -26,6 +29,9 @@ public interface CodeValueMapper {
 	
 	// 수정 (데이터 1개씩 수정 가능)
 	public long updateCodeValue(CodeValueVO codeValueVO);
+
+	// [프로시저] 수정 (사용여부/기본값 처리 + 수정을 한 번에 처리, company_id 스코프 버그 수정 포함)
+	public void updateCodeValueByProc(Map<String, Object> map);
 	
 	// 삭제
 	public void deleteCodeValue(Map<String, Object> params);

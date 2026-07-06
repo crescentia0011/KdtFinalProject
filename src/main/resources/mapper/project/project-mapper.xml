@@ -247,6 +247,71 @@
 	        AND p.project_title LIKE '%' || #{keyword} || '%'
 	    </if>
 	</select>
+
+	<!-- 관리자용 - 소속 회사 전체 프로젝트 목록 (구성원 여부와 무관하게 회사 소속 프로젝트는 모두 조회)
+	     project 테이블에 회사 구분 컬럼이 없어 members->users 경로로 회사를 판별하며,
+	     구성원이 한 명도 없는 프로젝트는 소속 회사를 특정할 수 없으므로 예외적으로 통과시킴 -->
+	<select id="selectAllByCompany" resultType="com.weple.cloud.project.service.ProjectVO">
+	    SELECT *
+	    FROM (
+	        SELECT p.project_id       AS projectId,
+	               p.project_title    AS projectTitle,
+	               p.project_describe AS projectDescribe,
+	               CASE
+	                   WHEN p.finish_date IS NOT NULL
+	                        AND p.finish_date &lt;= TRUNC(SYSDATE)
+	                   THEN '완료'
+	                   WHEN EXISTS (
+	                       SELECT 1 FROM task t WHERE t.project_id = p.project_id
+	                   )
+	                   THEN '진행 중'
+	                   ELSE '신규'
+	               END AS status,
+	               p.created_at       AS createdAt,
+	               p.finish_date      AS finishDate,
+	               ROWNUM AS rn
+	        FROM project p
+	        WHERE (
+	            NOT EXISTS (
+	                SELECT 1 FROM members m3
+	                WHERE m3.project_id = p.project_id
+	            )
+	            OR EXISTS (
+	                SELECT 1 FROM members m2
+	                JOIN users u2 ON m2.user_code = u2.user_code
+	                WHERE m2.project_id = p.project_id
+	                  AND u2.company_id = #{companyId}
+	            )
+	        )
+	        <if test="keyword != null and keyword != ''">
+	            AND p.project_title LIKE '%' || #{keyword} || '%'
+	        </if>
+	        ORDER BY p.project_id DESC
+	    )
+	    WHERE rn &gt; #{offset}
+	      AND rn &lt;= #{offset} + #{pageSize}
+	</select>
+
+	<!-- 관리자용 - 소속 회사 전체 프로젝트 수 -->
+	<select id="countAllByCompany" resultType="int">
+	    SELECT COUNT(*)
+	    FROM project p
+	    WHERE (
+	        NOT EXISTS (
+	            SELECT 1 FROM members m3
+	            WHERE m3.project_id = p.project_id
+	        )
+	        OR EXISTS (
+	            SELECT 1 FROM members m2
+	            JOIN users u2 ON m2.user_code = u2.user_code
+	            WHERE m2.project_id = p.project_id
+	              AND u2.company_id = #{companyId}
+	        )
+	    )
+	    <if test="keyword != null and keyword != ''">
+	        AND p.project_title LIKE '%' || #{keyword} || '%'
+	    </if>
+	</select>
 	
 	<!-- 프로젝트 한정 없이 이 사용자가 속한 모든 프로젝트에서 가진 k1_* 권한 코드 전체 (중복 제거) -->
 	<select id="selectAnyProjectPermissionCodes" resultType="string">

@@ -15,7 +15,7 @@
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b3')}"
             th:classappend="${currentMenu == 'milestone'} ? 'active' : ''">
-            <a th:href="@{/project/milestone(projectId=${projectId})}">마일스톤</a>
+            <a th:href="@{/project/milestone(projectId=${projectId})}">로드맵</a>
         </li>
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b4')}"

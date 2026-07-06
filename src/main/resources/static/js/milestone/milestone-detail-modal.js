@@ -178,57 +178,75 @@ document.addEventListener("DOMContentLoaded", function() {
     // =======================================================
     // [핵심 변경 포인트] 비동기 즉시 등록 및 화면 갱신 기능
     // =======================================================
-    btnConfirmTasks.addEventListener("click", function() {
-        // 더블 클릭 방지 및 상태 표시를 위한 버튼 비활성화
-        btnConfirmTasks.disabled = true;
-        btnConfirmTasks.textContent = "저장 중...";
+	btnConfirmTasks.addEventListener("click", function() {
+	    btnConfirmTasks.disabled = true;
+	    btnConfirmTasks.textContent = "저장 중...";
 
-        // 보낼 파라미터 빌드 (x-www-form-urlencoded 포맷)
-        const params = new URLSearchParams();
-        params.append("projectId", projectId);
-        params.append("milestoneId", milestoneId);
-        
-        // 현재 체크되어 임시 저장된 일감 ID들을 모두 담음
-        const taskIds = Object.keys(tempSelectedTasks);
-        if (taskIds.length > 0) {
-            taskIds.forEach(id => params.append("taskIds", id));
-        } else {
-            // 선택된 일감이 하나도 없을 경우에 대비해 공백 값 전송 (전체 해제 목적)
-            params.append("taskIds", "");
-        }
+	    const params = new URLSearchParams();
+	    params.append("projectId", projectId);
+	    params.append("milestoneId", milestoneId);
+	    
+	    const taskIds = Object.keys(tempSelectedTasks);
+	    if (taskIds.length > 0) {
+	        taskIds.forEach(id => params.append("taskIds", id));
+	    } else {
+	        params.append("taskIds", "");
+	    }
 
-        // 서버로 비동기 POST 요청
-        fetch("/project/milestone/api/update-task-mapping", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                [csrfHeader]: csrfToken // Spring Security CSRF 검증 우회용 헤더 주입
-            },
-            body: params.toString()
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("네트워크 응답 오류");
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                taskModal.classList.remove("show");
-                // 상세페이지의 통계, 진행바, 일감 리스트를 최신화하기 위해 새로고침 실행
-                location.reload();
-            } else {
-                alert("등록 실패: " + data.message);
-                btnConfirmTasks.disabled = false;
-                btnConfirmTasks.textContent = "연결 등록";
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert("서버 통신 중 문제가 발생했습니다.");
-            btnConfirmTasks.disabled = false;
-            btnConfirmTasks.textContent = "연결 등록";
-        });
-    });
+	    fetch("/project/milestone/api/update-task-mapping", {
+	        method: "POST",
+	        headers: {
+	            "Content-Type": "application/x-www-form-urlencoded",
+	            [csrfHeader]: csrfToken 
+	        },
+	        body: params.toString()
+	    })
+	    .then(response => {
+	        if (!response.ok) {
+	            throw new Error("네트워크 응답 오류");
+	        }
+	        return response.json();
+	    })
+	    .then(data => {
+	        if (data.success) {
+	            // alert 제거 -> 성공 토스트 출력
+	            showToast(data.message || '일감 연결이 완료되었습니다.', false);
+	            
+	            const taskModal = document.getElementById("taskModal");
+	            if (taskModal) taskModal.classList.remove("show");
+	            
+	            setTimeout(() => {
+	                location.reload();
+	            }, 1200);
+	        } else {
+	            // alert 제거 -> 에러 토스트 출력
+	            showToast("등록 실패: " + data.message, true);
+	            btnConfirmTasks.disabled = false;
+	            btnConfirmTasks.textContent = "선택 완료"; // HTML 원본 버튼 텍스트 명칭으로 복구
+	        }
+	    })
+	    .catch(error => {
+	        console.error("Error:", error);
+	        // alert 제거 -> 에러 토스트 출력
+	        showToast("서버 통신 중 문제가 발생했습니다.", true);
+	        btnConfirmTasks.disabled = false;
+	        btnConfirmTasks.textContent = "선택 완료";
+	    });
+	});
+	
+	function showToast(message, isError) {
+	    const toastWrap = document.createElement('div');
+	    toastWrap.className = 'toast-wrap';
+	    
+	    const toastMsg = document.createElement('div');
+	    toastMsg.className = `toast-msg ${isError ? 'toast-error' : 'toast-success'}`;
+	    toastMsg.textContent = message;
+	    
+	    toastWrap.appendChild(toastMsg);
+	    document.body.appendChild(toastWrap);
+	    
+	    setTimeout(() => {
+	        toastWrap.remove();
+	    }, 3500);
+	}
 });

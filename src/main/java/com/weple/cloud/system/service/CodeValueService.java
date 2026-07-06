@@ -15,6 +15,9 @@ public interface CodeValueService {
 
 	// 등록
 	public long addCodeValue(CodeValueVO codeValueVO, String type);
+
+	// [프로시저] 등록 - 기본값 처리 포함 (SP_ADD_CODE_VALUE)
+	public String addCodeValueByProc(CodeValueVO codeValueVO, String type);
 	
 	// 수정 (모든 기본값을 N으로 변경)
 	public void resetDefaultYn(Map<String, Object> params);
@@ -24,6 +27,9 @@ public interface CodeValueService {
 	
 	// 수정 (데이터 1개씩 수정 가능)
 	public void modifyCodeValue(CodeValueVO codeValueVO, String type);
+
+	// [프로시저] 수정 - 사용여부/기본값 처리 포함 (SP_UPDATE_CODE_VALUE)
+	public void modifyCodeValueByProc(CodeValueVO codeValueVO, String type);
 	
 	// 삭제
 	public void removeCodeValue(String type, String id);

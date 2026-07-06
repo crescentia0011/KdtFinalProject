@@ -19,7 +19,7 @@
 		<div
 			style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
 			<h3 style="color: #1e293b; font-weight: 700; margin: 0;">일감</h3>
-			<button th:if="${isAdminOrOwner or taskPerms.k3Add != null}"
+			<button th:if="${(isAdminOrOwner or taskPerms.k3Add != null) and (project == null or project.status != '완료')}"
 				type="button"
 				th:onclick="|location.href='@{/project/task/insert(projectId=${param.projectId})}'|"
 				class="btn-create-task">

@@ -341,147 +341,147 @@ public class SystemController {
 	}
 
 	// -------------------------------코드값------------------------------
-	// 전체조회
-	@GetMapping("codeValueList")
-	public String codeValueList(Model model, @AuthenticationPrincipal LoginUserDetails loginUser) {
-		Long companyId = loginUser.getLoginUser().getCompanyId();
-		List<CodeValueVO> codeList = codeValueService.findCodeValueAll(companyId);
-		// 조회 결과가 없으면 빈 리스트 생성해서 넣음
-		if (codeList == null) {
-			codeList = new java.util.ArrayList<>();
+		// 전체조회
+		@GetMapping("codeValueList")
+		public String codeValueList(Model model, @AuthenticationPrincipal LoginUserDetails loginUser) {
+			Long companyId = loginUser.getLoginUser().getCompanyId();
+			List<CodeValueVO> codeList = codeValueService.findCodeValueAll(companyId);
+			// 조회 결과가 없으면 빈 리스트 생성해서 넣음
+			if (codeList == null) {
+				codeList = new java.util.ArrayList<>();
+			}
+			model.addAttribute("codeList", codeList);
+			model.addAttribute("codeList", codeList);
+			model.addAttribute("menu", "codeValue");
+			model.addAttribute("sidebarMenu", "system");
+
+			return "weple/admin/code/list";
 		}
-		model.addAttribute("codeList", codeList);
-		model.addAttribute("codeList", codeList);
-		model.addAttribute("menu", "code");
-		model.addAttribute("sidebarMenu", "system");
 
-		return "weple/admin/code/list";
-	}
-
-	// 등록 양식
-	@GetMapping("/codeInsert")
-	//codeInsert?type=work처럼 접속하면 실행, type 값을 받아 화면에 전달
-	public String codeInsertForm(@RequestParam("type") String type, Model model) {
-		// 타입이 WORK이면 작업분류, 아니면 일감 우선순위
-		String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
-	    model.addAttribute("pageTitle", pageTitle);
-		model.addAttribute("type", type);
-		model.addAttribute("menu", "code");
-		model.addAttribute("sidebarMenu", "system");
-		// 현재 기본값 이름 (등록 폼에서 기본값 설정 시 confirm 메시지에 표시)
-		String defaultName = codeValueService.findDefaultNameByType(type, null);
-		model.addAttribute("defaultItemName", (defaultName != null ? defaultName : "없음"));
-		return "weple/admin/code/codeForm";
-	}
-
-	// 등록 처리
-	@PostMapping("codeInsert")
-	//용자가 입력한 폼(form)의 값들을 CodeValueVO 객체에 자동으로 담아즘
-	public String codeInsertProcess(@ModelAttribute("CodeValue") CodeValueVO codeValueVO, @RequestParam("type") String type, Model model,
-			@AuthenticationPrincipal LoginUserDetails loginUser) {
-		codeValueVO.setCompanyId(loginUser.getLoginUser().getCompanyId());
-		//체크박스는 체크하면 값이 오고, 체크하지 않으면 null
-	    codeValueVO.setUsingYn(codeValueVO.getUsingYn() != null ? "Y" : "N");
-	    codeValueVO.setDefaultYn(codeValueVO.getDefaultYn() != null ? "Y" : "N");
-	    // 기본값으로 등록했으면 다른 기본값은 모두 N로 변경
-	    if ("Y".equals(codeValueVO.getDefaultYn())) {
-	        codeValueService.resetAllDefaultYn(type); 
-	    }
-	    
-		codeValueService.addCodeValue(codeValueVO, type);
-		return "redirect:codeValueList";
-	}
-
-	// 수정 양식
-	@GetMapping("codeUpdate")
-	// CNO=수정할 코드의 번호(ID), TYPE=작업분류인지, 일감 우선순위인지 구분하는 값
-	public String codeUpdateForm(@RequestParam("cno") String cno, @RequestParam("type") String type, Model model) {
-		CodeValueVO vo = new CodeValueVO();
-		//type에 따라 ID 저장
-		if ("work".equals(type)) {
-	        vo.setTaskClassificationId(cno);
-	    } else {
-	        vo.setTaskPriorityId(cno);
-	    }
-
-	    CodeValueVO result = codeValueService.findCodeValueInfo(vo, type);
-	    
-	    String defaultName = codeValueService.findDefaultNameByType(type, cno);
-	    model.addAttribute("defaultItemName", (defaultName != null ? defaultName : "없음"));
-
-	    String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
-	    model.addAttribute("pageTitle", pageTitle);
-	    model.addAttribute("CodeValue", result);
-		model.addAttribute("type", type);
-		model.addAttribute("menu", "code");
-		model.addAttribute("sidebarMenu", "system");
-		return "weple/admin/code/codeForm";
-	}
-
-	// 수정 처리
-	@PostMapping("codeUpdate")
-	public String codeUpdateProcess(CodeValueVO codeValueVO, @RequestParam("type") String type, HttpServletRequest request) {
-		String defaultYn = (request.getParameter("defaultYn") != null) ? "Y" : "N";
-	    codeValueVO.setDefaultYn(defaultYn);
-	    String usingYn = (request.getParameter("usingYn") != null) ? "Y" : "N";
-	    codeValueVO.setUsingYn(usingYn);
-		codeValueService.modifyCodeValue(codeValueVO, type);
-	    return "redirect:codeValueList";
-	}
-	
-	// 삭제
-	@PostMapping("/codeDelete")
-	@ResponseBody
-	public Map<String, Object> codeDeleteProcess(@RequestParam("cno") String cno, @RequestParam("type") String type) {
-		Map<String, Object> result = new java.util.HashMap<>();
-		try {
-			codeValueService.removeCodeValue(type, cno);
-			result.put("success", true);
-		} catch (Exception e) {
-			result.put("success", false);
-			result.put("message", "삭제 중 오류가 발생했습니다.");
+		// 등록 양식
+		@GetMapping("/codeInsert")
+		//codeInsert?type=work처럼 접속하면 실행, type 값을 받아 화면에 전달
+		public String codeInsertForm(@RequestParam("type") String type, Model model) {
+			// 타입이 WORK이면 작업분류, 아니면 일감 우선순위
+			String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
+		    model.addAttribute("pageTitle", pageTitle);
+			model.addAttribute("type", type);
+			model.addAttribute("menu", "codeValue");
+			model.addAttribute("sidebarMenu", "system");
+			// 현재 기본값 이름 (등록 폼에서 기본값 설정 시 confirm 메시지에 표시)
+			String defaultName = codeValueService.findDefaultNameByType(type, null);
+			model.addAttribute("defaultItemName", (defaultName != null ? defaultName : "없음"));
+			return "weple/admin/code/codeForm";
 		}
-		return result;
-	}
 
-	//드래그앤드랍
-	@PostMapping("/updateOrder")
-	@ResponseBody
-	public Map<String, Object> updateOrder(@RequestBody Map<String, Object> params,
-			@AuthenticationPrincipal LoginUserDetails loginUser) throws Exception {
-	    try {
-	        String type = (String) params.get("type");
-	        List<Map<String, Object>> items = (List<Map<String, Object>>) params.get("items");
-	        
-	        if (items == null || items.isEmpty()) {
-	            throw new Exception("저장할 데이터가 없습니다.");
-	        }
+		// 등록 처리
+		@PostMapping("codeInsert")
+		//용자가 입력한 폼(form)의 값들을 CodeValueVO 객체에 자동으로 담아즘
+		public String codeInsertProcess(@ModelAttribute("CodeValue") CodeValueVO codeValueVO, @RequestParam("type") String type, Model model,
+				@AuthenticationPrincipal LoginUserDetails loginUser) {
+			codeValueVO.setCompanyId(loginUser.getLoginUser().getCompanyId());
+			//체크박스는 체크하면 값이 오고, 체크하지 않으면 null
+		    codeValueVO.setUsingYn(codeValueVO.getUsingYn() != null ? "Y" : "N");
+		    codeValueVO.setDefaultYn(codeValueVO.getDefaultYn() != null ? "Y" : "N");
+		    // [프로시저] 기본값 처리(회사 스코프)+등록을 SP_ADD_CODE_VALUE 한 번으로 처리
+		    codeValueService.addCodeValueByProc(codeValueVO, type);
+			return "redirect:codeValueList";
+		}
 
-	        Long companyId = loginUser.getLoginUser().getCompanyId();
-	        List<CodeValueVO> itemList = new ArrayList<>();
-	        int order = 1;
-	        for (Map<String, Object> item : items) {
-	            CodeValueVO vo = new CodeValueVO();
-	            vo.setOrderNo(order++);
-	            vo.setCompanyId(companyId);
-	            if ("work".equals(type)) {
-	                vo.setTaskClassificationId(String.valueOf(item.get("id")));
-	            } else {
-	                vo.setTaskPriorityId(String.valueOf(item.get("id")));
-	            }
-	            itemList.add(vo);
-	        }
-	        
-	        codeValueService.reorderCodes(type, itemList);
-	        
-	        Map<String, Object> response = new HashMap<>();
-	        response.put("status", "success");
-	        return response;
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        throw e;
-	    }
-	}
+		// 수정 양식
+		@GetMapping("codeUpdate")
+		// CNO=수정할 코드의 번호(ID), TYPE=작업분류인지, 일감 우선순위인지 구분하는 값
+		public String codeUpdateForm(@RequestParam("cno") String cno, @RequestParam("type") String type, Model model) {
+			CodeValueVO vo = new CodeValueVO();
+			//type에 따라 ID 저장
+			if ("work".equals(type)) {
+		        vo.setTaskClassificationId(cno);
+		    } else {
+		        vo.setTaskPriorityId(cno);
+		    }
+
+		    CodeValueVO result = codeValueService.findCodeValueInfo(vo, type);
+		    
+		    String defaultName = codeValueService.findDefaultNameByType(type, cno);
+		    model.addAttribute("defaultItemName", (defaultName != null ? defaultName : "없음"));
+
+		    String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
+		    model.addAttribute("pageTitle", pageTitle);
+		    model.addAttribute("CodeValue", result);
+			model.addAttribute("type", type);
+			model.addAttribute("menu", "codeValue");
+			model.addAttribute("sidebarMenu", "system");
+			return "weple/admin/code/codeForm";
+		}
+
+		// 수정 처리
+		@PostMapping("codeUpdate")
+		public String codeUpdateProcess(CodeValueVO codeValueVO, @RequestParam("type") String type, HttpServletRequest request,
+				@AuthenticationPrincipal LoginUserDetails loginUser) {
+			String defaultYn = (request.getParameter("defaultYn") != null) ? "Y" : "N";
+		    codeValueVO.setDefaultYn(defaultYn);
+		    String usingYn = (request.getParameter("usingYn") != null) ? "Y" : "N";
+		    codeValueVO.setUsingYn(usingYn);
+		    // companyId는 폼에 없으므로(신뢰 불가) 세션의 로그인 정보에서 가져와 회사 스코프를 보장
+		    codeValueVO.setCompanyId(loginUser.getLoginUser().getCompanyId());
+		    // [프로시저] 사용여부/기본값 처리(회사 스코프)+수정을 SP_UPDATE_CODE_VALUE 한 번으로 처리
+			codeValueService.modifyCodeValueByProc(codeValueVO, type);
+		    return "redirect:codeValueList";
+		}
+		
+		// 삭제
+		@PostMapping("/codeDelete")
+		@ResponseBody
+		public Map<String, Object> codeDeleteProcess(@RequestParam("cno") String cno, @RequestParam("type") String type) {
+			Map<String, Object> result = new java.util.HashMap<>();
+			try {
+				codeValueService.removeCodeValue(type, cno);
+				result.put("success", true);
+			} catch (Exception e) {
+				result.put("success", false);
+				result.put("message", "삭제 중 오류가 발생했습니다.");
+			}
+			return result;
+		}
+
+		//드래그앤드랍
+		@PostMapping("/updateOrder")
+		@ResponseBody
+		public Map<String, Object> updateOrder(@RequestBody Map<String, Object> params,
+				@AuthenticationPrincipal LoginUserDetails loginUser) throws Exception {
+		    try {
+		        String type = (String) params.get("type");
+		        List<Map<String, Object>> items = (List<Map<String, Object>>) params.get("items");
+		        
+		        if (items == null || items.isEmpty()) {
+		            throw new Exception("저장할 데이터가 없습니다.");
+		        }
+
+		        Long companyId = loginUser.getLoginUser().getCompanyId();
+		        List<CodeValueVO> itemList = new ArrayList<>();
+		        int order = 1;
+		        for (Map<String, Object> item : items) {
+		            CodeValueVO vo = new CodeValueVO();
+		            vo.setOrderNo(order++);
+		            vo.setCompanyId(companyId);
+		            if ("work".equals(type)) {
+		                vo.setTaskClassificationId(String.valueOf(item.get("id")));
+		            } else {
+		                vo.setTaskPriorityId(String.valueOf(item.get("id")));
+		            }
+		            itemList.add(vo);
+		        }
+		        
+		        codeValueService.reorderCodes(type, itemList);
+		        
+		        Map<String, Object> response = new HashMap<>();
+		        response.put("status", "success");
+		        return response;
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        throw e;
+		    }
+		}
 
 	// -------------------------------프로젝트------------------------------
 	   
@@ -702,7 +702,7 @@ public class SystemController {
 	
 	
 	// -------------------------------역할 및 권한------------------------------
-	@Autowired
+    @Autowired
 	private RoleService roleService;
 	
 	// 역할 목록
@@ -783,6 +783,13 @@ public class SystemController {
 	                          @AuthenticationPrincipal LoginUserDetails loginUser,
 	                          RedirectAttributes redirectAttributes) {
 	    Long companyId = loginUser.getLoginUser().getCompanyId();
+
+	    // 구성원에게 할당되어 사용 중인 역할은 삭제 불가
+	    if (roleService.isRoleInUse(roleId)) {
+	        redirectAttributes.addFlashAttribute("toastMessage", "해당 역할을 사용 중인 구성원이 있어 삭제할 수 없습니다.");
+	        return "redirect:/system/role";
+	    }
+
 	    int result = roleService.deleteRole(roleId, companyId);
 	    if(result > 0) {
 	        redirectAttributes.addFlashAttribute("toastMessage", "역할이 삭제되었습니다.");
@@ -790,7 +797,6 @@ public class SystemController {
 	    return "redirect:/system/role";
 	}
 	
-	// private 헬퍼: permissionList → tagLabel 기준 LinkedHashMap
 	private java.util.LinkedHashMap<String, java.util.List<PermissionVO>> groupPermissions(
 	        java.util.List<PermissionVO> permissionList) {
 
@@ -798,7 +804,6 @@ public class SystemController {
 	            new java.util.LinkedHashMap<>();
 
 	    for (PermissionVO perm : permissionList) {
-	        // tagLabel(한글)이 없으면 permissionTag(k1~k7) 로 폴백
 	        String key = (perm.getTagLabel() != null && !perm.getTagLabel().isBlank())
 	                     ? perm.getTagLabel()
 	                     : perm.getPermissionTag();

@@ -1,5 +1,4 @@
 package com.weple.cloud.task.web;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriUtils;
 
 import com.weple.cloud.admin.service.UserService;
@@ -35,6 +35,7 @@ import com.weple.cloud.history.task.service.TaskHistoryService;
 import com.weple.cloud.notification.service.AlarmType;
 import com.weple.cloud.notification.service.NotificationService;
 import com.weple.cloud.project.service.ProjectService;
+import com.weple.cloud.project.service.ProjectVO;
 import com.weple.cloud.system.service.CodeValueService;
 import com.weple.cloud.system.service.CodeValueVO;
 import com.weple.cloud.task.service.TaskCommentVO;
@@ -162,6 +163,14 @@ public class TaskController {
 		if (loginUser == null || loginUser.getLoginUser() == null) {
 			return "weple/access-denide";
 		}
+		
+		// 완료된 프로젝트는 조회만 가능 -> 일감 등록 페이지 접근 자체를 차단 - 은
+		ProjectVO project = projectService.findById(String.valueOf(pId));
+			if (project != null && "완료".equals(project.getStatus())) {
+				model.addAttribute("accessDenideTitle", "완료된 프로젝트입니다.");
+				model.addAttribute("accessDenideMessage", "완료된 프로젝트는 조회만 가능하며, 새 일감을 등록할 수 없습니다.");
+				return "weple/access-denide";
+			}
 		
 		
 		Integer ownerYn = loginUser.getLoginUser().getOwnerYn();

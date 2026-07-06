@@ -5,6 +5,7 @@
     display:flex;
     justify-content:flex-end;
     align-items:center;
+    gap:8px;
     margin-bottom:14px;
     min-height: 32px;
 }
@@ -26,6 +27,20 @@
 }
 .btn-delete-selected:hover:not(.disabled) { background: #FEE2E2; }
 .btn-delete-selected.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.btn-save-roles {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 32px; padding: 0 16px;
+    background: #F1EDFF; color: #6D5EF7;
+    border: 1.5px solid #DDD6FE; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background .15s, opacity .15s;
+}
+.btn-save-roles:hover:not(.disabled) { background: #EDE9FF; }
+.btn-save-roles.disabled {
     opacity: 0.35;
     cursor: not-allowed;
 }
@@ -324,31 +339,34 @@
 }
 
 /* ═══════════════════════════════════
-   토스트 (화면 중앙 상단)
+   토스트 (task-detail.css와 동일한 스타일로 통일)
 ═══════════════════════════════════ */
-.member-toast-container {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-    z-index: 99999; display: flex; flex-direction: column;
-    gap: 8px; align-items: center; pointer-events: none;
+.toast-wrap {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    animation: toastFadeOut 3.5s forwards;
 }
-.member-toast {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 22px; background: #fff;
-    border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.13);
-    font-size: 13px; font-weight: 500; color: #1e293b;
-    min-width: 240px; pointer-events: all;
-    animation: tIn .2s ease; border-left: 4px solid #6D5EF7;
+.toast-msg {
+    padding: 13px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    min-width: 250px;
 }
-@keyframes tIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-.member-toast.out { animation: tOut .2s ease forwards; }
-@keyframes tOut { to{opacity:0;transform:translateY(-8px)} }
-.toast-success { border-left-color: #22C55E; }
-.toast-error   { border-left-color: #EF4444; }
-.toast-warning { border-left-color: #F59E0B; }
-.t-msg { flex:1; }
-.member-toast button {
-    background: none; border: none; cursor: pointer;
-    color: #adb5bd; font-size: 13px;
+.toast-error   { background: #EF4444; }
+.toast-success { background: #22C55E; }
+.toast-warning { background: #F59E0B; }
+@keyframes toastFadeOut {
+    0%   { opacity: 0; transform: translate(-50%, -20px); }
+    10%  { opacity: 1; transform: translate(-50%, 0); }
+    75%  { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -20px); }
 }
 
 /* ── 라벨 + 버튼 한 줄 배치 (전체선택용) ── */
@@ -424,4 +442,9 @@
     outline: none;
     border-color: #6D5EF7;
     box-shadow: 0 0 0 3px rgba(109,94,247,.1);
+}
+.role-select.role-changed {
+    border-color: #F59E0B;
+    background-color: #FFFBEB;
+    box-shadow: 0 0 0 3px rgba(245,158,11,.12);
 }

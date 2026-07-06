@@ -193,21 +193,30 @@
     margin: 0;
 }
 
-/* ===== 토스트 ===== */
-.toast-message {
+/* ===== 토스트 (task-detail.css와 동일한 스타일로 통일) ===== */
+.toast-wrap {
     position: fixed;
     top: 24px;
     left: 50%;
     transform: translateX(-50%);
-    background: #111827;
-    color: #fff;
-    padding: 16px 30px;
-    border-radius: 12px;
-    z-index: 999999;
+    z-index: 9999;
+    animation: toastFadeOut 3.5s forwards;
+}
+.toast-msg {
+    padding: 13px 20px;
+    border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    white-space: nowrap;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    min-width: 250px;
+}
+.toast-error   { background: #EF4444; }
+.toast-success { background: #22C55E; }
+@keyframes toastFadeOut {
+    0%   { opacity: 0; transform: translate(-50%, -20px); }
+    10%  { opacity: 1; transform: translate(-50%, 0); }
+    75%  { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -20px); }
 }

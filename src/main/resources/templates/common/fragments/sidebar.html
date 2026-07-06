@@ -1,7 +1,7 @@
 <div th:fragment="sidebarFragment" class="left_col scroll-view"
      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
   <div class="navbar nav_title" style="border: 0">
-    <a th:href="@{/dashboard/index}" class="site_title">
+    <a th:href="@{/dashboard}" class="site_title">
       <i class="fa fa-group"></i> <span>WEPLE</span>
     </a>
   </div>
@@ -12,7 +12,7 @@
     <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
         <div class="menu_section">
             <ul class="nav side-menu">
-                <li><a th:href="@{/dashboard/index}"><i class="fa fa-dashboard"></i> 대시보드</a></li>
+                <li th:classappend="${sidebarMenu == 'dashboard'} ? 'active' : ''"><a th:href="@{/dashboard}"></i> 대시보드</a></li>
                 <li th:classappend="${sidebarMenu == 'task'} ? 'active' : ''"><a th:href="@{/task/all-list}"><i class="fa fa-tasks"></i> 일감</a></li>
                 <li th:classappend="${sidebarMenu == 'project'} ? 'active' : ''"><a th:href="@{/project}"><i class="fa fa-folder-open"></i> 프로젝트</a></li>
                 <li th:classappend="${sidebarMenu == 'work-history'} ? 'active' : ''"><a th:href="@{/worklog}"><i class="fa fa-history"></i> 작업내역</a></li>

@@ -3,13 +3,774 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+    <title>내 대시보드</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
+    
+    <style>
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr; /* 2:1:1 비율 */
+            gap: 32px;
+            padding: 16px 8px;
+            max-width: 100%;
+            margin: 0 auto;
+            align-items: stretch;
+            
+            /* 전역 body 오염 방지를 위해 컨테이너 내부 전용 폰트 크기 정의 */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 1.45rem; 
+            box-sizing: border-box;
+        }
+        
+        /* 대시보드 내부의 모든 요소에 box-sizing 일괄 적용 */
+        .dashboard-container * {
+            box-sizing: border-box;
+        }
+
+        /* 대시보드 메인 카드 스타일 */
+        .dashboard-container .dashboard-card {
+            background: #ffffff;
+            border: 1px solid #eef2f5;
+            border-radius: 24px; 
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            height: 700px; /* 세 영역의 전체 높이를 700px로 통일 */
+        }
+
+        /* 각 영역의 메인 소제목 */
+        .dashboard-container .card-header-title {
+            font-size: 1.8rem; 
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 46px;
+            flex-shrink: 0; 
+        }
+
+        /* 대량 데이터 및 균형을 위한 스크롤바 일괄 적용 */
+        .dashboard-container .scrollable-body {
+            flex-grow: 1; 
+            overflow-y: auto;  
+            padding-right: 12px;
+        }
+
+        /* 스크롤바 커스텀 (대시보드 내부 한정) */
+        .dashboard-container .scrollable-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        .dashboard-container .scrollable-body::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 6px;
+        }
+        .dashboard-container .scrollable-body::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 6px;
+        }
+        .dashboard-container .scrollable-body::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* 프로젝트 카드가 1row에 4개씩 배치되도록 설정 */
+        .dashboard-container .project-card-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 20px; 
+        }
+
+        .dashboard-container .project-item-card {
+            background: #ffffff;
+            border: 1px solid #eef2f5;
+            border-radius: 20px;
+            padding: 24px; 
+            min-height: 240px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.01);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .dashboard-container .project-item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        /* [수정] 태그 선택자 전역 오염 방지 */
+        .dashboard-container .project-info-top .project-title-text {
+            font-size: 1.5rem; 
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 10px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; 
+        }
+
+        /* [수정] 태그 선택자 전역 오염 방지 */
+        .dashboard-container .project-info-top .project-desc-text {
+            font-size: 1.3rem; 
+            color: #64748b;
+            margin: 0;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .dashboard-container .project-progress-section {
+            margin-top: 20px;
+        }
+
+        .dashboard-container .progress-bar-container {
+            width: 100%;
+            height: 12px; 
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-container .progress-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            width: 0%; 
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* 다른 요소와 겹치지 않게 대시보드 전용 색상 클래스로 명시력 강화 */
+        .dashboard-container .bg-blue   { background-color: #4e73df; }
+        .dashboard-container .bg-orange { background-color: #f6c23e; }
+        .dashboard-container .bg-green  { background-color: #1cc88a; }
+        .dashboard-container .bg-gray   { background-color: #beabc2; }
+
+        .dashboard-container .progress-txt-container {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem; 
+            color: #64748b;
+        }
+
+        .dashboard-container .progress-count { font-weight: 500; }
+        .dashboard-container .progress-percent { font-weight: 700; color: #4e73df; }
+
+        /* 마감 임박 카드 컴포넌트 테마 */
+        .dashboard-container .upcoming-box {
+            border-top: 5px solid #f43f5e; 
+        }
+        
+        .dashboard-container .task-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .dashboard-container .task-item-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 24px;
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 18px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.01);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .dashboard-container .task-item-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .dashboard-container .dday-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 68px;  
+            height: 68px; 
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1.4rem; 
+            flex-shrink: 0;
+        }
+        .dashboard-container .badge-danger { background-color: #fff1f2; color: #f43f5e; }  
+        .dashboard-container .badge-warning { background-color: #fffbeb; color: #d97706; } 
+        .dashboard-container .badge-info { background-color: #eff6ff; color: #2563eb; }    
+
+        .dashboard-container .task-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden; 
+        }
+
+        .dashboard-container .task-card-title {
+            font-size: 1.55rem; 
+            font-weight: 600;
+            color: #334155;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dashboard-container .task-card-project {
+            font-size: 1.35rem; 
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dashboard-container .loading-spinner, 
+        .dashboard-container .empty-msg {
+            text-align: center;
+            padding: 100px 0;
+            color: #94a3b8;
+            font-size: 1.5rem; 
+        }
+        
+        /* 드롭다운 공통 스타일 정의 */
+        .dashboard-container .card-header-select {
+            padding: 10px 40px 10px 18px;
+            font-size: 1.4rem; 
+            font-weight: 500;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background-color: #ffffff;
+            cursor: pointer;
+            outline: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 1.7rem;
+            appearance: none;
+            transition: border-color 0.2s;
+        }
+        .dashboard-container .card-header-select:focus {
+            border-color: #94a3b8;
+        }
+        
+		.dashboard-container .card-header-filters {
+		    display: flex;
+		    gap: 10px;
+		    align-items: center;
+		}
+		
+		/* 날짜 필터 스타일 커스텀 */
+		.dashboard-container .card-header-date {
+		    padding: 10px 14px;
+		    font-size: 1.4rem;
+		    font-weight: 500;
+		    color: #334155;
+		    border: 1px solid #e2e8f0;
+		    border-radius: 12px;
+		    background-color: #ffffff;
+		    outline: none;
+		    cursor: pointer;
+		    font-family: inherit;
+		    transition: border-color 0.2s;
+		}
+		.dashboard-container .card-header-date:focus {
+		    border-color: #94a3b8;
+		}
+
+        /* 수직 타임라인 레이아웃 구조 */
+        .dashboard-container .timeline-container {
+            position: relative;
+            padding-left: 44px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* 타임라인 가로수직 기둥 선 */
+        .dashboard-container .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 10px;
+            bottom: 10px;
+            width: 2.5px;
+            background-color: #f1f5f9;
+        }
+
+        .dashboard-container .timeline-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* 마커 서클 확대 */
+        .dashboard-container .timeline-marker {
+            position: absolute;
+            left: -44px;
+            top: 4px;
+            width: 42px; 
+            height: 42px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            border: 3px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dashboard-container .marker-create { border-color: #bfdbfe; background-color: #eff6ff; } 
+        .dashboard-container .marker-update { border-color: #bbf7d0; background-color: #f0fdf4; } 
+        .dashboard-container .marker-comment { border-color: #fed7aa; background-color: #fff7ed; } 
+        .dashboard-container .marker-wiki    { border-color: #e9d5ff; background-color: #f3e8ff; } 
+
+        /* 최근 활동 본문 */
+        .dashboard-container .timeline-info {
+            font-size: 1.55rem; 
+            color: #334155;
+            line-height: 1.6;
+        }
+        .dashboard-container .timeline-info strong {
+            color: #1e293b;
+            font-weight: 700;
+        }
+        .dashboard-container .timeline-meta {
+            font-size: 1.35rem; 
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        /* 반응형 태블릿/모바일 대응 */
+        @media (max-width: 1400px) {
+            .dashboard-container .project-card-grid {
+                grid-template-columns: repeat(2, 1fr); 
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .dashboard-container .project-card-grid {
+                grid-template-columns: 1fr; 
+            }
+            .dashboard-container .dashboard-card {
+                height: auto; 
+                max-height: 700px;
+            }
+        }
+    </style>
 </head>
 <body>
+<section>
+    <div class="dashboard-container">
+        
+        <div class="dashboard-card" id="my-projects-module">
+            <div class="card-header-title">프로젝트</div>
+            <div class="card-body scrollable-body">
+                <div class="loading-spinner">
+                    <span>프로젝트 목록을 불러오는 중입니다...</span>
+                </div>
+            </div>
+        </div>
 
-    <section>
-        본인 작성 내역 여기다 넣기
-    </section>
+        <div class="dashboard-card upcoming-box" id="upcoming-tasks-module">
+            <div class="card-header-title">
+                <span>마감 임박 일감</span>
+                <div class="card-header-filters">
+                    <select id="taskDdayFilter" class="card-header-select">
+                        <option value="all">전체</option>
+                        <option value="1">D-1 이내</option>
+                        <option value="3">D-3 이내</option>
+                        <option value="7">D-7 이내</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body scrollable-body">
+                <div class="loading-spinner">
+                    <span>데이터를 불러오는 중입니다...</span>
+                </div>
+            </div>
+        </div>
 
+        <div class="dashboard-card" id="recent-activity-module">
+		    <div class="card-header-title">
+		        <span>최근 활동</span>
+		        <div class="card-header-filters">
+		            <input type="date" id="activityDateFilter" class="card-header-date">
+		            <select id="activityProjectSelect" class="card-header-select">
+		                <option value="">전체 프로젝트</option>
+		            </select>
+		        </div>
+		    </div>
+		    <div class="card-body scrollable-body">
+		        <div class="loading-spinner">
+		            <span>데이터를 불러오는 중입니다...</span>
+		        </div>
+		    </div>
+		</div>
+            
+    </div>
+
+    <script th:inline="javascript">
+    // 전역 변수 선언
+    let cachedActivities = [];
+    let cachedTasks = []; // [추가] 마감 임박 일감 필터링을 위한 캐시 변수
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. 프로젝트 목록 로드
+        loadMyProjects();
+        // 2. 마감 임박 일감 로드
+        loadUpcomingTasks();
+        
+        // 최근 활동 프로젝트 드롭다운 이벤트 리스너
+        document.getElementById("activityProjectSelect").addEventListener("change", function(e) {
+            loadRecentActivities(e.target.value);
+        });
+
+        // 최근 활동 날짜 필터 이벤트 리스너
+        document.getElementById("activityDateFilter").addEventListener("change", function() {
+            applyActivityFilters();
+        });
+
+        // [추가] 마감 임박 일감 D-Day 필터 이벤트 리스너
+        document.getElementById("taskDdayFilter").addEventListener("change", function() {
+            applyTaskFilters();
+        });
+    });
+
+    function loadMyProjects() {
+        const container = document.querySelector("#my-projects-module .card-body");
+        if (!container) return;
+
+        fetch('/api/dashboard/my-projects', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('프로젝트 데이터를 가져오는 데 실패했습니다.');
+            return response.json();
+        })
+        .then(data => {
+            renderMyProjects(data, container);
+            initActivityProjectSelect(data);
+            loadRecentActivities();
+        })
+        .catch(error => {
+            console.error('Error fetching projects:', error);
+            container.innerHTML = `<p style="color: #f43f5e; text-align:center; font-size:1.4rem; padding: 20px 0;">프로젝트 정보를 불러오는 중 오류가 발생했습니다.</p>`;
+            loadRecentActivities();
+        });
+    }
+
+    function initActivityProjectSelect(projects) {
+        const selectBox = document.getElementById("activityProjectSelect");
+        if (!selectBox || !projects) return;
+        
+        selectBox.innerHTML = '<option value="">전체 프로젝트</option>';
+        
+        projects.forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p.projectId;
+            opt.textContent = p.projectTitle;
+            selectBox.appendChild(opt);
+        });
+    }
+
+    function renderMyProjects(projects, targetContainer) {
+        if (!projects || projects.length === 0) {
+            targetContainer.innerHTML = `<div class="empty-msg">참여 중인 프로젝트가 없습니다.</div>`;
+            return;
+        }
+
+        let html = `<div class="project-card-grid">`;
+        const colorThemes = ['bg-blue', 'bg-orange', 'bg-green', 'bg-gray'];
+
+        projects.forEach((project, index) => {
+            const progress = project.taskProgress !== undefined ? project.taskProgress : 0;
+            const completed = project.completedTasks !== undefined ? project.completedTasks : 0;
+            const total = project.totalTasks !== undefined ? project.totalTasks : 0;
+            const themeClass = colorThemes[index % colorThemes.length];
+
+            html += `
+                <a href="/project/outline?projectId=${project.projectId}" class="project-item-card">
+                    <div class="project-info-top">
+                        <h4 class="project-title-text">${escapeHtml(project.projectTitle)}</h4>
+                        <p class="project-desc-text">${escapeHtml(project.projectDescribe || '설명이 등록되지 않은 프로젝트입니다.')}</p>
+                    </div>
+                    
+                    <div class="project-progress-section">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill ${themeClass}" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="progress-txt-container">
+                            <span class="progress-count">${completed}/${total} 완료</span>
+                            <span class="progress-percent">${progress}%</span>
+                        </div>
+                    </div>
+                </a>
+            `;
+        });
+
+        html += `</div>`;
+        targetContainer.innerHTML = html;
+    }
+
+    function loadUpcomingTasks() {
+        const container = document.querySelector("#upcoming-tasks-module .scrollable-body");
+        if (!container) return;
+
+        fetch('/api/dashboard/upcoming-tasks', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('일감 데이터를 가져오는 데 실패했습니다.');
+            return response.json();
+        })
+        .then(data => {
+            cachedTasks = data; // 받아온 원본 데이터를 캐싱
+            applyTaskFilters(); // 필터 결합 조건 실행
+        })
+        .catch(error => {
+            console.error('Error fetching tasks:', error);
+            container.innerHTML = `<p style="color: #f43f5e; text-align:center; font-size:1.4rem; padding: 20px 0;">일감 정보를 불러오는 중 오류가 발생했습니다.</p>`;
+        });
+    }
+
+    // [추가] 마감 임박 일감 필터링 로직 함수
+    function applyTaskFilters() {
+	    const container = document.querySelector("#upcoming-tasks-module .scrollable-body");
+	    const filterValue = document.getElementById("taskDdayFilter").value;
+	
+	    if (filterValue === "all") {
+	        renderUpcomingTasks(cachedTasks, container);
+	        return;
+	    }
+	
+	    const maxDays = parseInt(filterValue);
+	    
+	    // 🔥 [최적화] 오늘 날짜 계산 및 시간 밀리초 변환은 루프 외부에서 딱 한 번만 수행!
+	    const today = new Date(); 
+	    today.setHours(0, 0, 0, 0);
+	    const todayTime = today.getTime();
+	    const oneDayMs = 1000 * 60 * 60 * 24;
+	
+	    const filteredTasks = cachedTasks.filter(task => {
+	        if (!task.finishDate) return false;
+	        
+	        // 🔥 [최적화] 크로스 브라우징 안전 포맷팅 속도 개선 ('2026.07.10' -> '2026/07/10')
+	        const normalizedDate = task.finishDate.substring(0, 10).replace(/\./g, '/');
+	        const targetDate = new Date(normalizedDate); 
+	        targetDate.setHours(0, 0, 0, 0);
+	        
+	        const diffTime = targetDate.getTime() - todayTime;
+	        const diffDays = Math.ceil(diffTime / oneDayMs);
+	        
+	        return diffDays <= maxDays;
+	    });
+	
+	    renderUpcomingTasks(filteredTasks, container);
+	}
+
+    function renderUpcomingTasks(tasks, targetContainer) {
+        if (!tasks || tasks.length === 0) {
+            targetContainer.innerHTML = `<div class="empty-msg">조건에 맞는 예정 일감이 없습니다. 🎉</div>`;
+            return;
+        }
+
+        // 🔥 [최적화] 계산 일관성을 위해 한 번 더 오늘 날짜 기준 생성 (함수 밖 추출 대체)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTime = today.getTime();
+        const oneDayMs = 1000 * 60 * 60 * 24;
+
+        let html = `<div class="task-card-list">`;
+
+        tasks.forEach(task => {
+            // 내부에서 인라인 계산하여 함수 호출 비용 절감
+            let ddayText = 'D-?';
+            let badgeClass = 'default';
+
+            if (task.finishDate) {
+                const normalizedDate = task.finishDate.substring(0, 10).replace(/\./g, '/');
+                const targetDate = new Date(normalizedDate);
+                targetDate.setHours(0, 0, 0, 0);
+                
+                const diffDays = Math.ceil((targetDate.getTime() - todayTime) / oneDayMs);
+                
+                if (diffDays === 0) ddayText = 'D-Day';
+                else ddayText = diffDays > 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`;
+                
+                // 기존에 정의하셨을 getBadgeClass 로직을 호출하거나 조건에 맞춰 바인딩 가능합니다.
+                badgeClass = getBadgeClass(ddayText); 
+            }
+
+            html += `
+                <a href="/project/task/detail/${task.taskId}?projectId=${task.projectId}" class="task-item-card">
+                    <div class="dday-badge ${badgeClass}">${ddayText}</div>
+                    <div class="task-card-info">
+                        <div class="task-card-title">${escapeHtml(task.taskTitle)}</div>
+                        <div class="task-card-project">${escapeHtml(task.projectTitle)}</div>
+                    </div>
+                </a>
+            `;
+        });
+
+        html += `</div>`;
+        targetContainer.innerHTML = html;
+    }
+
+    
+
+    function getBadgeClass(ddayText) {
+        if (ddayText === 'D-Day') return 'badge-danger';
+        if (ddayText.includes('D+')) return 'badge-danger'; // 이미 지난 일정 강조
+        const days = parseInt(ddayText.replace('D-', ''));
+        if (isNaN(days)) return 'badge-info';
+        
+        if (days <= 2) return 'badge-danger';  
+        if (days <= 5) return 'badge-warning'; 
+        return 'badge-info';                   
+    }
+
+    function escapeHtml(str) {
+        if(!str) return '';
+        return String(str).replace(/[&<>"']/g, function (m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+        });
+    }
+
+    function loadRecentActivities(projectId = "") {
+        const container = document.querySelector("#recent-activity-module .scrollable-body");
+        if (!container) return;
+
+        container.innerHTML = `<div class="loading-spinner"><span>데이터를 불러오는 중입니다...</span></div>`;
+
+        let url = '/api/dashboard/recent-activities';
+        if (projectId) {
+            url += `?projectId=${projectId}`;
+        }
+
+        fetch(url, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('최근 활동 데이터를 가져오는 데 실패했습니다.');
+            return response.json();
+        })
+        .then(data => {
+            cachedActivities = data;
+            applyActivityFilters();
+        })
+        .catch(error => {
+            console.error('Error fetching activities:', error);
+            container.innerHTML = `<p style="color: #f43f5e; text-align:center; font-size:1.4rem; padding: 20px 0;">활동 히스토리를 불러오는 중 오류가 발생했습니다.</p>`;
+        });
+    }
+
+    function applyActivityFilters() {
+        const container = document.querySelector("#recent-activity-module .scrollable-body");
+        const dateValue = document.getElementById("activityDateFilter").value; 
+
+        let filteredLogs = cachedActivities;
+
+        if (dateValue) {
+            filteredLogs = cachedActivities.filter(log => {
+                if (!log.actionAt) return false;
+                return log.actionAt.substring(0, 10) === dateValue;
+            });
+        }
+
+        renderRecentActivities(filteredLogs, container);
+    }
+
+    function renderRecentActivities(logs, targetContainer) {
+        if (!logs || logs.length === 0) {
+            targetContainer.innerHTML = `<div class="empty-msg" style="padding:100px 0;">조회된 조건의 활동 이력이 없습니다.</div>`;
+            return;
+        }
+
+        let html = `<div class="timeline-container">`;
+
+        logs.forEach(log => {
+            let actionText = "변경";
+            let markerClass = "marker-update";
+
+            if (log.typeName === '위키') {
+                markerClass = "marker-wiki";
+                actionText = (log.actionType === 'CREATE') ? "위키 생성" : "위키 수정";
+            } else {
+                if (log.actionType === 'CREATE') {
+                    actionText = "일감 생성";
+                    markerClass = "marker-create";
+                } else if (log.actionType === 'DELETE') {
+                    actionText = "일감 삭제";
+                    markerClass = "marker-delete";
+                } else if (log.defaultDescribe && log.defaultDescribe.includes("댓글")) {
+                    actionText = "댓글 작성";
+                    markerClass = "marker-comment";
+                } else {
+                    actionText = log.defaultDescribe || "상태 변경";
+                    markerClass = "marker-update";
+                }
+            }
+
+            const relativeTime = convertRelativeToTime(log.actionAt);
+
+            html += `
+                <div class="timeline-item">
+                    <div class="timeline-marker ${markerClass}"></div>
+                    <div class="timeline-info">
+                        <strong>${escapeHtml(log.userName)}</strong> ${actionText} — ${escapeHtml(log.taskTitle)}
+                    </div>
+                    <div class="timeline-meta">
+                        ${escapeHtml(log.projectTitle)} · ${relativeTime}
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        targetContainer.innerHTML = html;
+    }
+
+    function convertRelativeToTime(dateStr) {
+        if (!dateStr) return "-";
+        
+        const now = new Date();
+        const past = new Date(dateStr);
+        const diffMs = now.getTime() - past.getTime();
+        
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        const hours = String(past.getHours()).padStart(2, '0');
+        const minutes = String(past.getMinutes()).padStart(2, '0');
+        const timeString = `${hours}:${minutes}`;
+
+        let relativeStr = "";
+        if (diffMins < 1) relativeStr = "방금 전";
+        else if (diffMins < 60) relativeStr = `${diffMins}분 전`;
+        else if (diffHours < 24) relativeStr = `${diffHours}시간 전`;
+        else if (diffDays === 1) relativeStr = "어제";
+        else if (diffDays < 7) relativeStr = `${diffDays}일 전`;
+        else relativeStr = dateStr.substring(0, 10).replace(/-/g, '.');
+
+        return `${relativeStr} (${timeString})`;
+    }
+</script>
+</section>
 </body>
 </html>

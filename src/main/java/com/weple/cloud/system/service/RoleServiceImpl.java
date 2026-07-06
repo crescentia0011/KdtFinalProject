@@ -73,6 +73,12 @@ public class RoleServiceImpl implements RoleService {
 	    return roleMapper.deleteRole(roleId, companyId);
 	}
 
+	// 역할이 현재 구성원에게 할당되어 사용 중인지 확인
+	@Override
+	public boolean isRoleInUse(Long roleId) {
+	    return roleMapper.countMemberRolesByRoleId(roleId) > 0;
+	}
+
 	@Override
 	public Long selectRoleIdByName(Long companyId, String roleName) {
 		return roleMapper.selectRoleIdByName(companyId, roleName);

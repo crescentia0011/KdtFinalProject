@@ -38,5 +38,9 @@ public interface ProjectService {
 	public List<ProjectVO> findAllByMember(String userCode, String keyword, int offset, int pageSize);
 	public int countAllByMember(String userCode, String keyword);
 	
+	// 관리자용 - 소속 회사 전체 프로젝트 조회 (구성원 여부 무관)
+	public List<ProjectVO> findAllByCompany(String companyId, String keyword, int offset, int pageSize);
+	public int countAllByCompany(String companyId, String keyword);
+	
 	public Set<String> findAnyProjectPermissionCodes(String userCode);
 }

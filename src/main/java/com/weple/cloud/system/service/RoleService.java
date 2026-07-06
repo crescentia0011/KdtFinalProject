@@ -24,5 +24,8 @@ public interface RoleService {
 	// 역할 삭제
 	int deleteRole(Long roleId, Long companyId);
 	
+	// 역할이 현재 구성원에게 할당되어 사용 중인지 확인
+	boolean isRoleInUse(Long roleId);
+	
 	Long selectRoleIdByName(Long companyId, String roleName);
 }
