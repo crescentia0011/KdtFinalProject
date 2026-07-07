@@ -1,7 +1,7 @@
 .kanban-page-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-bottom: 18px;
 }
 
@@ -205,11 +205,11 @@
 }
 
 /* 작업내역과 동일한 유형 색상 */
-.kanban-type-badge.type-dev     { color: #6D5EF7; background: #F1EDFF; }
-.kanban-type-badge.type-bug     { color: #EF4444; background: #FFF1F1; }
-.kanban-type-badge.type-support { color: #B55DFF; background: #FBF2FF; }
-.kanban-type-badge.type-improve { color: #50CD89; background: #E8FFF3; }
-.kanban-type-badge.type-default { color: #94A3B8; background: #F1F3F7; }
+.kanban-type-badge.type-color-1 { color: #fff; background: #2563EB; }
+.kanban-type-badge.type-color-2 { color: #fff; background: #9333EA; }
+.kanban-type-badge.type-color-3 { color: #fff; background: #DB2777; }
+.kanban-type-badge.type-color-4 { color: #fff; background: #334155; }
+.kanban-type-badge.type-default { color: #fff; background: #94A3B8; }
 
 /* 우선순위 색상 (7단계 모두 서로 다른 색으로 구분) */
 .priority-icon{

@@ -1,8 +1,8 @@
 /* 현대적인 대시보드 스타일 필터 박스 */
 .filter-box {
 	background-color: #ffffff;
-	border: 1px solid #eef2f5;
-	border-radius: 12px;
+	border: 1px solid #DDD6FE;
+	border-radius: 14px;
 	padding: 24px;
 	margin-bottom: 25px;
 	box-shadow: 0 4px 12px rgba(0,0,0,0.03);
@@ -69,15 +69,15 @@
 .search-group .form-control {
 	border-radius: 0 20px 20px 0 !important;
 	border-left: none !important;
-	border: 1px solid #cbd5e1 !important;
+	border: 1px solid #DDD6FE !important;
 	height: 30px !important;
 }
 
 /* 테이블 카드 스타일 */
 .table-container {
 	background-color: #ffffff;
-	border: 1px solid #eef2f5;
-	border-radius: 12px;
+	border: 1px solid #DDD6FE;
+	border-radius: 14px;
 	padding: 20px;
 	box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 	overflow-x: auto;
@@ -86,9 +86,9 @@
 
 .custom-table th {
 	background-color: #F1EDFF !important;
-	color: #64748b;
+	color: #6B7280;
 	font-weight: 600;
-	border-bottom: 1px solid #e2e8f0 !important;
+	border-bottom: 1px solid #DDD6FE !important;
 }
 
 /* 진행도 바 (상단 바, 하단 텍스트 구조) */
@@ -100,14 +100,14 @@
 .progress {
     height: 6px;
     background-color: #F1EDFF;
-    border: 1px solid #000;   /* 얇은 검은 테두리 */
+    border: none;
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 4px;
     box-shadow: none;
 }
 .progress-bar {
-    background-color: #5747E6; /* 채워진 부분 */
+    background-color: #6D5EF7; /* 채워진 부분 */
 }
 
 /* ==========================================================================
@@ -124,7 +124,7 @@
 
 /* 2. 담당자 필터 내부의 입력 및 선택 창 내부 */
 .filter-options .choices__inner {
-    border: 1px solid #dee2e6 !important;
+    border: 1px solid #DDD6FE !important;
     border-radius: 8px !important;
     background-color: #fff !important;
     padding: 8px 14px !important; /* 위아래, 좌우 여백을 더 넓혀서 시원하게 만듦 */
@@ -138,8 +138,8 @@
 
 /* 포커스 효과 */
 .filter-options .choices.is-focused .choices__inner {
-    border-color: #86b7fe !important;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    border-color: #6D5EF7 !important;
+    box-shadow: 0 0 0 0.25rem rgba(109, 94, 247, 0.20) !important;
 }
 
 /* 3. 실제 타이핑하는 입력창 영역이 찌그러지지 않도록 방지 */
@@ -155,7 +155,7 @@
 
 /* 4. 선택된 담당자 '태그(배지)' 내부 글자 쪼개짐 방지 (★테이블 아이템과 격리 핵심) */
 .filter-options .choices__list--multiple .choices__item {
-    background-color: #0080ff !important;
+    background-color: #6D5EF7 !important;
     border: none !important;
     color: #ffffff !important;
     font-weight: 500;
@@ -182,7 +182,7 @@
 
 /* 5. 드롭다운 목록 상자 너비 및 패딩 확보 */
 .filter-options .choices__list--dropdown {
-    border: 1px solid #dee2e6 !important;
+    border: 1px solid #DDD6FE !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
     margin-top: 6px !important;
@@ -206,8 +206,8 @@
 }
 
 .filter-options .choices__list--dropdown .choices__item--selectable.is-highlighted {
-    background-color: #f1f3f5 !important;
-    color: #212529 !important;
+    background-color: #F1EDFF !important;
+    color: #374151 !important;
 }
 
 /* ==========================================================================
@@ -232,8 +232,8 @@
 }
 
 .more-options-btn:hover {
-    background-color: #f1f5f9;
-    color: #334155;
+    background-color: #F1EDFF;
+    color: #6D5EF7;
 }
 
 /* 드롭다운 박스 (기본적으로 숨김 처리) */
@@ -246,7 +246,7 @@
     background-color: #ffffff;
     min-width: 110px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border: 1px solid #e2e8f0;
+    border: 1px solid #DDD6FE;
     border-radius: 8px;
     z-index: 1000; /* 테이블이나 다른 요소들보다 무조건 위에 뜨게 함 */
     padding: 4px 0;
@@ -273,8 +273,8 @@
 }
 
 .dropdown-item:hover {
-    background-color: #f8fafc;
-    color: #1e293b;
+    background-color: #FAFAFC;
+    color: #374151;
 }
 
 /* 삭제 버튼 호버 시 빨간색 강조 */
@@ -391,13 +391,13 @@ div.choices .choices__list--multiple .choices__item .choices__button:hover {
     min-width: 32px;
     height: 32px;
     text-decoration: none !important;
-    color: #5d6b87;
+    color: #6B7280;
     border-radius: 6px;
     font-size: 13px;
 }
 
 .page-btn.active {
-    background: #5747E6;
+    background: #6D5EF7;
     color: #fff;
     font-weight: 700;
 }
@@ -408,8 +408,6 @@ div.choices .choices__list--multiple .choices__item .choices__button:hover {
 }
 
 .page-btn:hover:not(.active):not(.disabled) {
-    background: #eef4ff;
-    color: #5747E6;
+    background: #F1EDFF;
+    color: #6D5EF7;
 }
-
-

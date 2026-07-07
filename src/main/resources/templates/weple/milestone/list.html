@@ -14,10 +14,9 @@
 	
 
     <div class="milestone-page-header">
-	    <h1 class="milestone-page-title">로드맵</h1>
-        <div class="header-action-group" th:if="${canManageMilestone}">
-	        <a th:href="@{/project/milestone/version/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 버전 추가</a>
-	        <a th:href="@{/project/milestone/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 마일스톤 추가</a>
+	    <div class="header-action-group" th:if="${canManageMilestone}">
+	        <a th:href="@{/project/milestone/version/insert(projectId=${projectId})}" class="milestone-add-btn">+ 새 버전 추가</a>
+	        <a th:href="@{/project/milestone/insert(projectId=${projectId})}" class="milestone-add-btn">+ 새 마일스톤 추가</a>
 	    </div>
 	</div>
 

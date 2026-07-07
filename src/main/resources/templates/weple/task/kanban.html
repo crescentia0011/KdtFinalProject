@@ -14,7 +14,6 @@
 <section class="project-page">
 
     <div class="kanban-page-header">
-        <h3 class="project-title">칸반보드</h3>
         <div class="kanban-actions">
             <span id="kanbanPendingBadge" class="kanban-pending-badge" style="display:none;">
                 변경 <span id="kanbanPendingCount">0</span>건
@@ -66,11 +65,10 @@
 				
 				    <div class="kanban-card-top">
 					    <span class="kanban-type-badge"
-					          th:classappend="${task.typeName == '기획'} ? 'type-dev'
-					                          : (${task.typeName == '새 기능'} ? 'type-bug'
-					                          : (${task.typeName == '개선'} ? 'type-support'
-					                          : (${task.typeName == '피드백'} ? 'type-improve' : 'type-default')))"
-					          th:text="${task.typeName}">유형</span>
+					      th:classappend="${typeColorMap != null and typeColorMap.containsKey(task.typeName)
+					                        ? typeColorMap.get(task.typeName)
+					                        : 'type-default'}"
+					      th:text="${task.typeName}">유형</span>
 					
 					    <span class="kanban-task-no"
 					          th:text="'#' + ${task.taskId}">

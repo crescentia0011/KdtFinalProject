@@ -7,28 +7,34 @@
 /* 1. 페이지 최상단 헤더 */
 .milestone-page-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     margin-bottom: 38px;
 }
 
-.milestone-page-title {
-    margin: 0;
-    color: #433D74; /* 공통 테마 타이틀 톤 일치 */
-    font-size: 30px;
-    font-weight: 700;
-}
-
-.milestone-add-link {
-    color: #6D5EF7; /* 메인 퍼플 브랜딩 반영 */
-    font-size: 18px;
+.milestone-add-btn {
+    display: inline-flex;
+    align-items: center;
+    background-color: #5B4FEA;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
     font-weight: 600;
     text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(91, 79, 234, 0.25);
+    transition: background-color .2s ease, box-shadow .2s ease;
 }
 
-.milestone-add-link:hover {
-    color: #5B4FEA;
-    text-decoration: underline;
+.milestone-add-btn:hover,
+.milestone-add-btn:focus,
+.milestone-add-btn:visited {
+    color: #fff;
+    background-color: #5B4FEA;
+    box-shadow: 0 4px 12px rgba(91, 79, 234, 0.35);
+    text-decoration: none;
 }
 
 /* 2. 개별 마일스톤 대단위 카드 섹션 */
@@ -84,8 +90,8 @@
 }
 
 .badge-success {
-    background-color: #e6f4ea;
-    color: #137333;
+    background-color: #F3F4F6;   /* ★ 변경: #e6f4ea -> #F3F4F6 (project.css status-done과 통일) */
+    color: #9ea7b8;               /* ★ 변경: #137333 -> #9ea7b8 */
 }
 
 .badge-process {
@@ -157,7 +163,7 @@
     width: 200px;
     height: 8px;
     border-radius: 4px;
-    background-color: #e9ecef;
+    background-color: #F1EDFF;   /* ★ 변경: #e9ecef -> #F1EDFF */
     overflow: hidden;
 }
 
@@ -195,7 +201,7 @@
 .task-list-card {
     background-color: #FAFAFC;
     border: 1px solid #DDD6FE;
-    border-radius: 12px;
+    border-radius: 14px;   /* ★ 변경: 12px -> 14px (project-table-wrap과 통일) */
     overflow: hidden;
 }
 
@@ -233,7 +239,7 @@
 .task-mini-bar-wrap {
     width: 88px;
     height: 5px;
-    background-color: #e5e7eb;
+    background-color: #F1EDFF;   /* ★ 변경: #e5e7eb -> #F1EDFF */
     border-radius: 3px;
     overflow: hidden;
 }

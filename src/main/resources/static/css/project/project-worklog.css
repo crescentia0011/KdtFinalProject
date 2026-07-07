@@ -1,9 +1,7 @@
 .right_col { background: #f5f6fa !important; }
         .container-fluid { padding: 0 !important; }
         .project-page { padding: 15px; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .project-toolbar-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
-        .project-title { margin: 0; font-size: 24px; font-weight: 700; color: #222; letter-spacing: -0.5px; white-space: nowrap; }
-        .total-time-card { width: 180px; min-width: 180px; height: 95px; background: #fff; border: 1px solid #DDD6FE; border-radius: 12px; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .total-time-card { margin-left: auto; width: 180px; min-width: 180px; height: 95px; background: #fff; border: 1px solid #DDD6FE; border-radius: 12px; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
         .time-title { font-size: 11px; font-weight: 600; color: #9aa8c4; }
         .time-value { font-size: 18px; font-weight: 700; color: #6D5EF7; margin: 4px 0; }
         .time-period { font-size: 11px; color: #adb5bd; }
@@ -43,17 +41,17 @@
         .project-table th:nth-child(5), .project-table td:nth-child(5) { width: 16%; }
         .project-table td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .project-table td:nth-child(3) { white-space: normal; word-break: break-all; }
-        .project-table th { height: 42px; font-size: 12px; font-weight: 700; color: #5d6b87; background: #f8faff; border-bottom: 1px solid #e9edf5; text-align: center; }
+        .project-table th { height: 42px; font-size: 12px; font-weight: 700; color: #5d4a9c; background: #F1EDFF; border-bottom: 1px solid #DDD6FE; text-align: center; }
         .project-table td { height: 50px; padding: 0 15px; border-top: 1px solid #edf1f7; font-size: 13px; color: #495057; text-align: center; }
         .project-table th:nth-child(3), .project-table td:nth-child(3) { text-align: left; padding-left: 20px; }
         .project-table tbody tr:first-child td { border-top: none; }
         .project-table tbody tr:hover { background: #fafcff; }
         .status-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 70px; height: 24px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-        .type-dev     { background: #F1EDFF; color: #6D5EF7; }
-        .type-bug     { background: #fff1f1; color: #f64e60; }
-        .type-support { background: #fbf2ff; color: #b55dff; }
-        .type-improve { background: #e8fff3; color: #50cd89; }
-        .type-default { background: #f1f3f7; color: #8a99b5; }
+        .type-color-1 { background: #2563EB; color: #fff; }
+		.type-color-2 { background: #9333EA; color: #fff; }
+		.type-color-3 { background: #DB2777; color: #fff; }
+		.type-color-4 { background: #334155; color: #fff; }
+		.type-default { background: #94A3B8; color: #fff; }
         .action-cell { font-size: 12px; font-weight: 600; }
         .action-badge {
 		    display: inline-flex;
@@ -122,4 +120,5 @@
         }
         .btn-search:hover { background: #5B4FEA; }
 
-        .type-wiki { background: #E6FBF8; color: #0EA5A5; }
+        .type-wiki { background: #0EA5A5; color: #fff; }
+        .card-top-row { justify-content: flex-end }

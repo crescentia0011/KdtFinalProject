@@ -1,19 +1,27 @@
 .custom-calendar-header {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  margin-bottom: 10px; /* 여백을 조금 줄임 */
+  margin-bottom: 10px;
   font-family: sans-serif;
   flex-wrap: wrap;
+}
+
+.header-left-group {
+  display: flex;
+  gap: 16px;
 }
 
 
 
 #calendar-center-title {
-  text-align: center;         /* 가로 정중앙 정렬 */
-  font-size: 24px;            /* 글자 크기 확대 */
-  font-weight: 700;           /* 굵게 */
-  color: #1f2937;             /* 진한 회색/검은색 계열 */
-  margin: 20px 0;             /* 위아래 적절한 여백 */
+  flex: 1;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
   font-family: sans-serif;
 }
 

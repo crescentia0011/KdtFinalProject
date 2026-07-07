@@ -1,7 +1,7 @@
 @charset "UTF-8";
 
 /* ==========================================================================
-   Weple Premium Theme - Definite Layout System (Soft & Clean Blue Ver.4)
+   Weple Premium Theme - Definite Layout System (Royal Purple Ver.6 - Refined)
    ========================================================================== */
 
 
@@ -13,31 +13,32 @@
     list-style-type: none !important;
 }
 
-/* 2. [좌측 사이드바] 흰 배경 + 선택 항목만 하이라이트 (창 크기와 상관없이 항상 고정) */
+/* 2. [좌측 사이드바] 로열 퍼플 그라데이션 + 그림자로 입체감 */
 body .container.body .left_col,
 body.nav-sm .container.body .left_col,
 body.nav-md .container.body .left_col,
 .left_col.scroll-view {
-    background: #ffffff !important;
-    border-right: 1px solid #DDD6FE !important;
+    background: linear-gradient(180deg, #4A2D8A 0%, #3D2373 100%) !important;
+    border-right: none !important;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15) !important;
     width: 230px !important; /* 🔥 창이 작아져도 무조건 너비 230px 고정 */
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
 
-    position: fixed !important;    /* 🔥 사이드바를 화면 좌측에 완전 고정하여 자림 방지 */
+    position: fixed !important;    /* 🔥 사이드바를 화면 좌측에 완전 고정하여 잘림 방지 */
     height: 100vh !important;
     top: 0 !important;
     left: 0 !important;
     z-index: 1000 !important;
 }
 
-/* 📌 로고 영역 구조 정밀 교정 (우측 세로선 복원 및 로고 상하 정중앙 정렬 완벽 반영) */
+/* 📌 로고 영역 - 사이드바와 같은 톤, 하단 경계는 반투명 라인으로 은은하게 */
 .left_col .navbar.nav_title,
 .nav_title {
-    background: #ffffff !important;
-    border-bottom: 1px solid #DDD6FE !important;
-    border-right: 1px solid #DDD6FE !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-right: none !important;
     text-align: center !important;
     padding: 10px 16px 0 0 !important;
     margin: 0 !important;
@@ -61,7 +62,7 @@ body.nav-md .container.body .left_col,
 }
 
 .site_title span {
-    color: #6D5EF7 !important;
+    color: #ffffff !important;
     font-weight: bold !important;
     font-size: 22px !important;
     letter-spacing: -0.5px;
@@ -70,37 +71,38 @@ body.nav-md .container.body .left_col,
     visibility: visible !important;
 }
 
-/* 🔥 늘어난 로고 영역 전체 높이에 맞춰 사이드 메뉴 시작 지점 하향 조정 */
+/* 🔥 로고 영역 높이에 맞춰 사이드 메뉴 시작 지점 하향 조정 */
 .nav.side-menu {
     margin-top: 81px !important;
 }
 
+/* 메뉴 항목 좌우 여백 확대 - 벽에 붙은 느낌 제거, "떠 있는" 카드 느낌 */
 .nav.side-menu > li {
-    padding: 2px 10px !important;
+    padding: 3px 14px !important;
     width: 100% !important;
     display: block !important;
 }
 
 .nav.side-menu > li > a {
-	color: #111827 !important;
+    color: #C7B8EA !important;
     display: flex !important;
     align-items: center !important;
 
     width: 100% !important;
     box-sizing: border-box !important;
 
-    padding: 11px 16px !important;
-    border-radius: 8px !important;
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
 }
 
-
-/* 메뉴 안의 아이콘과 글자가 숨겨지거나 깨지는 현상 차단 */
+/* 메뉴 안의 아이콘 - 텍스트보다 한 톤 낮춰서 위계 구분 */
 .nav.side-menu > li > a i {
     font-size: 14px !important;
     width: 20px !important;
     margin-right: 10px !important;
     display: inline-block !important;
-    color: #6366A3 !important;
+    color: #A895D9 !important;
     text-align: left !important;
 }
 
@@ -112,34 +114,38 @@ body.nav-md .container.body .left_col,
 }
 
 .nav.side-menu > li > a:hover {
-    background: #EFEAFF !important; 
-    color: #6F5EF5 !important;    
-    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
 }
 
-/* 📌 원래 이쁘게 들어가 있던 파란색 활성화 스타일 완벽 복원 */
+.nav.side-menu > li > a:hover i {
+    color: #ffffff !important;
+}
+
+/* 📌 활성 메뉴 - 반투명 화이트 "알약형" 하이라이트 (각진 블록 느낌 제거) */
 .nav.side-menu > li.active > a,
 body.nav-sm .nav.side-menu > li.active-sm > a,
 body.nav-sm .nav.side-menu > li.active > a {
-    background: #F1EDFF !important;
-    color: #6D5EF7 !important;
-    font-weight: 500 !important;
-    border-radius: 8px !important;
-    border-right: none !important;
-    border-left: 3px solid #6D5EF7 !important;
-    padding-left: 13px !important;
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    border-left: none !important;
+    padding-left: 14px !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
     display: block !important;
 }
+
 .nav.side-menu > li.active > a i,
 body.nav-sm .nav.side-menu > li.active-sm > a i {
-    color: #6D5EF7 !important;
+    color: #ffffff !important;
 }
 
 .nav.side-menu > li.active {
     border-right: none !important;
 }
 
-/* 3. [우측 컨테이너 배경] 창 크기와 상관없이 좌측 메뉴 너비(230px)만큼 항상 여백 확보 */
+/* 3. [우측 컨테이너 배경] 좌측 메뉴 너비(230px)만큼 항상 여백 확보 */
 body .container.body .right_col,
 body.nav-md .container.body .right_col,
 body.nav-sm .container.body .right_col {
@@ -151,7 +157,7 @@ body.nav-sm .container.body .right_col {
     float: right !important;
 }
 
-/* 4. [상단 헤더바] - 중앙 정렬 무너짐 교정 + 스크롤 시에도 상단에 항상 고정 */
+/* 4. [상단 헤더바] - 화이트 유지 + 살짝 그림자로 사이드바와 톤 맞춤 */
 .top_nav,
 .top_nav .nav_menu,
 .nav_menu {
@@ -164,14 +170,15 @@ body.nav-sm .container.body .right_col {
     left: 230px !important;
     right: 0 !important;
     width: auto !important;
-    margin: 0 !important;      /* 새로 추가 */
-    padding: 0 !important;     /* 새로 추가 */
+    margin: 0 !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
     z-index: 999 !important;
 }
 
 .top_nav .nav_menu {
-    border-bottom: 1px solid #DDD6FE !important;
+    border-bottom: 1px solid #EEE8FF !important;
+    box-shadow: 0 1px 0 rgba(74, 45, 138, 0.03) !important;
     margin-bottom: 0 !important;
     padding: 0 24px !important;
     height: 81px !important;
@@ -206,34 +213,60 @@ body.nav-sm .container.body .right_col {
     height: 34px !important;
     border-radius: 50% !important;
     object-fit: cover;
-    border: 2px solid #5B4FEA !important;
+    border: 2px solid #4A2D8A !important;   /* ★ 변경: 사이드바 컬러와 통일 */
 }
 
-/* 5. [중단 서브 메뉴바] - 창 축소 시 글자 찌그러짐 및 강제 줄바꿈 방지 수정 */
+/* ★ 추가: 알림 종 아이콘 - 사이드바 컬러로 통일 */
+.notif-wrap #notifBellBtn i.fa-bell {
+    color: #4A2D8A !important;
+    font-size: 18px !important;
+    transition: color 0.15s ease !important;
+}
+.notif-wrap #notifBellBtn:hover i.fa-bell {
+    color: #6B3FC0 !important;
+}
+
+/* ★ 추가: 로그아웃 아이콘 - 사이드바 컬러로 통일 */
+.header-profile-right form button i.fa-sign-out {
+    color: #4A2D8A !important;
+    font-size: 22px !important;
+    transition: color 0.15s ease !important;
+}
+.header-profile-right form button:hover i.fa-sign-out {
+    color: #6B3FC0 !important;
+}
+.header-profile-right form button {
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+/* 5. [중단 서브 메뉴바] - 활성 탭을 밑줄 대신 은은한 알약형 배경으로 (사이드바 활성 스타일과 통일감) */
 .sub_menu_nav {
     background: #ffffff !important;
-    border-bottom: 1px solid #DDD6FE !important;
+    border-bottom: 1px solid #EEE8FF !important;
     box-shadow: 0 2px 4px rgba(109, 94, 247, 0.02) !important;
     width: 100% !important;
-    overflow-x: auto !important; /* 창이 너무 작아지면 메뉴바 내부에 가로 스크롤 생성 */
+    overflow-x: auto !important;
 }
 
 .sub_menu_nav ul {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important; /* 메뉴가 밑으로 떨어지지 않도록 설정 */
+    flex-wrap: nowrap !important;
     padding: 0 24px !important;
     margin: 0 !important;
     gap: 20px !important;
     height: 45px !important;
     align-items: center !important;
-    width: max-content !important; /* 자식 요소들의 원본 너비 보존 */
+    width: max-content !important;
 }
 
 .sub_menu_nav ul li {
-    flex-shrink: 0 !important; /* 창이 줄어들어도 메뉴 항목 너비가 좁아지지 않음 */
+    flex-shrink: 0 !important;
 }
 
+/* 기존 밑줄 스타일 그대로 유지, 색상만 사이드바 컬러(#4A2D8A)로 통일 */
 .sub_menu_nav ul li a {
     text-decoration: none !important;
     color: #6B7280 !important;
@@ -244,14 +277,14 @@ body.nav-sm .container.body .right_col {
     background: none !important;
     border: none !important;
     transition: color 0.15s ease !important;
-    white-space: nowrap !important; /* 글자 내부 줄바꿈 완전 차단 */
+    white-space: nowrap !important;
 }
 
 .sub_menu_nav ul li.active a,
 .sub_menu_nav ul li a.active,
 .sub_menu_nav ul li a:hover {
-    color: #5B4FEA !important;
-    border-bottom: 2px solid #5B4FEA !important;
+    color: #4A2D8A !important;
+    border-bottom: 2px solid #4A2D8A !important;
 }
 
 /* 6. [메인 캔버스 영역] */
@@ -275,7 +308,7 @@ body.nav-sm .container.body .right_col {
 .table td span[class*="label-"] {
     background-color: #F1EDFF !important;
     color: #6D5EF7 !important;
-    border-radius: 6px !important; 
+    border-radius: 6px !important;
     padding: 4px 10px !important;
     font-weight: 600 !important;
     border: none !important;
@@ -308,18 +341,18 @@ body.nav-sm .container.body .right_col {
 
 
 /* ==========================================================================
-   ★ 이미지 속 끈질긴 초록색 요소들 및 Gentelella 기본 컨테이너 제거 저격 코드
+   ★ Gentelella 기본 테마 잔여 요소 정리 (초록/기본색 저격)
    ========================================================================== */
 
 #nprogress .bar {
-    background: #5B4FEA !important;
+    background: #6B3FC0 !important;
 }
 #nprogress .peg {
-    box-shadow: 0 0 10px #5B4FEA, 0 0 5px #5B4FEA !important;
+    box-shadow: 0 0 10px #6B3FC0, 0 0 5px #6B3FC0 !important;
 }
 #nprogress .spinner-icon {
-    border-top-color: #5B4FEA !important;
-    border-left-color: #5B4FEA !important;
+    border-top-color: #6B3FC0 !important;
+    border-left-color: #6B3FC0 !important;
 }
 
 .top_nav .dropdown-menu,
@@ -342,7 +375,7 @@ body .sidebar-footer {
     height: 0 !important;
 }
 
-/* 부모 구조체 전체의 까만색 배경색 초기화 */
+/* 부모 구조체 전체의 배경색 통일 */
 body .container.body,
 .container.body,
 body .main_container,

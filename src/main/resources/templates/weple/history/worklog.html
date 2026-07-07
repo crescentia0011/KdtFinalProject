@@ -97,28 +97,15 @@
                 </div>
             </div>
 
-            <!-- 일감유형 체크박스 -->
-            <div class="filter-checkbox-row">
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="typeNames" value="기획"
-                           th:checked="${typeNames != null and #lists.contains(typeNames, '기획')}">
-                    <span class="custom-check-box"></span> 기획
-                </label>
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="typeNames" value="새 기능"
-                           th:checked="${typeNames != null and #lists.contains(typeNames, '새 기능')}">
-                    <span class="custom-check-box"></span> 새 기능
-                </label>
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="typeNames" value="개선"
-                           th:checked="${typeNames != null and #lists.contains(typeNames, '개선')}">
-                    <span class="custom-check-box"></span> 개선
-                </label>
-                <label class="checkbox-inline">
-                    <input type="checkbox" name="typeNames" value="피드백"
-                           th:checked="${typeNames != null and #lists.contains(typeNames, '피드백')}">
-                    <span class="custom-check-box"></span> 피드백
-                </label>
+            <!-- 일감유형 체크박스 (task_types 동적 목록) -->
+			<div class="filter-checkbox-row">
+			    <label class="checkbox-inline" th:each="type : ${taskTypes}">
+			        <input type="checkbox" name="typeNames" th:value="${type.typeName}"
+			               th:checked="${typeNames != null and #lists.contains(typeNames, type.typeName)}">
+			        <span class="custom-check-box"></span>
+			        <span th:text="${type.typeName}"></span>
+			    </label>
+                <!-- 위키는 일감유형(task_types) 소속이 아닌 별도 로그 구분값이라 고정 노출 -->
                 <label class="checkbox-inline">
 			        <input type="checkbox" name="typeNames" value="위키"
 			               th:checked="${typeNames != null and #lists.contains(typeNames, '위키')}">
@@ -185,13 +172,13 @@
 								    <span th:if="${log.taskId == null or log.projectId == null}" th:text="${log.taskTitle}"></span>
 								</td>
                                 <td>
-								    <span th:if="${log.typeName == '기획'}" class="status-badge type-dev" th:text="${log.typeName}"></span>
-								    <span th:if="${log.typeName == '새 기능'}" class="status-badge type-bug" th:text="${log.typeName}"></span>
-								    <span th:if="${log.typeName == '개선'}" class="status-badge type-support" th:text="${log.typeName}"></span>
-								    <span th:if="${log.typeName == '피드백'}" class="status-badge type-improve" th:text="${log.typeName}"></span>
-								    <span th:if="${log.typeName == '위키'}" class="status-badge type-wiki" th:text="${log.typeName}"></span>
-								    <span th:if="${log.typeName != '기획' and log.typeName != '새 기능' and log.typeName != '개선' and log.typeName != '피드백' and log.typeName != '위키'}"
-								          class="status-badge type-default" th:text="${log.typeName}"></span>
+									<span th:if="${log.typeName == '위키'}" class="status-badge type-wiki" th:text="${log.typeName}"></span>
+									<span th:if="${log.typeName != '위키'}"
+									      class="status-badge"
+									      th:classappend="${typeColorMap != null and typeColorMap.containsKey(log.typeName)
+									                        ? typeColorMap.get(log.typeName)
+									                        : 'type-default'}"
+									      th:text="${log.typeName}"></span>
 								</td>
                                 <td>
                                     <span th:if="${log.actionType == 'CREATE'}" class="action-badge action-create">CREATE</span>

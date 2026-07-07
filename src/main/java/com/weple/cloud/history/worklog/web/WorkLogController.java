@@ -2,7 +2,9 @@ package com.weple.cloud.history.worklog.web;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,26 +20,45 @@ import com.weple.cloud.history.worklog.service.WorkLogService;
 import com.weple.cloud.history.worklog.service.WorkLogVO;
 import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.project.service.ProjectVO;
+import com.weple.cloud.system.service.TaskTypeService;
+import com.weple.cloud.system.service.TaskTypeVO;
 
 @Controller
 public class WorkLogController {
     private final WorkLogService workLogService;
     private final ProjectService projectService;
     private final UserService userService;
+    private final TaskTypeService taskTypeService;
+
+    // 뱃지 색상 순환용 (고정 5색을 순서대로 순환 적용)
+    private static final String[] TYPE_COLOR_CLASSES = {
+            "type-color-1", "type-color-2", "type-color-3", "type-color-4"
+    };
 
     @Autowired
     public WorkLogController(
             WorkLogService workLogService,
             ProjectService projectService,
-            UserService userService) {
+            UserService userService,
+            TaskTypeService taskTypeService) {
         this.workLogService = workLogService;
         this.projectService = projectService;
         this.userService = userService;
+        this.taskTypeService = taskTypeService;
     }
 
     private boolean isCompanyManager(com.weple.cloud.auth.service.LoginUserVO user) {
         return Integer.valueOf(1).equals(user.getOwnerYn())
             || Integer.valueOf(1).equals(user.getAdminYn());
+    }
+
+    // 일감유형 이름 -> 뱃지 색상 클래스 매핑 (task_types position 순서 기준 4색 순환)
+    private Map<String, String> buildTypeColorMap(List<TaskTypeVO> taskTypes) {
+        Map<String, String> colorMap = new LinkedHashMap<>();
+        for (int i = 0; i < taskTypes.size(); i++) {
+            colorMap.put(taskTypes.get(i).getTypeName(), TYPE_COLOR_CLASSES[i % TYPE_COLOR_CLASSES.length]);
+        }
+        return colorMap;
     }
 
     // 작업내역 조회
@@ -100,6 +121,10 @@ public class WorkLogController {
             userList    = List.of();
         }
 
+        // 일감유형 (필터 체크박스 + 뱃지 색상용, task_types 테이블에서 동적으로 가져옴)
+        List<TaskTypeVO> taskTypes = taskTypeService.findTaskTypeAll(loginUser.getLoginUser().getCompanyId());
+        Map<String, String> typeColorMap = buildTypeColorMap(taskTypes);
+
         model.addAttribute("projects", projectList);
         model.addAttribute("users",    userList);
 
@@ -114,6 +139,8 @@ public class WorkLogController {
         model.addAttribute("currentPage",     page);
         model.addAttribute("totalPages",      totalPages);
         model.addAttribute("totalSpentHour",  totalSpentHour);
+        model.addAttribute("taskTypes",       taskTypes);
+        model.addAttribute("typeColorMap",    typeColorMap);
 
         model.addAttribute("sidebarMenu", "work-history");
         model.addAttribute("currentMenu", "none");

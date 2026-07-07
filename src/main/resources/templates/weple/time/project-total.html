@@ -10,15 +10,14 @@
 	<section>
 		<div class="worktime-container">
 			<div class="page-header"
-				style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-				<h3 style="margin: 0; font-size: 22px; font-weight: 700;">소요시간</h3>
+   				 style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 15px;">
 				<button class="btn btn-primary"
 					th:onclick="|location.href='@{/insertProjectTime(projectId=${param.projectId != null ? param.projectId : ''}, taskId=${param.taskId != null ? param.taskId : ''})}'|">
 					+ 소요시간 등록</button>
 			</div>
 
 			<!-- 일감 필터 안내 -->
-			<div th:if="${filterTaskId != null}"
+			<div th:if="${filterTaskId != null and !#strings.isEmpty(filterTaskId)}"
 				style="margin-bottom: 12px; padding: 10px 16px; background: #F1EDFF; border-left: 4px solid #6D5EF7; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
 				<span style="font-size: 14px; color: #6D5EF7; font-weight: 600;">
 					일감 <strong th:text="${filterTaskId}"></strong> 의 소요시간 목록
@@ -335,6 +334,61 @@
 	</script>
 
 		<style>
+		.worktime-container .page-header { justify-content: flex-end; }
+		.worktime-container .page-header .btn-primary {
+	        background-color: #5B4FEA;
+	        border: none;
+	        color: #fff;
+	        border-radius: 8px;
+	        padding: 10px 18px;
+	        font-size: 14px;
+	        font-weight: 600;
+	        cursor: pointer;
+	        box-shadow: 0 2px 8px rgba(91, 79, 234, 0.25);
+	        transition: background-color .2s ease, box-shadow .2s ease;
+	    }
+	
+	    .worktime-container .page-header .btn-primary:hover {
+	        background-color: #4B3FE0;
+	        box-shadow: 0 4px 12px rgba(91, 79, 234, 0.35);
+	    }
+
+	    /* 일감 필터의 지우기/적용 버튼(.btn-pill-light / .btn-pill-primary)과 동일한 스타일 */
+	    .worktime-container .search-right .btn-primary,
+	    .worktime-container .search-action .btn-primary,
+	    .worktime-container .search-action .btn-light {
+	        padding: 8px 18px;
+	        border-radius: 8px;
+	        font-size: 14px;
+	        font-weight: 600;
+	        cursor: pointer;
+	        transition: all 0.2s ease;
+	        box-shadow: none;
+	    }
+
+	    .worktime-container .search-right .btn-primary,
+	    .worktime-container .search-action .btn-primary {
+	        background: #5B4FEA;
+	        color: #fff;
+	        border: 1px solid #5B4FEA;
+	    }
+
+	    .worktime-container .search-right .btn-primary:hover,
+	    .worktime-container .search-action .btn-primary:hover {
+	        background: #4B3FE0;
+	        border-color: #4B3FE0;
+	        box-shadow: none;
+	    }
+
+	    .worktime-container .search-action .btn-light {
+	        background: #fff;
+	        color: #5B4FEA;
+	        border: 1px solid #5B4FEA;
+	    }
+
+	    .worktime-container .search-action .btn-light:hover {
+	        background: #F5F3FF;
+	    }
 .worktime-container {
 	width: 95%;
 	margin: 25px auto;
@@ -352,11 +406,12 @@
 }
 
 .search-box {
-	border: 1px solid #dcdfe6;
-	border-radius: 6px;
+	border: 1px solid #DDD6FE;
+	border-radius: 14px;
 	background: #fff;
-	padding: 20px 25px;
-	margin-bottom: 20px;
+	padding: 24px;
+	margin-bottom: 25px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .search-top {
@@ -442,12 +497,16 @@
 }
 
 .btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	min-width: 90px;
 	height: 36px;
 	border-radius: 4px;
 	cursor: pointer;
 	transition: .2s;
 	font-size: 14px;
+	line-height: 1;
 }
 
 .btn-primary {

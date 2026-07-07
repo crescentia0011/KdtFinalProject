@@ -154,13 +154,15 @@
 
     <!-- 특정 버전 조회 (본문 포함) -->
     <select id="selectHistoryByVersion" resultMap="wikiHistoryResultMap">
-        SELECT
-            wiki_history_id, wiki_page_id, wiki_version,
-            title, content, user_code, created_at
-        FROM wiki_histories
-        WHERE wiki_page_id = #{wikiPageId}
-          AND wiki_version  = #{wikiVersion}
-    </select>
+	    SELECT
+	        h.wiki_history_id, h.wiki_page_id, h.wiki_version,
+	        h.title, h.content, h.user_code, h.created_at,
+	        u.user_name
+	    FROM wiki_histories h
+	    LEFT JOIN users u ON h.user_code = u.user_code
+	    WHERE h.wiki_page_id = #{wikiPageId}
+	      AND h.wiki_version  = #{wikiVersion}
+	</select>
 
     <!-- 유저 프로필 이미지 조회 -->
     <select id="selectUserProfileImg" resultType="String">

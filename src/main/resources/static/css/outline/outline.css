@@ -3,7 +3,7 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa;
+    background-color: #FAFAFC;   /* ★ 변경: #f8f9fa -> project.css .right_col과 통일 */
 }
 
 .outline-page {
@@ -22,33 +22,38 @@ body {
 
 .outline-page-title {
     margin: 0;
-    color: #1f2937;
+    color: #111827;   /* ★ 변경: #1f2937 -> project-title과 동일 톤 */
     font-size: 30px;
     font-weight: 700;
 }
 
-/* 상단 상태 배지 */
+/* 상단 상태 배지 - ★ project.css의 status-badge(pill)와 동일한 형태/색상 체계로 통일 */
 .outline-badge {
-    padding: 4px 10px;
-    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 999px;      /* ★ 변경: 5px -> 999px (pill) */
     font-size: 13px;
     font-weight: 700;
     line-height: 1;
 }
 
+/* 신규 -> status-new와 동일 */
 .badge-new {
-    background-color: #ffeef0;
-    color: #ff4f6b;
+    background-color: #F1EDFF;   /* ★ 변경: #ffeef0 -> #F1EDFF */
+    color: #6D5EF7;               /* ★ 변경: #ff4f6b -> #6D5EF7 */
 }
 
+/* 진행 중 -> status-progress와 동일 */
 .badge-process {
-    background-color: #e8f0fe;
-    color: #1a73e8;
+    background-color: #FFF7ED;   /* ★ 변경: #e8f0fe -> #FFF7ED */
+    color: #f59e0b;               /* ★ 변경: #1a73e8 -> #f59e0b */
 }
 
+/* 완료 -> status-done과 동일 */
 .badge-success {
-    background-color: #e6f4ea;
-    color: #137333;
+    background-color: #F3F4F6;   /* ★ 변경: #e6f4ea -> #F3F4F6 */
+    color: #9ea7b8;               /* ★ 변경: #137333 -> #9ea7b8 */
 }
 
 /* 컨테이너 및 헤더 */
@@ -56,13 +61,13 @@ body {
     margin-bottom: 40px;
 }
 
-/* [개선] 슬림하고 깔끔해진 진척도 컨테이너 */
+/* [진척도 컨테이너] 보더/라운드를 project.css 카드와 통일 */
 .outline-progress-container {
     background-color: #ffffff;
-    border: 1px solid #eaecf0;
-    border-radius: 12px;
+    border: 1px solid #DDD6FE;    /* ★ 변경: #eaecf0 -> #DDD6FE */
+    border-radius: 14px;          /* ★ 변경: 12px -> 14px (project-table-wrap과 동일) */
     padding: 22px 26px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.01);
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);  /* ★ 변경: project-card와 동일한 그림자 톤 */
     margin-bottom: 25px;
 }
 
@@ -82,20 +87,20 @@ body {
 .outline-progress-percent {
     font-size: 22px;
     font-weight: 700;
-    color: #4d7df4;
+    color: #6D5EF7;   /* ★ 변경: #4d7df4 -> #6D5EF7 (사이트 포인트 컬러 통일) */
 }
 
 .outline-progress-bar-wrap {
     width: 100%;
     height: 10px;
-    background-color: #f2f4f7;
+    background-color: #F1EDFF;   /* ★ 변경: #f2f4f7 -> #F1EDFF (연보라 트랙) */
     border-radius: 6px;
     overflow: hidden;
 }
 
 .outline-progress-bar {
     height: 100%;
-    background-color: #4d7df4;
+    background-color: #6D5EF7;   /* ★ 변경: #4d7df4 -> #6D5EF7 */
     border-radius: 6px;
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -120,10 +125,10 @@ body {
     flex: 1;
     max-width: 400px;
     background-color: #ffffff;
-    border: 1px solid #eaecf0;
-    border-radius: 12px;
+    border: 1px solid #DDD6FE;    /* ★ 변경: #eaecf0 -> #DDD6FE */
+    border-radius: 14px;          /* ★ 변경: 12px -> 14px */
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -136,8 +141,9 @@ body {
     padding-left: 12px;
 }
 
-.info-estimated { border-left: 5px solid #36b37e; }
-.info-spent { border-left: 5px solid #0052cc; }
+/* 추정/소요 시간 좌측 컬러바 - 브랜드 포인트/보조색으로 통일 */
+.info-estimated { border-left: 5px solid #6D5EF7; }   /* ★ 변경: #36b37e -> #6D5EF7 */
+.info-spent { border-left: 5px solid #A895D9; }        /* ★ 변경: #0052cc -> #A895D9 (연보라 보조색) */
 
 .time-label {
     font-size: 1.4rem;
@@ -147,13 +153,13 @@ body {
 
 .time-value {
     font-size: 1.4rem;
-    color: #1d2939;
+    color: #111827;   /* ★ 변경: #1d2939 -> #111827 */
     font-weight: 700;
 }
 
 .time-card-divider {
     height: 1px;
-    background-color: #f2f4f7;
+    background-color: #EEEAFE;   /* ★ 변경: #f2f4f7 -> #EEEAFE (연보라 구분선) */
     margin: 18px 0;
 }
 
@@ -161,10 +167,10 @@ body {
 .stat-dropdown-container {
     flex: 2;
     background: #ffffff;
-    border: 1px solid #eaecf0;
-    border-radius: 12px;
+    border: 1px solid #DDD6FE;    /* ★ 변경: #eaecf0 -> #DDD6FE */
+    border-radius: 14px;          /* ★ 변경: 12px -> 14px */
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);
     display: flex;
     flex-direction: column;
 }
@@ -173,7 +179,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #f2f4f7;
+    border-bottom: 1px solid #EEEAFE;   /* ★ 변경: #f2f4f7 -> #EEEAFE */
     padding-bottom: 12px;
     margin-bottom: 15px;
 }
@@ -186,8 +192,8 @@ body {
     padding: 6px 12px;
     font-size: 1.4rem;
     color: #344054;
-    border: 1px solid #d0d5dd;
-    border-radius: 6px;
+    border: 1px solid #DDD6FE;   /* ★ 변경: #d0d5dd -> #DDD6FE */
+    border-radius: 8px;          /* ★ 변경: 6px -> 8px (project-search와 통일감) */
     background-color: #ffffff;
     font-weight: 500;
     outline: none;
@@ -195,7 +201,7 @@ body {
 }
 
 .stat-select-box:focus {
-    border-color: #4d7df4;
+    border-color: #6D5EF7;   /* ★ 변경: #4d7df4 -> #6D5EF7 */
 }
 
 .stat-toggle-content {
@@ -227,13 +233,13 @@ body {
     justify-content: center;
     margin-top: 18px;
     padding-top: 12px;
-    border-top: 1px dashed #eaecf0;
+    border-top: 1px dashed #DDD6FE;   /* ★ 변경: #eaecf0 -> #DDD6FE */
 }
 
 .stat-more-btn {
     background: none;
     border: none;
-    color: #4d7df4;
+    color: #6D5EF7;   /* ★ 변경: #4d7df4 -> #6D5EF7 */
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
@@ -244,7 +250,7 @@ body {
 
 .stat-more-btn:hover {
     text-decoration: underline;
-    color: #1a73e8;
+    color: #5B4FEA;   /* ★ 변경: #1a73e8 -> #5B4FEA (project.css hover 컬러와 통일) */
 }
 
 .stat-name {
@@ -268,14 +274,14 @@ body {
 .stat-mini-bar-wrap {
     width: 100px;
     height: 8px;
-    background-color: #f2f4f7;
+    background-color: #F1EDFF;   /* ★ 변경: #f2f4f7 -> #F1EDFF */
     border-radius: 5px;
     overflow: hidden;
 }
 
 .stat-mini-bar {
     height: 100%;
-    background-color: #12b76a;
+    background-color: #6D5EF7;   /* ★ 변경: #12b76a -> #6D5EF7 (브랜드 포인트로 통일) */
     border-radius: 5px;
 }
 
@@ -314,13 +320,13 @@ body {
 .members-title {
     font-size: 18px;
     font-weight: 700;
-    color: #1f2937;
+    color: #111827;
     margin: 0;
 }
 
-/* [추가] 총인원 직관적 스코어 배지 */
+/* 총인원 스코어 배지 - 브랜드 포인트 컬러로 통일 */
 .members-total-badge {
-    background-color: #4d7df4;
+    background-color: #6D5EF7;   /* ★ 변경: #4d7df4 -> #6D5EF7 */
     color: #ffffff;
     font-size: 13px;
     font-weight: 700;
@@ -331,20 +337,21 @@ body {
 
 .member-list-card {
     background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 15px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    border: 1px solid #DDD6FE;    /* ★ 변경: #e5e7eb -> #DDD6FE */
+    border-radius: 14px;          /* ★ 변경: 15px -> 14px (통일) */
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);
     overflow: hidden;
 }
 
+/* 멤버 리스트 헤더 - project-table의 thead(#F1EDFF)와 동일한 역할이라 색 통일 */
 .member-item-header-row {
     display: flex;
     align-items: center;
     padding: 14px 30px;
-    background-color: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
+    background-color: #F1EDFF;   /* ★ 변경: #f9fafb -> #F1EDFF */
+    border-bottom: 1px solid #DDD6FE;   /* ★ 변경: #e5e7eb -> #DDD6FE */
     font-weight: 600;
-    color: #374151;
+    color: #6B7280;               /* ★ 변경: #374151 -> #6B7280 (project-table th와 동일) */
     font-size: 15px;
 }
 
@@ -352,12 +359,12 @@ body {
     display: flex;
     align-items: center;
     padding: 18px 30px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid #EEEAFE;   /* ★ 변경: #f3f4f6 -> #EEEAFE */
     transition: background-color 0.15s ease;
 }
 
 .member-item-row:hover {
-    background-color: #f9fafb;
+    background-color: #FAFAFC;   /* ★ 변경: #f9fafb -> #FAFAFC (project-table tbody hover와 동일) */
 }
 
 .member-item-row:last-child {
@@ -368,16 +375,17 @@ body {
     display: flex;
     align-items: center;
     font-size: 15px;
-    color: #4b5563;
+    color: #374151;
 }
 
 .col-group-name { width: 20%; font-weight: 600; }
 .col-count { width: 15%; color: #4b5563; font-weight: 500;}
 .col-names { width: 65%; color: #111827; line-height: 1.5; }
 
+/* 그룹 태그 - status-new 배지와 동일한 톤(라이트퍼플) */
 .group-tag {
-    background-color: #f0f4ff;
-    color: #4d7df4;
+    background-color: #F1EDFF;   /* ★ 변경: #f0f4ff -> #F1EDFF */
+    color: #6D5EF7;               /* ★ 변경: #4d7df4 -> #6D5EF7 */
     padding: 5px 12px;
     border-radius: 6px;
     font-size: 14px;

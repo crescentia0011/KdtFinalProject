@@ -1,6 +1,7 @@
 package com.weple.cloud.task.web;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.project.service.ProjectService;
+import com.weple.cloud.system.service.TaskTypeService;
+import com.weple.cloud.system.service.TaskTypeVO;
 import com.weple.cloud.task.mapper.TaskMapper;
 import com.weple.cloud.task.service.TaskKanbanService;
 import com.weple.cloud.task.service.TaskMemberVO;
@@ -33,6 +36,21 @@ public class TaskKanbanController {
     private final TaskKanbanService taskKanbanService;
     private final TaskMapper taskMapper; // 조회 전용 재사용 (findMember, taskStatuses 등)
     private final ProjectService projectService;
+    private final TaskTypeService taskTypeService;
+
+    // 일감유형 뱃지 색상 순환용 (진한 단색 4가지를 순서대로 순환 적용)
+    private static final String[] TYPE_COLOR_CLASSES = {
+            "type-color-1", "type-color-2", "type-color-3", "type-color-4"
+    };
+
+    // 일감유형 이름 -> 뱃지 색상 클래스 매핑 (task_types position 순서 기준 4색 순환)
+    private Map<String, String> buildTypeColorMap(List<TaskTypeVO> taskTypes) {
+        Map<String, String> colorMap = new LinkedHashMap<>();
+        for (int i = 0; i < taskTypes.size(); i++) {
+            colorMap.put(taskTypes.get(i).getTypeName(), TYPE_COLOR_CLASSES[i % TYPE_COLOR_CLASSES.length]);
+        }
+        return colorMap;
+    }
 
     @GetMapping("/project/task/kanban")
     public String projectTaskKanban(
@@ -67,6 +85,10 @@ public class TaskKanbanController {
             tasksByStatus.computeIfAbsent(task.getTaskStatus(), k -> new java.util.ArrayList<>()).add(task);
         }
 
+        // 일감유형 (뱃지 색상용, task_types 테이블에서 동적으로 가져옴)
+        List<TaskTypeVO> taskTypes = taskTypeService.findTaskTypeAll(loginUser.getLoginUser().getCompanyId());
+        Map<String, String> typeColorMap = buildTypeColorMap(taskTypes);
+
         model.addAttribute("projectId", pId);
         model.addAttribute("loginUserCode", userCode);
         model.addAttribute("project", projectService.findById(String.valueOf(pId)));
@@ -76,6 +98,7 @@ public class TaskKanbanController {
         model.addAttribute("tasksByStatus", tasksByStatus);
         model.addAttribute("taskPerms", taskPerms);
         model.addAttribute("isAdminOrOwner", isAdminOrOwner);
+        model.addAttribute("typeColorMap", typeColorMap);
 
         return "weple/task/kanban";
     }
