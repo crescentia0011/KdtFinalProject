@@ -22,9 +22,8 @@
 </head>
 <body>
 <section>
-
     <div class="header-bar">
-        <span>프로젝트 간트차트 모니터링 (Project ID: <span th:text="${projectId}"></span>)</span>
+        <span>프로젝트 간트차트</span>
     </div>
 
     <div id="gantt_here" class="gantt-container"></div>
@@ -45,6 +44,9 @@
         // 하위 항목이 있으면 자동으로 부모 폴더가 열린 상태로 렌더링되도록 설정
         gantt.config.open_tree_initially = true; 
         
+        // 💡 [추가] 좌측 그리드 컬럼 각각을 클릭 드래그하여 길이를 조절할 수 있도록 설정
+        gantt.config.resize_column = true;
+        
         // 3. 좌측 그리드(테이블) 컬럼 설정
         gantt.config.columns = [
             { 
@@ -52,9 +54,9 @@
                 label: "작업 및 마일스톤명", 
                 tree: true, 
                 width: "*", 
-                min_width: 250,
+                min_width: 200,
+                resize: true, // 각각 리사이즈 명시 허용
                 template: function(obj) {
-                    // 💡 [수정] ID가 "M_"로 시작하면서 부모가 없으면 '버전(📦)', 부모가 있으면 '마일스톤(📌)'으로 분기
                     if (typeof obj.id === "string" && obj.id.startsWith("M_")) {
                         if (!obj.parent || obj.parent == 0) {
                             return "<strong style='color:#1a365d;'>📦 " + obj.text + "</strong>"; // 버전
@@ -69,10 +71,26 @@
                 name: "start_date", 
                 label: "시작일", 
                 align: "center", 
-                width: 90,
+                min_width: 120,
+                resize: true,
                 template: function(obj) {
-                    // 마일스톤(project 타입)은 시작일이 명확하지 않으므로 화면에서 공백 처리하거나 마감일만 노출 가능
                     return obj.start_date ? gantt.date.date_to_str("%Y-%m-%d")(obj.start_date) : "-";
+                }
+            },
+            { 
+                name: "end_date", 
+                label: "목표일", 
+                align: "center", 
+                min_width: 120,
+                resize: true,
+                // 💡 [수정] end_date 표시 시 UI에서 -1일을 적용하여 시각적 불일치 해결
+                template: function(obj) {
+                    if (obj.end_date) {
+                        // 오리지널 end_date에서 1일을 뺀 새로운 Date 객체 생성
+                        const displayEndDate = gantt.date.add(obj.end_date, -1, "day");
+                        return gantt.date.date_to_str("%Y-%m-%d")(displayEndDate);
+                    }
+                    return "-";
                 }
             },
             { 
@@ -80,6 +98,7 @@
                 label: "기간", 
                 align: "center", 
                 width: 50, 
+                resize: true,
                 template: function(obj) { return obj.duration + "일"; } 
             },
             {
@@ -87,22 +106,23 @@
                 label: "진척도",
                 align: "center",
                 width: 60,
+                resize: true,
                 template: function(obj) {
                     return Math.round(obj.progress * 100) + "%";
                 }
             }
         ];
 
-     	// [수정] 4. 우측 차트 타임라인 스케일 설정 (년/월/주 표현 방식으로 압축)
+     	// 4. 우측 차트 타임라인 스케일 설정 (년/월/주 표현 방식으로 압축)
         gantt.config.scales = [
             { unit: "month", step: 1, format: "%Y년 %M" },
-            { unit: "week", step: 1, format: "%W주" } // '일' 대신 '주' 단위로 변경하여 가로폭을 크게 압축!
+            { unit: "week", step: 1, format: "%W주" } 
         ];
      
-     	// [추가] 한 칸(Column)의 최소 너비를 좁혀서 더 많은 레이아웃이 한눈에 보이게 설정 (기본값은 보통 50~60)
+     	// 한 칸(Column)의 최소 너비를 좁혀서 더 많은 레이아웃이 한눈에 보이게 설정
         gantt.config.min_column_width = 40;
      	
-     	// 💡 [추가] 데이터 종류별로 타임라인 바에 다른 CSS 클래스명을 부여합니다.
+     	// 데이터 종류별로 타임라인 바에 다른 CSS 클래스명을 부여합니다.
         gantt.templates.task_class = function(start, end, task) {
             if (typeof task.id === "string" && task.id.startsWith("M_")) {
                 if (!task.parent || task.parent == 0) {
@@ -114,44 +134,53 @@
             return "task-bar";                // 일감 (Task)
         };
         
-     	// 💡 [수정] 모든 텍스트를 타임라인 바의 '좌측 바깥'에 배치합니다.
+     	// 💡 모든 텍스트를 타임라인 바의 '좌측 바깥'에 배치하되, 공백 깨짐을 막기 위해 두껍게 감쌉니다.
         gantt.templates.leftside_text = function(start, end, task) {
+            // 1. 완료 상태 (진척도 100% 이상) -> 회색(#a0aec0)으로 통일
+            if (task.progress >= 1) {
+                if (typeof task.id === "string" && task.id.startsWith("M_")) {
+                    if (!task.parent || task.parent == 0) {
+                        return "<strong style='color:#a0aec0; margin-left:8px;'>📦 " + task.text + " (완료)</strong>";
+                    }
+                    return "<span style='color:#a0aec0; font-weight:600; margin-left:8px;'>📌 " + task.text + " (완료)</span>";
+                }
+                return "<span style='color:#a0aec0; font-size:12px; margin-left:8px;'>📄 " + task.text + " (완료)</span>";
+            }
+
+            // 2. 미완료 상태 -> 깊은 다크 그레이(#2d3748)로 폰트 색상 통일
             if (typeof task.id === "string" && task.id.startsWith("M_")) {
                 if (!task.parent || task.parent == 0) {
-                    return "<strong style='color:#4a154b; margin-right:5px;'>📦 " + task.text + "</strong>"; // 버전
+                    return "<strong style='color:#2d3748; margin-left:8px;'>📦 " + task.text + "</strong>"; // 미완료 버전
                 }
-                return "<span style='color:#c05621; font-weight:600; margin-right:5px;'>📌 " + task.text + "</span>"; // 마일스톤
+                return "<span style='color:#2d3748; font-weight:600; margin-left:8px;'>📌 " + task.text + "</span>"; // 미완료 마일스톤
             }
-            return "<span style='color:#2d3748; font-size:12px; margin-right:5px;'>📄 " + task.text + "</span>"; // 일감
+            return "<span style='color:#2d3748; font-size:12px; margin-left:8px;'>📄 " + task.text + "</span>"; // 미완료 일감
         };
 
-        // 💡 [추가] 바 내부 텍스트는 좌측 글자와 겹치지 않도록 깨끗하게 비워줍니다.
+        // 바 내부 텍스트는 좌측 글자와 겹치지 않도록 깨끗하게 비워줍니다.
         gantt.templates.task_text = function(start, end, task) {
             return "";
         };
+        
+        
      	
      	// 5. 간트차트 초기화 실행
         gantt.init("gantt_here");
         
         gantt.attachEvent("onTaskClick", function(id, e) {
-
             if (!e.target.closest(".gantt_tree_content")) {
                 return true; 
             }
     	
-            // gantt 내부에서 파싱된 원본 로우 객체를 가져옴 (부모 존재 여부 파악용)
             const taskObj = gantt.getTask(id);
             let detailUrl = "";
     	
-            // 💡 [수정] 경로 및 분기 처리 명확화
             if (typeof id === "string" && id.startsWith("M_")) {
                 const realMilestoneId = id.substring(2); 
                 
                 if (!taskObj.parent || taskObj.parent == 0) {
-                    // 상위 마일스톤(=버전) 클릭 시 요구하신 경로로 이동
                     detailUrl = `/project/milestone?projectId=${projectId}`;
                 } else {
-                    // 하위 마일스톤 클릭 시 기존 상세조회 경로로 이동
                     detailUrl = `/project/milestone/detail?projectId=${projectId}&milestoneId=${realMilestoneId}`;
                 }
             } else if (typeof id === "string" && id.startsWith("T_")) {
@@ -164,8 +193,21 @@
             window.location.href = detailUrl;
             return true; 
         });
-
         
+     // 💡 [추가] 가로 스크롤 시에도 글자가 화면 오른쪽 밖으로 넘어가서 잘리지 않도록 안전장치 클래스 부여
+        gantt.templates.task_class = function(start, end, task) {
+            let css = [];
+            if (typeof task.id === "string" && task.id.startsWith("M_")) {
+                if (!task.parent || task.parent == 0) {
+                    css.push("version-bar");
+                } else {
+                    css.push("milestone-bar");
+                }
+            } else {
+                css.push("task-bar");
+            }
+            return css.join(" ");
+        };
 
        gantt.load('/api/project/gantt/data?projectId=' + projectId);
     </script>

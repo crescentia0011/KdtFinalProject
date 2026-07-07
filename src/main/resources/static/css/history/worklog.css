@@ -283,23 +283,30 @@
     background: #fafcff;
 }
 
-/* ── Status Badges ── */
+/* ── Status Badgess ── */
 .status-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 70px;
     height: 24px;
+    padding: 3px 8px;
     border-radius: 6px;
     font-size: 11px;
     font-weight: 700;
 }
 
-.type-color-1 { background: #2563EB; color: #fff; }
-.type-color-2 { background: #9333EA; color: #fff; }
-.type-color-3 { background: #DB2777; color: #fff; }
-.type-color-4 { background: #334155; color: #fff; }
-.type-default { background: #94A3B8; color: #fff; }
+		.type-color-1 { background: #6D5EF7; color: #fff; }
+		.type-color-2  { background: #EF4444; color: #fff; } /* Deep Purple */
+		.type-color-3  { background: #F59E0B; color: #fff; } /* Slate */
+		.type-color-4  { background: #14B8A6; color: #fff; } /* Fuchsia */
+		.type-color-5  { background: #22C55E; color: #fff; } /* Pink */
+		.type-color-6 { background: #06B6D4; color: #fff; }
+		.type-color-7  { background: #3B82F6; color: #fff; } /* Purple */
+		.type-color-8  { background: #8B5CF6; color: #fff; } /* Navy */
+		.type-color-9 { background: #F97316; color: #fff; }
+		.type-color-10 { background: #64748B; color: #fff; } /* Deep Pink/Maroon */
+		.type-default  { background: #94A3B8; color: #fff; }
 
 .action-cell {
     font-size: 12px;

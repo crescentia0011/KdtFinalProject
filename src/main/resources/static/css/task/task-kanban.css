@@ -205,11 +205,17 @@
 }
 
 /* 작업내역과 동일한 유형 색상 */
-.kanban-type-badge.type-color-1 { color: #fff; background: #2563EB; }
-.kanban-type-badge.type-color-2 { color: #fff; background: #9333EA; }
-.kanban-type-badge.type-color-3 { color: #fff; background: #DB2777; }
-.kanban-type-badge.type-color-4 { color: #fff; background: #334155; }
-.kanban-type-badge.type-default { color: #fff; background: #94A3B8; }
+.kanban-type-badge.type-color-1  { color: #fff; background: #6D5EF7; } /* Blue */
+.kanban-type-badge.type-color-2  { color: #fff; background: #EF4444; } /* Indigo */
+.kanban-type-badge.type-color-3  { color: #fff; background: #F59E0B; } /* Violet */
+.kanban-type-badge.type-color-4  { color: #fff; background: #14B8A6; } /* Purple */
+.kanban-type-badge.type-color-5  { color: #fff; background: #22C55E; } /* Fuchsia */
+.kanban-type-badge.type-color-6  { color: #fff; background: #06B6D4; } /* Pink */
+.kanban-type-badge.type-color-7  { color: #fff; background: #3B82F6; } /* Slate */
+.kanban-type-badge.type-color-8  { color: #fff; background: #8B5CF6; } /* Navy */
+.kanban-type-badge.type-color-9  { color: #fff; background: #F97316; } /* Deep Purple */
+.kanban-type-badge.type-color-10 { color: #fff; background: #64748B; } /* Deep Pink/Maroon */
+.kanban-type-badge.type-default  { color: #fff; background: #94A3B8; }
 
 /* 우선순위 색상 (7단계 모두 서로 다른 색으로 구분) */
 .priority-icon{

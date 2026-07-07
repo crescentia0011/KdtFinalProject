@@ -164,7 +164,7 @@
                COUNT(*) AS totalCount,
                SUM(CASE WHEN task_status = 'e3' THEN 1 ELSE 0 END) AS closedCount
         FROM task
-        WHERE milestone_id = #{milestoneId} AND project_id = #{projectId}
+        WHERE milestone_id = #{milestoneId} AND project_id = #{projectId} AND deleted_yn = 'N'
         GROUP BY task_status
     </select>
 

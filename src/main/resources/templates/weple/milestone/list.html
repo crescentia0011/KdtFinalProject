@@ -105,7 +105,7 @@
             </div>
 
             <div class="connected-tasks-section">
-                <h3 class="connected-tasks-title">소속 하위 마일스톤</h3>
+                <h3 class="connected-tasks-title">소속 마일스톤</h3>
                 
                 <div class="task-list-card">
                     <div class="task-item-row" 
@@ -116,7 +116,7 @@
                         <div class="task-col col-id" th:text="'#' + ${child.milestoneId}">#2</div>
                         
                         <div class="task-col col-name">
-                            <span th:text="${child.milestoneTitle}">하위 마일스톤명</span>
+                            <span th:text="${child.milestoneTitle}">마일스톤명</span>
                         </div>
                         
                         <div class="task-col col-progress">
@@ -139,7 +139,7 @@
                     </div>
 
                     <div class="task-empty-row" th:if="${#lists.isEmpty(milestone.childMilestones)}" style="padding: 20px; text-align: center; color: #9ca3af;">
-                        등록된 하위 마일스톤이 존재하지 않습니다.
+                        등록된 마일스톤이 존재하지 않습니다.
                     </div>
                 </div>
             </div>
@@ -150,7 +150,7 @@
                 <h2 id="milestoneDeleteDialogTitle">마일스톤 삭제</h2>
                 <button class="milestone-dialog-close" type="button" aria-label="닫기" data-milestone-delete-close>&times;</button>
             </div>
-            <p><strong id="milestoneDeleteName" style="color: #ff4d4f;">마일스톤명</strong>을(를) 삭제합니다. 하위 일감이나 관련 데이터가 함께 영향받을 수 있으며, 이 작업은 되돌릴 수 없습니다.</p>
+            <p><strong id="milestoneDeleteName" style="color: #ff4d4f;">마일스톤명</strong>을(를) 삭제합니다. 연결된 일감이나 관련 데이터가 함께 영향받을 수 있으며, 이 작업은 되돌릴 수 없습니다.</p>
             
             <form th:action="@{/project/milestone/delete}" method="post" id="milestoneDeleteForm">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">

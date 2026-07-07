@@ -40,9 +40,9 @@
 
 			<div class="row" style="margin-bottom: 20px;">
 				<div class="col-md-6">
-					<label class="form-label">목표 완료일</label> 
+					<label class="form-label">목표 완료일 <span class="text-danger">*</span></label> 
 					<input type="date" class="form-control" name="finishDate" id="finishDateInput"
-						   th:value="${milestone.finishDate != null ? #strings.substring(milestone.finishDate, 0, 10) : ''}">
+						   th:value="${milestone.finishDate != null ? #strings.substring(milestone.finishDate, 0, 10) : ''}" required>
 				</div>
 			</div>
 			

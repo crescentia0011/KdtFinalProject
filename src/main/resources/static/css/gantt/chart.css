@@ -4,43 +4,51 @@
    Weple Premium Theme - Gantt Chart Component (Soft & Clean Blue Ver.4 Matching)
    ========================================================================== */
 
-/* 1. 간트 섹션 타이틀 헤더 바 (공통 캔버스 톤에 맞춰 세련되게 변경) */
+/* 1. 간트 섹션 타이틀 헤더 바 */
 .header-bar { 
     height: 45px; 
     background: transparent; 
-    color: #433D74; /* 공통 메인 타이틀 컬러 동기화 */
+    color: #433D74; 
     display: flex; 
     align-items: center; 
     padding: 0 4px 10px 0;
     font-size: 18px;
     font-weight: 700; 
-    border-bottom: 2px solid #F1EDFF; /* 은은한 보라색 언더라인 */
+    border-bottom: 2px solid #F1EDFF; 
     margin-bottom: 20px;
 }
 
 /* 2. 간트차트 대형 박스 및 레이아웃 잘림 방지 안전장치 */
 .gantt-container { 
     width: 100%; 
-    height: calc(100vh - 240px); /* 메인 캔버스 내부 여백 및 헤더바 높이 고려하여 동적 최적화 */
+    height: calc(100vh - 240px); 
     position: relative;
-    border: 1px solid #DDD6FE; /* 테마 전용 보라색 보더 매칭 */
+    border: 1px solid #DDD6FE; 
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(109, 94, 247, 0.02);
 }
 
-/* dhtmlxGantt 무료 버전의 요소 잘림(hidden) 현상 원천 차단 */
+/* 💡 [수정] 좌측 바깥 텍스트가 가로로 길 때 영역 밖으로 나가거나 줄바꿈되어 잘리는 현상 방지 */
+.gantt_task_row {
+    overflow: visible !important;
+}
+.gantt_bars_area {
+    overflow: visible !important;
+}
+
 .gantt_task_line,
 .gantt_project,
 .gantt_task_content { 
     overflow: visible !important; 
 }
 
-/* 3. 좌측 바깥 텍스트 정렬 보정 (Row 높이 30px 수직 중앙 정렬 일치) */
+/* 3. 좌측 바깥 텍스트 정렬 보정 */
 .gantt_side_text.gantt_left {
-    padding-right: 12px !important;
+    padding-right: 8px !important;
     overflow: visible !important;
     line-height: 30px !important; 
+    white-space: nowrap !important; /* 이름이 길어도 강제 줄바꿈 되지 않고 쭉 펴지도록 설정 */
 }
 
 /* 타임라인 바 공통 외형 다듬기 */
@@ -49,42 +57,40 @@
 .gantt_task_line.task-bar {
     height: 20px !important;
     line-height: 20px !important;
-    border-radius: 6px !important; /* 트렌디한 라운드 처리 */
+    border-radius: 6px !important; 
 }
 
 /* ==========================================================================
    ★ 인디고 퍼플 브랜드 아이덴티티 타임라인 바 커스텀
    ========================================================================== */
 
-/* A. 최상위 버전 바 (📦) : 어두운 느낌을 빼고 진척도를 명확히 살린 선명한 프리미엄 로열 블루 */
+/* A. 최상위 버전 바 (📦) */
 .gantt_task_line.version-bar {
-    background-color: #2A2475 !important; /* 확연히 어두운 딥 인디고로 변경 */
-    border: 1px solid #1D1854 !important;
+    background-color: #2648AB !important; 
+    border: 1px solid #172554 !important;
 }
-/* 버전 내부 진척도 채우기 영역 */
 .gantt_task_line.version-bar .gantt_task_progress {
-    background-color: #15113C !important;
-    opacity: 0.5; /* 대비를 위해 불투명도 살짝 상향 */
+    background-color: #231C70 !important; 
+    opacity: 0.9; 
 }
 
-/* B. 하위 마일스톤 바 (📌) : 화사하고 선명하게 눈에 띄는 메인 포인트 보라색 */
+/* B. 하위 마일스톤 바 (📌) */
 .gantt_task_line.milestone-bar {
-    background-color: #6D5EF7 !important; /* 만족해하신 메인 퍼플 유지 */
+    background-color: #6D5EF7 !important; 
     border: 1px solid #5B4FEA !important;
 }
-/* 마일스톤 내부 진척도 채우기 영역 */
 .gantt_task_line.milestone-bar .gantt_task_progress {
     background-color: #433D74 !important;
     opacity: 0.35;
 }
 
-/* C. 일반 실무 일감 바 (📄) : 부드러운 파스텔 소프트 라벤더 (기존 유지) */
+/* C. 일반 실무 일감 바 (📄) */
 .gantt_task_line.task-bar {
     background-color: #DDD6FE !important;
     border: 1px solid #C4B5FD !important;
 }
-/* 일감 내부 진척도 채우기 영역 */
 .gantt_task_line.task-bar .gantt_task_progress {
     background-color: #6D5EF7 !important;
     opacity: 0.3;
 }
+
