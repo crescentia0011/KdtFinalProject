@@ -385,3 +385,24 @@ body .main_container,
 .main_container {
     background: #FAFAFC !important;
 }
+
+/* Remove the default Gentelella green active bar from the sidebar. */
+.nav.side-menu > li.active,
+.nav.side-menu > li.active-sm,
+.nav.side-menu > li.current-page,
+body.nav-sm .nav.side-menu > li.active,
+body.nav-sm .nav.side-menu > li.active-sm,
+body.nav-sm .nav.side-menu > li.current-page {
+    border-right: 0 !important;
+}
+
+.nav.side-menu > li.active::before,
+.nav.side-menu > li.active-sm::before,
+.nav.side-menu > li.current-page::before,
+.nav.side-menu > li.active > a::before,
+.nav.side-menu > li.active-sm > a::before,
+.nav.side-menu > li.current-page > a::before {
+    display: none !important;
+    border: 0 !important;
+    background: transparent !important;
+}
