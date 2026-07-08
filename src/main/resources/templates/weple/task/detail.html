@@ -345,7 +345,7 @@
 											th:style="${reply.userCode == null} ? 'opacity: 0.6; flex: 1;' : 'flex: 1;'">
 											<div class="comment-header">
 												<div class="user-info">
-													<img class="profile-img" th:src="${comment.profileImage}"
+													<img class="profile-img" th:src="${#strings.isEmpty(reply.profileImage)} ? @{/images/default-profile.svg} : ${reply.profileImage}"
 														alt="프로필 사진" /> <strong th:if="${reply.userCode != null}"
 														th:text="|${reply.userName}(${reply.email})|"></strong> <strong
 														th:if="${reply.userCode == null}"
