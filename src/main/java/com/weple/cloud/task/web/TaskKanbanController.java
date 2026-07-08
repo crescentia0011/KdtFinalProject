@@ -40,7 +40,8 @@ public class TaskKanbanController {
 
     // 일감유형 뱃지 색상 순환용 (진한 단색 4가지를 순서대로 순환 적용)
     private static final String[] TYPE_COLOR_CLASSES = {
-            "type-color-1", "type-color-2", "type-color-3", "type-color-4"
+            "type-color-1", "type-color-2", "type-color-3", "type-color-4", "type-color-5",
+            "type-color-6", "type-color-7", "type-color-8", "type-color-9", "type-color-10"
     };
 
     // 일감유형 이름 -> 뱃지 색상 클래스 매핑 (task_types position 순서 기준 4색 순환)
