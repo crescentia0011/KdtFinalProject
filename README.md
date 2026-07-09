@@ -141,15 +141,11 @@ WEPLE은 프로젝트 수행 과정에서 발생하는 일정, 일감, 산출물
 
 ```text
 src/main/java/com/weple/cloud
-├── auth          # 인증, 로그인, 회원가입
-├── system        # 관리자 기능, 사용자/설정 관리
-├── project       # 프로젝트 및 구성원 관리
-├── task          # 일감 및 테스트 관련 기능
-├── repository    # GitHub 저장소 연동
-├── file          # 파일관리
-├── wiki          # 위키
-├── alarm         # 알림
-└── common        # 공통 설정 및 공통 기능
+├── auth          # 인증 관련 기능
+├── system        # 시스템 및 관리자 기능
+├── project       # 프로젝트 관련 기능
+├── repository    # 저장소 연동 기능
+└── ...           # 일감, 파일, 위키, 알림 등 협업 기능
 
 src/main/resources
 ├── mapper        # MyBatis Mapper XML
